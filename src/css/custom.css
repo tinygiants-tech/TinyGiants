@@ -1,12 +1,15 @@
 /* ==========================================================================
-   1. 核心主题变量 (Theme Variables)
+   TinyGiants Documentation - Custom Styles
+   ========================================================================== */
+
+/* ==========================================================================
+   1. 核心主题变量
    ========================================================================== */
 
 :root {
-    /* --- 浅色模式 (羊皮纸黄金比例色) --- */
+    /* 浅色模式 (羊皮纸风格) */
     --site-bg-color: #f9e6be;
     --ifm-background-color: var(--site-bg-color);
-
     --ifm-navbar-background-color: #e8ddbd;
     --ifm-footer-background-color: #e8ddbd;
     --ifm-menu-color-background: transparent;
@@ -25,17 +28,17 @@
     --ifm-line-height-base: 1.6;
     --ifm-menu-link-font-size: 0.95rem;
 
-    /* 表格线条：加深对比度 */
+    /* 表格样式 */
     --ifm-table-border-color: rgba(62, 43, 26, 0.25);
     --ifm-table-head-background: rgba(62, 43, 26, 0.08);
     --ifm-table-stripe-background-color: rgba(62, 43, 26, 0.04);
 
-    /* 行内代码：模拟深棕色墨水笔迹 */
+    /* 行内代码 */
     --ifm-code-background: rgba(62, 43, 26, 0.08);
 }
 
 [data-theme='dark'] {
-    /* --- 深色模式 (炭灰古迹风格) --- */
+    /* 深色模式 (炭灰风格) */
     --site-bg-color: #1a1a1a;
     --ifm-background-color: var(--site-bg-color);
     --ifm-navbar-background-color: #222222;
@@ -49,7 +52,7 @@
 }
 
 /* ==========================================================================
-   2. 全局基础布局 (Global Layout)
+   2. 全局基础布局
    ========================================================================== */
 
 html, body {
@@ -62,7 +65,7 @@ html, body {
 }
 
 /* ==========================================================================
-   3. 导航栏 (Navbar)
+   3. 导航栏
    ========================================================================== */
 
 .navbar {
@@ -79,36 +82,77 @@ html, body {
     padding: 0 0.5rem;
 }
 
-/* 浅色导航适配 */
+/* 浅色模式 */
 [data-theme='light'] .navbar {
-    background-color: rgba(232, 213, 173, 0.85) !important;
+    background-color: rgba(232, 213, 173, 0.85);
 }
 
 [data-theme='light'] .navbar__title,
 [data-theme='light'] .navbar__item,
 [data-theme='light'] .navbar__link {
-    color: var(--ifm-color-primary) !important;
+    color: var(--ifm-color-primary);
     font-weight: 700;
 }
 
 [data-theme='light'] .navbar__link:hover {
-    color: var(--ifm-color-primary-dark) !important;
+    color: var(--ifm-color-primary-dark);
     opacity: 0.8;
 }
 
-/* 深色导航适配 */
+/* 深色模式 */
 [data-theme='dark'] .navbar {
-    background-color: rgba(26, 26, 26, 0.75) !important;
+    background-color: rgba(26, 26, 26, 0.75);
 }
+
 [data-theme='dark'] .navbar__title,
 [data-theme='dark'] .navbar__item,
 [data-theme='dark'] .navbar__link {
-    color: var(--ifm-color-primary) !important;
+    color: var(--ifm-color-primary);
     font-weight: 600;
 }
 
 /* ==========================================================================
-   4. 导航栏图标适配 (Icons & Filters)
+   4. 移动端侧边栏修复 (关键部分)
+   ========================================================================== */
+
+/*
+   Docusaurus 默认侧边栏没有设置 z-index，导致被页面内容遮挡
+   这里强制设置高优先级的 z-index
+*/
+
+/* 背景遮罩 */
+.navbar-sidebar__backdrop {
+    z-index: 9998 !important;
+}
+
+/* 侧边栏容器 - 必须比遮罩高 */
+.navbar-sidebar {
+    z-index: 9999 !important;
+}
+
+/* 浅色模式侧边栏背景 */
+[data-theme='light'] .navbar-sidebar {
+    background-color: #e8ddbd;
+}
+
+/* 深色模式侧边栏背景 */
+[data-theme='dark'] .navbar-sidebar {
+    background-color: #1a1a1a;
+}
+
+/* 侧边栏头部 */
+.navbar-sidebar__header {
+    background-color: rgba(0, 0, 0, 0.05);
+    padding: 0.5rem 1rem;
+}
+
+/* 侧边栏内容 */
+.navbar-sidebar__items {
+    color: var(--ifm-font-color-base);
+}
+
+/* ==========================================================================
+   5. 导航栏图标
    ========================================================================== */
 
 .header-discord-link,
@@ -136,12 +180,14 @@ html, body {
     transform: scale(1.1);
 }
 
+/* 深色模式图标反色 */
 [data-theme='dark'] .header-discord-link,
 [data-theme='dark'] .header-unity-forum-link,
 [data-theme='dark'] .header-mail-link {
     filter: invert(1) brightness(2);
 }
 
+/* 浅色模式图标颜色调整 */
 [data-theme='light'] .header-discord-link,
 [data-theme='light'] .header-unity-forum-link,
 [data-theme='light'] .header-mail-link {
@@ -149,7 +195,7 @@ html, body {
 }
 
 /* ==========================================================================
-   5. Markdown 图片与排版 (Markdown Styles)
+   6. Markdown 图片样式
    ========================================================================== */
 
 article .markdown img {
@@ -158,44 +204,53 @@ article .markdown img {
     margin: 2.5rem auto;
     cursor: zoom-in;
     border-radius: 8px;
-    background-color: #1a1a1a;
     transition: all 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* 浅色模式辉光 */
+/* 浅色模式图片 */
 [data-theme='light'] article .markdown img {
     background-color: #ffffff;
     box-shadow: 0 8px 30px rgba(45, 90, 39, 0.1);
     border: 1px solid rgba(45, 90, 39, 0.15);
 }
+
 [data-theme='light'] article .markdown img:hover {
     box-shadow: 0 12px 40px rgba(245, 158, 11, 0.4);
     border-color: rgba(245, 158, 11, 0.5);
-}
-
-/* 深色模式辉光 */
-[data-theme='dark'] article .markdown img {
-    box-shadow: 0 8px 30px rgba(245, 158, 11, 0.15);
-    border: 1px solid rgba(245, 158, 11, 0.15);
-}
-[data-theme='dark'] article .markdown img:hover {
-    box-shadow: 0 12px 40px rgba(245, 158, 11, 0.4);
-    border-color: rgba(245, 158, 11, 0.5);
-}
-
-article .markdown img:hover {
     transform: scale(1.02);
 }
 
-/* 浅色模式：仿苹果灰白质感，且适配羊皮纸 */
+/* 深色模式图片 */
+[data-theme='dark'] article .markdown img {
+    background-color: #1a1a1a;
+    box-shadow: 0 8px 30px rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.15);
+}
+
+[data-theme='dark'] article .markdown img:hover {
+    box-shadow: 0 12px 40px rgba(245, 158, 11, 0.4);
+    border-color: rgba(245, 158, 11, 0.5);
+    transform: scale(1.02);
+}
+
+/* 图片工具类 */
+.img-full { width: 100% !important; margin: 3rem 0 !important; }
+.img-small { width: auto !important; max-width: 300px !important; }
+.image-row { display: flex; justify-content: center; gap: 20px; margin: 2rem 0; }
+.image-row img { width: 100% !important; flex: 1; border-radius: 8px; }
+
+/* ==========================================================================
+   7. 代码块样式
+   ========================================================================== */
+
+/* 浅色模式代码块 */
 [data-theme='light'] .prism-code {
-    background-color: #e8ddbd !important; /* 极浅的纸白色 */
+    background-color: #e8ddbd !important;
     border: 1px solid rgba(62, 43, 26, 0.12) !important;
     box-shadow: 0 10px 30px rgba(62, 43, 26, 0.05) !important;
 }
 
-/* 深色模式：保持深炭灰专业质感 */
+/* 深色模式代码块 */
 [data-theme='dark'] .prism-code {
     background-color: #1e1e1e !important;
     border: 1px solid rgba(0, 0, 0, 0.3) !important;
@@ -205,7 +260,7 @@ article .markdown img:hover {
 /* 行内代码 */
 code {
     background-color: var(--ifm-code-background) !important;
-    color: #8b4513 !important; /* 深棕色墨迹 */
+    color: #8b4513 !important;
     border: 1px solid rgba(62, 43, 26, 0.1) !important;
 }
 
@@ -213,36 +268,31 @@ code {
     color: #e2b13c !important;
 }
 
-/* 图片辅助工具类 */
-.img-full { width: 100% !important; margin: 3rem 0 !important; }
-.img-small { width: auto !important; max-width: 300px !important; }
-.image-row { display: flex; justify-content: center; gap: 20px; margin: 2rem 0; }
-.image-row img { width: 100% !important; flex: 1; border-radius: 8px; }
-
 /* ==========================================================================
-   6. 插件覆盖与页脚 (Plugins & Footer)
+   8. 图片缩放插件
    ========================================================================== */
 
 .medium-zoom-overlay {
-    z-index: 9999 !important;
+    z-index: 999 !important;
     background: var(--ifm-background-color) !important;
 }
 
 .medium-zoom-image--opened {
-    z-index: 10000 !important;
+    z-index: 1000 !important;
 }
 
-div[class^='zoomContainer'] {
-    z-index: 9999 !important;
-}
+/* ==========================================================================
+   9. 页脚
+   ========================================================================== */
 
 .footer {
     padding: 2rem 0;
     background-color: var(--ifm-navbar-background-color);
     border-top: 1px solid var(--card-border-color);
-    color: var(--ifm-color-primary) !important;
+    color: var(--ifm-color-primary);
 }
 
-.footer__link-item, .footer__copyright {
-    color: var(--ifm-color-primary) !important;
+.footer__link-item,
+.footer__copyright {
+    color: var(--ifm-color-primary);
 }
