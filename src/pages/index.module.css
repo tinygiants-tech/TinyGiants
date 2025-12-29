@@ -2,6 +2,91 @@
   position: relative;
 }
 
+/* 自定义导航栏右侧按钮组 */
+.customNavbarRight {
+  position: fixed;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 20px;
+  z-index: 101;
+}
+
+.navIcon {
+  display: block;
+  width: 24px;
+  height: 24px;
+  opacity: 0.8;
+  transition: all 0.2s ease;
+}
+
+.navIcon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.navIcon:hover {
+  opacity: 1.0;
+  transform: scale(1.1);
+}
+
+/* 深色模式下的图标滤镜 */
+[data-theme='dark'] .navIcon img {
+  filter: invert(1) brightness(2);
+}
+
+/* 浅色模式下的图标滤镜 */
+[data-theme='light'] .navIcon img {
+  filter: invert(31%) sepia(13%) saturate(1472%) hue-rotate(336deg) brightness(98%) contrast(89%);
+}
+
+/* 自定义主题切换按钮 - 模仿 Docusaurus 原生样式 */
+.customThemeToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--ifm-color-primary);
+}
+
+.customThemeToggle:hover {
+  background-color: var(--ifm-color-emphasis-200);
+}
+
+.customThemeToggle .toggleIcon {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+
+/* 深色模式下的主题切换按钮 */
+[data-theme='dark'] .customThemeToggle {
+  color: var(--ifm-color-primary);
+}
+
+[data-theme='dark'] .customThemeToggle:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 浅色模式下的主题切换按钮 */
+[data-theme='light'] .customThemeToggle {
+  color: var(--ifm-color-primary);
+}
+
+[data-theme='light'] .customThemeToggle:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
 /* Hero Banner */
 .heroBanner {
   position: relative;
@@ -197,6 +282,28 @@
 
 /* 响应式设计 - 移动端 */
 @media (max-width: 996px) {
+
+  /* 移动端自定义导航栏 */
+  .customNavbarRight {
+    gap: 15px;
+    padding: 10px 15px;
+  }
+
+  .navIcon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .customThemeToggle {
+    width: 36px;
+    height: 36px;
+  }
+
+  .customThemeToggle .toggleIcon {
+    width: 22px;
+    height: 22px;
+  }
+
   .heroBanner {
     height: 35vh;
     min-height: 220px;
@@ -253,6 +360,26 @@
 
 /* 极小屏幕优化 */
 @media (max-width: 480px) {
+  .customNavbarRight {
+    gap: 12px;
+    padding: 8px 12px;
+  }
+
+  .navIcon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .customThemeToggle {
+    width: 32px;
+    height: 32px;
+  }
+
+  .customThemeToggle .toggleIcon {
+    width: 20px;
+    height: 20px;
+  }
+
   .heroBanner {
     height: 30vh;
   }

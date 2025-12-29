@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from '@docusaurus/Link';
 import Layout from '@theme/Layout';
+import { useColorMode } from '@docusaurus/theme-common';
 import styles from './index.module.css';
 
 function HomepageHeader() {
@@ -16,11 +17,124 @@ function HomepageHeader() {
     );
 }
 
+// 自定义主题切换按钮组件 - 使用 SVG 图标
+function CustomThemeToggle() {
+    const { colorMode, setColorMode } = useColorMode();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) return null;
+
+    const toggleTheme = () => {
+        setColorMode(colorMode === 'dark' ? 'light' : 'dark');
+    };
+
+    return (
+        <button
+            className={styles.customThemeToggle}
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+            title={`Switch to ${colorMode === 'dark' ? 'light' : 'dark'} mode`}
+        >
+            {colorMode === 'dark' ? (
+                // 浅色模式图标 (太阳)
+                <svg viewBox="0 0 24 24" width="24" height="24" className={styles.toggleIcon}>
+                    <path
+                        fill="currentColor"
+                        d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"
+                    />
+                </svg>
+            ) : (
+                // 深色模式图标 (月亮)
+                <svg viewBox="0 0 24 24" width="24" height="24" className={styles.toggleIcon}>
+                    <path
+                        fill="currentColor"
+                        d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"
+                    />
+                </svg>
+            )}
+        </button>
+    );
+}
+
 export default function Home() {
+    // 在主页挂载时隐藏导航栏右侧的所有默认元素
+    useEffect(() => {
+        const hideNavbarElements = () => {
+            // 隐藏侧边栏按钮
+            const toggle = document.querySelector('.navbar__toggle');
+            if (toggle) {
+                toggle.style.display = 'none';
+            }
+
+            // 隐藏导航栏右侧的所有项目（包括图标链接和主题切换）
+            const navbarItems = document.querySelector('.navbar__items--right');
+            if (navbarItems) {
+                navbarItems.style.display = 'none';
+            }
+        };
+
+        // 立即执行
+        hideNavbarElements();
+
+        // 监听 DOM 变化，确保动态加载的元素也被隐藏
+        const observer = new MutationObserver(hideNavbarElements);
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+
+        // 清理函数：离开主页时恢复显示
+        return () => {
+            observer.disconnect();
+            const toggle = document.querySelector('.navbar__toggle');
+            if (toggle) {
+                toggle.style.display = '';
+            }
+            const navbarItems = document.querySelector('.navbar__items--right');
+            if (navbarItems) {
+                navbarItems.style.display = '';
+            }
+        };
+    }, []);
+
     return (
         <Layout
             title="Home"
             description="TinyGiants - Professional Unity Tools & Innovative Games">
+
+            {/* 自定义导航栏右侧按钮组 */}
+            <div className={styles.customNavbarRight}>
+                <a
+                    href="https://discord.tinygiants.tech"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.navIcon}
+                    aria-label="Discord"
+                >
+                    <img src="img/home-page/discord.png" alt="Discord" />
+                </a>
+                <a
+                    href="https://forum.unity.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.navIcon}
+                    aria-label="Unity Forum"
+                >
+                    <img src="img/home-page/unity-forum.png" alt="Unity Forum" />
+                </a>
+                <a
+                    href="mailto:support@tinygiants.tech"
+                    className={styles.navIcon}
+                    aria-label="Email"
+                >
+                    <img src="img/home-page/mail.png" alt="Email" />
+                </a>
+                <CustomThemeToggle />
+            </div>
 
             <HomepageHeader />
 
