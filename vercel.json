@@ -1,0 +1,15 @@
+{
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "discord.tinygiants.tech"
+        }
+      ],
+      "destination": "https://discord.gg/4Pmg9vR8KF",
+      "permanent": true
+    }
+  ]
+}

@@ -1,0 +1,138 @@
+.heroBanner {
+  position: relative;
+  height: 786px;
+  width: 100%;
+  overflow: hidden;
+  background-color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.heroImage {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+.heroMask {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background:
+          linear-gradient(to right, #000 0%, transparent 12%, transparent 88%, #000 100%),
+          linear-gradient(to top, #000 0%, transparent 25%);
+}
+
+.featureSection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 60px;
+  padding: 100px 0;
+  width: 100%;
+}
+
+.featureReverse {
+  flex-direction: row-reverse;
+}
+
+.featureImageColumn,
+.featureTextColumn {
+  flex: 1;
+  width: 50%;
+}
+
+.featureImg {
+  display: block;
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px var(--card-shadow);
+  border: 1px solid var(--card-border-color);
+}
+
+.featureTextColumn {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.featureTitle {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--ifm-heading-color);
+  margin-bottom: 1.5rem;
+  line-height: 1.1;
+}
+
+.featureDescription {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: var(--ifm-font-color-base);
+  margin-bottom: 2.5rem;
+}
+
+.featureButton {
+  align-self: flex-start;
+  padding: 12px 36px;
+  background-color: var(--ifm-color-primary);
+  color: #fff !important;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-decoration: none !important;
+  transition: all 0.3s ease;
+}
+.featureButton:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.1);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+/* --- Coming Soon 特效 --- */
+.comingSoonWrapper {
+  position: relative;
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+}
+.blurred {
+  filter: blur(10px) brightness(0.5);
+  transform: scale(1.05);
+}
+.comingSoonOverlay {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--ifm-color-primary);
+  letter-spacing: 5px;
+  text-shadow: 0 0 20px rgba(0,0,0,0.8);
+}
+.comingSoonTag {
+  display: inline-block;
+  padding: 6px 16px;
+  border: 1px dashed var(--ifm-font-color-base);
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  opacity: 0.6;
+}
+
+@media (max-width: 996px) {
+  .featureSection, .featureReverse {
+    flex-direction: column;
+    gap: 40px;
+    padding: 60px 20px;
+  }
+  .featureImageColumn, .featureTextColumn {
+    width: 100%;
+    text-align: center;
+  }
+  .featureButton {
+    align-self: center;
+  }
+}
