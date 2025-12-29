@@ -27,13 +27,13 @@ export default function Home() {
             <main className="home-main-content">
                 <div className="container">
 
-                    {/* 第一个插件展示：左图右文 */}
+                    {/* 第一个展示：Game Event System */}
                     <section className={styles.featureSection}>
                         <div className={styles.featureImageColumn}>
                             <img
-                                src="img/home-page/game-event-system-preview.png"
-                                className={styles.featureImg}
-                                alt="Game Event System"
+                              src="img/home-page/game-event-system-preview.png"
+                              className={styles.featureImg}
+                              alt="Game Event System"
                             />
                         </div>
                         <div className={styles.featureTextColumn}>
@@ -43,20 +43,26 @@ export default function Home() {
                                 Streamline your development with our ScriptableObject-driven graph editor,
                                 designed for performance and maintainability.
                             </p>
-                            <Link className={styles.featureButton} to="/docs/game-event-system/intro/overview">
-                                View Documentation
-                            </Link>
+                            {/* 按钮组 */}
+                            <div className={styles.buttonGroup}>
+                                <Link className={styles.featureButton} to="/docs/game-event-system/intro/overview">
+                                    <span className={styles.btnIcon}>📖</span> View Documentation
+                                </Link>
+                                <Link className={styles.featureButtonSecondary} to="https://assetstore.unity.com/">
+                                    <img src="img/home-page/asset-store.png" className={styles.btnIconImg} alt="" /> Asset Store
+                                </Link>
+                            </div>
                         </div>
                     </section>
 
-                    {/* 第二个展示：右图左文 (Coming Soon) */}
+                    {/* 第二个展示：Coming Soon (与上方布局完全对齐) */}
                     <section className={`${styles.featureSection} ${styles.featureReverse}`}>
                         <div className={styles.featureImageColumn}>
                             <div className={styles.comingSoonWrapper}>
                                 <img
-                                    src="img/home-page/tinygiants-wide.png"
-                                    className={`${styles.featureImg} ${styles.blurred}`}
-                                    alt="Coming Soon"
+                                  src="img/home-page/default-preview.png"
+                                  className={`${styles.featureImg} ${styles.blurred}`}
+                                  alt="Coming Soon"
                                 />
                                 <div className={styles.comingSoonOverlay}>COMING SOON</div>
                             </div>
@@ -68,7 +74,12 @@ export default function Home() {
                                 Innovative tools that balance visual clarity with raw coding power,
                                 helping you build giants from tiny ideas.
                             </p>
-                            <div className={styles.comingSoonTag}>In Development</div>
+                            {/* 锁定状态的按钮 */}
+                            <div className={styles.buttonGroup}>
+                                <div className={styles.featureButtonDisabled}>
+                                    <span className={styles.btnIcon}>🔒</span> In Development
+                                </div>
+                            </div>
                         </div>
                     </section>
 

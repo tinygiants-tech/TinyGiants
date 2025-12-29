@@ -57,9 +57,14 @@ const config = {
           className: 'header-discord-link',
         },
         {
-          href: 'https://assetstore.unity.com/',
+          href: 'https://forum.unity.com/',
           position: 'right',
-          className: 'header-assetstore-link',
+          className: 'header-unity-forum-link',
+        },
+        {
+          href: 'mailto:support@tinygianys.tech',
+          position: 'right',
+          className: 'header-mail-link',
         },
       ],
     },

@@ -1,6 +1,7 @@
 .heroBanner {
   position: relative;
-  height: 786px;
+  height: 50vh;
+  min-height: 300px;
   width: 100%;
   overflow: hidden;
   background-color: #000;
@@ -8,6 +9,7 @@
   align-items: center;
   justify-content: center;
 }
+
 .heroImage {
   position: absolute;
   width: 100%;
@@ -29,8 +31,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 60px;
-  padding: 100px 0;
+  padding: 40px 0;
   width: 100%;
+}
+
+.featureSection:first-of-type {
+  padding-top: 20px;
 }
 
 .featureReverse {
@@ -60,18 +66,37 @@
 }
 
 .featureTitle {
-  font-size: 3rem;
+  font-size: 2.5rem;
   font-weight: 800;
   color: var(--ifm-heading-color);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   line-height: 1.1;
 }
 
 .featureDescription {
-  font-size: 1.2rem;
-  line-height: 1.6;
+  font-size: 1.1rem;
+  line-height: 1.5;
   color: var(--ifm-font-color-base);
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.btnIcon {
+  margin-right: 8px;
+  font-size: 1.1rem;
+}
+
+.btnIconImg {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  vertical-align: middle;
+  filter: brightness(0) invert(1);
 }
 
 .featureButton {
@@ -91,16 +116,64 @@
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
 
+.featureButtonSecondary {
+  display: flex;
+  align-items: center;
+  padding: 12px 24px;
+  background-color: rgba(113, 79, 61, 0.1);
+  border: 1.5px solid var(--ifm-color-primary);
+  color: var(--ifm-color-primary) !important;
+  border-radius: 8px;
+  font-weight: 700;
+  text-decoration: none !important;
+  transition: all 0.3s ease;
+}
+
+.featureButtonSecondary:hover {
+  background-color: var(--ifm-color-primary);
+  color: #fff !important;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.featureButtonSecondary:hover .btnIconImg {
+  filter: brightness(0) invert(1);
+}
+
+.featureButtonDisabled {
+  display: flex;
+  align-items: center;
+  padding: 12px 24px;
+  background-color: #555; /* 灰色调 */
+  color: #aaa !important;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: not-allowed;
+  opacity: 0.6;
+  border: 1.5px solid transparent;
+  filter: grayscale(1);
+}
+
+.featureButtonDisabled:hover {
+  opacity: 0.7;
+}
+
 /* --- Coming Soon 特效 --- */
 .comingSoonWrapper {
   position: relative;
   width: 100%;
+  max-width: 600px;
   border-radius: 16px;
   overflow: hidden;
+  box-shadow: 0 20px 40px var(--card-shadow);
+  border: 1px solid var(--card-border-color);
 }
 .blurred {
-  filter: blur(10px) brightness(0.5);
-  transform: scale(1.05);
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: blur(10px) brightness(0.4);
+  transform: scale(1.1);
 }
 .comingSoonOverlay {
   position: absolute;
@@ -134,5 +207,13 @@
   }
   .featureButton {
     align-self: center;
+  }
+  .buttonGroup {
+    flex-direction: column;
+    width: 100%;
+  }
+  .featureButton, .featureButtonSecondary, .featureButtonDisabled {
+    width: 100%;
+    justify-content: center;
   }
 }

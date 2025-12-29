@@ -59,11 +59,10 @@ html, body {
 
 .home-main-content {
     background-color: var(--ifm-background-color);
-    padding-top: 20px;
 }
 
 /* ==========================================================================
-   3. 导航栏 (Navbar - MEE6 Style Glass)
+   3. 导航栏 (Navbar)
    ========================================================================== */
 
 .navbar {
@@ -109,15 +108,12 @@ html, body {
 }
 
 /* ==========================================================================
-   4. 文档侧边栏与外部链接 (Sidebar & Icons)
+   4. 导航栏图标适配 (Icons & Filters)
    ========================================================================== */
 
-.theme-doc-sidebar-container {
-    background-color: var(--ifm-navbar-background-color) !important;
-    border-right: 1px solid var(--card-border-color) !important;
-}
-
-.header-discord-link, .header-assetstore-link {
+.header-discord-link,
+.header-unity-forum-link,
+.header-mail-link {
     display: block;
     width: 24px;
     height: 24px;
@@ -126,25 +122,30 @@ html, body {
     background-repeat: no-repeat;
     background-size: contain;
     transition: all 0.2s ease;
-    opacity: 0.7;
+    opacity: 0.8;
 }
 
 .header-discord-link { background-image: url('/img/home-page/discord.png'); }
-.header-assetstore-link { background-image: url('/img/home-page/asset-store.png'); }
+.header-unity-forum-link { background-image: url('/img/home-page/unity-forum.png'); }
+.header-mail-link { background-image: url('/img/home-page/mail.png'); }
 
-.header-discord-link:hover, .header-assetstore-link:hover {
+.header-discord-link:hover,
+.header-unity-forum-link:hover,
+.header-mail-link:hover {
     opacity: 1.0;
     transform: scale(1.1);
 }
 
 [data-theme='dark'] .header-discord-link,
-[data-theme='dark'] .header-assetstore-link {
+[data-theme='dark'] .header-unity-forum-link,
+[data-theme='dark'] .header-mail-link {
     filter: invert(1) brightness(2);
 }
 
 [data-theme='light'] .header-discord-link,
-[data-theme='light'] .header-assetstore-link {
-    filter: sepia(100%) hue-rotate(90deg) saturate(2);
+[data-theme='light'] .header-unity-forum-link,
+[data-theme='light'] .header-mail-link {
+    filter: invert(31%) sepia(13%) saturate(1472%) hue-rotate(336deg) brightness(98%) contrast(89%);
 }
 
 /* ==========================================================================
