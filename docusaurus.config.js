@@ -62,7 +62,7 @@ const config = {
           className: 'header-unity-forum-link',
         },
         {
-          href: 'mailto:support@tinygianys.tech',
+          href: 'mailto:support@tinygiants.tech',
           position: 'right',
           className: 'header-mail-link',
         },
