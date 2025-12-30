@@ -14,24 +14,30 @@ function TechInteractiveBackground() {
         const ctx = canvas.getContext('2d');
         let animationFrameId;
         let particles = [];
-        const mouse = { x: null, y: null, radius: 220, active: true };
+        const mouse = { x: null, y: null, radius: 250, active: true };
 
         function createParticle(w, h) {
             const px = Math.random() * w;
             const py = Math.random() * h;
-            const angleOffset = Math.random() * Math.PI * 2;
-            const distOffset = Math.random() * 85;
+
+            const orbitRadiusA = Math.random() * 100 + 40;
+            const orbitRadiusB = Math.random() * 60 + 20;
+            const orbitSpeed = (Math.random() * 0.01 + 0.005) * (Math.random() > 0.5 ? 1 : -1);
+            const orbitAngle = Math.random() * Math.PI * 2;
 
             return {
                 x: px, y: py, baseX: px, baseY: py,
-                targetOffsetX: Math.cos(angleOffset) * distOffset,
-                targetOffsetY: Math.sin(angleOffset) * distOffset,
+                angle: Math.random() * Math.PI * 2,
+                rotationSpeed: (Math.random() - 0.5) * 0.04,
                 size: Math.random() * 6 + 5,
                 type: Math.floor(Math.random() * 3),
-                vx: (Math.random() - 0.5) * 1.8,
-                vy: (Math.random() - 0.5) * 1.8,
-                angle: Math.random() * Math.PI * 2,
-                rotationSpeed: (Math.random() - 0.5) * 0.05,
+                vx: (Math.random() - 0.5) * 1.2,
+                vy: (Math.random() - 0.5) * 1.2,
+
+                currOrbitAngle: orbitAngle,
+                orbitRadiusA: orbitRadiusA,
+                orbitRadiusB: orbitRadiusB,
+                orbitSpeed: orbitSpeed,
 
                 draw: function() {
                     const color = colorMode === 'dark' ? 'rgba(226, 177, 60,' : 'rgba(113, 79, 61,';
@@ -51,26 +57,37 @@ function TechInteractiveBackground() {
                 },
 
                 update: function() {
-                    if (mouse.active && mouse.x !== null) {
-                        const targetX = mouse.x + this.targetOffsetX;
-                        const targetY = mouse.y + this.targetOffsetY;
-                        const dx = targetX - this.x;
-                        const dy = targetY - this.y;
-                        const distance = Math.sqrt(dx * dx + dy * dy);
-                        if (distance < mouse.radius) {
-                            const force = (mouse.radius - distance) / mouse.radius;
-                            this.x += (dx / distance) * force * 3;
-                            this.y += (dy / distance) * force * 3;
+                    let distToMouse = 9999;
+                    if (mouse.x !== null) {
+                        const dxMouse = mouse.x - this.x;
+                        const dyMouse = mouse.y - this.y;
+                        distToMouse = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
+                    }
+
+                    if (mouse.active && distToMouse < mouse.radius) {
+                        this.currOrbitAngle += this.orbitSpeed;
+
+                        const targetX = mouse.x + Math.cos(this.currOrbitAngle) * this.orbitRadiusA;
+                        const targetY = mouse.y + Math.sin(this.currOrbitAngle) * this.orbitRadiusB;
+
+                        this.x += (targetX - this.x) * 0.05;
+                        this.y += (targetY - this.y) * 0.05;
+                    } else {
+                        const dxBase = this.baseX - this.x;
+                        const dyBase = this.baseY - this.y;
+
+                        this.x += dxBase * 0.015;
+                        this.y += dyBase * 0.015;
+
+                        this.x += this.vx;
+                        this.y += this.vy;
+
+                        if(Math.random() > 0.97) {
+                            this.vx = (Math.random() - 0.5) * 1.2;
+                            this.vy = (Math.random() - 0.5) * 1.2;
                         }
                     }
-                    const dxBase = this.baseX - this.x;
-                    const dyBase = this.baseY - this.y;
-                    this.x += dxBase * 0.015 + this.vx;
-                    this.y += dyBase * 0.015 + this.vy;
-                    if(Math.random() > 0.96) {
-                        this.vx = (Math.random() - 0.5) * 1.8;
-                        this.vy = (Math.random() - 0.5) * 1.8;
-                    }
+
                     this.angle += this.rotationSpeed;
                 }
             };
@@ -104,7 +121,6 @@ function TechInteractiveBackground() {
         function handleMouseMove(e) {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
-            // 修改点：删除了对 styles.featureSection 的 closest 判断，粒子现在全程磁吸。
         }
 
         window.addEventListener('resize', handleResize);
