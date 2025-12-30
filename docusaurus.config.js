@@ -90,8 +90,60 @@ const config = {
       },
     },
     footer: {
-      style: 'dark',
-      copyright: `Copyright © ${new Date().getFullYear()} <strong>TinyGiants</strong>.`,
+      links: [
+        {
+          title: 'CORE TOOLS',
+          items: [
+            {
+              label: 'Game Event System',
+              to: '/docs/game-event-system/intro/overview',
+            },
+            {
+              label: 'Asset Store Page',
+              href: 'https://assetstore.unity.com/',
+            },
+            {
+              label: 'Visual Flow Editor',
+              to: '/docs/game-event-system/flow-graph/game-event-node-editor',
+            },
+          ],
+        },
+        {
+          title: 'COMMUNITY',
+          items: [
+            {
+              label: 'Official Discord',
+              href: 'https://discord.tinygiants.tech',
+            },
+            {
+              label: 'Unity Forum Thread',
+              href: 'https://forum.unity.com/',
+            },
+            {
+              label: 'Github Repository',
+              href: 'https://github.com/TinyGiants',
+            },
+          ],
+        },
+        {
+          title: 'STUDIO',
+          items: [
+            {
+              label: 'Technical Support',
+              href: 'mailto:support@tinygiants.tech',
+            },
+            {
+              label: 'Privacy Policy',
+              to: '/docs/game-event-system/tools/community-and-support',
+            },
+            {
+              label: 'Contact Us',
+              href: 'mailto:contact@tinygiants.tech',
+            },
+          ],
+        },
+      ],
+      copyright: `Copyright © ${new Date().getFullYear()} <strong>TinyGiants</strong>. <br/> <small style="opacity: 0.6; font-weight: 400;">Crafting professional Unity tools and games for giants with tiny ideas.</small>`,
     },
   }),
 };

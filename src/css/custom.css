@@ -1,11 +1,7 @@
 :root {
     --site-bg-color: #fdfbf7;
-    --site-bg-pattern:
-            linear-gradient(rgba(113, 79, 61, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(113, 79, 61, 0.03) 1px, transparent 1px);
-    --site-bg-size: 40px 40px;
     --ifm-background-color: var(--site-bg-color);
-    --ifm-navbar-background-color: rgba(247, 242, 232, 0.85);
+    --ifm-navbar-background-color: #f7f2e8;
     --ifm-footer-background-color: #f7f2e8;
     --ifm-menu-color-background: transparent;
     --ifm-color-primary: #714F3D;
@@ -14,37 +10,26 @@
     --ifm-heading-color: #714F3D;
     --card-shadow: rgba(62, 43, 26, 0.07);
     --card-border-color: rgba(62, 43, 26, 0.05);
-    --glass-border: rgba(113, 79, 61, 0.08);
     --ifm-code-font-size: 95%;
     --ifm-font-size-base: 15px;
     --ifm-line-height-base: 1.6;
     --ifm-menu-link-font-size: 0.95rem;
-    --ifm-table-border-color: rgba(62, 43, 26, 0.1);
-    --ifm-table-head-background: rgba(113, 79, 61, 0.04);
-    --ifm-table-stripe-background-color: rgba(113, 79, 61, 0.01);
-    --ifm-code-background: rgba(113, 79, 61, 0.04);
 }
 
 [data-theme='dark'] {
-    --site-bg-color: #0d0d0d;
-    --site-bg-pattern:
-            linear-gradient(rgba(226, 177, 60, 0.04) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(226, 177, 60, 0.04) 1px, transparent 1px);
+    --site-bg-color: #3D3D3D;
     --ifm-background-color: var(--site-bg-color);
-    --ifm-navbar-background-color: rgba(20, 20, 20, 0.8);
-    --ifm-footer-background-color: #222222;
+    --ifm-navbar-background-color: #242424;
+    --ifm-footer-background-color: #242424;
     --ifm-color-primary: #e2b13c;
     --ifm-color-primary-dark: #cba036;
     --ifm-font-color-base: #e3dcd2;
     --ifm-heading-color: #e2b13c;
-    --card-shadow: rgba(0, 0, 0, 0.4);
-    --glass-border: rgba(226, 177, 60, 0.15);
+    --card-shadow: rgba(0, 0, 0, 0.6);
 }
 
 html, body {
     background-color: var(--ifm-background-color);
-    background-image: var(--site-bg-pattern);
-    background-size: var(--site-bg-size);
     color: var(--ifm-font-color-base);
 }
 
@@ -58,18 +43,17 @@ html, body {
     pointer-events: none;
 }
 
-.home-main-content {
-    background-color: transparent;
-    position: relative;
-    z-index: 1;
+.navbar, .footer {
+    background-color: var(--ifm-navbar-background-color) !important;
 }
 
 .navbar {
     z-index: 100 !important;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    background-color: var(--ifm-navbar-background-color) !important;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+[data-theme='light'] .navbar {
+    border-bottom: 1px solid var(--card-border-color);
 }
 
 .navbar__inner {
@@ -85,19 +69,6 @@ html, body {
     font-weight: 700;
 }
 
-[data-theme='dark'] .navbar,
-[data-theme='dark'] .navbar-sidebar {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-}
-
-[data-theme='light'] .navbar-sidebar {
-    background-color: #f7f2e8;
-}
-
-[data-theme='dark'] .navbar-sidebar {
-    background-color: #1a1a1a;
-}
-
 [data-theme='light'] .theme-doc-sidebar-container {
     background-color: #f9f6f0;
     border-right: 1px solid rgba(62, 43, 26, 0.05);
@@ -108,9 +79,7 @@ html, body {
     border-right: 1px solid rgba(255, 255, 255, 0.07);
 }
 
-.theme-doc-sidebar-container {
-    z-index: 2;
-}
+.theme-doc-sidebar-container { z-index: 2; }
 
 [data-theme='light'] .menu__link--active {
     background-color: rgba(113, 79, 61, 0.06);
@@ -119,69 +88,6 @@ html, body {
 [data-theme='dark'] .menu__link--active {
     background-color: rgba(226, 177, 60, 0.1);
     color: var(--ifm-color-primary) !important;
-}
-
-.header-discord-link,
-.header-unity-forum-link,
-.header-mail-link {
-    display: block;
-    width: 24px;
-    height: 24px;
-    margin-right: 20px;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: contain;
-    transition: all 0.2s ease;
-    opacity: 0.8;
-}
-
-.header-discord-link { background-image: url('/img/home-page/discord.png'); }
-.header-unity-forum-link { background-image: url('/img/home-page/unity-forum.png'); }
-.header-mail-link { background-image: url('/img/home-page/mail.png'); }
-
-[data-theme='light'] .header-discord-link,
-[data-theme='light'] .header-unity-forum-link,
-[data-theme='light'] .header-mail-link {
-    filter: invert(31%) sepia(13%) saturate(1472%) hue-rotate(336deg) brightness(98%) contrast(89%);
-}
-
-[data-theme='dark'] .header-discord-link,
-[data-theme='dark'] .header-unity-forum-link,
-[data-theme='dark'] .header-mail-link {
-    filter: invert(1) brightness(2);
-}
-
-article .markdown img {
-    display: block;
-    width: 60%;
-    margin: 2.5rem auto;
-    cursor: zoom-in;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-}
-
-[data-theme='light'] article .markdown img {
-    background-color: #ffffff;
-    box-shadow: 0 8px 30px rgba(113, 79, 61, 0.08);
-    border: 1px solid rgba(113, 79, 61, 0.1);
-}
-
-[data-theme='light'] article .markdown img:hover {
-    box-shadow: 0 12px 40px rgba(245, 158, 11, 0.4);
-    border-color: rgba(245, 158, 11, 0.5);
-    transform: scale(1.02);
-}
-
-[data-theme='dark'] article .markdown img {
-    background-color: #1a1a1a;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-[data-theme='dark'] article .markdown img:hover {
-    box-shadow: 0 12px 40px rgba(245, 158, 11, 0.5);
-    border-color: rgba(245, 158, 11, 0.6);
-    transform: scale(1.02);
 }
 
 [data-theme='light'] .prism-code {
@@ -208,14 +114,94 @@ code {
     background-color: rgba(255, 255, 255, 0.05) !important;
 }
 
-.footer {
-    padding: 2rem 0;
-    background-color: var(--ifm-navbar-background-color);
-    border-top: 1px solid var(--card-border-color);
-    color: var(--ifm-color-primary);
+article .markdown img {
+    display: block;
+    width: 60%;
+    margin: 2.5rem auto;
+    border-radius: 8px;
+    transition: all 0.3s ease;
 }
 
-@media (max-width: 996px) {
-    [data-theme='light'] .navbar { border-bottom: 1px solid rgba(62, 43, 26, 0.12); }
-    [data-theme='dark'] .navbar { border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+[data-theme='light'] article .markdown img:hover {
+    box-shadow: 0 12px 40px rgba(245, 158, 11, 0.4);
+    border: 1px solid rgba(245, 158, 11, 0.5);
+    transform: scale(1.02);
+}
+
+[data-theme='dark'] article .markdown img:hover {
+    box-shadow: 0 12px 40px rgba(245, 158, 11, 0.5);
+    border: 1px solid rgba(245, 158, 11, 0.6);
+    transform: scale(1.02);
+}
+
+.footer {
+    padding: 4rem 0 2rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    color: var(--ifm-color-primary);
+    position: relative;
+    z-index: 2;
+}
+
+[data-theme='light'] .footer {
+    border-top: 1px solid var(--card-border-color);
+}
+
+.footer__title {
+    font-size: 0.9rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    margin-bottom: 1.5rem;
+    color: var(--ifm-color-primary);
+    opacity: 0.8;
+}
+
+.footer__link-item {
+    line-height: 2;
+    transition: all 0.2s ease;
+    display: inline-block;
+    color: var(--ifm-color-primary) !important;
+    opacity: 0.7;
+}
+
+.footer__link-item:hover {
+    opacity: 1;
+    transform: translateX(5px);
+    text-decoration: none !important;
+}
+
+.footer__copyright {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(113, 79, 61, 0.08);
+    font-size: 0.9rem;
+    color: var(--ifm-color-primary);
+    text-align: center;
+}
+
+[data-theme='dark'] .footer__copyright {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.header-discord-link,
+.header-unity-forum-link,
+.header-mail-link {
+    display: block; width: 24px; height: 24px; margin-right: 20px;
+    background-position: center; background-repeat: no-repeat; background-size: contain;
+    transition: all 0.2s ease; opacity: 0.8;
+}
+
+.header-discord-link { background-image: url('/img/home-page/discord.png'); }
+.header-unity-forum-link { background-image: url('/img/home-page/unity-forum.png'); }
+.header-mail-link { background-image: url('/img/home-page/mail.png'); }
+
+[data-theme='light'] .header-discord-link,
+[data-theme='light'] .header-unity-forum-link,
+[data-theme='light'] .header-mail-link {
+    filter: invert(31%) sepia(13%) saturate(1472%) hue-rotate(336deg) brightness(98%) contrast(89%);
+}
+
+[data-theme='dark'] .header-discord-link,
+[data-theme='dark'] .header-unity-forum-link,
+[data-theme='dark'] .header-mail-link {
+    filter: invert(1) brightness(2);
 }

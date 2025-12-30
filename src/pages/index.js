@@ -14,82 +14,63 @@ function TechInteractiveBackground() {
         const ctx = canvas.getContext('2d');
         let animationFrameId;
         let particles = [];
-        const mouse = { x: null, y: null, radius: 180 }; // 稍微增大吸引半径
+        const mouse = { x: null, y: null, radius: 220, active: true };
 
         function createParticle(w, h) {
             const px = Math.random() * w;
             const py = Math.random() * h;
+            const angleOffset = Math.random() * Math.PI * 2;
+            const distOffset = Math.random() * 85;
+
             return {
-                x: px,
-                y: py,
-                baseX: px,
-                baseY: py,
-                // 1. 增大尺寸：4px 到 10px 之间随机
-                size: Math.random() * 6 + 4,
-                density: (Math.random() * 20) + 2,
-                // 2. 随机图案类型：0-实心方块, 1-十字, 2-空心方块
+                x: px, y: py, baseX: px, baseY: py,
+                targetOffsetX: Math.cos(angleOffset) * distOffset,
+                targetOffsetY: Math.sin(angleOffset) * distOffset,
+                size: Math.random() * 6 + 5,
                 type: Math.floor(Math.random() * 3),
-                // 3. 初始随机速度（布朗运动基础）
-                vx: (Math.random() - 0.5) * 0.5,
-                vy: (Math.random() - 0.5) * 0.5,
+                vx: (Math.random() - 0.5) * 1.8,
+                vy: (Math.random() - 0.5) * 1.8,
                 angle: Math.random() * Math.PI * 2,
-                rotationSpeed: (Math.random() - 0.5) * 0.02,
+                rotationSpeed: (Math.random() - 0.5) * 0.05,
 
                 draw: function() {
                     const color = colorMode === 'dark' ? 'rgba(226, 177, 60,' : 'rgba(113, 79, 61,';
+                    const alpha = colorMode === 'dark' ? '0.18' : '0.22';
                     ctx.save();
                     ctx.translate(this.x, this.y);
                     ctx.rotate(this.angle);
-                    ctx.fillStyle = `${color} 0.25)`;
-                    ctx.strokeStyle = `${color} 0.25)`;
-                    ctx.lineWidth = 1;
-
-                    if (this.type === 0) {
-                        // 类型 0: 实心方块
-                        ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
-                    } else if (this.type === 1) {
-                        // 类型 1: 十字准星
-                        const len = this.size / 2;
-                        ctx.beginPath();
-                        ctx.moveTo(-len, 0); ctx.lineTo(len, 0);
-                        ctx.moveTo(0, -len); ctx.lineTo(0, len);
-                        ctx.stroke();
-                    } else {
-                        // 类型 2: 空心线框
-                        ctx.strokeRect(-this.size/2, -this.size/2, this.size, this.size);
-                    }
+                    ctx.fillStyle = `${color} ${alpha})`;
+                    ctx.strokeStyle = `${color} ${alpha})`;
+                    ctx.lineWidth = 1.2;
+                    if (this.type === 0) ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+                    else if (this.type === 1) {
+                        ctx.beginPath(); ctx.moveTo(-this.size/2, 0); ctx.lineTo(this.size/2, 0);
+                        ctx.moveTo(0, -this.size/2); ctx.lineTo(0, this.size/2); ctx.stroke();
+                    } else ctx.strokeRect(-this.size/2, -this.size/2, this.size, this.size);
                     ctx.restore();
                 },
 
                 update: function() {
-                    // --- 鼠标交互逻辑 (更加平滑) ---
-                    const dx = mouse.x - this.x;
-                    const dy = mouse.y - this.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-
-                    if (distance < mouse.radius) {
-                        // 吸引力：限制最大速度，增加阻尼感
-                        const force = (mouse.radius - distance) / mouse.radius;
-                        this.x += (dx / distance) * force * 2;
-                        this.y += (dy / distance) * force * 2;
-                    } else {
-                        // --- 闲置状态逻辑 (布朗运动 & 归位) ---
-                        // 缓慢向初始位置靠拢 (缓动系数 0.02)
-                        const dxBase = this.baseX - this.x;
-                        const dyBase = this.baseY - this.y;
-                        this.x += dxBase * 0.02;
-                        this.y += dyBase * 0.02;
-
-                        // 注入微弱的随机漂移 (布朗运动)
-                        this.x += this.vx;
-                        this.y += this.vy;
-                        // 概率性改变漂移方向
-                        if(Math.random() > 0.98) {
-                            this.vx = (Math.random() - 0.5) * 0.5;
-                            this.vy = (Math.random() - 0.5) * 0.5;
+                    if (mouse.active && mouse.x !== null) {
+                        const targetX = mouse.x + this.targetOffsetX;
+                        const targetY = mouse.y + this.targetOffsetY;
+                        const dx = targetX - this.x;
+                        const dy = targetY - this.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        if (distance < mouse.radius) {
+                            const force = (mouse.radius - distance) / mouse.radius;
+                            this.x += (dx / distance) * force * 3;
+                            this.y += (dy / distance) * force * 3;
                         }
                     }
-                    // 持续缓慢旋转
+                    const dxBase = this.baseX - this.x;
+                    const dyBase = this.baseY - this.y;
+                    this.x += dxBase * 0.015 + this.vx;
+                    this.y += dyBase * 0.015 + this.vy;
+                    if(Math.random() > 0.96) {
+                        this.vx = (Math.random() - 0.5) * 1.8;
+                        this.vy = (Math.random() - 0.5) * 1.8;
+                    }
                     this.angle += this.rotationSpeed;
                 }
             };
@@ -97,8 +78,7 @@ function TechInteractiveBackground() {
 
         function init() {
             particles = [];
-            // 由于粒子变大且样式变复杂，稍微减少粒子总数以维持性能
-            const numberOfParticles = (canvas.width * canvas.height) / 15000;
+            const numberOfParticles = (canvas.width * canvas.height) / 14000;
             for (let i = 0; i < numberOfParticles; i++) {
                 particles.push(createParticle(canvas.width, canvas.height));
             }
@@ -124,11 +104,11 @@ function TechInteractiveBackground() {
         function handleMouseMove(e) {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
+            // 修改点：删除了对 styles.featureSection 的 closest 判断，粒子现在全程磁吸。
         }
 
         window.addEventListener('resize', handleResize);
         window.addEventListener('mousemove', handleMouseMove);
-
         handleResize();
         animate();
 
@@ -145,11 +125,7 @@ function TechInteractiveBackground() {
 function HomepageHeader() {
     return (
       <header className={styles.heroBanner}>
-          <img
-            src="img/home-page/tinygiants-wide.png"
-            alt="TinyGiants World Map"
-            className={styles.heroImage}
-          />
+          <img src="img/home-page/tinygiants-wide.png" alt="TinyGiants" className={styles.heroImage} />
           <div className={styles.heroMask} />
       </header>
     );
@@ -197,67 +173,69 @@ export default function Home() {
     }, []);
 
     return (
-      <Layout title="Home" description="TinyGiants - Professional Unity Tools & Innovative Games">
-          <TechInteractiveBackground />
-          <div className={styles.customNavbarRight}>
-              <a href="https://discord.tinygiants.tech" target="_blank" rel="noopener noreferrer" className={styles.navIcon} aria-label="Discord">
-                  <img src="img/home-page/discord.png" alt="Discord" />
-              </a>
-              <a href="https://forum.unity.com/" target="_blank" rel="noopener noreferrer" className={styles.navIcon} aria-label="Unity Forum">
-                  <img src="img/home-page/unity-forum.png" alt="Unity Forum" />
-              </a>
-              <a href="mailto:support@tinygiants.tech" className={styles.navIcon} aria-label="Email">
-                  <img src="img/home-page/mail.png" alt="Email" />
-              </a>
-              <CustomThemeToggle />
-          </div>
-          <HomepageHeader />
-          <main className="home-main-content">
-              <div className="container">
-                  <section className={styles.featureSection}>
-                      <div className={styles.featureImageColumn}>
-                          <img src="img/home-page/game-event-system-preview.png" className={styles.featureImg} alt="Game Event System" />
-                      </div>
-                      <div className={styles.featureTextColumn}>
-                          <h2 className={styles.featureTitle}>Game Event System</h2>
-                          <p className={styles.featureDescription}>
-                              A professional, visual, and type-safe event architecture for Unity.
-                              Streamline your development with our ScriptableObject-driven graph editor,
-                              designed for performance and maintainability.
-                          </p>
-                          <div className={styles.buttonGroup}>
-                              <Link className={styles.featureButton} to="/docs/game-event-system/intro/overview">
-                                  <span className={styles.btnIcon}>📖</span> View Documentation
-                              </Link>
-                              <Link className={styles.featureButtonSecondary} to="https://assetstore.unity.com/">
-                                  <img src="img/home-page/asset-store.png" className={styles.btnIconImg} alt="" /> Asset Store
-                              </Link>
+      <Layout title="Home" description="TinyGiants Studio">
+          <div className={styles.homepageWrapper}>
+              <TechInteractiveBackground />
+              <div className={styles.customNavbarRight}>
+                  <a href="https://discord.tinygiants.tech" target="_blank" rel="noopener noreferrer" className={styles.navIcon} aria-label="Discord">
+                      <img src="img/home-page/discord.png" alt="Discord" />
+                  </a>
+                  <a href="https://forum.unity.com/" target="_blank" rel="noopener noreferrer" className={styles.navIcon} aria-label="Unity Forum">
+                      <img src="img/home-page/unity-forum.png" alt="Unity Forum" />
+                  </a>
+                  <a href="mailto:support@tinygiants.tech" className={styles.navIcon} aria-label="Email">
+                      <img src="img/home-page/mail.png" alt="Email" />
+                  </a>
+                  <CustomThemeToggle />
+              </div>
+              <HomepageHeader />
+              <main className="home-main-content">
+                  <div className="container">
+                      <section className={styles.featureSection}>
+                          <div className={styles.featureImageColumn}>
+                              <img src="img/home-page/game-event-system-preview.png" className={styles.featureImg} alt="Game Event System" />
                           </div>
-                      </div>
-                  </section>
-                  <section className={`${styles.featureSection} ${styles.featureReverse}`}>
-                      <div className={styles.featureImageColumn}>
-                          <div className={styles.comingSoonWrapper}>
-                              <img src="img/home-page/default-preview.png" className={`${styles.featureImg} ${styles.blurred}`} alt="Coming Soon" />
-                              <div className={styles.comingSoonOverlay}>COMING SOON</div>
-                          </div>
-                      </div>
-                      <div className={styles.featureTextColumn}>
-                          <h2 className={styles.featureTitle}>The Next Giant Leap</h2>
-                          <p className={styles.featureDescription}>
-                              We are building the next generation of core game systems.
-                              Innovative tools that balance visual clarity with raw coding power,
-                              helping you build giants from tiny ideas.
-                          </p>
-                          <div className={styles.buttonGroup}>
-                              <div className={styles.featureButtonDisabled}>
-                                  <span className={styles.btnIcon}>🔒</span> In Development
+                          <div className={styles.featureTextColumn}>
+                              <h2 className={styles.featureTitle}>Game Event System</h2>
+                              <p className={styles.featureDescription}>
+                                  A professional, visual, and type-safe event architecture for Unity.
+                                  Streamline your development with our ScriptableObject-driven graph editor,
+                                  designed for performance and maintainability.
+                              </p>
+                              <div className={styles.buttonGroup}>
+                                  <Link className={styles.featureButton} to="/docs/game-event-system/intro/overview">
+                                      <span className={styles.btnIcon}>📖</span> View Documentation
+                                  </Link>
+                                  <Link className={styles.featureButtonSecondary} to="https://assetstore.unity.com/">
+                                      <img src="img/home-page/asset-store.png" className={styles.btnIconImg} alt="" /> Asset Store
+                                  </Link>
                               </div>
                           </div>
-                      </div>
-                  </section>
-              </div>
-          </main>
+                      </section>
+                      <section className={`${styles.featureSection} ${styles.featureReverse}`}>
+                          <div className={styles.featureImageColumn}>
+                              <div className={styles.comingSoonWrapper}>
+                                  <img src="img/home-page/default-preview.png" className={`${styles.featureImg} ${styles.blurred}`} alt="Coming Soon" />
+                                  <div className={styles.comingSoonOverlay}>COMING SOON</div>
+                              </div>
+                          </div>
+                          <div className={styles.featureTextColumn}>
+                              <h2 className={styles.featureTitle}>The Next Giant Leap</h2>
+                              <p className={styles.featureDescription}>
+                                  We are building the next generation of core game systems.
+                                  Innovative tools that balance visual clarity with raw coding power,
+                                  helping you build giants from tiny ideas.
+                              </p>
+                              <div className={styles.buttonGroup}>
+                                  <div className={styles.featureButtonDisabled}>
+                                      <span className={styles.btnIcon}>🔒</span> In Development
+                                  </div>
+                              </div>
+                          </div>
+                      </section>
+                  </div>
+              </main>
+          </div>
       </Layout>
     );
 }
