@@ -52,9 +52,7 @@ html, body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-[data-theme='light'] .navbar {
-    border-bottom: 1px solid var(--card-border-color);
-}
+[data-theme='light'] .navbar { border-bottom: 1px solid var(--card-border-color); }
 
 .navbar__inner {
     width: 100%;
@@ -123,18 +121,6 @@ article .markdown img {
     cursor: zoom-in;
 }
 
-[data-theme='light'] article .markdown img:hover {
-    box-shadow: 0 12px 40px rgba(245, 158, 11, 0.4);
-    border: 1px solid rgba(245, 158, 11, 0.5);
-    transform: scale(1.02);
-}
-
-[data-theme='dark'] article .markdown img:hover {
-    box-shadow: 0 12px 40px rgba(245, 158, 11, 0.5);
-    border: 1px solid rgba(245, 158, 11, 0.6);
-    transform: scale(1.02);
-}
-
 .img-full { width: 100% !important; margin: 3.5rem 0 !important; }
 .img-small { width: auto !important; max-width: 400px !important; }
 .image-row { display: flex; justify-content: center; gap: 20px; margin: 2.5rem 0; }
@@ -148,49 +134,9 @@ article .markdown img {
     z-index: 2;
 }
 
-[data-theme='light'] .footer {
-    border-top: 1px solid var(--card-border-color);
-}
+.footer__copyright { text-align: center; }
 
-.footer__title {
-    font-size: 0.9rem;
-    font-weight: 800;
-    letter-spacing: 1.5px;
-    margin-bottom: 1.5rem;
-    color: var(--ifm-color-primary);
-    opacity: 0.8;
-}
-
-.footer__link-item {
-    line-height: 2;
-    transition: all 0.2s ease;
-    display: inline-block;
-    color: var(--ifm-color-primary) !important;
-    opacity: 0.7;
-}
-
-.footer__link-item:hover {
-    opacity: 1;
-    transform: translateX(5px);
-    text-decoration: none !important;
-}
-
-.footer__copyright {
-    margin-top: 3rem;
-    padding-top: 2rem;
-    border-top: 1px solid rgba(113, 79, 61, 0.08);
-    font-size: 0.9rem;
-    color: var(--ifm-color-primary);
-    text-align: center;
-}
-
-[data-theme='dark'] .footer__copyright {
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.header-discord-link,
-.header-unity-forum-link,
-.header-mail-link {
+.header-discord-link, .header-unity-forum-link, .header-mail-link {
     display: block; width: 24px; height: 24px; margin-right: 20px;
     background-position: center; background-repeat: no-repeat; background-size: contain;
     transition: all 0.2s ease; opacity: 0.8;
@@ -218,6 +164,4 @@ article .markdown img {
     opacity: 0.9 !important;
 }
 
-.medium-zoom-image--opened {
-    z-index: 2001 !important;
-}
+.medium-zoom-image--opened { z-index: 2001 !important; }
