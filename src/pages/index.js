@@ -17,7 +17,6 @@ function HomepageHeader() {
     );
 }
 
-// 自定义主题切换按钮组件 - 使用 SVG 图标
 function CustomThemeToggle() {
     const { colorMode, setColorMode } = useColorMode();
     const [mounted, setMounted] = useState(false);
@@ -39,8 +38,7 @@ function CustomThemeToggle() {
             aria-label="Toggle theme"
             title={`Switch to ${colorMode === 'dark' ? 'light' : 'dark'} mode`}
         >
-            {colorMode === 'dark' ? (
-                // 浅色模式图标 (太阳)
+            {colorMode === 'light' ? (
                 <svg viewBox="0 0 24 24" width="24" height="24" className={styles.toggleIcon}>
                     <path
                         fill="currentColor"
@@ -48,7 +46,6 @@ function CustomThemeToggle() {
                     />
                 </svg>
             ) : (
-                // 深色模式图标 (月亮)
                 <svg viewBox="0 0 24 24" width="24" height="24" className={styles.toggleIcon}>
                     <path
                         fill="currentColor"
@@ -61,33 +58,27 @@ function CustomThemeToggle() {
 }
 
 export default function Home() {
-    // 在主页挂载时隐藏导航栏右侧的所有默认元素
     useEffect(() => {
         const hideNavbarElements = () => {
-            // 隐藏侧边栏按钮
             const toggle = document.querySelector('.navbar__toggle');
             if (toggle) {
                 toggle.style.display = 'none';
             }
 
-            // 隐藏导航栏右侧的所有项目（包括图标链接和主题切换）
             const navbarItems = document.querySelector('.navbar__items--right');
             if (navbarItems) {
                 navbarItems.style.display = 'none';
             }
         };
 
-        // 立即执行
         hideNavbarElements();
 
-        // 监听 DOM 变化，确保动态加载的元素也被隐藏
         const observer = new MutationObserver(hideNavbarElements);
         observer.observe(document.body, {
             childList: true,
             subtree: true
         });
 
-        // 清理函数：离开主页时恢复显示
         return () => {
             observer.disconnect();
             const toggle = document.querySelector('.navbar__toggle');
@@ -106,7 +97,6 @@ export default function Home() {
             title="Home"
             description="TinyGiants - Professional Unity Tools & Innovative Games">
 
-            {/* 自定义导航栏右侧按钮组 */}
             <div className={styles.customNavbarRight}>
                 <a
                     href="https://discord.tinygiants.tech"
@@ -141,7 +131,6 @@ export default function Home() {
             <main className="home-main-content">
                 <div className="container">
 
-                    {/* Game Event System */}
                     <section className={styles.featureSection}>
                         <div className={styles.featureImageColumn}>
                             <img
@@ -168,7 +157,6 @@ export default function Home() {
                         </div>
                     </section>
 
-                    {/* Coming Soon */}
                     <section className={`${styles.featureSection} ${styles.featureReverse}`}>
                         <div className={styles.featureImageColumn}>
                             <div className={styles.comingSoonWrapper}>
