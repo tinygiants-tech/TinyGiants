@@ -28,31 +28,63 @@ function TechInteractiveBackground() {
             return {
                 x: px, y: py, baseX: px, baseY: py,
                 angle: Math.random() * Math.PI * 2,
-                rotationSpeed: (Math.random() - 0.5) * 0.04,
-                size: Math.random() * 6 + 5,
+                rotationSpeed: (Math.random() - 0.5) * 0.03,
+                size: Math.random() * 8 + 6,
                 type: Math.floor(Math.random() * 3),
                 vx: (Math.random() - 0.5) * 1.2,
                 vy: (Math.random() - 0.5) * 1.2,
-
                 currOrbitAngle: orbitAngle,
                 orbitRadiusA: orbitRadiusA,
                 orbitRadiusB: orbitRadiusB,
                 orbitSpeed: orbitSpeed,
 
                 draw: function() {
-                    const color = colorMode === 'dark' ? 'rgba(226, 177, 60,' : 'rgba(113, 79, 61,';
-                    const alpha = colorMode === 'dark' ? '0.18' : '0.22';
+                    const color = colorBase;
+                    const alphaVal = alpha;
                     ctx.save();
                     ctx.translate(this.x, this.y);
                     ctx.rotate(this.angle);
-                    ctx.fillStyle = `${color} ${alpha})`;
-                    ctx.strokeStyle = `${color} ${alpha})`;
+                    ctx.fillStyle = `${color} ${alphaVal})`;
+                    ctx.strokeStyle = `${color} ${alphaVal})`;
                     ctx.lineWidth = 1.2;
-                    if (this.type === 0) ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
-                    else if (this.type === 1) {
-                        ctx.beginPath(); ctx.moveTo(-this.size/2, 0); ctx.lineTo(this.size/2, 0);
-                        ctx.moveTo(0, -this.size/2); ctx.lineTo(0, this.size/2); ctx.stroke();
-                    } else ctx.strokeRect(-this.size/2, -this.size/2, this.size, this.size);
+
+                    if (this.type === 0) {
+                        // 绘制 ⚡ 闪电脉冲
+                        ctx.beginPath();
+                        const s = this.size;
+                        ctx.moveTo(s * 0.1, -s * 0.5);
+                        ctx.lineTo(-s * 0.3, 0);
+                        ctx.lineTo(s * 0.1, 0);
+                        ctx.lineTo(-s * 0.1, s * 0.5);
+                        ctx.lineTo(s * 0.3, 0);
+                        ctx.lineTo(-s * 0.1, 0);
+                        ctx.closePath();
+                        ctx.fill();
+                    } else if (this.type === 1) {
+                        // 绘制 🔳 集成芯片 (带引脚)
+                        const s = this.size * 0.7;
+                        ctx.strokeRect(-s/2, -s/2, s, s);
+                        // 绘制引脚
+                        for(let i=-1; i<=1; i++) {
+                            const offset = i * (s/3);
+                            ctx.moveTo(-s/2, offset); ctx.lineTo(-s/2 - 2, offset);
+                            ctx.moveTo(s/2, offset); ctx.lineTo(s/2 + 2, offset);
+                            ctx.moveTo(offset, -s/2); ctx.lineTo(offset, -s/2 - 2);
+                            ctx.moveTo(offset, s/2); ctx.lineTo(offset, s/2 + 2);
+                        }
+                        ctx.stroke();
+                    } else {
+                        // 绘制 💠 逻辑节点
+                        const s = this.size * 0.8;
+                        ctx.beginPath();
+                        ctx.moveTo(0, -s/2); ctx.lineTo(s/2, 0);
+                        ctx.lineTo(0, s/2); ctx.lineTo(-s/2, 0);
+                        ctx.closePath();
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.arc(0, 0, 1.5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
                     ctx.restore();
                 },
 
@@ -66,36 +98,32 @@ function TechInteractiveBackground() {
 
                     if (mouse.active && distToMouse < mouse.radius) {
                         this.currOrbitAngle += this.orbitSpeed;
-
                         const targetX = mouse.x + Math.cos(this.currOrbitAngle) * this.orbitRadiusA;
                         const targetY = mouse.y + Math.sin(this.currOrbitAngle) * this.orbitRadiusB;
-
                         this.x += (targetX - this.x) * 0.05;
                         this.y += (targetY - this.y) * 0.05;
                     } else {
                         const dxBase = this.baseX - this.x;
                         const dyBase = this.baseY - this.y;
-
-                        this.x += dxBase * 0.015;
-                        this.y += dyBase * 0.015;
-
-                        this.x += this.vx;
-                        this.y += this.vy;
-
+                        this.x += dxBase * 0.015 + this.vx;
+                        this.y += dyBase * 0.015 + this.vy;
                         if(Math.random() > 0.97) {
                             this.vx = (Math.random() - 0.5) * 1.2;
                             this.vy = (Math.random() - 0.5) * 1.2;
                         }
                     }
-
                     this.angle += this.rotationSpeed;
                 }
             };
         }
 
+        const colorBase = colorMode === 'dark' ? 'rgba(226, 177, 60,' : 'rgba(113, 79, 61,';
+        const alpha = colorMode === 'dark' ? '0.22' : '0.28';
+
         function init() {
+            if (canvas.width <= 0 || canvas.height <= 0) return;
             particles = [];
-            const numberOfParticles = (canvas.width * canvas.height) / 14000;
+            const numberOfParticles = (canvas.width * canvas.height) / 16000;
             for (let i = 0; i < numberOfParticles; i++) {
                 particles.push(createParticle(canvas.width, canvas.height));
             }
@@ -118,19 +146,16 @@ function TechInteractiveBackground() {
             }
         }
 
-        function handleMouseMove(e) {
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('mousemove', (e) => {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
-        }
-
-        window.addEventListener('resize', handleResize);
-        window.addEventListener('mousemove', handleMouseMove);
+        });
         handleResize();
         animate();
 
         return () => {
             window.removeEventListener('resize', handleResize);
-            window.removeEventListener('mousemove', handleMouseMove);
             cancelAnimationFrame(animationFrameId);
         };
     }, [colorMode]);

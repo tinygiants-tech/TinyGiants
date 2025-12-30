@@ -120,6 +120,7 @@ article .markdown img {
     margin: 2.5rem auto;
     border-radius: 8px;
     transition: all 0.3s ease;
+    cursor: zoom-in;
 }
 
 [data-theme='light'] article .markdown img:hover {
@@ -133,6 +134,11 @@ article .markdown img {
     border: 1px solid rgba(245, 158, 11, 0.6);
     transform: scale(1.02);
 }
+
+.img-full { width: 100% !important; margin: 3.5rem 0 !important; }
+.img-small { width: auto !important; max-width: 400px !important; }
+.image-row { display: flex; justify-content: center; gap: 20px; margin: 2.5rem 0; }
+.image-row img { width: 100% !important; flex: 1; border-radius: 8px; margin: 0 !important; }
 
 .footer {
     padding: 4rem 0 2rem 0;
@@ -204,4 +210,14 @@ article .markdown img {
 [data-theme='dark'] .header-unity-forum-link,
 [data-theme='dark'] .header-mail-link {
     filter: invert(1) brightness(2);
+}
+
+.medium-zoom-overlay {
+    z-index: 2000 !important;
+    background-color: var(--ifm-background-color) !important;
+    opacity: 0.9 !important;
+}
+
+.medium-zoom-image--opened {
+    z-index: 2001 !important;
 }

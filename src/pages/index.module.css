@@ -1,16 +1,7 @@
 .homepageWrapper {
     position: relative;
     min-height: 100vh;
-    background-image:
-            linear-gradient(rgba(113, 79, 61, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(113, 79, 61, 0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-}
-
-[data-theme='dark'] .homepageWrapper {
-    background-image:
-            linear-gradient(rgba(226, 177, 60, 0.06) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(226, 177, 60, 0.06) 1px, transparent 1px);
+    background: transparent;
 }
 
 .customNavbarRight {
@@ -171,13 +162,6 @@
 
 @media (max-width: 996px) {
     .heroBanner { height: 35vh; min-height: 220px; }
-    .heroImage { object-position: center; }
-    .heroMask {
-        background:
-                linear-gradient(to right, rgba(0,0,0,0.6) 0%, transparent 15%, transparent 85%, rgba(0,0,0,0.6) 100%),
-                linear-gradient(to top, #000 0%, transparent 40%);
-    }
-
     .featureSection, .featureReverse { flex-direction: column; gap: 30px; padding: 40px 20px; }
     .featureImageColumn, .featureTextColumn { width: 100%; text-align: center; }
     .buttonGroup { flex-direction: column; width: 100%; gap: 12px; }
