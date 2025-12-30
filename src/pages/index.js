@@ -125,7 +125,19 @@ function TechInteractiveBackground() {
 function HomepageHeader() {
     return (
       <header className={styles.heroBanner}>
-          <img src="img/home-page/tinygiants-wide.png" alt="TinyGiants" className={styles.heroImage} />
+          {/*<img src="img/home-page/tinygiants-wide.png" alt="TinyGiants" className={styles.heroImage} />*/}
+
+          <video
+              className={styles.heroImage}
+              autoPlay
+              loop
+              muted
+              playsInline
+              poster="img/home-page/tinygiants-wide.png"
+          >
+              <source src="video/tinygiants-video-wide.mp4" type="video/mp4" />
+          </video>
+
           <div className={styles.heroMask} />
       </header>
     );
