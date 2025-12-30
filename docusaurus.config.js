@@ -15,11 +15,7 @@ const config = {
 
   i18n: {
     defaultLocale: 'en',
-    locales: ['en', 'zh'],
-    localeConfigs: {
-      en: { label: 'English' },
-      zh: { label: '简体中文' },
-    },
+    locales: ['en'],
   },
 
   presets: [
@@ -55,10 +51,6 @@ const config = {
         src: 'img/home-page/tinygiants-logo.png',
       },
       items: [
-        {
-          type: 'localeDropdown',
-          position: 'right',
-        },
         {
           href: 'https://discord.tinygiants.tech',
           position: 'right',

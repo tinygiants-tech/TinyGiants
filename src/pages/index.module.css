@@ -45,103 +45,23 @@
     right: 0;
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
     padding: 12px 20px;
     z-index: 101;
 }
 
-.langWrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.langButton {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: transparent;
-    border: none;
-    color: var(--ifm-color-primary);
-    cursor: pointer;
-    font-family: var(--font-family-heading);
-    font-weight: 700;
-    font-size: 0.9rem;
-    padding: 6px 10px;
-    border-radius: 6px;
-    transition: all 0.2s ease;
-}
-
-.langIconInline {
-    font-size: 0.95rem;
-    opacity: 0.9;
-}
-
-.langButton:hover {
-    background-color: rgba(113, 79, 61, 0.08);
-}
-
-[data-theme='dark'] .langButton:hover {
-    background-color: rgba(226, 177, 60, 0.1);
-}
-
-.chevronIcon {
-    opacity: 0.5;
-    transition: transform 0.2s ease;
-}
-
-.chevronRotate {
-    transform: rotate(180deg);
-}
-
-.langDropdown {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    margin-top: 8px;
-    background-color: var(--ifm-navbar-background-color);
-    border: 1px solid var(--card-border-color);
-    border-radius: 8px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    min-width: 140px;
-    overflow: hidden;
-    z-index: 110;
-}
-
-.langItem {
-    display: block;
-    padding: 10px 16px;
-    color: var(--ifm-font-color-base);
-    text-decoration: none !important;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.langItem:hover {
-    background-color: rgba(113, 79, 61, 0.05);
-    color: var(--ifm-color-primary);
-}
-
-.langActive {
-    color: var(--ifm-color-primary);
-    font-weight: 700;
-    background-color: rgba(113, 79, 61, 0.03);
-}
-
 .navIcon {
     display: block;
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     opacity: 0.8;
     transition: all 0.2s ease;
 }
 
 .navIcon img {
-    width: 22px !important;
-    height: 22px !important;
+    width: 24px !important;
+    height: 24px !important;
     object-fit: contain;
-    display: block;
 }
 
 .navIcon:hover { opacity: 1.0; transform: scale(1.1); }
@@ -164,11 +84,7 @@
     padding: 0;
 }
 
-.customThemeToggle svg {
-    width: 22px !important;
-    height: 22px !important;
-}
-
+.customThemeToggle svg { width: 24px; height: 24px; }
 [data-theme='light'] .customThemeToggle:hover { background-color: rgba(0, 0, 0, 0.05); }
 [data-theme='dark'] .customThemeToggle:hover { background-color: rgba(255, 255, 255, 0.1); }
 
@@ -387,10 +303,6 @@
     .heroBanner {
         height: 35vh;
         min-height: 220px;
-    }
-    .customNavbarRight {
-        padding: 10px 16px;
-        gap: 16px;
     }
     .featureSection, .featureReverse { flex-direction: column; gap: 40px; padding: 60px 20px; }
     .featureImageColumn, .featureTextColumn { width: 100%; text-align: center; clip-path: none !important; opacity: 1 !important; }
