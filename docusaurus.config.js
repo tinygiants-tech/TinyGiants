@@ -102,10 +102,6 @@ const config = {
               label: 'Asset Store Page',
               href: 'https://assetstore.unity.com/',
             },
-            {
-              label: 'Visual Flow Editor',
-              to: '/docs/game-event-system/flow-graph/game-event-node-editor',
-            },
           ],
         },
         {
@@ -116,29 +112,21 @@ const config = {
               href: 'https://discord.tinygiants.tech',
             },
             {
-              label: 'Unity Forum Thread',
+              label: 'Unity Forum',
               href: 'https://forum.unity.com/',
-            },
-            {
-              label: 'Github Repository',
-              href: 'https://github.com/TinyGiants',
             },
           ],
         },
         {
-          title: 'STUDIO',
+          title: 'SUPPORT',
           items: [
+            {
+              label: 'Official Discord',
+              href: 'https://discord.tinygiants.tech',
+            },
             {
               label: 'Technical Support',
               href: 'mailto:support@tinygiants.tech',
-            },
-            {
-              label: 'Privacy Policy',
-              to: '/docs/game-event-system/tools/community-and-support',
-            },
-            {
-              label: 'Contact Us',
-              href: 'mailto:contact@tinygiants.tech',
             },
           ],
         },

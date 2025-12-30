@@ -1,4 +1,35 @@
+@font-face {
+    font-family: 'Inter';
+    src: url('/fonts/Inter-Variable.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Inter';
+    src: url('/fonts/Inter-Italic-Variable.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: italic;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url('/fonts/Montserrat-Variable.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url('/fonts/Montserrat-Italic-Variable.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: italic;
+    font-display: swap;
+}
+
 :root {
+    --ifm-font-family-base: 'Inter', sans-serif;
+    --font-family-heading: 'Montserrat', sans-serif;
     --site-bg-color: #fdfbf7;
     --ifm-background-color: var(--site-bg-color);
     --ifm-navbar-background-color: #f7f2e8;
@@ -33,6 +64,12 @@ html, body {
     color: var(--ifm-font-color-base);
 }
 
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
 #interactive-bg-canvas {
     position: fixed;
     top: 0;
@@ -58,6 +95,13 @@ html, body {
     width: 100%;
     margin: 0;
     padding: 0 0.5rem;
+}
+
+.navbar__title {
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    letter-spacing: 0.02rem;
+    color: var(--ifm-color-primary) !important;
 }
 
 [data-theme='light'] .navbar__title,
@@ -117,8 +161,18 @@ article .markdown img {
     width: 60%;
     margin: 2.5rem auto;
     border-radius: 8px;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
     cursor: zoom-in;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+article .markdown img:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 45px rgba(113, 79, 61, 0.35) !important;
+}
+
+[data-theme='dark'] article .markdown img:hover {
+    box-shadow: 0 0 25px rgba(226, 177, 60, 0.4), 0 20px 50px rgba(0, 0, 0, 0.5) !important;
 }
 
 .img-full { width: 100% !important; margin: 3.5rem 0 !important; }

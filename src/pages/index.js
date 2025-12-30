@@ -160,10 +160,8 @@ export default function Home() {
         const obs = new MutationObserver(hideNavbar);
         obs.observe(document.body, { childList: true, subtree: true });
 
-        // 核心修改：无限滚动触发逻辑
         const revealObs = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                // 不再解绑观察器，而是根据可见性实时切换类名
                 if (entry.isIntersecting) {
                     entry.target.classList.add(styles.sectionVisible);
                 } else {
