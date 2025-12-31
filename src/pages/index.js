@@ -123,59 +123,24 @@ function TechInteractiveBackground() {
 }
 
 function HomepageHeader() {
-    const videoRef = useRef(null);
-
-    useEffect(() => {
-        const video = videoRef.current;
-        if (!video) return;
-
-        // 针对微信环境的自动播放逻辑
-        const attemptPlay = () => {
-            if (video) {
-                video.play().catch((err) => {
-                    console.warn("Video autoplay failed:", err);
-                });
-            }
-        };
-
-        // 1. 标准浏览器尝试
-        attemptPlay();
-
-        // 2. 微信环境：当微信浏览器内核准备就绪时强制播放
-        if (typeof window.WeixinJSBridge !== "undefined") {
-            window.WeixinJSBridge.invoke('getNetworkType', {}, attemptPlay);
-        } else {
-            document.addEventListener("WeixinJSBridgeReady", attemptPlay, false);
-        }
-
-        return () => {
-            document.removeEventListener("WeixinJSBridgeReady", attemptPlay);
-        };
-    }, []);
-
     return (
-        <header className={styles.heroBanner}>
-            <video
-                ref={videoRef}
-                className={styles.heroImage}
-                autoPlay
-                loop
-                muted
-                playsInline
-                /* React 中 webkit-playsinline 需写成 webkitPlaysInline */
-                webkitPlaysInline={true}
-                /* 微信 X5 内核专有属性：防止劫持播放器强制全屏 */
-                x5-video-player-type="h5-page"
-                x5-video-player-fullscreen="true"
-                x5-video-orientation="portrait"
-                x5-playsinline="true"
-                poster="img/home-page/tinygiants-wide.png"
-            >
-                <source src="video/tinygiants-wide.mp4" type="video/mp4" />
-            </video>
+      <header className={styles.heroBanner}>
+          {/*<img src="img/home-page/tinygiants-wide.png" alt="TinyGiants" className={styles.heroImage} />*/}
 
-            <div className={styles.heroMask} />
-        </header>
+          <video
+              className={styles.heroImage}
+              autoPlay
+              loop
+              muted
+              playsInline
+              webkit-playsinline
+              poster="img/home-page/tinygiants-wide.png"
+          >
+              <source src="video/tinygiants-wide-800.mp4" type="video/mp4" />
+          </video>
+
+          <div className={styles.heroMask} />
+      </header>
     );
 }
 
