@@ -190,10 +190,31 @@ article .markdown img:hover {
 
 .footer__copyright { text-align: center; }
 
-.header-discord-link, .header-unity-forum-link, .header-mail-link {
-    display: block; width: 24px; height: 24px; margin-right: 20px;
-    background-position: center; background-repeat: no-repeat; background-size: contain;
-    transition: all 0.2s ease; opacity: 0.8;
+.header-discord-link,
+.header-unity-forum-link,
+.header-mail-link {
+    display: block;
+    width: 24px;
+    height: 24px;
+    margin-right: 20px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    transition: all 0.2s ease;
+    opacity: 0.8;
+}
+
+.navbar__item.navbar__link.header-discord-link,
+.navbar__item.navbar__link.header-unity-forum-link,
+.navbar__item.navbar__link.header-mail-link {
+    padding: 0;
+}
+
+.header-discord-link:hover,
+.header-unity-forum-link:hover,
+.header-mail-link:hover {
+    opacity: 1;
+    transform: scale(1.1);
 }
 
 .header-discord-link { background-image: url('/img/home-page/discord.png'); }
