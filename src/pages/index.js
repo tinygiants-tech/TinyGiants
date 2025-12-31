@@ -164,7 +164,7 @@ function CustomThemeToggle() {
 export default function Home() {
     const sectionRefs = useRef([]);
     useEffect(() => {
-        // 核心修改：给根节点打上“主页”标识，供 CSS 精准控制
+        // 核心标识：给根节点打上“主页”标识
         document.documentElement.setAttribute('data-site-render', 'home');
 
         const revealObs = new IntersectionObserver((entries) => {
@@ -180,7 +180,7 @@ export default function Home() {
         sectionRefs.current.forEach(ref => { if(ref) revealObs.observe(ref); });
 
         return () => {
-            // 卸载时移除标识，还原文档页样式
+            // 卸载时移除标识，确保文档页恢复标准导航栏
             document.documentElement.removeAttribute('data-site-render');
             revealObs.disconnect();
         };

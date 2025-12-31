@@ -190,7 +190,6 @@ article .markdown img:hover {
 
 .footer__copyright { text-align: center; }
 
-/* 导航栏背景图标 - 仅作用于标准 navbar 以防干扰主页手写组件 */
 .navbar .header-discord-link,
 .navbar .header-unity-forum-link,
 .navbar .header-mail-link {
@@ -223,29 +222,28 @@ article .markdown img:hover {
 
 .medium-zoom-image--opened { z-index: 2001 !important; }
 
-/* --- 响应式核心修复 --- */
+html[data-site-render='home'] .navbar__items--right,
+html[data-site-render='home'] .navbar__toggle {
+    display: none !important;
+}
 
 @media (max-width: 996px) {
-    /* 1. 只有当不是主页时，才强制显示标准导航栏右侧图标 */
     html:not([data-site-render='home']) .navbar__items--right {
         display: flex !important;
         align-items: center;
-        gap: 0;
+        padding-right: 0.5rem;
     }
 
-    /* 2. 在主页时，强制隐藏标准导航栏的所有交互项，确保只显示主页手写的 customNavbarRight */
-    html[data-site-render='home'] .navbar__items--right,
-    html[data-site-render='home'] .navbar__toggle {
-        display: none !important;
-    }
-
-    /* 移动端标准导航栏图标尺寸微调 */
     .navbar .header-discord-link,
     .navbar .header-unity-forum-link,
     .navbar .header-mail-link {
-        margin-right: 10px;
+        margin-right: 20px !important;
         width: 22px;
         height: 22px;
+    }
+
+    .navbar .header-mail-link {
+        margin-right: 0px !important;
     }
 
     .navbar__title {
