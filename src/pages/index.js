@@ -135,7 +135,7 @@ function HomepageHeader() {
               playsInline
               poster="img/home-page/tinygiants-wide.png"
           >
-              <source src="video/tinygiants-video-wide.mp4" type="video/mp4" />
+              <source src="video/tinygiants-wide.mp4" type="video/mp4" />
           </video>
 
           <div className={styles.heroMask} />
