@@ -164,14 +164,8 @@ function CustomThemeToggle() {
 export default function Home() {
     const sectionRefs = useRef([]);
     useEffect(() => {
-        const hideNavbar = () => {
-            ['.navbar__toggle', '.navbar__items--right'].forEach(cls => {
-                const el = document.querySelector(cls); if(el) el.style.display = 'none';
-            });
-        };
-        hideNavbar();
-        const obs = new MutationObserver(hideNavbar);
-        obs.observe(document.body, { childList: true, subtree: true });
+        // 核心修改：给根节点打上“主页”标识，供 CSS 精准控制
+        document.documentElement.setAttribute('data-site-render', 'home');
 
         const revealObs = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -186,58 +180,57 @@ export default function Home() {
         sectionRefs.current.forEach(ref => { if(ref) revealObs.observe(ref); });
 
         return () => {
-            obs.disconnect(); revealObs.disconnect();
-            ['.navbar__toggle', '.navbar__items--right'].forEach(cls => {
-                const el = document.querySelector(cls); if(el) el.style.display = '';
-            });
+            // 卸载时移除标识，还原文档页样式
+            document.documentElement.removeAttribute('data-site-render');
+            revealObs.disconnect();
         };
     }, []);
 
     return (
-      <Layout title="Home" description="TinyGiants Studio">
-          <div className={styles.homepageWrapper}>
-              <FilmGrain />
-              <TechInteractiveBackground />
-              <div className={styles.customNavbarRight}>
-                  <a href="https://discord.tinygiants.tech" target="_blank" rel="noopener noreferrer" className={styles.navIcon} aria-label="Discord"><img src="img/home-page/discord.png" alt="Discord" /></a>
-                  <a href="https://forum.unity.com/" target="_blank" rel="noopener noreferrer" className={styles.navIcon} aria-label="Unity Forum"><img src="img/home-page/unity-forum.png" alt="Unity Forum" /></a>
-                  <a href="mailto:support@tinygiants.tech" className={styles.navIcon} aria-label="Email"><img src="img/home-page/mail.png" alt="Email" /></a>
-                  <CustomThemeToggle />
-              </div>
-              <HomepageHeader />
-              <main className="home-main-content">
-                  <div className="container">
-                      <section className={styles.featureSection} ref={el => sectionRefs.current[0] = el}>
-                          <div className={styles.featureImageColumn}>
-                              <img src="img/home-page/game-event-system-preview.png" className={styles.featureImg} alt="Game Event System" />
-                          </div>
-                          <div className={styles.featureTextColumn}>
-                              <h2 className={styles.featureTitle}>Game Event System</h2>
-                              <p className={styles.featureDescription}>A professional, visual, and type-safe event architecture for Unity. Streamline your development with our ScriptableObject-driven graph editor, designed for performance and maintainability.</p>
-                              <div className={styles.buttonGroup}>
-                                  <Link className={styles.featureButton} to="/docs/game-event-system/intro/overview"><span className={styles.btnIcon}>📖</span> View Documentation</Link>
-                                  <Link className={styles.featureButtonSecondary} to="https://assetstore.unity.com/"><img src="img/home-page/asset-store.png" className={styles.btnIconImg} alt="" /> Asset Store</Link>
-                              </div>
-                          </div>
-                      </section>
-                      <section className={`${styles.featureSection} ${styles.featureReverse}`} ref={el => sectionRefs.current[1] = el}>
-                          <div className={styles.featureImageColumn}>
-                              <div className={styles.comingSoonWrapper}>
-                                  <img src="img/home-page/default-preview.png" className={`${styles.featureImg} ${styles.blurred}`} alt="Coming Soon" />
-                                  <div className={styles.comingSoonOverlay}>COMING SOON</div>
-                              </div>
-                          </div>
-                          <div className={styles.featureTextColumn}>
-                              <h2 className={styles.featureTitle}>The Next Giant Leap</h2>
-                              <p className={styles.featureDescription}>We are building the next generation of core game systems. Innovative tools that balance visual clarity with raw coding power, helping you build giants from tiny ideas.</p>
-                              <div className={styles.buttonGroup}>
-                                  <div className={styles.featureButtonDisabled}><span className={styles.btnIcon}>🔒</span> In Development</div>
-                              </div>
-                          </div>
-                      </section>
-                  </div>
-              </main>
-          </div>
-      </Layout>
+        <Layout title="Home" description="TinyGiants Studio">
+            <div className={styles.homepageWrapper}>
+                <FilmGrain />
+                <TechInteractiveBackground />
+                <div className={styles.customNavbarRight}>
+                    <a href="https://discord.tinygiants.tech" target="_blank" rel="noopener noreferrer" className={styles.navIcon} aria-label="Discord"><img src="img/home-page/discord.png" alt="Discord" /></a>
+                    <a href="https://forum.unity.com/" target="_blank" rel="noopener noreferrer" className={styles.navIcon} aria-label="Unity Forum"><img src="img/home-page/unity-forum.png" alt="Unity Forum" /></a>
+                    <a href="mailto:support@tinygiants.tech" className={styles.navIcon} aria-label="Email"><img src="img/home-page/mail.png" alt="Email" /></a>
+                    <CustomThemeToggle />
+                </div>
+                <HomepageHeader />
+                <main className="home-main-content">
+                    <div className="container">
+                        <section className={styles.featureSection} ref={el => sectionRefs.current[0] = el}>
+                            <div className={styles.featureImageColumn}>
+                                <img src="img/home-page/game-event-system-preview.png" className={styles.featureImg} alt="Game Event System" />
+                            </div>
+                            <div className={styles.featureTextColumn}>
+                                <h2 className={styles.featureTitle}>Game Event System</h2>
+                                <p className={styles.featureDescription}>A professional, visual, and type-safe event architecture for Unity. Streamline your development with our ScriptableObject-driven graph editor, designed for performance and maintainability.</p>
+                                <div className={styles.buttonGroup}>
+                                    <Link className={styles.featureButton} to="/docs/game-event-system/intro/overview"><span className={styles.btnIcon}>📖</span> View Documentation</Link>
+                                    <Link className={styles.featureButtonSecondary} to="https://assetstore.unity.com/"><img src="img/home-page/asset-store.png" className={styles.btnIconImg} alt="" /> Asset Store</Link>
+                                </div>
+                            </div>
+                        </section>
+                        <section className={`${styles.featureSection} ${styles.featureReverse}`} ref={el => sectionRefs.current[1] = el}>
+                            <div className={styles.featureImageColumn}>
+                                <div className={styles.comingSoonWrapper}>
+                                    <img src="img/home-page/default-preview.png" className={`${styles.featureImg} ${styles.blurred}`} alt="Coming Soon" />
+                                    <div className={styles.comingSoonOverlay}>COMING SOON</div>
+                                </div>
+                            </div>
+                            <div className={styles.featureTextColumn}>
+                                <h2 className={styles.featureTitle}>The Next Giant Leap</h2>
+                                <p className={styles.featureDescription}>We are building the next generation of core game systems. Innovative tools that balance visual clarity with raw coding power, helping you build giants from tiny ideas.</p>
+                                <div className={styles.buttonGroup}>
+                                    <div className={styles.featureButtonDisabled}><span className={styles.btnIcon}>🔒</span> In Development</div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </main>
+            </div>
+        </Layout>
     );
 }
