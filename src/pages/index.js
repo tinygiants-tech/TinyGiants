@@ -123,24 +123,35 @@ function TechInteractiveBackground() {
 }
 
 function HomepageHeader() {
+    const [isWeChat, setIsWeChat] = useState(false);
+
+    useEffect(() => {
+        const ua = navigator.userAgent.toLowerCase();
+        setIsWeChat(ua.includes('micromessenger'));
+    }, []);
+
     return (
-      <header className={styles.heroBanner}>
-          {/*<img src="img/home-page/tinygiants-wide.png" alt="TinyGiants" className={styles.heroImage} />*/}
-
-          <video
-              className={styles.heroImage}
-              autoPlay
-              loop
-              muted
-              playsInline
-              webkit-playsinline
-              poster="img/home-page/tinygiants-wide.png"
-          >
-              <source src="video/tinygiants-wide-800.mp4" type="video/mp4" />
-          </video>
-
-          <div className={styles.heroMask} />
-      </header>
+        <header className={styles.heroBanner}>
+            {isWeChat ? (
+                <img
+                    src="img/home-page/tinygiants-wide.png"
+                    alt="TinyGiants"
+                    className={styles.heroImage}
+                />
+            ) : (
+                <video
+                    className={styles.heroImage}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    poster="img/home-page/tinygiants-wide.png"
+                >
+                    <source src="video/tinygiants-wide-800.mp4" type="video/mp4" />
+                </video>
+            )}
+            <div className={styles.heroMask} />
+        </header>
     );
 }
 
