@@ -3,7 +3,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 const config = {
   title: 'TinyGiants',
   tagline: 'Home',
-  favicon: 'img/home-page/tinygiants-logo.png',
+  favicon: '/img/home-page/tinygiants-logo.png', // 添加前缀 /
 
   url: 'https://docs.tinygiants.tech',
   baseUrl: '/',
@@ -15,7 +15,17 @@ const config = {
 
   i18n: {
     defaultLocale: 'en',
-    locales: ['en'],
+    locales: ['en', 'zh'],
+    localeConfigs: {
+      en: {
+        label: 'EN',
+        direction: 'ltr',
+      },
+      zh: {
+        label: 'ZH',
+        direction: 'ltr',
+      },
+    },
   },
 
   presets: [
@@ -48,9 +58,13 @@ const config = {
       title: 'TinyGiants',
       logo: {
         alt: 'TinyGiants Logo',
-        src: 'img/home-page/tinygiants-logo.png',
+        src: '/img/home-page/tinygiants-logo.png', // 添加前缀 /
       },
       items: [
+        {
+          type: 'localeDropdown',
+          position: 'right',
+        },
         {
           href: 'https://discord.tinygiants.tech',
           position: 'right',

@@ -88,6 +88,94 @@
 [data-theme='light'] .customThemeToggle:hover { background-color: rgba(0, 0, 0, 0.05); }
 [data-theme='dark'] .customThemeToggle:hover { background-color: rgba(255, 255, 255, 0.1); }
 
+/* ----------------------------------------------------------- */
+/* 主页自定义语言选择下拉框样式 (匹配自定义Navbar) */
+/* ----------------------------------------------------------- */
+
+.langDropdownContainer {
+    position: relative;
+    display: inline-block;
+}
+
+.langDropButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px 12px;
+    color: var(--ifm-color-primary);
+    font-weight: 700;
+    font-family: var(--font-family-heading);
+    transition: opacity 0.2s;
+}
+
+.langDropButton:hover { opacity: 0.8; }
+
+.langFlagMain {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+}
+
+.langTextMain { font-size: 0.9rem; }
+
+.langArrow {
+    transition: transform 0.3s ease;
+    opacity: 0.7;
+}
+
+.langArrowOpen { transform: rotate(180deg); }
+
+.langMenu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    padding: 8px 0;
+    list-style: none;
+    background-color: var(--ifm-navbar-background-color);
+    border: 1px solid var(--card-border-color);
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    min-width: 140px;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.langMenuItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    text-decoration: none !important;
+    color: var(--ifm-color-primary) !important;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+}
+
+.langMenuItem:hover {
+    background-color: rgba(113, 79, 61, 0.08);
+}
+
+.langMenuItemFlag {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+}
+
+/* 移动端适配 */
+@media (max-width: 996px) {
+    .langTextMain { font-size: 0.85rem; }
+}
+
+/* ----------------------------------------------------------- */
+/* 原始功能样式续接 (不改动) */
+/* ----------------------------------------------------------- */
+
 .heroBanner {
     position: relative;
     height: 50vh;

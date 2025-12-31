@@ -1,0 +1,30 @@
+{
+  "version.label": {
+    "message": "Next",
+    "description": "The label for version current"
+  },
+  "sidebar.tutorialSidebar.category.🏠 Introduction": {
+    "message": "🏠 Introduction",
+    "description": "The label for category '🏠 Introduction' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.💎 Visual Workflow": {
+    "message": "💎 Visual Workflow",
+    "description": "The label for category '💎 Visual Workflow' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.🕸️ Flow Orchestration": {
+    "message": "🕸️ Flow Orchestration",
+    "description": "The label for category '🕸️ Flow Orchestration' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.💻 Runtime API": {
+    "message": "💻 Runtime API",
+    "description": "The label for category '💻 Runtime API' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.🛠 Tools & Support": {
+    "message": "🛠 Tools & Support",
+    "description": "The label for category '🛠 Tools & Support' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.📚 Examples": {
+    "message": "📚 Examples",
+    "description": "The label for category '📚 Examples' in sidebar 'tutorialSidebar'"
+  }
+}

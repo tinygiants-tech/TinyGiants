@@ -253,3 +253,57 @@ html[data-site-render='home'] .navbar__toggle {
         white-space: nowrap;
     }
 }
+
+/* ----------------------------------------------------------- */
+/* 语言切换下拉框样式支持 (Docs Navbar) */
+/* ----------------------------------------------------------- */
+
+.navbar__item.dropdown > .navbar__link::before {
+    content: '';
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+    margin-right: 8px;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+html[lang='en'] .navbar__item.dropdown > .navbar__link::before { background-image: url('/img/language/en.png'); }
+html[lang='zh'] .navbar__item.dropdown > .navbar__link::before { background-image: url('/img/language/zh.png'); }
+
+.dropdown__menu {
+    min-width: 140px !important;
+    padding: 0.5rem 0 !important;
+    border-radius: 8px !important;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
+}
+
+.dropdown__link {
+    display: flex !important;
+    align-items: center !important;
+    padding: 0.6rem 1rem !important;
+}
+
+.dropdown__link::before {
+    content: '';
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.dropdown__link[href$="/"]:not([href*="/zh/"])::before,
+.dropdown__link[href$="/en/"]::before { background-image: url('/img/language/en.png'); }
+.dropdown__link[href*="/zh/"]::before { background-image: url('/img/language/zh.png'); }
+
+.dropdown__link[href$="/"]:not([href*="/zh/"]),
+.dropdown__link[href$="/en/"] { font-size: 0; }
+.dropdown__link[href$="/"]:not([href*="/zh/"])::after,
+.dropdown__link[href$="/en/"]::after { content: 'English'; font-size: 0.9rem; }
+
+.dropdown__link[href*="/zh/"] { font-size: 0; }
+.dropdown__link[href*="/zh/"]::after { content: '简体中文'; font-size: 0.9rem; }
