@@ -240,3 +240,26 @@ article .markdown img:hover {
 }
 
 .medium-zoom-image--opened { z-index: 2001 !important; }
+
+@media (max-width: 996px) {
+    .navbar__items--right {
+        display: flex !important;
+        align-items: center;
+        gap: 0;
+    }
+
+    .header-discord-link,
+    .header-unity-forum-link,
+    .header-mail-link {
+        margin-right: 12px !important;
+        width: 22px;
+        height: 22px;
+    }
+
+    .navbar__title {
+        max-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
