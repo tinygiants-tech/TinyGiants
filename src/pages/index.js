@@ -133,6 +133,7 @@ function HomepageHeader() {
               loop
               muted
               playsInline
+              webkit-playsinline
               poster="img/home-page/tinygiants-wide.png"
           >
               <source src="video/tinygiants-wide.mp4" type="video/mp4" />
