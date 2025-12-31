@@ -301,7 +301,7 @@
 
 @media (max-width: 996px) {
     .heroBanner {
-        height: 35vh;
+        height: 30vh;
         min-height: 220px;
     }
     .featureSection, .featureReverse { flex-direction: column; gap: 40px; padding: 60px 20px; }
