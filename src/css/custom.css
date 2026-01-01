@@ -156,7 +156,6 @@ code {
     background-color: rgba(255, 255, 255, 0.05) !important;
 }
 
-/* --- 基础图片样式 --- */
 article .markdown img {
     display: block;
     width: 60%;
@@ -167,16 +166,6 @@ article .markdown img {
     border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-article .markdown img:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 45px rgba(113, 79, 61, 0.35) !important;
-}
-
-[data-theme='dark'] article .markdown img:hover {
-    box-shadow: 0 0 25px rgba(226, 177, 60, 0.4), 0 20px 50px rgba(0, 0, 0, 0.5) !important;
-}
-
-/* --- 图片布局辅助类 --- */
 article .markdown img.img-full,
 article .markdown .img-full-wrapper img {
     width: 100% !important;
@@ -205,9 +194,7 @@ article .markdown .image-row p img {
     margin: 0 !important;
 }
 
-article .markdown .image-row p {
-    display: contents;
-}
+article .markdown .image-row p { display: contents; }
 
 .footer {
     padding: 4rem 0 2rem 0;
@@ -219,7 +206,6 @@ article .markdown .image-row p {
 
 .footer__copyright { text-align: center; }
 
-/* PC端文档页导航栏图标样式 */
 .navbar .header-discord-link,
 .navbar .header-unity-forum-link,
 .navbar .header-mail-link {
@@ -257,98 +243,123 @@ html[data-site-render='home'] .navbar__toggle {
     display: none !important;
 }
 
-/* ----------------------------------------------------------- */
-/* 移动端文档页导航栏专项优化 */
-/* ----------------------------------------------------------- */
+.navbar__item.dropdown > .navbar__link svg { display: none !important; }
+
+.navbar__item.dropdown > .navbar__link {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 0 12px !important;
+    height: 40px !important;
+    font-weight: 700 !important;
+    font-family: var(--font-family-heading) !important;
+    color: var(--ifm-color-primary) !important;
+    background: transparent !important;
+}
+
+.navbar__item.dropdown > .navbar__link::before {
+    content: '';
+    display: block;
+    width: 18px;
+    height: 18px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    order: -1;
+}
+
+html[lang='en'] .navbar__item.dropdown > .navbar__link::before { background-image: url('/img/language/en.png'); }
+html[lang='zh'] .navbar__item.dropdown > .navbar__link::before { background-image: url('/img/language/zh.png'); }
+
+.navbar__item.dropdown > .navbar__link::after {
+    content: '';
+    display: block !important;
+    width: 12px !important;
+    height: 12px !important;
+    border: none !important;
+    margin: 0 !important;
+    background-color: var(--ifm-color-primary) !important;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    transition: transform 0.3s ease !important;
+    opacity: 0.8 !important;
+    transform: none !important;
+    position: static !important;
+}
+
+.navbar__item.dropdown--show > .navbar__link::after { transform: rotate(180deg) !important; }
+
+.dropdown__menu {
+    top: 52px !important;
+    min-width: 140px !important;
+    padding: 8px 0 !important;
+    border-radius: 8px !important;
+    background-color: var(--ifm-navbar-background-color) !important;
+    border: 1px solid var(--card-border-color) !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important;
+    right: 0 !important;
+    left: auto !important;
+}
+
+.dropdown__link {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 8px 16px !important;
+    color: var(--ifm-color-primary) !important;
+    font-weight: 600 !important;
+    font-size: 0 !important;
+    background: transparent !important;
+}
+
+.dropdown__link:hover { background-color: rgba(113, 79, 61, 0.08) !important; }
+
+.dropdown__link::before {
+    content: '';
+    display: block;
+    width: 18px;
+    height: 18px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    flex-shrink: 0;
+}
+
+.dropdown__link:not([href*="/zh/"])::before { background-image: url('/img/language/en.png') !important; }
+.dropdown__link:not([href*="/zh/"])::after { content: 'English' !important; font-size: 0.9rem !important; }
+
+.dropdown__link[href*="/zh/"]::before { background-image: url('/img/language/zh.png') !important; }
+.dropdown__link[href*="/zh/"]::after { content: '简体中文' !important; font-size: 0.9rem !important; }
+
+
 @media (max-width: 996px) {
-    /* 强制显示文档页右上角的项目组 */
     html:not([data-site-render='home']) .navbar__items--right {
         display: flex !important;
         align-items: center;
         padding-right: 0.5rem;
     }
 
-    /* 强制在移动端文档页显示语言下拉框 (Docusaurus默认会隐藏它) */
     html:not([data-site-render='home']) .navbar__item.dropdown {
-        display: block !important;
-        margin-right: 12px;
+        display: flex !important;
+        margin-right: 4px;
     }
 
-    /* 隐藏语言下拉框的文字，仅保留图标，节省空间 */
     html:not([data-site-render='home']) .navbar__item.dropdown > .navbar__link {
-        font-size: 0;
-        padding: 0;
-    }
-
-    /* 缩小移动端文档页的图标间距和尺寸 */
-    .navbar .header-discord-link,
-    .navbar .header-unity-forum-link,
-    .navbar .header-mail-link {
-        margin-right: 12px !important;
-        width: 22px;
-        height: 22px;
-    }
-
-    .navbar .header-mail-link {
-        margin-right: 0px !important;
+        font-size: 0.8rem !important;
+        padding: 0 4px !important;
+        gap: 4px !important;
     }
 
     .navbar__title {
-        max-width: 80px; /* 进一步收缩标题为右侧留空间 */
+        max-width: 70px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
+
+    @media (max-width: 360px) {
+        html:not([data-site-render='home']) .navbar__item.dropdown > .navbar__link { font-size: 0 !important; }
+    }
 }
-
-/* --- 语言切换下拉框样式支持 (全局) --- */
-.navbar__item.dropdown > .navbar__link::before {
-    content: '';
-    display: inline-block;
-    width: 18px;
-    height: 18px;
-    vertical-align: middle;
-    margin-right: 8px;
-    background-size: contain;
-    background-repeat: no-repeat;
-}
-
-html[lang='en'] .navbar__item.dropdown > .navbar__link::before { background-image: url('/img/language/en.png'); }
-html[lang='zh'] .navbar__item.dropdown > .navbar__link::before { background-image: url('/img/language/zh.png'); }
-
-/* 修正下拉菜单在移动端的弹出定位 */
-.dropdown__menu {
-    min-width: 140px !important;
-    padding: 0.5rem 0 !important;
-    border-radius: 8px !important;
-    overflow: hidden;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
-}
-
-.dropdown__link {
-    display: flex !important;
-    align-items: center !important;
-    padding: 0.6rem 1rem !important;
-}
-
-.dropdown__link::before {
-    content: '';
-    display: inline-block;
-    width: 18px;
-    height: 18px;
-    margin-right: 10px;
-    background-size: contain;
-    background-repeat: no-repeat;
-}
-
-.dropdown__link[href$="/"]:not([href*="/zh/"])::before,
-.dropdown__link[href$="/en/"]::before { background-image: url('/img/language/en.png'); }
-.dropdown__link[href*="/zh/"]::before { background-image: url('/img/language/zh.png'); }
-
-.dropdown__link[href$="/"]:not([href*="/zh/"]),
-.dropdown__link[href$="/en/"] { font-size: 0; }
-.dropdown__link[href$="/"]:not([href*="/zh/"])::after,
-.dropdown__link[href$="/en/"]::after { content: 'English'; font-size: 0.9rem; }
-
-.dropdown__link[href*="/zh/"] { font-size: 0; }
-.dropdown__link[href*="/zh/"]::after { content: '简体中文'; font-size: 0.9rem; }

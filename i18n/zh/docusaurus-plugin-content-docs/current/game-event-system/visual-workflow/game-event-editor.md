@@ -1,5 +1,5 @@
 ﻿---
-sidebar_label: 'Edit Game Event'
+sidebar_label: '编辑游戏事件'
 sidebar_position: 3
 ---
 
@@ -9,154 +9,153 @@ import TabItem from '@theme/TabItem';
 
 
 
-# Game Event Editor
+# 游戏事件编辑器
 
-Your primary workspace for organizing, refining, and maintaining your event library. While the **[Game Event Creator](./game-event-creator.md)** is for birthing new events, the **Editor** is where you manage their entire lifecycle.
+您组织、优化和维护事件库的主要工作区。虽然 **[游戏事件创建器](./game-event-creator.md)** 用于创建新事件，但 **编辑器** 是您管理其整个生命周期的地方。
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-editor/editor-window-full.png)
 
 
 ---
 
-## 🚀 Opening the Editor
+## 🚀 打开编辑器
 
-Access the editor through the following method:
+通过以下方法访问编辑器：
 
-**From the System Dashboard:**
-
+**从系统仪表板：**
 ```
-Game Event System Window → Click "Game Event Editor"
+游戏事件系统窗口 → 点击"Game Event Editor"
 ```
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-editor/hub-core-tools.png)
 
 ---
 
-## 🎛️ Configuration Bar
+## 🎛️ 配置栏
 
-Located at the top of the window, this bar determines the scope of your work.
+位于窗口顶部，此栏决定您的工作范围。
 
-<img src="/img/game-event-system/visual-workflow/game-event-editor/editor-config-bar.png" alt="Configuration Bar" className="img-inline" />
+![alt text](/img/game-event-system/visual-workflow/game-event-editor/editor-config-bar.png)
 
-### Manager Selection
+### 管理器选择
 
-**Purpose**: Connect the editor to the active `GameEventManager` in your scene.
+**目的**：将编辑器连接到场景中活动的 `GameEventManager`。
 
-**Behavior**:
+**行为**：
 
-- ✅ Auto-detects manager on startup
-- 🔄 Updates when switching scenes
-- 📌 Pin button opens Manager Inspector
+- ✅ 启动时自动检测管理器
+- 🔄 切换场景时更新
+- 📌 固定按钮打开管理器Inspector
 
-:::tip Multi-Scene Workflow
-If you have multiple scenes open, the editor will target the manager in the **active scene**. Switch scenes to update the connection automatically.
+:::tip 多场景工作流
+如果您打开了多个场景，编辑器将以 **活动场景** 中的管理器为目标。切换场景以自动更新连接。
 :::
 
 ---
 
-### Database Selector
+### 数据库选择器
 
-Switch between different event databases to focus your work.
+在不同的事件数据库之间切换以聚焦您的工作。
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-editor/editor-database-switch.png)
 
-:::tip Only Active Databases Appear
-The dropdown only shows databases marked as **Active** in the **[Game Event Manager](./game-event-manager.md)**. If your database is missing, check its active state in the Manager Inspector.
+:::tip 仅显示活动数据库
+下拉菜单仅显示在 **[游戏事件管理器](./game-event-manager.md)** 中标记为 **活动** 的数据库。如果您的数据库缺失，请在管理器Inspector中检查其活动状态。
 :::
 
 ---
 
-## 🛠️ Toolbar & Display Modes
+## 🛠️ 工具栏与显示模式
 
-Powerful filtering and view controls for managing large event libraries.
+用于管理大型事件库的强大过滤和视图控制。
 
-<img src="/img/game-event-system/visual-workflow/game-event-editor/editor-toolbar.png" alt="Editor Toolbar" />
+![alt text](/img/game-event-system/visual-workflow/game-event-editor/editor-toolbar.png)
 
-### View Modes
+### 视图模式
 
-Toggle between two display strategies:
+在两种显示策略之间切换：
 
 
-| Mode          | Icon      | Best For                           | Behavior                                |
+| 模式 | 图标 | 最适合 | 行为 |
 | ------------- | --------- | ---------------------------------- | --------------------------------------- |
-| **Page Mode** | `1 / 5`   | Large databases (100+ events)      | Shows events in pages (10-100 per page) |
-| **Full Mode** | Grid icon | Small databases or bulk operations | Single scrollable list with all events  |
+| **分页模式** | `1 / 5` | 大型数据库（100+事件） | 分页显示事件（每页10-100个） |
+| **完整模式** | 网格图标 | 小型数据库或批量操作 | 包含所有事件的单个可滚动列表 |
 
-**Switching Modes**:
-- Click the grid icon in the toolbar
-- Your preference is saved between sessions
+**切换模式**：
+- 点击工具栏中的网格图标
+- 您的偏好在会话之间保存
 
-**Page Size Options**: 10, 20, 50, or 100 events per page (click the number to change)
+**页面大小选项**：每页10、20、50或100个事件（点击数字更改）
 
 ---
 
-### **🧩** Smart Filtering System
+### **🧩** 智能过滤系统
 
-Three layers of filtering to find exactly what you need:
+三层过滤以精确找到您需要的内容：
 
 <Tabs>
-<TabItem value="category" label="1️⃣ Category Filter" default>
+<TabItem value="category" label="1️⃣ 类别过滤器" default>
 
-**Category matching** 
+**类别匹配** 
 
-Show events from a specific category.
+显示特定类别的事件。
 
-**Usage**
+**用法**
 
-- Category: All ➔ 🟦 Shows **All** events
-- Category: Combat ➔ 🟥 Shows only **Combat** events (Damage, Death, Spawn)
-- Category: UI ➔ 🟩 Shows only **UI** events (Click, Hover, Open)
+- 类别：All ➔ 🟦 显示 **所有** 事件
+- 类别：Combat ➔ 🟥 仅显示 **Combat** 事件（Damage、Death、Spawn）
+- 类别：UI ➔ 🟩 仅显示 **UI** 事件（Click、Hover、Open）
 
-:::tip **Source**
+:::tip **来源**
 
-Categories are defined in the event's **Category** field (editable in the list).
-
-:::
-
-</TabItem>
-
-<TabItem value="type" label="2️⃣ Type Filter">
-
-**Signature matching**
-
-Filter events by their underlying C# parameter types.
-
-**Usage**
-
-- Type: All ➔ ⚪ Shows **All** signature types
-- Type: void ➔ 🔘 Shows only **Parameterless** events
-- Type: Int32 ➔ 🔢 Shows only `GameEvent<int>`
-- Type: GameObject ➔ 📦 Shows only **GameObject** reference events
-
-:::tip **Available Types**
-
-The dropdown is **auto-populated** based on the events currently present in your database.
+类别在事件的 **Category** 字段中定义（可在列表中编辑）。
 
 :::
 
 </TabItem>
 
-<TabItem value="search" label="3️⃣ Search Bar">
+<TabItem value="type" label="2️⃣ 类型过滤器">
 
-**Fuzzy search**
+**签名匹配**
 
-High-performance, real-time filtering by event name.
+按底层C#参数类型过滤事件。
 
-**Usage**
+**用法**
 
-- ⌨️ **Search:** damage ➔ 🔍 Displays all events **matching** the substring (case-insensitive)
+- 类型：All ➔ ⚪ 显示 **所有** 签名类型
+- 类型：void ➔ 🔘 仅显示 **无参数** 事件
+- 类型：Int32 ➔ 🔢 仅显示 `GameEvent<int>`
+- 类型：GameObject ➔ 📦 仅显示 **GameObject** 引用事件
+
+:::tip **可用类型**
+
+下拉菜单根据数据库中当前存在的事件 **自动填充**。
+
+:::
+
+</TabItem>
+
+<TabItem value="search" label="3️⃣ 搜索栏">
+
+**模糊搜索**
+
+按事件名称进行高性能、实时过滤。
+
+**用法**
+
+- ⌨️ **搜索：** damage ➔ 🔍 显示所有 **匹配** 子字符串的事件（不区分大小写）
   - ⚡ `OnDamageTaken`
   - ⚡ `OnDamageDealt`
   - ⚡ `ApplyDamageMultiplier`
 
-**Features**
+**功能**
 
-- 🚀 **Instant Filtering** — Results update immediately as you type.
-- 🔡 **Case-Insensitive** — DAMAGE, Damage, and damage yield the same results.
-- 🧩 **Partial Match** — Matches any part of the name (Prefix, Suffix, or Middle).
+- 🚀 **即时过滤** — 结果在您输入时立即更新。
+- 🔡 **不区分大小写** — DAMAGE、Damage和damage产生相同的结果。
+- 🧩 **部分匹配** — 匹配名称的任何部分（前缀、后缀或中间）。
 
-:::tip **Clear Search**
-Click the **×** button in the bar or press Esc to reset the view.
+:::tip **清除搜索**
+点击栏中的 **×** 按钮或按Esc键重置视图。
 :::
 
 </TabItem>
@@ -165,72 +164,72 @@ Click the **×** button in the bar or press Esc to reset the view.
 
 ---
 
-### 🔀 Multi-Layer Filtering (Combination)
+### 🔀 多层过滤（组合）
 
-All three filters work in tandem using **AND Logic** to help you drill down into the most specific results.
+所有三个过滤器使用 **AND逻辑** 协同工作，帮助您深入到最具体的结果。
 
-**Example Scenario**
-To find a specific health-related combat event, you might set:
+**示例场景**
+要查找特定的与生命值相关的战斗事件，您可以设置：
 
-> 🟦 **Category:** Combat ➕ 🔢 **Type:** Int32 ➕ ⌨️ **Search:** damage
+> 🟦 **类别：** Combat ➕ 🔢 **类型：** Int32 ➕ ⌨️ **搜索：** damage
 
-**🎯 Result:**
+**🎯 结果：**
 
-> 🔍 Displays only **Combat**-category, **Integer**-type events with "**damage**" in the name (e.g., OnDamageTaken).
+> 🔍 仅显示名称中包含"**damage**"的 **Combat** 类别、**Integer** 类型事件（例如OnDamageTaken）。
 
-### 🧹 Quick Reset
+### 🧹 快速重置
 
-Need to start over? Returning to the full list is instant.
+需要重新开始？返回完整列表是即时的。
 
-- **Action:** Set Category & Type to **All** + **Clear** the Search Bar.
-- **Shortcut:** Pressing the × button in the search bar and selecting "All" from the dropdowns will immediately restore the full view.
+- **操作：** 将类别和类型设置为 **All** + **清除** 搜索栏。
+- **快捷方式：** 按下搜索栏中的×按钮并从下拉菜单中选择"All"将立即恢复完整视图。
 
-:::tip **Pro Tip: Efficiency**
-The system remembers your filter settings even when you switch between different database tabs, ensuring a seamless workflow.
+:::tip **专业提示：效率**
+即使在不同的数据库选项卡之间切换，系统也会记住您的过滤器设置，确保无缝的工作流程。
 :::
 
 ---
 
-## 📝 The Event List
+## 📝 事件列表
 
-Each row represents one event asset with editable properties and action buttons.
+每行代表一个事件资产，具有可编辑的属性和操作按钮。
 
-<img src="/img/game-event-system/visual-workflow/game-event-editor/editor-event-row.png" alt="Event List Row" />
+![alt text](/img/game-event-system/visual-workflow/game-event-editor/editor-event-row.png)
 
-### Editable Fields
+### 可编辑字段
 
 <Tabs>
-<TabItem value="category" label="1️⃣ Category Field" default>
+<TabItem value="category" label="1️⃣ 类别字段" default>
 
-#### Category Field
+#### 类别字段
 
-Organize events into logical groups.
+将事件组织成逻辑组。
 
-**Usage**:
+**用法**：
 
-- Click to edit
-- Press Enter or click away to save
-- Changes apply immediately
+- 点击编辑
+- 按Enter或点击其他位置保存
+- 更改立即应用
 
 </TabItem>
 
-<TabItem value="name" label="2️⃣ Name Field">
+<TabItem value="name" label="2️⃣ 名称字段">
 
-#### Name Field
+#### 名称字段
 
-Rename the event asset.
+重命名事件资产。
 
-**Key Feature**: 🔒 **GUID-Protected Renaming**
+**关键功能**：🔒 **GUID保护的重命名**
 
-**File Renaming**:
-When you rename an event, the `.asset` file is automatically renamed to match:
+**文件重命名**：
+当您重命名事件时，`.asset` 文件会自动重命名以匹配：
 ```
-Before: OnPlayerDied.asset
-After:  OnCharacterDeath.asset
+之前：OnPlayerDied.asset
+之后：OnCharacterDeath.asset
 ```
 
-:::tip Safe Renaming
-Thanks to Unity's GUID system, you can rename events fearlessly. Nothing breaks! This is one of the system's most powerful features.But it is best not to define events with the same name in the same database, as this habit may introduce unnecessary confusion in the future
+:::tip 安全重命名
+由于Unity的GUID系统，您可以无畏地重命名事件。什么都不会破坏！这是系统最强大的功能之一。但最好不要在同一个数据库中定义同名事件，因为这种习惯可能会在未来引入不必要的混淆
 :::
 
 </TabItem>
@@ -239,284 +238,284 @@ Thanks to Unity's GUID system, you can rename events fearlessly. Nothing breaks!
 
 ---
 
-### Action Buttons
+### 操作按钮
 
-Four buttons per row provide quick access to related tools:
+每行四个按钮提供快速访问相关工具：
 
-#### 📄 Reference Field (Read-Only)
+#### 📄 引用字段（只读）
 
-Shows the actual event asset with its full type signature.
+显示实际的事件资产及其完整类型签名。
 
-**Actions**:
+**操作**：
 
-- **Left-Click**: Select and ping asset in Project window
-- **Right-Click**: Context menu with options:
-  - Copy GUID
-  - Copy Name
-  - Ping in Project
-  - Open Asset
+- **左键点击**：在项目窗口中选择并定位资产
+- **右键点击**：上下文菜单，带选项：
+  - 复制GUID
+  - 复制名称
+  - 在项目中定位
+  - 打开资产
 
 ---
 
-#### 🎯 Behavior Button (Color-Coded)
+#### 🎯 行为按钮（颜色编码）
 
-Configure advanced event behaviors (actions, conditions, delays, repeating, looping and persistent).
+配置高级事件行为（动作、条件、延迟、重复、循环和持久化）。
 
-**Button States**:
+**按钮状态**：
 
-| Color    | Icon | Meaning                | Tooltip                |
+| 颜色 | 图标 | 含义 | 提示 |
 | -------- | ---- | ---------------------- | ---------------------- |
-| 🟢 Green  | ✓    | Configured (Inspector) | Has Inspector bindings |
-| 🔵 Blue   | ▶    | Configured (Runtime)   | Has runtime listeners  |
-| 🟡 Orange | ⚠    | Not configured         | No bindings yet        |
+| 🟢 绿色 | ✓ | 已配置（Inspector） | 有Inspector绑定 |
+| 🔵 蓝色 | ▶ | 已配置（运行时） | 有运行时监听器 |
+| 🟡 橙色 | ⚠ | 未配置 | 尚无绑定 |
 
 :::tip 
 
-Open **[Game Event Behavior Window](./game-event-behavior.md)** to learn about the complete event behavior configuration.
+打开 **[游戏事件行为窗口](./game-event-behavior.md)** 以了解完整的事件行为配置。
 
 :::
 
 ---
 
-#### 🔍 Reference Finder
+#### 🔍 引用查找器
 
-Discover where this event is used in the current scene.
+发现此事件在当前场景中的使用位置。
 
-**Use Case**: Before deleting an event, check if anything is using it.
+**使用场景**：在删除事件之前，检查是否有任何内容正在使用它。
 
 :::tip 
 
-You can jump to **[Game Event Reference Window](./game-event-finder.md)** to learn more about its powerful scene reference lookup capabilities.
+您可以跳转到 **[游戏事件引用窗口](./game-event-finder.md)** 以了解更多关于其强大的场景引用查找功能。
 
 :::
 
 ---
 
-#### 🗑️ Delete Button
+#### 🗑️ 删除按钮
 
-Remove the event asset from the database.
+从数据库中删除事件资产。
 
-**Behavior**:
-1. Click trash icon
-2. Confirmation dialog appears
-3. Shows event details (name, type, category)
-4. Confirm → Event deleted permanently
+**行为**：
+1. 点击垃圾桶图标
+2. 出现确认对话框
+3. 显示事件详情（名称、类型、类别）
+4. 确认 → 事件永久删除
 
-**What Gets Deleted**:
-- ✅ Event asset (`.asset` file)
-- ✅ Sub-asset entry in database
-- ✅ Any associated bindings in Manager
+**删除的内容**：
+- ✅ 事件资产（`.asset` 文件）
+- ✅ 数据库中的子资产条目
+- ✅ 管理器中的任何关联绑定
 
-**What Doesn't Break**:
-- ❌ Scene won't break (references become `Missing`)
-- ❌ Scripts won't error (null checks should handle it)
+**不会破坏的内容**：
+- ❌ 场景不会破坏（引用变为 `Missing`）
+- ❌ 脚本不会出错（空检查应该处理它）
 
-:::danger Cannot Be Undone
-Deletion is permanent. Use the **Reference Finder** first to check usage.
+:::danger 无法撤销
+删除是永久性的。首先使用 **引用查找器** 检查使用情况。
 :::
 
 ---
 
-## ⚡ Global Actions (Top-Right Toolbar)
+## ⚡ 全局操作（右上角工具栏）
 
-Quick access to related workflows:
+快速访问相关工作流：
 
-### 🕸️ Flow Graph
+### 🕸️ 流程图
 
-Build visual event chains and orchestration logic.
+构建可视化事件链和编排逻辑。
 
-**Button**: "Flow Graph"
+**按钮**："Flow Graph"
 
-**What It Opens**: **[Game Event Flow Editor](../flow-graph/game-event-node-editor.md)**
+**打开的内容**：**[游戏事件流程编辑器](../flow-graph/game-event-node-editor.md)**
 
-**When to Use**:
-- You need Event A to trigger Events B, C, and D
-- You want sequential execution with delays
-- You're building complex conditional branching
-
----
-
-### ➕ New Event
-
-Batch-create multiple events at once.
-
-**Button**: "New Event"
-
-**What It Opens**: **[Game Event Creator](./game-event-creator.md)**
-
-**When to Use**:
-
-- Creating many events of the same or different type
-- Generating events from custom types
-- Bulk event creation workflow
+**何时使用**：
+- 您需要事件A触发事件B、C和D
+- 您想要带延迟的顺序执行
+- 您正在构建复杂的条件分支
 
 ---
 
-### 🗑️ Delete Events (Batch Mode)
+### ➕ 新事件
 
-For efficient maintenance of large databases, the Editor supports a dedicated batch deletion mode.
+一次批量创建多个事件。
 
-#### **Entering Batch Mode**
+**按钮**："New Event"
 
-Click the **Delete Event** button on the far right of the standard toolbar (see image below) to toggle the selection interface.
+**打开的内容**：**[游戏事件创建器](./game-event-creator.md)**
+
+**何时使用**：
+
+- 创建许多相同或不同类型的事件
+- 从自定义类型生成事件
+- 批量事件创建工作流
+
+---
+
+### 🗑️ 删除事件（批量模式）
+
+为了高效维护大型数据库，编辑器支持专用的批量删除模式。
+
+#### **进入批量模式**
+
+点击标准工具栏最右侧的 **Delete Event** 按钮（见下图）以切换选择界面。
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-editor/editor-batch-mode.png)
 
-#### **Selection Controls**
+#### **选择控制**
 
-Once clicked, the toolbar transforms to provide batch operations, and selection checkboxes will appear next to each event row:
+点击后，工具栏会转换为提供批量操作，并且每个事件行旁边会出现选择复选框：
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-editor/editor-batch-delete.png)
 
-| Action         | Description                                                  |
+| 操作 | 描述 |
 | -------------- | ------------------------------------------------------------ |
-| **Select All** | Checks every event currently visible in the list (respects active filters). |
-| **Delete**     | Opens a final confirmation dialog listing all selected events for permanent removal. |
-| **Cancel**     | Exits batch mode and clears all current selections without making changes. |
+| **全选** | 勾选列表中当前可见的每个事件（尊重活动过滤器）。 |
+| **删除** | 打开最终确认对话框，列出所有选定的事件以进行永久删除。 |
+| **取消** | 退出批量模式并清除所有当前选择而不做更改。 |
 
-**Workflow Steps:**
+**工作流步骤：**
 
-1. Click **Delete Event** to enter selection mode.
-2. Manually check specific events or use **Select All**.
-3. Click **Delete** to process the removal, or **Cancel** to return to the standard view.
+1. 点击 **Delete Event** 进入选择模式。
+2. 手动勾选特定事件或使用 **全选**。
+3. 点击 **删除** 处理删除，或 **取消** 返回标准视图。
 
-:::warning Bulk Deletion Safety
+:::warning 批量删除安全性
 
-- **Irreversible:** Bulk deletion cannot be undone.
-- **Filter Sensitivity:** "Select All" only affects events that meet your current filter criteria (Category/Type/Search).
-- **Reordering Disabled:** While in Batch Mode, the drag-and-drop reordering handles (☰) are hidden to prevent accidental moves.
-
-:::
-
----
-
-## 🎨 Row Reordering (Drag & Drop)
-
-Change event order by dragging rows:
-
-**How to Reorder**:
-1. Hover over the handle icon (☰) on the left of any row
-2. Click and drag vertically
-3. Release to drop in new position
-
-**When Available**:
-
-- ✅ No active filters (Category: All, Type: All, Search: empty)
-- ✅ Not in batch selection mode
-
-**When Disabled**:
-
-- ❌ Any filter active (would break visual continuity)
-- ❌ Batch selection mode enabled
-
-**Why Order Matters**:
-Event order affects:
-
-- Display order in dropdowns
-- Alphabetical grouping in some tools
-- Personal organization preference
-
-:::info Order is Database-Specific
-Each database has its own event order. Switching databases preserves their individual ordering.
-:::
-
----
-
-## 📊 Statistics Badge
-
-Located in the header, shows real-time event count:
-
-**Display**: `150 Events` (example)
-
-**What It Counts**:
-- Total events in **currently selected database**
-- Updates immediately when creating/deleting events
-- Reflects filtered count when filters are active
-
----
-
-## ❓ Troubleshooting
-
-This section covers common issues and their solutions. If you encounter a problem not listed here, please check the console for error logs.
-
----
-
-### 1. Events Not Appearing
-**Problem**: You created events, but they are not visible in the event list.
-
-#### **Check Active Database**
-1. Look at the **Database** dropdown menu.
-2. Confirm if the correct database is selected.
-3. Try **switching databases** to refresh the list.
-
-#### **Check Filters**
-*   Set **Category** -> `All`
-*   Set **Type** -> `All`
-*   **Clear** the search bar.
-*   Check if events appear after resetting filters.
-
-#### **Check Manager Status**
-1. Click the **Manager** field -> **Ping Inspector**.
-2. Verify the database is **Active** (green badge).
-3. If it shows **Inactive**, toggle the switch to **Active**.
-
-:::info dynamic compilation
-
-If none of the above checks are abnormal, try modifying any code to trigger a Unity compilation, which will update the database status. Check again in the Editor window to see if the created event has occurred.
-
-:::
-
-:::warning Unknown exception
-
-If you still cannot create it, please contact me
+- **不可逆：** 批量删除无法撤销。
+- **过滤器敏感性：** "全选"仅影响满足当前过滤条件的事件（类别/类型/搜索）。
+- **禁用重新排序：** 在批量模式下，拖放重新排序句柄（☰）被隐藏以防止意外移动。
 
 :::
 
 ---
 
-### 2. Can't Edit Event Properties
-**Problem**: The **Category** or **Name** fields appear grayed out and cannot be edited.
+## 🎨 行重新排序（拖放）
 
-**Potential Cause**: The event might be part of a **locked asset**, or the database file is set to **read-only**.
+通过拖动行来更改事件顺序：
 
-**Solution**:
-*   Verify if the database file in your project is **writable** (not read-only in OS).
-*   Ensure you are not currently in **Prefab Isolation Mode**.
-*   Check if the event asset is **locked/checked out** in your version control system (e.g., Perforce or Git LFS).
+**如何重新排序**：
+1. 将鼠标悬停在任何行左侧的句柄图标（☰）上
+2. 点击并垂直拖动
+3. 释放以放置在新位置
+
+**何时可用**：
+
+- ✅ 无活动过滤器（类别：All，类型：All，搜索：空）
+- ✅ 不在批量选择模式
+
+**何时禁用**：
+
+- ❌ 任何过滤器处于活动状态（会破坏视觉连续性）
+- ❌ 批量选择模式已启用
+
+**为什么顺序很重要**：
+事件顺序影响：
+
+- 下拉菜单中的显示顺序
+- 某些工具中的字母分组
+- 个人组织偏好
+
+:::info 顺序是数据库特定的
+每个数据库都有自己的事件顺序。切换数据库会保留其各自的排序。
+:::
 
 ---
 
-### 3. Reordering Not Working
-**Problem**: Dragging rows to reorder events is not functioning.
+## 📊 统计徽章
 
-**Checklist**:
-To enable drag & drop reordering, ensure the following conditions are met:
+位于标题中，显示实时事件计数：
 
-- Are all filters (Category/Type) set to **"All"**?
-- Is the search bar **empty**?
-- Are you **not** in batch selection mode?
+**显示**：`150 Events`（示例）
+
+**计数内容**：
+- **当前选定数据库** 中的总事件数
+- 创建/删除事件时立即更新
+- 过滤器处于活动状态时反映过滤后的计数
+
+---
+
+## ❓ 故障排除
+
+本节涵盖常见问题及其解决方案。如果您遇到此处未列出的问题，请检查控制台的错误日志。
+
+---
+
+### 1. 事件未出现
+**问题**：您创建了事件，但它们在事件列表中不可见。
+
+#### **检查活动数据库**
+1. 查看 **Database** 下拉菜单。
+2. 确认是否选择了正确的数据库。
+3. 尝试 **切换数据库** 以刷新列表。
+
+#### **检查过滤器**
+*   将 **Category** 设置为 `All`
+*   将 **Type** 设置为 `All`
+*   **清除** 搜索栏。
+*   重置过滤器后检查事件是否出现。
+
+#### **检查管理器状态**
+1. 点击 **Manager** 字段 -> **Ping Inspector**。
+2. 验证数据库是 **活动** 的（绿色徽章）。
+3. 如果显示 **非活动**，将开关切换到 **活动**。
+
+:::info 动态编译
+
+如果以上检查均无异常，尝试修改任何代码以触发Unity编译，这将更新数据库状态。再次在编辑器窗口中检查创建的事件是否出现。
+
+:::
+
+:::warning 未知异常
+
+如果仍然无法创建，请联系我
+
+:::
+
+---
+
+### 2. 无法编辑事件属性
+**问题**：**Category** 或 **Name** 字段显示为灰色且无法编辑。
+
+**潜在原因**：事件可能是 **锁定资产** 的一部分，或者数据库文件设置为 **只读**。
+
+**解决方案**：
+*   验证项目中的数据库文件是否 **可写**（在操作系统中不是只读）。
+*   确保您当前不在 **预制件隔离模式**。
+*   检查事件资产是否在版本控制系统中 **锁定/签出**（例如Perforce或Git LFS）。
+
+---
+
+### 3. 重新排序不起作用
+**问题**：拖动行以重新排序事件不起作用。
+
+**检查清单**：
+要启用拖放重新排序，请确保满足以下条件：
+
+- 所有过滤器（类别/类型）是否设置为 **"All"**？
+- 搜索栏是否 **为空**？
+- 您是否 **不在** 批量选择模式？
 
 :::warning
 
-Reordering is only available when viewing the full, unfiltered list.
+重新排序仅在查看完整的、未过滤的列表时可用。
 
 :::
 
 ---
 
-### 4. Behavior Button Not Opening
-**Problem**: Clicking the behavior button does not trigger any action.
+### 4. 行为按钮未打开
+**问题**：点击行为按钮不会触发任何操作。
 
-#### **Check Manager Assignment**
-If the **Manager** field shows `None`:
-1. The **Auto-detect** system should normally find it.
-2. If it fails, **manually drag** the manager object from your scene into the field.
+#### **检查管理器分配**
+如果 **Manager** 字段显示 `None`：
+1. **自动检测** 系统通常应该找到它。
+2. 如果失败，从场景中 **手动拖动** 管理器对象到该字段。
 
-#### **Check Console for Errors**
-*   Open the **Console** window (`Ctrl+Shift+C`).
-*   Look for **Red Errors** (exceptions).
-*   Fix any **compilation issues** first, as script errors can prevent UI events from firing.
+#### **检查控制台错误**
+*   打开 **Console** 窗口（`Ctrl+Shift+C`）。
+*   查找 **红色错误**（异常）。
+*   首先修复任何 **编译问题**，因为脚本错误可能会阻止UI事件触发。
 
-:::tip Workflow Recommendation
-Keep this window docked alongside your Inspector. When you select an event in the list, the Inspector shows its full asset details—perfect for quick property checks without leaving your workspace.
+:::tip 工作流推荐
+将此窗口停靠在Inspector旁边。当您在列表中选择事件时，Inspector会显示其完整的资产详情——非常适合快速属性检查而无需离开工作区。
 :::

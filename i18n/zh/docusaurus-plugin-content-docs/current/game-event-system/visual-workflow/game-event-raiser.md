@@ -1,29 +1,28 @@
 ﻿---
-sidebar_label: 'Raise Game Event'
+sidebar_label: '触发游戏事件'
 sidebar_position: 6
 ---
 
-# Raising Game Event
+# 触发游戏事件
 
-After creating and configuring events, the final step is **triggering them in your game logic**. This page shows how Game Events work and how to raise them in your scripts.
+创建和配置事件后，最后一步是 **在游戏逻辑中触发它们**。本页展示游戏事件的工作原理以及如何在脚本中触发它们。
 
-:::tip Complete the Visual Workflow
+:::tip 完成可视化工作流
 
-1. ✅ Create events → **[Game Event Creator](./game-event-creator.md)**
-2. ✅ Configure actions → **[Game Event Behavior](./game-event-behavior.md)**
-3. ✅ **Raise events** ← You are here
+1. ✅ 创建事件 → **[游戏事件创建器](./game-event-creator.md)**
+2. ✅ 配置动作 → **[游戏事件行为](./game-event-behavior.md)**
+3. ✅ **触发事件** ← 您在这里
    :::
 
 ---
 
-## 🎯 How Game Events Work
+## 🎯 游戏事件的工作原理
 
-Game Events decouple **event raising** from **action execution**:
+游戏事件将 **事件触发** 与 **动作执行** 解耦：
 
-**Traditional Approach**:
-
+**传统方法**：
 ```csharp
-// ❌ Tightly coupled - door logic knows about sound, animation, etc.
+// ❌ 紧密耦合 - 门的逻辑知道声音、动画等
 public class Door : MonoBehaviour
 {
     public AudioSource audioSource;
@@ -35,15 +34,14 @@ public class Door : MonoBehaviour
         audioSource.Play();
         animator.SetTrigger("Open");
         uiManager.ShowNotification("Door opened");
-        // Logic scattered across multiple dependencies
+        // 逻辑分散在多个依赖项中
     }
 }
 ```
 
-**Game Event Approach**:
-
+**游戏事件方法**：
 ```csharp
-// ✅ Decoupled - door only knows "something happened"
+// ✅ 解耦 - 门只知道"发生了某事"
 public class Door : MonoBehaviour
 {
     [GameEventDropdown]
@@ -51,26 +49,25 @@ public class Door : MonoBehaviour
     
     public void Open()
     {
-        onDoorOpened.Raise();  // Actions configured in Inspector
+        onDoorOpened.Raise();  // 动作在Inspector中配置
     }
 }
 ```
 
-**Key Difference**: Actions (sound, animation, UI) are configured **visually in Event Behavior**, not hardcoded in scripts.
+**关键区别**：动作（声音、动画、UI）在 **事件行为中可视化配置**，而不是在脚本中硬编码。
 
 ---
 
-## 📝 Basic Usage: Raising Events
+## 📝 基本用法：触发事件
 
-### Step 1: Reference the Event in Your Script
-
+### 步骤1：在脚本中引用事件
 ```csharp
 using TinyGiants.GameEventSystem.Runtime;
 using UnityEngine;
 
 public class DoorController : MonoBehaviour
 {
-    [GameEventDropdown]  // Smart Inspector picker
+    [GameEventDropdown]  // 智能Inspector选择器
     public GameEvent onDoorOpened;
     
     [GameEventDropdown]
@@ -78,13 +75,13 @@ public class DoorController : MonoBehaviour
     
     public void OpenDoor()
     {
-        // Your door logic here
-        onDoorOpened.Raise();  // Trigger the event
+        // 您的门逻辑在这里
+        onDoorOpened.Raise();  // 触发事件
     }
     
     public void CloseDoor()
     {
-        // Your door logic here
+        // 您的门逻辑在这里
         onDoorClosed.Raise();
     }
 }
@@ -92,62 +89,59 @@ public class DoorController : MonoBehaviour
 
 ---
 
-### Step 2: Assign Event in Inspector
+### 步骤2：在Inspector中分配事件
 
-The **[GameEventDropdown]** attribute provides a **type-safe searchable dropdown**:
+**[GameEventDropdown]** 属性提供 **类型安全的可搜索下拉菜单**：
 
 ![GameEvent Dropdown](/img/game-event-system/visual-workflow/game-event-raiser/raiser-dropdown.png)
 
-**Features**:
+**功能**：
 
-- 🔍 **Fuzzy Search**: Type to filter events by name
-- 📁 **Categorized**: Events grouped by database and category
-- 🔒 **Type Safety**: Only shows compatible event types
-- ⚡ **Quick Access**: No manual asset dragging needed
+- 🔍 **模糊搜索**：输入以按名称过滤事件
+- 📁 **分类**：事件按数据库和类别分组
+- 🔒 **类型安全**：仅显示兼容的事件类型
+- ⚡ **快速访问**：无需手动拖动资产
 
 ---
 
-### Alternative: Without [GameEventDropdown]
+### 替代方案：不使用[GameEventDropdown]
 
-You can also use a standard public field:
-
+您也可以使用标准公共字段：
 ```csharp
-public GameEvent onDoorOpened;  // Standard ScriptableObject field
+public GameEvent onDoorOpened;  // 标准ScriptableObject字段
 ```
 
-**Inspector View**:
+**Inspector视图**：
 
 ![Standard Object Field](/img/game-event-system/visual-workflow/game-event-raiser/raiser-so.png)
 
-**Workflow**:
+**工作流**：
 
-1. Locate event asset in Project window (Event Database)
-2. Drag & drop into Inspector field
+1. 在项目窗口中找到事件资产（事件数据库）
+2. 拖放到Inspector字段
 
-**Recommendation**: Use **[GameEventDropdown]** for better workflow—it's faster and type-safe.
+**建议**：使用 **[GameEventDropdown]** 以获得更好的工作流——它更快且类型安全。
 
 ---
 
-## 🎨 Typed Events (With Arguments)
+## 🎨 类型化事件（带参数）
 
-Events can carry data to actions.
+事件可以向动作携带数据。
 
-### Void Events (No Data)
-
+### 空事件（无数据）
 ```csharp
 [GameEventDropdown]
 public GameEvent onGameStart;
 
 void Start()
 {
-    onGameStart.Raise();  // No arguments
+    onGameStart.Raise();  // 无参数
 }
 ```
 
 ---
 
-### Single Argument Events
-
+### 单参数事件
 ```csharp
 [GameEventDropdown]
 public GameEvent<float> onHealthChanged;
@@ -157,100 +151,95 @@ private float health = 100f;
 public void TakeDamage(float damage)
 {
     health -= damage;
-    onHealthChanged.Raise(health);  // Pass current health value
+    onHealthChanged.Raise(health);  // 传递当前生命值
 }
 ```
 
-**Type Safety**: Dropdown only shows `GameEvent<float>` events, preventing type mismatches.
+**类型安全**：下拉菜单仅显示 `GameEvent<float>` 事件，防止类型不匹配。
 
 ---
 
-### Sender + Argument Events
-
+### Sender + 参数事件
 ```csharp
 [GameEventDropdown]
 public GameEvent<GameObject, DamageInfo> onPlayerDamaged;
 
 public void ApplyDamage(DamageInfo damageInfo)
 {
-    // Sender = this GameObject, Args = damage info
+    // Sender = 此GameObject, Args = 伤害信息
     onPlayerDamaged.Raise(this.gameObject, damageInfo);
 }
 ```
 
-**Use Case**: Actions need to know **who** triggered the event and **what** data to process.
+**使用场景**：动作需要知道 **谁** 触发了事件以及要处理 **什么** 数据。
 
 ---
 
-## 🔒 Type Safety in Action
+## 🔒 类型安全实战
 
-The dropdown **automatically filters** events based on field type:
-
+下拉菜单根据字段类型 **自动过滤** 事件：
 ```csharp
 public class ScoreManager : MonoBehaviour
 {
     [GameEventDropdown]
-    public GameEvent<int> onScoreChanged;  // Only shows GameEvent<int>
+    public GameEvent<int> onScoreChanged;  // 仅显示GameEvent<int>
     
     [GameEventDropdown]
-    public GameEvent<int> onLevelUp;       // Only shows GameEvent<int>
+    public GameEvent<int> onLevelUp;       // 仅显示GameEvent<int>
     
     private int score = 0;
     
     public void AddScore(int points)
     {
         score += points;
-        onScoreChanged.Raise(score);  // Pass integer score
+        onScoreChanged.Raise(score);  // 传递整数分数
     }
 }
 ```
 
-**Dropdown Filtering**:
-
+**下拉过滤**：
 ```
-Available Events for GameEvent<int>:
+GameEvent<int>的可用事件：
   ✅ OnScoreChanged (int)
   ✅ OnLevelUp (int)
   ✅ OnComboMultiplier (int)
-  ❌ OnPlayerDeath (void) — Filtered out (wrong type)
-  ❌ OnDamage (float) — Filtered out (wrong type)
+  ❌ OnPlayerDeath (void) — 过滤掉（错误类型）
+  ❌ OnDamage (float) — 过滤掉（错误类型）
 ```
 
-**Why This Matters**: Catches type errors at **edit time**, not runtime.
+**为什么这很重要**：在 **编辑时** 捕获类型错误，而不是运行时。
 
 ---
 
-## 🔄 Canceling Scheduled Events
+## 🔄 取消预定事件
 
-If your event uses **delay** or **repeat** settings (configured in **[Game Event Behavior](./game-event-behavior.md)**), you can cancel execution:
-
+如果您的事件使用 **延迟** 或 **重复** 设置（在 **[游戏事件行为](./game-event-behavior.md)** 中配置），您可以取消执行：
 ```csharp
 [GameEventDropdown]
 public GameEvent repeatingSoundEvent;
 
 void StartAmbientSound()
 {
-    repeatingSoundEvent.Raise();  // Starts repeating (based on Behavior config)
+    repeatingSoundEvent.Raise();  // 开始重复（基于行为配置）
 }
 
 void StopAmbientSound()
 {
-    repeatingSoundEvent.Cancel();  // Stops scheduled execution
+    repeatingSoundEvent.Cancel();  // 停止预定执行
 }
 ```
 
-**Use Cases**:
+**使用场景**：
 
-- Player leaves trigger zone → Cancel ambient sounds
-- Game paused → Cancel timed events
-- Object destroyed → Cleanup scheduled actions
+- 玩家离开触发区域 → 取消环境声音
+- 游戏暂停 → 取消定时事件
+- 对象销毁 → 清理预定动作
 
 ---
 
-## 🔧 Advanced: Inspector Listener Control
+## 🔧 高级：Inspector监听器控制
 
-Rarely needed, but you can disable Inspector-configured actions at runtime:
-
+很少需要，但您可以在运行时禁用Inspector配置的动作：
 ```csharp
 [GameEventDropdown]
 public GameEvent myEvent;
@@ -258,59 +247,58 @@ public GameEvent myEvent;
 void DisableCutsceneUI()
 {
     myEvent.SetInspectorListenersActive(false);
-    // Inspector actions won't fire, only code listeners
+    // Inspector动作不会触发，只有代码监听器
 }
 
 void EnableCutsceneUI()
 {
     myEvent.SetInspectorListenersActive(true);
-    // Inspector actions fire again
+    // Inspector动作再次触发
 }
 ```
 
-**Use Cases**:
+**使用场景**：
 
-- Temporarily disable UI updates during cutscenes
-- Switch between action sets based on game state
+- 在过场动画期间临时禁用UI更新
+- 根据游戏状态在动作集之间切换
 
 ------
 
-## 💡 Complete Workflow Example
+## 💡 完整工作流示例
 
-Let's build a complete door system using the visual workflow.
+让我们使用可视化工作流构建一个完整的门系统。
 
-### Step 1: Create Events
+### 步骤1：创建事件
 
-In **[Game Event Creator](./game-event-creator.md)**:
+在 **[游戏事件创建器](./game-event-creator.md)** 中：
 
 ![Event Editor Create](/img/game-event-system/visual-workflow/game-event-raiser/raiser-example-editor.png)
 
-- Create `OnDoorOpened` (void event)
-- Create `OnDoorClosed` (void event)
+- 创建 `OnDoorOpened`（空事件）
+- 创建 `OnDoorClosed`（空事件）
 
 ---
 
-### Step 2: Configure Actions
+### 步骤2：配置动作
 
-In **[Game Event Behavior](./game-event-behavior.md)**:
+在 **[游戏事件行为](./game-event-behavior.md)** 中：
 
 ![Event Behavior Configure](/img/game-event-system/visual-workflow/game-event-raiser/raiser-example-behavior.png)
 
-**OnDoorOpened Event**:
+**OnDoorOpened事件**：
 
-- Action: `AudioSource.PlayOneShot(doorOpenSound)`
-- Action: `Animator.SetTrigger("Open")`
-- Action: `ParticleSystem.Play()` (dust effect)
+- 动作：`AudioSource.PlayOneShot(doorOpenSound)`
+- 动作：`Animator.SetTrigger("Open")`
+- 动作：`ParticleSystem.Play()`（灰尘效果）
 
-**OnDoorClosed Event**:
+**OnDoorClosed事件**：
 
-- Action: `AudioSource.PlayOneShot(doorCloseSound)`
-- Action: `Animator.SetTrigger("Close")`
+- 动作：`AudioSource.PlayOneShot(doorCloseSound)`
+- 动作：`Animator.SetTrigger("Close")`
 
 ---
 
-### Step 3: Write the Script
-
+### 步骤3：编写脚本
 ```csharp
 using TinyGiants.GameEventSystem.Runtime;
 using UnityEngine;
@@ -330,74 +318,72 @@ public class DoorController : MonoBehaviour
         if (isOpen)
         {
             isOpen = false;
-            onDoorClosed.Raise();  // All actions fire automatically
+            onDoorClosed.Raise();  // 所有动作自动触发
         }
         else
         {
             isOpen = true;
-            onDoorOpened.Raise();  // All actions fire automatically
+            onDoorOpened.Raise();  // 所有动作自动触发
         }
     }
     
-    // This method can be called from:
-    // - Button OnClick in Inspector
-    // - Collision/Trigger detection
-    // - Other game systems
+    // 此方法可以从以下位置调用：
+    // - Inspector中的按钮OnClick
+    // - 碰撞/触发器检测
+    // - 其他游戏系统
 }
 ```
 
 ---
 
-### Step 4: Assign Events in Inspector
+### 步骤4：在Inspector中分配事件
 
 ![Door Inspector Setup](/img/game-event-system/visual-workflow/game-event-raiser/raiser-example-dropdown.png)
 
-1. Select `DoorController` GameObject
-2. Use dropdown to assign `OnDoorOpened` event
-3. Use dropdown to assign `OnDoorClosed` event
+1. 选择 `DoorController` GameObject
+2. 使用下拉菜单分配 `OnDoorOpened` 事件
+3. 使用下拉菜单分配 `OnDoorClosed` 事件
 
-**Done!** No sound, animation, or VFX references in script—all configured visually.
+**完成！** 脚本中没有声音、动画或VFX引用——全部可视化配置。
 
 ---
 
-## 🆚 Why Better Than UnityEvents?
+## 🆚 为什么比UnityEvents好？
 
-Traditional UnityEvent approach has limitations that Game Events solve:
+传统的UnityEvent方法有游戏事件解决的限制：
 
-### Traditional UnityEvent Limitations
-
+### 传统UnityEvent限制
 ```csharp
-// ❌ Problem 1: Configuration scattered across many GameObjects
+// ❌ 问题1：配置分散在许多GameObject中
 public class Button1 : MonoBehaviour
 {
-    public UnityEvent onClick;  // Configured in Button1's Inspector
+    public UnityEvent onClick;  // 在Button1的Inspector中配置
 }
 
 public class Button2 : MonoBehaviour
 {
-    public UnityEvent onClick;  // Configured in Button2's Inspector
+    public UnityEvent onClick;  // 在Button2的Inspector中配置
 }
 
-// ❌ Problem 2: Hard to find all usages
-// Need to manually search every GameObject in scene
+// ❌ 问题2：难以找到所有使用
+// 需要手动搜索场景中的每个GameObject
 
-// ❌ Problem 3: No central control
-// Can't globally enable/disable button sounds
+// ❌ 问题3：没有集中控制
+// 无法全局启用/禁用按钮声音
 
-// ❌ Problem 4: Duplication
-// Same sound/VFX setup repeated in 50 buttons
+// ❌ 问题4：重复
+// 在50个按钮中重复相同的声音/VFX设置
 ```
 
 ---
 
-### Game Event Advantages
-
+### 游戏事件优势
 ```csharp
-// ✅ Solution: All buttons raise the same event
+// ✅ 解决方案：所有按钮触发相同事件
 public class ButtonController : MonoBehaviour
 {
     [GameEventDropdown]
-    public GameEvent onButtonClick;  // Same event for all buttons
+    public GameEvent onButtonClick;  // 所有按钮的相同事件
     
     public void OnClick()
     {
@@ -406,109 +392,108 @@ public class ButtonController : MonoBehaviour
 }
 ```
 
-**Benefits**:
+**好处**：
 
-| Feature                | UnityEvent          | Game Event                               |
+| 功能 | UnityEvent | 游戏事件 |
 | ---------------------- | ------------------- | ---------------------------------------- |
-| **Centralized Config** | ❌ Per GameObject    | ✅ One Event Behavior                     |
-| **Find All Usage**     | ❌ Manual search     | ✅ [Event Finder](./game-event-finder.md) |
-| **Global Control**     | ❌ Change 50 objects | ✅ Change one event                       |
-| **Reusability**        | ❌ Copy-paste        | ✅ Reference same asset                   |
-| **Conditional Logic**  | ❌ Code required     | ✅ Visual condition tree                  |
-| **Debugging**          | ❌ Inspector only    | ✅ Flow Graph visualization               |
+| **集中配置** | ❌ 每个GameObject | ✅ 一个事件行为 |
+| **查找所有使用** | ❌ 手动搜索 | ✅ [事件查找器](./game-event-finder.md) |
+| **全局控制** | ❌ 更改50个对象 | ✅ 更改一个事件 |
+| **可重用性** | ❌ 复制粘贴 | ✅ 引用相同资产 |
+| **条件逻辑** | ❌ 需要代码 | ✅ 可视化条件树 |
+| **调试** | ❌ 仅Inspector | ✅ 流程图可视化 |
 
 ---
 
-### When to Use Each
+### 何时使用每种
 
-**Use UnityEvents**:
+**使用UnityEvents**：
 
-- Simple one-off callbacks (e.g., tutorial button)
-- Component-specific logic (e.g., slider updates its own label)
-- No need for reusability
+- 简单的一次性回调（例如，教程按钮）
+- 组件特定逻辑（例如，滑块更新其自己的标签）
+- 不需要可重用性
 
-**Use Game Events**:
+**使用游戏事件**：
 
-- Reusable logic (e.g., all button clicks play same sound)
-- Complex sequences (e.g., cutscenes, door puzzles)
-- Need central control (e.g., mute all UI sounds)
-- Want visual debugging (Flow Graph)
+- 可重用逻辑（例如，所有按钮点击播放相同声音）
+- 复杂序列（例如，过场动画、门谜题）
+- 需要集中控制（例如，静音所有UI声音）
+- 想要可视化调试（流程图）
 
 ------
 
-## ❓ Troubleshooting
+## ❓ 故障排除
 
-### Dropdown Shows "Manager Missing"
+### 下拉菜单显示"Manager Missing"
 
-**Cause**: No `GameEventManager` in scene.
+**原因**：场景中没有 `GameEventManager`。
 
-**Solution**: 
+**解决方案**：
 
-Open Game Event System via the Unity toolbar:
-
+通过Unity工具栏打开游戏事件系统：
 ```csharp
 Tools > TinyGiants > Game Event System
 ```
 
-Click the **"Initialize Event System"** button, creating a **Game Event Manager** GameObject (Singleton) in your scene.
+点击 **"Initialize Event System"** 按钮，在场景中创建一个 **Game Event Manager** GameObject（单例）。
 
 ---
 
-### Dropdown Shows "No Active Databases"
+### 下拉菜单显示"No Active Databases"
 
-**Cause**: No databases assigned in `GameEventManager`.
+**原因**：`GameEventManager` 中未分配数据库。
 
-**Solution**:
-1. Select `GameEventManager` in scene
-2. Inspector → Databases section
-3. Add your event databases
+**解决方案**：
+1. 在场景中选择 `GameEventManager`
+2. Inspector → 数据库部分
+3. 添加您的事件数据库
 
 ---
 
-### Dropdown Shows "No Matching Events"
+### 下拉菜单显示"No Matching Events"
 
-**Cause**: No events match the field type.
+**原因**：没有事件匹配字段类型。
 
-**Example**:
+**示例**：
 ```csharp
 [GameEventDropdown]
-public GameEvent<string> textEvent;  // Needs GameEvent<string>
+public GameEvent<string> textEvent;  // 需要GameEvent<string>
 
-// But your databases only have:
+// 但您的数据库只有：
 // - GameEvent (void)
 // - GameEvent<int>
 // - GameEvent<float>
 
-Result: No matching events!
+结果：没有匹配的事件！
 ```
 
-**Solution**: Create events of the correct type using [Game Event Creator](./game-event-creator.md).
+**解决方案**：使用[游戏事件创建器](./game-event-creator.md)创建正确类型的事件。
 
 ---
 
-### Event Doesn't Fire
+### 事件未触发
 
-**Checklist**:
-1. ✅ Is event asset assigned in Inspector?
-2. ✅ Is `Raise()` being called? (add Debug.Log to verify)
-3. ✅ Are actions configured in [Game Event Behavior](./game-event-behavior.md)?
-4. ✅ Are conditions passing? (check condition tree)
-5. ✅ Is GameEventManager in scene?
+**检查清单**：
+1. ✅ 事件资产是否在Inspector中分配？
+2. ✅ `Raise()` 是否被调用？（添加Debug.Log以验证）
+3. ✅ 动作是否在[游戏事件行为](./game-event-behavior.md)中配置？
+4. ✅ 条件是否通过？（检查条件树）
+5. ✅ GameEventManager是否在场景中？
 
-:::tip Visual Workflow Complete!
+:::tip 可视化工作流完成！
 
-You've now learned the complete visual workflow:
+您现在已经学习了完整的可视化工作流：
 
-1. ✅ **Create** events in Event Creator
-2. ✅ **Configure** actions in Event Behavior
-3. ✅ **Raise** events with UnityEvents or `GameEventDropdown`
+1. ✅ 在事件创建器中**创建**事件
+2. ✅ 在事件行为中**配置**动作
+3. ✅ 使用UnityEvents或 `GameEventDropdown` **触发**事件
 
-**Result**: Decoupled, maintainable, designer-friendly game logic!
+**结果**：解耦、可维护、设计师友好的游戏逻辑！
 
 :::
 
-:::info From Visual to Code
+:::info 从可视化到代码
 
-This page covers **visual workflow** (raising events in scripts with Inspector assignment). For **advanced code techniques** (runtime listeners, conditional triggers, event chains), see **[Runtime API](../scripting/raising-and-scheduling.md)**.
+本页涵盖 **可视化工作流**（在脚本中使用Inspector分配触发事件）。对于 **高级代码技术**（运行时监听器、条件触发器、事件链），请参阅 **[运行时API](../scripting/raising-and-scheduling.md)**。
 
 :::

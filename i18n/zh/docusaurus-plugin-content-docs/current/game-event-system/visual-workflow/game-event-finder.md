@@ -1,227 +1,225 @@
 ﻿---
-sidebar_label: 'Find Game Event'
+sidebar_label: '查找游戏事件'
 sidebar_position: 7
 ---
 
-# Game Event Finder
+# 游戏事件查找器
 
-The **Reference Finder** is a powerful diagnostic tool that scans your entire active scene to locate every GameObject, Script, and Component that is referencing a specific Game Event.
+**引用查找器** 是一个强大的诊断工具，可以扫描整个活动场景，定位引用特定游戏事件的每个GameObject、脚本和组件。
 
-It answers the critical question: ***"If I change this event, who will be affected?"***
+它回答了一个关键问题：***"如果我更改此事件，谁会受到影响？"***
 
-## 🚀 Accessing the Tool
+## 🚀 访问工具
 
-You can open the Reference Finder from the  [**Game Event Editor**](./game-event-editor.md)
-
+您可以从 [**游戏事件编辑器**](./game-event-editor.md) 打开引用查找器
 ```
-Game Event Editor → Click 🔍 icon on event row
+游戏事件编辑器 → 点击事件行上的🔍图标
 ```
 
-The window opens showing all scene references to that event.
+窗口打开时显示该事件的所有场景引用。
 
 ---
 
-## 🖼️ Interface Modes
+## 🖼️ 界面模式
 
-The window supports two visualization modes to suit different inspection needs. You can toggle between them using the toolbar buttons.
+窗口支持两种可视化模式以适应不同的检查需求。您可以使用工具栏按钮在它们之间切换。
 
-### List Mode (Flat View)
+### 列表模式（平面视图）
 
-Displays a straightforward, sortable list of all references.
+显示所有引用的直观、可排序列表。
 
 ![List Mode View](/img/game-event-system/visual-workflow/game-event-finder/game-event-finder-list.png)
 
-**Best for**: Quickly scanning total usage or sorting by path/name.
+**最适合**：快速扫描总使用量或按路径/名称排序。
 
 ---
 
-### Grouped Mode (Script View)
+### 分组模式（脚本视图）
 
-Groups references by the **Script Component** that is holding them.
+按持有引用的 **脚本组件** 对引用进行分组。
 
 ![Grouped Mode View](/img/game-event-system/visual-workflow/game-event-finder/game-event-finder-grouped.png)
 
-**Best for**: Understanding which *systems* rely on this event (e.g., seeing that 5 `EnemyAI` scripts and 1 `GameManager` are using it).
+**最适合**：了解哪些*系统*依赖于此事件（例如，看到5个 `EnemyAI` 脚本和1个 `GameManager` 正在使用它）。
 
-**Toggle**: Click the **List** / **Grouped** button in the toolbar to switch between modes.
+**切换**：点击工具栏中的 **List** / **Grouped** 按钮在模式之间切换。
 
 ---
 
-## 📊 Status Indicators
+## 📊 状态指示器
 
-Each row provides real-time feedback about the state of the referencing object:
+每行提供有关引用对象状态的实时反馈：
 
-| Icon | Status       | Description                                                  |
+| 图标 | 状态 | 描述 |
 | :--- | :----------- | :----------------------------------------------------------- |
-| 🟢    | **Active**   | The GameObject is currently active in the hierarchy. The event binding is live. |
-| 🔴    | **Inactive** | The GameObject is disabled. The event binding will not trigger until enabled. |
+| 🟢 | **活动** | GameObject当前在层级视图中处于活动状态。事件绑定已生效。 |
+| 🔴 | **非活动** | GameObject已禁用。事件绑定在启用之前不会触发。 |
 
 ---
 
-## 📝 Reference Details
+## 📝 引用详情
 
-The columns provide detailed context for every reference:
+列提供每个引用的详细上下文：
 
-| Column             | Description                                                  |
+| 列 | 描述 |
 | ------------------ | ------------------------------------------------------------ |
-| **GameObject**     | The name of the object in the scene                          |
-| **Hierarchy Path** | The full breadcrumb path (e.g., `Environment/Enemies/Grunt_01`) |
-| **Script**         | The name of the C# class referencing the event (e.g., `PlayerHealth`) |
-| **Type**           | The variable name in the code (e.g., `onDeathEvent`)         |
+| **GameObject** | 场景中对象的名称 |
+| **层级路径** | 完整的面包屑路径（例如，`Environment/Enemies/Grunt_01`） |
+| **脚本** | 引用事件的C#类名称（例如，`PlayerHealth`） |
+| **类型** | 代码中的变量名称（例如，`onDeathEvent`） |
 
-:::tip Smart Scanning
-The tool uses **Reflection** to scan all public and private fields on your MonoBehaviours. It finds references even if they are buried in private serialized fields!
+:::tip 智能扫描
+该工具使用 **反射** 扫描MonoBehaviour上的所有公共和私有字段。它可以找到即使隐藏在私有序列化字段中的引用！
 :::
 
 ------
 
-## 🔍 Search & Sort
+## 🔍 搜索与排序
 
-**Search Bar**: Type to filter references by GameObject name, hierarchy path, script name, or field name. Supports partial matching.
+**搜索栏**：输入以按GameObject名称、层级路径、脚本名称或字段名称过滤引用。支持部分匹配。
 
-**Sortable Columns**: Click any column header to sort by that column. Click again to reverse the sort order.
+**可排序列**：点击任何列标题按该列排序。再次点击以反转排序顺序。
 
 ---
 
-## ⚡ Quick Actions
+## ⚡ 快速操作
 
-The **Actions** column on the right provides three powerful navigation tools to jump instantly to the target object.
+右侧的 **操作** 列提供三个强大的导航工具，可立即跳转到目标对象。
 
-| Button    | Icon | Action                 | Use Case                                                     |
+| 按钮 | 图标 | 操作 | 使用场景 |
 | :-------- | :--- | :--------------------- | :----------------------------------------------------------- |
-| **Ping**  | 🔍    | **Ping in Hierarchy**  | Flashes the object in the Hierarchy window to show its location without changing selection |
-| **Focus** | 📋    | **Focus in Inspector** | Selects the object and instantly brings the **Inspector** into focus, allowing you to edit the script immediately |
-| **Frame** | 🎥    | **Frame in Scene**     | Selects the object and moves the **Scene View camera** to frame it perfectly |
+| **Ping** | 🔍 | **在层级视图中定位** | 在层级视图窗口中闪烁对象以显示其位置，而不更改选择 |
+| **Focus** | 📋 | **在Inspector中聚焦** | 选择对象并立即将 **Inspector** 带入焦点，允许您立即编辑脚本 |
+| **Frame** | 🎥 | **在场景中框选** | 选择对象并移动 **场景视图相机** 以完美框选它 |
 
 ---
 
-## 🛠️ Toolbar Features
+## 🛠️ 工具栏功能
 
-The toolbar provides additional controls for managing the reference view:
+工具栏提供用于管理引用视图的附加控件：
 
-**Refresh Button** (`🔄`): Re-scan the current scene to update the reference list. Useful after making changes to your scene.
+**刷新按钮**（`🔄`）：重新扫描当前场景以更新引用列表。在对场景进行更改后很有用。
 
-**Select All Button** (`👁️`): Selects all referenced GameObjects in the Hierarchy at once. Useful for batch operations.
+**全选按钮**（`👁️`）：一次性在层级视图中选择所有引用的GameObject。适用于批量操作。
 
-**List/Grouped Toggle** (`📁` / `📄`): Switch between flat list view and grouped script view.
-
----
-
-## 💡 Practical Use Cases
-
-### Before Refactoring
-
-**Question**: "Which objects will break if I rename or delete this event?"
-
-**Answer**: Open the Finder to see all references before making changes. Update each reference accordingly.
+**列表/分组切换**（`📁` / `📄`）：在平面列表视图和分组脚本视图之间切换。
 
 ---
 
-### Debugging
+## 💡 实际使用场景
 
-**Problem**: "My event isn't firing as expected."
+### 重构之前
 
-**Solution**: Use the Finder to verify that references exist on active GameObjects. Check the status indicators (🟢/🔴) to ensure objects are enabled.
+**问题**："如果我重命名或删除此事件，哪些对象会损坏？"
 
----
-
-### Cleanup & Optimization
-
-**Goal**: "Remove unused events to clean up the project."
-
-**Process**: Open the Finder for each event. If it shows "0 References", the event is safe to delete from that scene.
+**答案**：在进行更改之前打开查找器以查看所有引用。相应地更新每个引用。
 
 ---
 
-### Team Documentation
+### 调试
 
-**Need**: "Document which systems use specific events for team members."
+**问题**："我的事件没有按预期触发。"
 
-**Result**: The Finder provides a complete list of event usage that can be screenshotted or documented.
-
----
-
-## ❓ Troubleshooting
-
-### No References Found
-
-**Possible Causes**:
-
-- The event is not used in the current scene
-- References exist in other scenes (Finder only scans active scene)
-- Event is used only through code via `AddListener()` (not detectable by Reflection scan)
-- References exist in prefabs that aren't instantiated in the scene
-
-**Solution**: Check other scenes or use Unity's built-in "Find References in Scene" on the event asset.
+**解决方案**：使用查找器验证活动GameObject上是否存在引用。检查状态指示器（🟢/🔴）以确保对象已启用。
 
 ---
 
-### Inactive References
+### 清理与优化
 
-**Cause**: GameObject is disabled in the hierarchy.
+**目标**："删除未使用的事件以清理项目。"
 
-**Impact**: The event binding exists but won't trigger until the GameObject is enabled.
-
-**Action**: Enable the GameObject or verify this is intentional behavior (e.g., pooled objects).
+**过程**：为每个事件打开查找器。如果显示"0 References"，则该事件在该场景中可以安全删除。
 
 ---
 
-### Reference Count Mismatch
+### 团队文档
 
-**Common Reasons**:
+**需求**："为团队成员记录哪些系统使用特定事件。"
 
-- Each prefab instance counts as a separate reference
-- Multiple fields in the same script each count as individual references
-- Disabled GameObjects are included in the count (check status icons)
+**结果**：查找器提供了可以截图或记录的完整事件使用列表。
 
 ---
 
-## 📖 Workflow Example
+## ❓ 故障排除
 
-**Scenario**: You're refactoring the damage system and need to change the `OnPlayerDamaged` event.
+### 未找到引用
 
-**Step 1**: Open the Game Event Editor
+**可能原因**：
 
-**Step 2**: Find `OnPlayerDamaged` event → Click 🔍 icon
+- 事件在当前场景中未使用
+- 引用存在于其他场景（查找器仅扫描活动场景）
+- 事件仅通过 `AddListener()` 在代码中使用（无法通过反射扫描检测）
+- 引用存在于场景中未实例化的预制件中
 
-**Step 3**: Review the Finder results:
+**解决方案**：检查其他场景或在事件资产上使用Unity内置的"在场景中查找引用"。
 
+---
+
+### 非活动引用
+
+**原因**：GameObject在层级视图中被禁用。
+
+**影响**：事件绑定存在，但在GameObject启用之前不会触发。
+
+**操作**：启用GameObject或验证这是有意的行为（例如，对象池中的对象）。
+
+---
+
+### 引用计数不匹配
+
+**常见原因**：
+
+- 每个预制件实例都计为单独的引用
+- 同一脚本中的多个字段各自计为单独的引用
+- 禁用的GameObject包含在计数中（检查状态图标）
+
+---
+
+## 📖 工作流示例
+
+**场景**：您正在重构伤害系统，需要更改 `OnPlayerDamaged` 事件。
+
+**步骤1**：打开游戏事件编辑器
+
+**步骤2**：找到 `OnPlayerDamaged` 事件 → 点击🔍图标
+
+**步骤3**：查看查找器结果：
 ```
-3 References Found:
-├─ PlayerHealth (Script) - Active 🟢
-├─ UIHealthBar (Script) - Active 🟢  
-└─ DeathScreen (Script) - Inactive 🔴
+找到3个引用：
+├─ PlayerHealth (脚本) - 活动 🟢
+├─ UIHealthBar (脚本) - 活动 🟢  
+└─ DeathScreen (脚本) - 非活动 🔴
 ```
 
-**Step 4**: Use Quick Actions to navigate to each reference:
+**步骤4**：使用快速操作导航到每个引用：
 
-- Click 🔍 **Ping** to locate in Hierarchy
-- Click 📋 **Focus** to open in Inspector
-- Update each reference as needed
+- 点击🔍 **Ping** 在层级视图中定位
+- 点击📋 **Focus** 在Inspector中打开
+- 根据需要更新每个引用
 
-**Step 5**: Safely complete refactoring knowing all usage points
+**步骤5**：在了解所有使用点的情况下安全完成重构
 
 ---
 
-## 🔗 Related Tools
+## 🔗 相关工具
 
-**Finder vs Editor**:
+**查找器与编辑器**：
 
-| Tool                                            | Scope                   | Best For                        |
+| 工具 | 范围 | 最适合 |
 | ----------------------------------------------- | ----------------------- | ------------------------------- |
-| **[Game Event Editor](./game-event-editor.md)** | All events in project   | Browse and manage event library |
-| **Game Event Finder** (this tool)               | Single event references | Impact analysis and debugging   |
+| **[游戏事件编辑器](./game-event-editor.md)** | 项目中的所有事件 | 浏览和管理事件库 |
+| **游戏事件查找器**（此工具） | 单个事件引用 | 影响分析和调试 |
 
-:::tip Pro Tip
-Always check the Finder before deleting or renaming an event. Even events showing "0 References" in the current scene might be used in other scenes or through code-based listeners.
+:::tip 专业提示
+在删除或重命名事件之前，始终检查查找器。即使在当前场景中显示"0 References"的事件也可能在其他场景中使用或通过基于代码的监听器使用。
 :::
 
-:::info Scope Limitation
-The Finder scans the **active scene only**. To check references across multiple scenes:
+:::info 范围限制
+查找器 **仅扫描活动场景**。要检查多个场景中的引用：
 
-1. Open each scene individually
-2. Run the Finder in each one
-3. Compile results manually
+1. 单独打开每个场景
+2. 在每个场景中运行查找器
+3. 手动编译结果
 
-For true project-wide asset search, use Unity's built-in "Find References in Scene" feature on the event asset itself.
+对于真正的项目范围资产搜索，在事件资产本身上使用Unity内置的"在场景中查找引用"功能。
 :::

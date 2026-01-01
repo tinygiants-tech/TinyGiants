@@ -1,151 +1,150 @@
 ﻿---
-sidebar_label: 'System Dashboard'
+sidebar_label: '系统仪表板'
 sidebar_position: 1
 ---
 
-# System Dashboard
+# 系统仪表板
 
-The **Game Event System Window** (The system dashboard) is your central command center. It is designed to provide a high-level overview of the plugin's status, quick access to core tools, and real-time environment telemetry.
+**游戏事件系统窗口**（系统仪表板）是您的中央指挥中心。它旨在提供插件状态的高级概览、核心工具的快速访问以及实时环境遥测。
 
-Instead of hunting through project folders or menus, The dashboard brings every critical operation into a single, organized interface—all in one place.
+仪表板将每个关键操作整合到一个有组织的界面中，而不是在项目文件夹或菜单中寻找——一站式服务。
 
-## 🚀 Accessing the Dashboard
+## 🚀 访问仪表板
 
-Open the dashboard via the Unity top menu:
-
+通过Unity顶部菜单打开仪表板：
 ```text
 Tools > TinyGiants > Game Event System
 ```
 
-:::tip First Time Setup
-If this is your first time opening the dashboard, you'll be guided through an automatic initialization process. See **[Installation](../intro/installation.md)** for details.
+:::tip 首次设置
+如果这是您第一次打开仪表板，您将被引导完成自动初始化过程。有关详细信息，请参阅 **[安装](../intro/installation.md)**。
 :::
 
 ------
 
-## 🗺️ Interface Overview
+## 🗺️ 界面概览
 
-The dashboard is divided into specific functional zones. Below is a detailed breakdown of each section.
+仪表板分为特定的功能区域。以下是每个部分的详细分解。
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-system/system-dashboard-full.png)
 
-### 1. 🚀 Initialization & Status
+### 1. 🚀 初始化与状态
 
-Located on the **Middle-Left**, this bar acts as the **Global Health Indicator** for the system.
+位于 **中左部**，此栏充当系统的 **全局健康指示器**。
 
-- **Green Check**: The system is fully initialized. Core managers and databases are present.
-- **Blue Action Button**: Critical components are missing (e.g., if the Manager object was accidentally deleted from the scene).
+- **绿色勾选**：系统已完全初始化。核心管理器和数据库已存在。
+- **蓝色操作按钮**：缺少关键组件（例如，如果管理器对象从场景中意外删除）。
 
-:::tip Quick Repair
-If this bar turns Blue during development, simply click it to **Auto-Repair** the scene dependencies immediately. For the initial setup guide, refer to **[Installation](../intro/installation.md)**.
+:::tip 快速修复
+如果此栏在开发期间变为蓝色，只需点击它即可立即 **自动修复** 场景依赖关系。有关初始设置指南，请参阅 **[安装](../intro/installation.md)**。
 :::
 
 ------
 
-### 2. ⚡ Core Workflow Tools
+### 2. ⚡ 核心工作流工具
 
-Located in the **Editor & Monitor** section, these are your daily drivers.
+位于 **编辑器与监控器** 部分，这些是您的日常驱动工具。
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-system/hub-core-tools.png)
 
-| Tool                                                    | Description                                                  |
+| 工具 | 描述 |
 | ------------------------------------------------------- | ------------------------------------------------------------ |
-| [**📝 Game Event Editor**](./game-event-editor.md)       | Opens the main management window to batch operations (create, delete, search, filter, and edit events). This is where you will spend 80% of your time. |
-| [**📊 Game Event Monitor**](../tools/runtime-monitor.md) | Opens the runtime debugger. Use this during Play Mode to watch event execution in real-time, inspect listener call stacks, profile performance bottlenecks, and visualize flow graph automation exectuion. |
+| [**📝 游戏事件编辑器**](./game-event-editor.md) | 打开主管理窗口进行批量操作（创建、删除、搜索、过滤和编辑事件）。这是您将花费80%时间的地方。 |
+| [**📊 游戏事件监控器**](../tools/runtime-monitor.md) | 打开运行时调试器。在播放模式期间使用此工具实时观察事件执行、检查监听器调用堆栈、分析性能瓶颈并可视化流程图自动化执行。 |
 
 ------
 
-### 3. ⚙️ Code Maintenance Tools
+### 3. ⚙️ 代码维护工具
 
-Located in the **Tools & Utilities** section, these utilities manage the underlying C# generation system.
+位于 **工具与实用程序** 部分，这些实用工具管理底层C#生成系统。
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-system/hub-code-tools.png)
 
-| Tool                                                         | Description                                                  |
+| 工具 | 描述 |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [**📜 Generate Game Event Code**](../tools/codegen-and-cleanup.md) | Manually triggers the code generator. Use this if you have added a new custom type (e.g., `GameEvent<MyCustomData>`) and need the concrete class generated immediately. |
-| [**✂️ Clean Game Event Code**](../tools/codegen-and-cleanup.md) | Scan your project, find all GameEvent classes, and safely delete them to keep the project tidy. |
-| [**🧹 Clean All Game Event Code**](../tools/codegen-and-cleanup.md) | A hard reset. Removes **ALL** generated code (except basic types). Use this only if you are reinstalling or refactoring significantly. |
+| [**📜 生成游戏事件代码**](../tools/codegen-and-cleanup.md) | 手动触发代码生成器。如果您添加了新的自定义类型（例如，`GameEvent<MyCustomData>`）并需要立即生成具体类，请使用此工具。 |
+| [**✂️ 清理游戏事件代码**](../tools/codegen-and-cleanup.md) | 扫描您的项目，找到所有GameEvent类，并安全删除它们以保持项目整洁。 |
+| [**🧹 清理所有游戏事件代码**](../tools/codegen-and-cleanup.md) | 硬重置。删除 **所有** 生成的代码（基本类型除外）。仅在重新安装或进行重大重构时使用。 |
 
-:::tip Automation
-The system is designed to auto-generate code when you create events via the Wizard. You rarely need to click "Generate" manually unless you are doing custom scripting work.
+:::tip 自动化
+该系统设计为在您通过向导创建事件时自动生成代码。除非您正在进行自定义脚本工作，否则很少需要手动点击"生成"。
 :::
 
 ------
 
-### 4. ℹ️ System Telemetry
-Located on the **Right**, this panel monitors your project environment in real-time.
+### 4. ℹ️ 系统遥测
+位于 **右侧**，此面板实时监控您的项目环境。
 
-It automatically validates your **Unity Version**, **Render Pipeline**, and **Scripting Backend** compatibility.
+它自动验证您的 **Unity版本**、**渲染管线** 和 **脚本后端** 兼容性。
 
-:::tip Environment Check
-For a detailed explanation of what these metrics mean and how they affect the plugin, please refer to the **[Automatic Environment Check](../intro/installation.md#step-2-open-the-system-dashboard)** section in the Installation guide.
+:::tip 环境检查
+有关这些指标含义及其如何影响插件的详细说明，请参阅安装指南中的 **[自动环境检查](../intro/installation.md#step-2-open-the-system-dashboard)** 部分。
 :::
 
 ------
 
-### 5. 📂 Quick Access
+### 5. 📂 快速访问
 
-Stop digging through the Project window. The **Quick Access** panel provides direct shortcuts to critical folders and assets.
+停止在项目窗口中挖掘。**快速访问** 面板提供直接快捷方式到关键文件夹和资产。
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-system/quick-access.png)
 
-| Tool                | Description                                                  |
+| 工具 | 描述 |
 | ------------------- | ------------------------------------------------------------ |
-| 📘 **Documentation** | Opens this local documentation.                              |
-| 📜 **API Scripts**   | Selects the API folder in the Project View.                  |
-| **🗄️ Databases**     | Selects the folder containing default database asset files.  |
-| **🕸️ Flow Graph**    | Selects the folder containing default visual-graph asset files. |
-| ⚙️ **CodeGen**       | Jumps to the generated code folder                           |
-| **🎮 Demo Scenes**   | Quickly locate the examples folder.                          |
+| 📘 **文档** | 打开此本地文档。 |
+| 📜 **API脚本** | 在项目视图中选择API文件夹。 |
+| **🗄️ 数据库** | 选择包含默认数据库资产文件的文件夹。 |
+| **🕸️ 流程图** | 选择包含默认可视化图表资产文件的文件夹。 |
+| ⚙️ **代码生成** | 跳转到生成的代码文件夹 |
+| **🎮 演示场景** | 快速定位示例文件夹。 |
 
 ------
 
-### 6. 🌐  Support & Community
+### 6. 🌐 支持与社区
 
-I believe in strong support. Use this panel to connect with us.
+我相信强大的支持。使用此面板与我们联系。
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-system/support-community.png)
 
-| Tool                    | Description                                                  |
+| 工具 | 描述 |
 | ----------------------- | ------------------------------------------------------------ |
-| **💬 Discord Community** | Join our active server for real-time help and showcase.      |
-| **📺 Video Tutorials**   | Watch step-by-step guides on YouTube.                        |
-| **📧 Email Support**     | Please provide a complete description of the problem you encountered and provide detailed environmental information, I will reply to you within 24 hours every day if I am available. |
-| **🛒 Asset Store**       | If you enjoy the plugin, a 5-star review helps us immensely! 🌟 |
+| **💬 Discord社区** | 加入我们的活跃服务器以获得实时帮助和展示。 |
+| **📺 视频教程** | 在YouTube上观看分步指南。 |
+| **📧 邮件支持** | 请提供您遇到问题的完整描述并提供详细的环境信息，如果我有空，我会在每天24小时内回复您。 |
+| **🛒 资产商店** | 如果您喜欢这个插件，5星评价对我们帮助很大！🌟 |
 
-:::tip Community First
+:::tip 社区优先
 
-Before emailing, check the **Discord #faq** channel—90% of common issues have existing solutions posted by the community!
+在发送电子邮件之前，请查看 **Discord #faq** 频道——90%的常见问题都有社区发布的现有解决方案！
 
 :::
 
 ------
 
-## 📝 Release Notes
+## 📝 发行说明
 
-This panel highlights the foundational pillars of **Game Event System v1.0.0**. This major release introduces a robust ecosystem for event-driven architecture, featuring:
+此面板突出显示 **游戏事件系统v1.0.0** 的基础支柱。这个主要版本引入了一个强大的事件驱动架构生态系统，其特点包括：
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-system/release-notes.png)
 
-- **Core & Logic**: ScriptableObject-driven backend with high-performance Expression Tree compilation.
-- **Visual Orchestration**: A powerful Node Graph for managing complex event dependencies and hybrid execution.
-- **Workflow Automation**: Automated code generation, smart Inspector bindings, and batch processing tools.
-- **Diagnostics**: Real-time monitors and performance profiling for deep system visibility.
+- **核心与逻辑**：基于ScriptableObject的后端，具有高性能表达式树编译。
+- **可视化编排**：用于管理复杂事件依赖关系和混合执行的强大节点图。
+- **工作流自动化**：自动代码生成、智能Inspector绑定和批处理工具。
+- **诊断**：实时监控器和性能分析，实现深度系统可见性。
 
-:::tip View Details
+:::tip 查看详情
 
-Click **"View Full Details"** to explore the full technical changelog across all 7 major categories.
+点击 **"View Full Details"** 探索所有7个主要类别的完整技术变更日志。
 
 :::
 
 ------
 
-## 🛠️ Troubleshooting
+## 🛠️ 故障排除
 
-:::caution[Pre-flight Check]
+:::caution[飞行前检查]
 
-Before troubleshooting, ensure there are no **Red Compiler Errors** in your Unity Console, as they will disable all editor-script functionality.
+在故障排除之前，请确保Unity控制台中没有 **红色编译器错误**，因为它们将禁用所有编辑器脚本功能。
 
 :::
 
@@ -153,58 +152,57 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
 <Tabs>
-<TabItem value="dashboard" label="❌ Dashboard Won't Open" default>
+<TabItem value="dashboard" label="❌ 仪表板无法打开" default>
 
-> **Symptom:** The menu item is grayed out or the window fails to appear.
+> **症状：** 菜单项显示为灰色或窗口无法出现。
 
-| Solution                | Action                                                       |
+| 解决方案 | 操作 |
 | ----------------------- | ------------------------------------------------------------ |
-| **Check Compilation**   | Fix all script errors in the Console first.                  |
-| **Clear Library Cache** | Close Unity → Delete Library/ folder → Reopen project to force re-index. |
-| **Re-import Plugin**    | If scripts are missing, re-import the package from the Asset Store. |
+| **检查编译** | 首先修复控制台中的所有脚本错误。 |
+| **清除Library缓存** | 关闭Unity → 删除Library/文件夹 → 重新打开项目以强制重新索引。 |
+| **重新导入插件** | 如果脚本缺失，请从资产商店重新导入包。 |
 
 </TabItem>
-<TabItem value="alert" label="🔵 Status Indicator Issues">
+<TabItem value="alert" label="🔵 状态指示器问题">
 
-> **Symptom:** Clicking "Initialize" does not turn the status icon green.
+> **症状：** 点击"Initialize"不会使状态图标变绿。
 
-| Solution             | Action                                                       |
+| 解决方案 | 操作 |
 | -------------------- | ------------------------------------------------------------ |
-| **Check Exceptions** | Look for any "Initialization Failed" errors in the Console   |
-| **Naming Conflicts** | Ensure no other GameObject is named `GameEventManager` in your active scene |
-| **Prefab Overrides** | If the manager is part of a prefab, ensure the instance isn't blocked by missing references. Delete the instance and re-initialize |
+| **检查异常** | 在控制台中查找任何"Initialization Failed"错误 |
+| **命名冲突** | 确保活动场景中没有其他GameObject命名为 `GameEventManager` |
+| **预制件覆盖** | 如果管理器是预制件的一部分，请确保实例没有被缺失引用阻止。删除实例并重新初始化 |
 
 </TabItem>
-<TabItem value="telemetry" label="🚩 Telemetry Alerts">
+<TabItem value="telemetry" label="🚩 遥测警报">
 
-> **Symptom:** System requirements show a Red Cross ❌ in the telemetry panel.
+> **症状：** 系统要求在遥测面板中显示红色叉号❌。
 
-| Issue | Fix / Requirement |
+| 问题 | 修复/要求 |
 | :--- | :--- |
-| **Unity Version** | Upgrade to **Unity 2020.3 LTS** or higher. |
-| **API Level** | Switch to **.NET Standard 2.0** or **.NET 4.x** in Player Settings. |
-| **IL2CPP Warning** | Ensure "Stripping Level" is not set to "High" to avoid losing generic metadata. |
+| **Unity版本** | 升级到 **Unity 2020.3 LTS** 或更高版本。 |
+| **API级别** | 在播放器设置中切换到 **.NET Standard 2.0** 或 **.NET 4.x**。 |
+| **IL2CPP警告** | 确保"Stripping Level"未设置为"High"以避免丢失泛型元数据。 |
 
 </TabItem>
 </Tabs>
 
 ------
 
-## Next Steps
+## 下一步
 
-**🎨 Manage Existing Events**: Learn the [Edit Game Event](./game-event-editor.md) window features 
+**🎨 管理现有事件**：了解[编辑游戏事件](./game-event-editor.md)窗口功能
 
-**📝 Create Your First Event**: Follow the [Create Game Event](./game-event-creator.md) guide 
+**📝 创建您的第一个事件**：遵循[创建游戏事件](./game-event-creator.md)指南
 
-**🎯 Raise Your First Event**: View the [Raise Game Event](./game-event-creator.md) guide 
+**🎯 触发您的第一个事件**：查看[触发游戏事件](./game-event-creator.md)指南
 
-**🕸️ Build Visual Flows**: Orchestrate complex event chains [Game Event Node Editor](../flow-graph/game-event-node-editor.md)
+**🕸️ 构建可视化流程**：编排复杂的事件链[游戏事件节点编辑器](../flow-graph/game-event-node-editor.md)
 
-**📊 Debug in Play Mode**: Monitor runtime execution [Runtime Monitor](../tools/runtime-monitor.md)
+**📊 在播放模式下调试**：监控运行时执行[运行时监控器](../tools/runtime-monitor.md)
 
 ------
 
-:::tip[Pro Tip]
-For the best experience, **Dock the Dashboard** as a tab next to your Inspector. This allows for instant access to search and debugging tools without disrupting your layout.
+:::tip[专业提示]
+为获得最佳体验，将 **仪表板停靠** 为Inspector旁边的选项卡。这允许即时访问搜索和调试工具，而不会破坏您的布局。
 :::
-

@@ -1,72 +1,70 @@
 ﻿---
-sidebar_label: 'Visual Condition Tree'
+sidebar_label: '可视化条件树'
 sidebar_position: 8
 ---
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# Visual Condition Tree
+# 可视化条件树
 
-Build complex boolean logic **visually** to control whether event actions should execute. Create sophisticated runtime checks through an intuitive interface—no coding required.
+**可视化地**构建复杂的布尔逻辑以控制事件动作是否应该执行。通过直观的界面创建复杂的运行时检查——无需编码。
 
 ![Visual Condition Tree](/img/game-event-system/visual-workflow/visual-condition-tree/condition-tree-overview.png)
 
 ---
 
-## 🎯 Overview
+## 🎯 概览
 
-The Visual Condition Tree is a **logic gate system** that evaluates runtime conditions before executing event actions.
+可视化条件树是一个**逻辑门系统**，在执行事件动作之前评估运行时条件。
 
-### The Problem It Solves
+### 它解决的问题
 
-**Traditional Approach** (scattered logic):
-
+**传统方法**（分散的逻辑）：
 ```csharp
-// Logic buried in scripts, hard to modify
+// 逻辑埋藏在脚本中，难以修改
 if (damageInfo.amount > 20 && 
     (damageInfo.isCritical || damageInfo.type == DamageType.Fire) &&
     playerController.Health < 50 &&
     gameManager.IsInCombat()) {
-    // Execute actions
+    // 执行动作
 }
 ```
 
-**Visual Approach**:
+**可视化方法**：
 
 ![Visual Condition Tree](/img/game-event-system/visual-workflow/visual-condition-tree/condition-tree-example.png)
 
 ------
 
-### Build an example
+### 构建示例
 
-**Event**: `OnPlayerDamaged`
+**事件**：`OnPlayerDamaged`
 
-**Event Types**:
+**事件类型**：
 
-- `GameEvent<GameObject, DamageInfo>` (GameObject sender)
-- `GameEvent<PlayerStats, DamageInfo>` (Custom sender)
+- `GameEvent<GameObject, DamageInfo>`（GameObject sender）
+- `GameEvent<PlayerStats, DamageInfo>`（自定义sender）
 
-**Data Structures**:
-
+**数据结构**：
 ```csharp
-// Damage type enumeration
+// 伤害类型枚举
 public enum DamageType {
     Physical,
     Fire,
     Void
 }
 
-// Damage information payload
+// 伤害信息有效载荷
 public class DamageInfo {
-    public float amount;           // Damage value
-    public bool isCritical;        // Critical hit flag
-    public DamageType type;        // Damage type
-    public Vector3 hitPoint;       // Impact location
-    public string attacker;        // Attacker name
+    public float amount;           // 伤害值
+    public bool isCritical;        // 暴击标志
+    public DamageType type;        // 伤害类型
+    public Vector3 hitPoint;       // 撞击位置
+    public string attacker;        // 攻击者名称
 }
 
-// Custom sender type (alternative to GameObject)
+// 自定义sender类型（GameObject的替代方案）
 public class PlayerStats {
     public string playerName;
     public int level;
@@ -74,39 +72,38 @@ public class PlayerStats {
 }
 ```
 
-**Goal**: Trigger warning effects when player takes significant damage under specific conditions.
+**目标**：在特定条件下，当玩家受到重大伤害时触发警告效果。
 
 ---
 
-### Key Benefits
+### 核心优势
 
-| Feature                | Benefit                                            |
+| 功能 | 好处 |
 | ---------------------- | -------------------------------------------------- |
-| 🎨 **Visual Building**  | Designers create logic without code                |
-| 🚀 **High Performance** | Compiles to Expression Trees (zero reflection)     |
-| 🔄 **Reusable**         | Same condition applies to all event actions        |
-| 🧪 **Live Testing**     | Tweak values in Inspector, see results immediately |
-| 🔒 **Type-Safe**        | Auto-validates type compatibility                  |
+| 🎨 **可视化构建** | 设计师无需代码即可创建逻辑 |
+| 🚀 **高性能** | 编译为表达式树（零反射） |
+| 🔄 **可重用** | 相同条件适用于所有事件动作 |
+| 🧪 **实时测试** | 在Inspector中调整值，立即查看结果 |
+| 🔒 **类型安全** | 自动验证类型兼容性 |
 
 ---
 
-## 🏗️ Tree Structure
+## 🏗️ 树结构
 
-The condition tree is built from **two node types**:
+条件树由**两种节点类型**构建：
 
 ![Node Types](/img/game-event-system/visual-workflow/visual-condition-tree/condition-node-types.png)
 
-### 🌳 Group Nodes
+### 🌳 组节点
 
-Combine multiple conditions using AND/OR logic.
+使用AND/OR逻辑组合多个条件。
 
-**Logic Types**:
+**逻辑类型**：
 
 <Tabs>
-<TabItem value="and" label="AND Logic" default>
+<TabItem value="and" label="AND逻辑" default>
 
-All child conditions must evaluate to TRUE.
-
+所有子条件必须评估为TRUE。
 ```mermaid
 graph LR
   
@@ -114,29 +111,28 @@ graph LR
     classDef cond fill:#b45309,stroke:#020617,stroke-width:2px,color:#ffffff
     classDef success fill:#0f766e,stroke:#042f2e,stroke-width:2px,color:#ffffff,font-weight:bold
 
-    A(📂 AND Group):::group
+    A(📂 AND组):::group
     
-    A --> C1(⚔️ Damage > 20):::cond
-    A --> C2(🔥 Type == Fire):::cond
-    A --> C3(❤️ Health < 50):::cond
+    A --> C1(⚔️ 伤害 > 20):::cond
+    A --> C2(🔥 类型 == 火):::cond
+    A --> C3(❤️ 生命 < 50):::cond
 
-    C1 -- "✓" --> R([✅ Result: TRUE]):::success
+    C1 -- "✓" --> R([✅ 结果: TRUE]):::success
     C2 -- "✓" --> R
     C3 -- "✓" --> R
 
     linkStyle 3,4,5 stroke:#10b981,stroke-width:2px
 ```
 
-**Visual**: 🟢 Green border
+**可视化**：🟢 绿色边框
 
-**Use**: "Must satisfy ALL requirements"
+**用途**："必须满足所有要求"
 
 </TabItem>
 
-<TabItem value="or" label="OR Logic">
+<TabItem value="or" label="OR逻辑">
 
-Any child condition can evaluate to TRUE.
-
+任何子条件可以评估为TRUE。
 ```mermaid
 graph LR
 
@@ -144,13 +140,13 @@ graph LR
     classDef cond fill:#b45309,stroke:#020617,stroke-width:2px,color:#ffffff
     classDef success fill:#0f766e,stroke:#042f2e,stroke-width:2px,color:#ffffff,font-weight:bold
 
-    A(📂 OR Group):::group
+    A(📂 OR组):::group
     
-    A --> C1(🎯 Is Critical):::cond
-    A --> C2(🔥 Type == Fire):::cond
-    A --> C3(⚔️ Damage > 100):::cond
+    A --> C1(🎯 是暴击):::cond
+    A --> C2(🔥 类型 == 火):::cond
+    A --> C3(⚔️ 伤害 > 100):::cond
 
-    C1 -- "✗" --> R([✅ Result: TRUE]):::success
+    C1 -- "✗" --> R([✅ 结果: TRUE]):::success
     C2 -- "✓" --> R
     C3 -- "✗" --> R
 
@@ -158,17 +154,16 @@ graph LR
     linkStyle 4 stroke:#10b981,stroke-width:3px
 ```
 
-**Visual**: 🟠 Orange border
+**可视化**：🟠 橙色边框
 
-**Use**: "Satisfy ANY requirement"
+**用途**："满足任何要求"
 
 </TabItem>
 </Tabs>
 
-**Toggle Logic**: Click the logic button (AND/OR) to switch.
+**切换逻辑**：点击逻辑按钮（AND/OR）进行切换。
 
-**Nesting**: Groups can contain other groups—build complex logic with unlimited depth.
-
+**嵌套**：组可以包含其他组——构建无限深度的复杂逻辑。
 ```mermaid
 graph LR
 
@@ -177,16 +172,16 @@ graph LR
     classDef nested fill:#334155,stroke:#020617,stroke-width:2px,color:#ffffff
     classDef success fill:#0f766e,stroke:#042f2e,stroke-width:2px,color:#ffffff,font-weight:bold
 
-    ROOT(📂 Root: AND Group):::root
+    ROOT(📂 根: AND组):::root
 
-    ROOT --> A(📜 Condition A):::cond
-    ROOT --> OR(📂 Nested: OR Group):::nested
-    ROOT --> D(📜 Condition D):::cond
+    ROOT --> A(📜 条件A):::cond
+    ROOT --> OR(📂 嵌套: OR组):::nested
+    ROOT --> D(📜 条件D):::cond
 
-    OR --> B(📜 Condition B):::cond
-    OR --> C(📜 Condition C):::cond
+    OR --> B(📜 条件B):::cond
+    OR --> C(📜 条件C):::cond
 
-    A --> RES([✅ Logic Result]):::success
+    A --> RES([✅ 逻辑结果]):::success
     B --> OR_OUT(( ))
     C --> OR_OUT
     OR_OUT --> RES
@@ -196,95 +191,93 @@ graph LR
     linkStyle 4,5 stroke:#94a3b8,stroke-width:1px
 ```
 
-**Add Nodes**: Use **+ Condition** or **+ Group** buttons on each group.
+**添加节点**：在每个组上使用**+ 条件**或**+ 组**按钮。
 
 ---
 
-### ⚖️ Comparison Nodes
+### ⚖️ 比较节点
 
-**Comparison Nodes** are the fundamental building blocks of your event logic. Each node performs a single **boolean check** (True/False) to determine if the event actions should proceed.
+**比较节点**是事件逻辑的基本构建块。每个节点执行单个**布尔检查**（True/False）以确定事件动作是否应该继续。
 
-#### 🏗️ Anatomy of a Comparison
+#### 🏗️ 比较的结构
 
-Every node follows a standard tripartite structure, making complex logic easy to read at a glance.
+每个节点遵循标准的三部分结构，使复杂逻辑一目了然。
 
-> **[ 🟦 Source(Left Operand) ]**  **[ Operator ]**  **[ 🟧 Target (Right Operand) ]** 
+> **[ 🟦 源（左操作数）]** **[ 运算符 ]** **[ 🟧 目标（右操作数）]**
 
-**Practical Example:**
-Imagine an event that only triggers if a hit is powerful enough:
-Argument.amount  **>**  20.0
+**实际示例：**
+想象一个只有在命中足够强大时才触发的事件：
+Argument.amount **>** 20.0
 
-- **🔍 Source:** Argument.amount — The raw damage value passed by the `GameEvent<float>`
-- **📐 Operator:** > — The logical rule (Greater Than)
-- **🎯 Target:** 20.0 — The constant threshold or another variable to compare against
+- **🔍 源：** Argument.amount — `GameEvent<float>` 传递的原始伤害值
+- **📐 运算符：** > — 逻辑规则（大于）
+- **🎯 目标：** 20.0 — 要比较的常量阈值或另一个变量
 
 ------
 
-#### 👓 View Modes
+#### 👓 查看模式
 
-The editor UI adapts to your needs, balancing **readability** with **precision control**.
+编辑器UI适应您的需求，平衡**可读性**与**精确控制**。
 
-| View Mode       | Visual Style                            | Best For...                                |
+| 查看模式 | 可视化样式 | 最适合... |
 | --------------- | --------------------------------------- | ------------------------------------------ |
-| 📖 **Collapsed** | **Summary Text** (e.g., Health < 50)    | Quick overview of complex logic chains.    |
-| 🛠️ **Expanded**  | **Detailed Editor** (Dropdowns, Fields) | Modifying specific parameters and sources. |
+| 📖 **折叠** | **摘要文本**（例如，Health < 50） | 快速概览复杂逻辑链。 |
+| 🛠️ **展开** | **详细编辑器**（下拉菜单、字段） | 修改特定参数和源。 |
 
-:::tip **Interaction Hint**
-Simply **Click** on any comparison block to toggle between these two views. This allows you to keep your workspace clean while retaining the ability to deep-dive into settings.
+:::tip **交互提示**
+只需**点击**任何比较块即可在这两种视图之间切换。这允许您保持工作区整洁，同时保留深入设置的能力。
 :::
 
 ---
 
-## **📝** Structure Configuration
+## **📝** 结构配置
 
 <details>
-<summary>📌 Source</summary>
+<summary>📌 源</summary>
 
 <Tabs>
-<TabItem value="event-arg" label="Event Argument" default>
+<TabItem value="event-arg" label="事件参数" default>
 
-### 🧬 Event Argument (Data Payload)
+### 🧬 事件参数（数据有效载荷）
 
-The **Argument** system allows you to drill down into the event's data payload to extract specific values for conditions and actions.
+**Argument**系统允许您深入事件的数据有效载荷以提取特定值用于条件和动作。
 
-:::info **Availability**
-Data access is exclusive to typed events: `GameEvent<T>` or `GameEvent<TSender, TArgs>`.
+:::info **可用性**
+数据访问专属于类型化事件：`GameEvent<T>` 或 `GameEvent<TSender, TArgs>`。
 :::
 
-#### 🔢 Single Parameter Events
+#### 🔢 单参数事件
 
-**Signature:** `GameEvent<DamageInfo>`
+**签名：** `GameEvent<DamageInfo>`
 
-When an event carries a single object, you can access the object itself or any of its public members.
+当事件携带单个对象时，您可以访问对象本身或其任何公共成员。
 
-**Data Structure Example:**
-
+**数据结构示例：**
 ```
-📦 (this Argument)      ➔ Full DamageInfo object
+📦 (this Argument)      ➔ 完整的DamageInfo对象
 ├── 🔢 amount           ➔ float
 ├── ✅ isCritical       ➔ bool
-├── 🏷️ type             ➔ DamageType (Enum)
+├── 🏷️ type             ➔ DamageType（枚举）
 ├── 📍 hitPoint         ➔ Vector3
 └── 👤 attacker         ➔ string
 ```
 
 ------
 
-#### 👥 Sender Events (Context-Aware)
+#### 👥 Sender事件（上下文感知）
 
-Sender events provide two distinct roots for data access: **Sender** (Who) and **Argument** (What).
+Sender事件为数据访问提供两个不同的根：**Sender**（谁）和**Argument**（什么）。
 
-##### 🎮 Case A: GameObject Sender
+##### 🎮 情况A：GameObject Sender
 
-**Signature:** `GameEvent<GameObject, DamageInfo>`
+**签名：** `GameEvent<GameObject, DamageInfo>`
 
-| Root         | Path Example              | Data Type |
+| 根 | 路径示例 | 数据类型 |
 | ------------ | ------------------------- | --------- |
-| **Sender**   | Sender.Transform.position | Vector3   |
-| **Argument** | Argument.amount           | float     |
+| **Sender** | Sender.Transform.position | Vector3 |
+| **Argument** | Argument.amount | float |
 
-**Visual Hierarchy:**
-
+**可视化层次结构：**
 ```
 👥 Sender
    ├── 🆔 tag           ➔ string
@@ -297,141 +290,135 @@ Sender events provide two distinct roots for data access: **Sender** (Who) and *
    └── ✅ isCritical    ➔ bool
 ```
 
-##### 🛡️ Case B: Custom C# Sender (Advanced)
+##### 🛡️ 情况B：自定义C# Sender（高级）
 
-**Signature:** `GameEvent<PlayerStats, DamageInfo>`
+**签名：** `GameEvent<PlayerStats, DamageInfo>`
 
-> 🚀 **Why it's special:** Unlike traditional systems, you are not tied to GameObjects. Use any **Pure C# Class** as a sender for decoupled, logic-first architecture.
+> 🚀 **为什么它特别：** 与传统系统不同，您不受GameObject的限制。使用任何**纯C#类**作为sender，实现解耦的逻辑优先架构。
 
-- 💎 **Pure Logic** — Works with non-MonoBehaviour classes.
-- 🌐 **Network Ready** — Ideal for PlayerData or NetworkAgent sync.
-- 🤖 **AI Agents** — Track internal state without scene dependencies.
+- 💎 **纯逻辑** — 适用于非MonoBehaviour类。
+- 🌐 **网络就绪** — 适用于PlayerData或NetworkAgent同步。
+- 🤖 **AI代理** — 跟踪内部状态而无需场景依赖。
 
 ------
 
-#### 🧭 Deep Property Access
+#### 🧭 深度属性访问
 
-**Precision Navigation.** Navigate nested structures up to **5 levels deep** with high-performance reflection.
+**精确导航。** 使用高性能反射导航最多**5层深**的嵌套结构。
 
-**Example: Directional Check**
+**示例：方向检查**
 
-- **Path:** Argument.hitPoint.normalized.x
-- **Condition:** > 0.5
-- **Result:** 🎯 "Hit came from the right side."
+- **路径：** Argument.hitPoint.normalized.x
+- **条件：** > 0.5
+- **结果：** 🎯 "命中来自右侧。"
 
-**Breadcrumb Logic:**
+**面包屑逻辑：**
 Argument (DamageInfo) ➔ hitPoint (Vector3) ➔ normalized (Vector3) ➔ x (float)
 
 ------
 
-#### 📋 Supported Types
+#### 📋 支持的类型
 
-The system automatically support below types:
+系统自动支持以下类型：
 
-| Category       | Supported Types                                   |
+| 类别 | 支持的类型 |
 | -------------- | ------------------------------------------------- |
-| **Primitives** | int, float, double, long, bool, string            |
-| **Math**       | Vector2, Vector3, Quaternion, Color               |
-| **Unity**      | GameObject, Transform, Component references       |
-| **Logic**      | Enums (with dropdowns), [Serializable] C# Classes |
+| **基础类型** | int、float、double、long、bool、string |
+| **数学** | Vector2、Vector3、Quaternion、Color |
+| **Unity** | GameObject、Transform、Component引用 |
+| **逻辑** | 枚举（带下拉菜单）、[Serializable] C#类 |
 
-:::tip **Pro Tip: Custom Classes**
-Any public **Field** or **Property** in a [Serializable] class is automatically exposed in the deep-link picker.
+:::tip **专业提示：自定义类**
+[Serializable]类中的任何公共**字段**或**属性**都会自动在深度链接选择器中公开。
 :::
 
 </TabItem>
 
-<TabItem value="scene-type" label="Scene Type">
+<TabItem value="scene-type" label="场景类型">
 
-### **🎬** Scene Type
+### **🎬** 场景类型
 
-Access runtime data from GameObjects or Components in the scene.
-
----
-
-#### How to Use
-
-**Step 1**: Drag GameObject or Component from Hierarchy into the object field.
-
-**Step 2**: Click "Select Property..." to browse available members.
+从场景中的GameObject或Component访问运行时数据。
 
 ---
 
-#### GameObject Example
+#### 使用方法
 
-Drag `PlayerController` GameObject:
+**步骤1**：从层级视图将GameObject或Component拖到对象字段。
 
+**步骤2**：点击"选择属性..."浏览可用成员。
+
+---
+
+#### GameObject示例
+
+拖动`PlayerController` GameObject：
 ```
-📦 GameObject (Instance)
-├─ 📦 (this GameObject)    ➔ The reference itself
+📦 GameObject（实例）
+├─ 📦 (this GameObject)    ➔ 引用本身
 ├─ ✅ activeSelf           ➔ bool
 ├─ 🔤 tag                  ➔ string
 └─ 🔢 layer                ➔ int
 
-📐 Transform (Component)
+📐 Transform（组件）
 ├─ 📍 position             ➔ Vector3
 ├─ 📏 localScale           ➔ Vector3
 └─ 📂 childCount           ➔ int
 
-🧩 PlayerController (Script)
+🧩 PlayerController（脚本）
 ├─ 🔢 Health               ➔ float
 ├─ 🛡️ Shield               ➔ float
 ├─ 🏅 Level                ➔ int
 ├─ ✅ HasFireResistance    ➔ bool
 │
-├─ ⚡ IsInDangerZone()      ➔ bool (Method)
-└─ ⚡ IsCriticallyWounded() ➔ bool (Method)
+├─ ⚡ IsInDangerZone()      ➔ bool（方法）
+└─ ⚡ IsCriticallyWounded() ➔ bool（方法）
 ```
 
-**Usage**:
-
+**用法**：
 ```
-Player.Health < 50                  → Health check
-Player.Level >= 10                  → Level requirement
-Player.IsInDangerZone() == true     → Complex check via method
+Player.Health < 50                  → 生命值检查
+Player.Level >= 10                  → 等级要求
+Player.IsInDangerZone() == true     → 通过方法进行复杂检查
 ```
 
 ---
 
-#### Bool Method Support ✨
+#### Bool方法支持 ✨
 
-**Zero-parameter methods** returning `bool` appear in the dropdown!
+返回`bool`的**零参数方法**出现在下拉菜单中！
 
-**Example**:
-
+**示例**：
 ```csharp
-// In your component
+// 在您的组件中
 public bool IsInDangerZone() {
     return Health < 20 && Shield == 0 && !IsInvincible;
 }
 ```
 
-**In Condition Tree**:
-
+**在条件树中**：
 ```
 Player.IsInDangerZone() == true
 ```
 
-This encapsulates complex logic in a single method call instead of building it visually.
+这将复杂逻辑封装在单个方法调用中，而不是可视化构建它。
 
 ---
 
-#### Component Example
+#### Component示例
 
-Drag `GameManager` Component:
-
+拖动`GameManager` Component：
 ```
-🏛️ GameManager (Global System)
-├─ 🔄 CurrentState        ➔ GameState (Enum)
+🏛️ GameManager（全局系统）
+├─ 🔄 CurrentState        ➔ GameState（枚举）
 ├─ 🌊 CurrentWave         ➔ int
 ├─ 🏅 DifficultyLevel     ➔ int
 │
-├─ ⚡ IsInCombat()         ➔ bool (Method)
-└─ ⚡ IsHardMode()         ➔ bool (Method)
+├─ ⚡ IsInCombat()         ➔ bool（方法）
+└─ ⚡ IsHardMode()         ➔ bool（方法）
 ```
 
-**Usage**:
-
+**用法**：
 ```
 GameManager.CurrentState == Playing
 GameManager.IsInCombat() == true
@@ -440,74 +427,70 @@ GameManager.DifficultyLevel >= 3
 
 ---
 
-#### Important Limitation
+#### 重要限制
 
-⚠️ **Scene Type requires objects to exist at scene load time.**
-
+⚠️ **场景类型要求对象在场景加载时存在。**
 ```
-✅ Works: Objects in scene hierarchy (exist at initialization)
-❌ Fails: Runtime-instantiated objects (don't exist yet)
+✅ 有效：场景层级中的对象（在初始化时存在）
+❌ 失败：运行时实例化的对象（尚不存在）
 
-Solution: Use Event Argument for runtime objects
+解决方案：对运行时对象使用事件参数
 ```
 
 </TabItem>
 
-<TabItem value="random" label="Random Type">
+<TabItem value="random" label="随机类型">
 
-### **🎲** Random Type
+### **🎲** 随机类型
 
-**Purpose**: Generate random values at execution time.
+**目的**：在执行时生成随机值。
 
 ---
 
-#### Two Modes
+#### 两种模式
 
-**Mode 1: Range**
+**模式1：范围**
 
-Generate random number within bounds.
+在边界内生成随机数。
 
 ![Visual Condition Tree](/img/game-event-system/visual-workflow/visual-condition-tree/condition-tree-random-value.png)
 
-**Configuration**:
+**配置**：
 
-- **Min**: Lower bound
-- **Max**: Upper bound  
-- **Integer**: Check for whole numbers, uncheck for decimals
+- **最小值**：下界
+- **最大值**：上界
+- **整数**：勾选表示整数，取消勾选表示小数
 
 ---
 
-**Mode 2: List**
+**模式2：列表**
 
-Pick random item from predefined values.
+从预定义值中随机选择项目。
 
 ![Visual Condition Tree](/img/game-event-system/visual-workflow/visual-condition-tree/condition-tree-random-list.png)
 
-**Configuration**:
+**配置**：
 
-- **Data Type**: Choose type (int, float, string, bool, etc.)
-- **List Items**: Add/remove values with +/- buttons
+- **数据类型**：选择类型（int、float、string、bool等）
+- **列表项**：使用+/-按钮添加/删除值
 
 ---
 
-#### Use Cases
+#### 使用场景
 
-**Critical Hit Chance**:
-
+**暴击几率**：
 ```
-Random(0~100) > 90  → 10% chance
-```
-
-**Damage Variance**:
-
-```
-Random(0~10) → Add random bonus damage
+Random(0~100) > 90  → 10%几率
 ```
 
-**Dynamic Events**:
-
+**伤害变化**：
 ```
-Random List[Easy, Normal, Hard] → Randomize difficulty
+Random(0~10) → 添加随机额外伤害
+```
+
+**动态事件**：
+```
+Random List[简单, 普通, 困难] → 随机化难度
 ```
 
 </TabItem>
@@ -516,91 +499,85 @@ Random List[Easy, Normal, Hard] → Randomize difficulty
 </details>
 
 <details>
-<summary>📌 Operator</summary>
+<summary>📌 运算符</summary>
 
+### **📐** 可用运算符
 
-### **📐** Available Operators
+**数值（6个）**
 
-**Numeric (6)**
+用于数字（int、float、double、long）：
 
-For numbers (int, float, double, long):
-
-| Operator         | Symbol | Example         |
+| 运算符 | 符号 | 示例 |
 | ---------------- | ------ | --------------- |
-| Equals           | `==`   | `Health == 100` |
-| Not Equals       | `!=`   | `Health != 0`   |
-| Greater          | `>`    | `Damage > 20`   |
-| Less             | `<`    | `Health < 50`   |
-| Greater Or Equal | `>=`   | `Level >= 10`   |
-| Less Or Equal    | `<=`   | `Shield <= 0`   |
+| 等于 | `==` | `Health == 100` |
+| 不等于 | `!=` | `Health != 0` |
+| 大于 | `>` | `Damage > 20` |
+| 小于 | `<` | `Health < 50` |
+| 大于或等于 | `>=` | `Level >= 10` |
+| 小于或等于 | `<=` | `Shield <= 0` |
 
-**Auto-Conversion**: Compatible numeric types convert automatically (int ↔ float).
+**自动转换**：兼容的数值类型自动转换（int ↔ float）。
 
 ---
 
-**String (4)**
+**字符串（4个）**
 
-For text values:
+用于文本值：
 
-| Operator    | Symbol         | Example                      |
+| 运算符 | 符号 | 示例 |
 | ----------- | -------------- | ---------------------------- |
-| Equals      | `==`           | `Name == "Hero"`             |
-| Not Equals  | `!=`           | `Tag != "Enemy"`             |
-| Starts With | `Starts With`  | `Name Starts With "Player_"` |
-| Ends With   | `Ends With`    | `File Ends With ".png"`      |
-| Contains    | `Contains (⊃)` | `Message Contains "error"`   |
+| 等于 | `==` | `Name == "Hero"` |
+| 不等于 | `!=` | `Tag != "Enemy"` |
+| 以...开头 | `Starts With` | `Name Starts With "Player_"` |
+| 以...结尾 | `Ends With` | `File Ends With ".png"` |
+| 包含 | `Contains (⊃)` | `Message Contains "error"` |
 
-⚠️ **Case-sensitive**: "Hero" ≠ "hero"
+⚠️ **区分大小写**："Hero" ≠ "hero"
 
 ---
 
-**Enum Support**
+**枚举支持**
 
-Full enumeration support with dropdown selection!
+完全枚举支持，带下拉选择！
 
-**Example**:
-
+**示例**：
 ```csharp
 public enum DamageType { Physical, Fire, Void }
 ```
 
-**In Condition Tree**:
-
+**在条件树中**：
 ```
-Source: Argument.type (DamageType)
-Operator: ==
-Target: DamageType.Fire (dropdown shows Physical/Fire/Void)
+源：Argument.type（DamageType）
+运算符：==
+目标：DamageType.Fire（下拉菜单显示Physical/Fire/Void）
 ```
 
-**With Lists**:
-
+**使用列表**：
 ```
 Argument.type In List [Fire, Void]
-Result: TRUE if type is DamageType.Fire OR DamageType.Void
+结果：如果type是DamageType.Fire或DamageType.Void，则为TRUE
 ```
 
-**Supported Operators**: `==`, `!=`, `In List (∈)`
+**支持的运算符**：`==`、`!=`、`In List (∈)`
 
 ---
 
-**Collection (1)**
+**集合（1个）**
 
-Check list/array membership:
+检查列表/数组成员资格：
 
-| Operator | Symbol | Purpose                       |
+| 运算符 | 符号 | 目的 |
 | -------- | ------ | ----------------------------- |
-| In List  | `∈`    | Check if value exists in list |
+| 在列表中 | `∈` | 检查值是否存在于列表中 |
 
-**Structure**:
-
+**结构**：
 ```
-Source: Single value
-Operator: In List (∈)
-Target: List/Array (matching type)
+源：单个值
+运算符：在列表中（∈）
+目标：列表/数组（匹配类型）
 ```
 
-**Examples**:
-
+**示例**：
 ```
 Argument.attacker In List ["Dragon", "Demon", "Lich"]
 Player.Level In List [10, 20, 30, 40, 50]
@@ -610,112 +587,109 @@ Argument.type In List [Fire, Void]
 </details>
 
 <details>
-<summary>📌 Target</summary>
+<summary>📌 目标</summary>
 <Tabs>
-<TabItem value="event-arg" label="Event Argument" default>
+<TabItem value="event-arg" label="事件参数" default>
 
-### 🧬 Event Argument (Data Payload)
+### 🧬 事件参数（数据有效载荷）
 
-:::tip Same as Source
+:::tip 与源相同
 
-Like Source, please refer to the relevant configuration introduction in Source for specific details
-
-:::
-
-</TabItem>
-
-<TabItem value="scene-type" label="Scene Type">
-
-### **🎬** Scene Type
-
-:::tip Same as Source
-
-Like Source, please refer to the relevant configuration introduction in Source for specific details
+与源一样，具体细节请参考源中的相关配置介绍
 
 :::
 
 </TabItem>
 
-<TabItem value="random" label="Random Type">
+<TabItem value="scene-type" label="场景类型">
 
-### **🎲** Random Type
+### **🎬** 场景类型
 
-:::tip Same as Source
+:::tip 与源相同
 
-Like Source, please refer to the relevant configuration introduction in Source for specific details
+与源一样，具体细节请参考源中的相关配置介绍
 
 :::
 
 </TabItem>
 
-<TabItem value="constant" label="Constant">
+<TabItem value="random" label="随机类型">
 
-### **📌** Constant
+### **🎲** 随机类型
 
-Fixed comparison value.
+:::tip 与源相同
 
-**Note**: Only available as **Target** (right side), not Source.
+与源一样，具体细节请参考源中的相关配置介绍
+
+:::
+
+</TabItem>
+
+<TabItem value="constant" label="常量">
+
+### **📌** 常量
+
+固定比较值。
+
+**注意**：仅作为**目标**（右侧）可用，不作为源。
 
 ---
 
-#### Two Modes
+#### 两种模式
 
-**Mode 1: Single Value**
+**模式1：单个值**
 
-Enter one fixed value.
+输入一个固定值。
 
 ![Visual Condition Tree](/img/game-event-system/visual-workflow/visual-condition-tree/condition-tree-constant-value.png)
 
-**Data Types**: Int, Float, Double, String, Bool
+**数据类型**：Int、Float、Double、String、Bool
 
 ---
 
-**Mode 2: List**
+**模式2：列表**
 
-Define multiple acceptable values (for "In List" operator).
+定义多个可接受的值（用于"在列表中"运算符）。
 
 ![Visual Condition Tree](/img/game-event-system/visual-workflow/visual-condition-tree/condition-tree-constant-list.png)
 
-**Configuration**:
+**配置**：
 
-- **Data Type**: Type for all list items
-- **+ / -**: Add/remove items
+- **数据类型**：所有列表项的类型
+- **+ / -**：添加/删除项
 
 ---
 
-#### Use Cases
+#### 使用场景
 
-**Thresholds**:
-
+**阈值**：
 ```
 Health < 50.0
 ```
 
-**Exact Matches**:
-
+**精确匹配**：
 ```
 Name == "Hero"
 ```
 
-**Multiple Values**:
-
+**多个值**：
 ```
 Type In List [Fire, Void, Lightning]
 ```
 
-:::tip **Key difference**
+:::tip **关键区别**
 
-Additional support type: Constant Type**（only available for Target）**
+额外支持类型：常量类型**（仅适用于目标）**
 
 :::
 
-:::tip **Context-Aware**
+:::tip **上下文感知**
 
-Some operators restrict target type:
+某些运算符限制目标类型：
 
-- Numeric operators (`>`, `<`, etc.) require single values
+- 数值运算符（`>`、`<`等）需要单个值
 
-- "In List" operator requires list types
+- "在列表中"运算符需要列表类型
 
 :::
 
@@ -726,42 +700,39 @@ Some operators restrict target type:
 
 ------
 
-## 🎨 Type Validation
+## 🎨 类型验证
 
-The system automatically validates type compatibility.
+系统自动验证类型兼容性。
 
-**Valid Comparisons**:
-
+**有效比较**：
 ```
 ✅ int == int
-✅ float > int (auto-converts)
+✅ float > int（自动转换）
 ✅ string Contains string
-✅ DamageType == Fire (enum)
+✅ DamageType == Fire（枚举）
 ✅ int In List<int>
 ```
 
-**Invalid Comparisons**:
-
+**无效比较**：
 ```
-❌ string > int (incompatible types)
-❌ bool Contains string (meaningless)
-❌ float In List<string> (type mismatch)
+❌ string > int（不兼容类型）
+❌ bool Contains string（无意义）
+❌ float In List<string>（类型不匹配）
 ```
 
-**Visual Feedback**: Red outline + warning text on incompatible types.
+**视觉反馈**：不兼容类型上的红色轮廓+警告文本。
 
 ---
 
-## 🧩 Bool Methods vs Visual Tree
+## 🧩 Bool方法 vs 可视化树
 
-Two approaches to building conditions—when to use each?
+两种构建条件的方法——何时使用每种？
 
-### Approach 1: Bool Methods
+### 方法1：Bool方法
 
-**Best for**: Complex multi-step logic.
+**最适合**：复杂的多步逻辑。
 
-**Example**:
-
+**示例**：
 ```csharp
 public bool IsInDangerZone() {
     bool lowHealth = Health < 20;
@@ -774,49 +745,48 @@ public bool IsInDangerZone() {
 }
 ```
 
-**In Tree**: `Player.IsInDangerZone() == true`
+**在树中**：`Player.IsInDangerZone() == true`
 
-**Pros**:
+**优点**：
 
-- Encapsulates complexity
-- Can use Physics, raycasts
-- Unit testable
-- Code reusable
+- 封装复杂性
+- 可以使用Physics、raycast
+- 单元可测试
+- 代码可重用
 
-**Cons**:
+**缺点**：
 
-- Requires C# coding
-- Designers can't modify
+- 需要C#编码
+- 设计师无法修改
 
 ---
 
-### Approach 2: Visual Tree
+### 方法2：可视化树
 
-**Best for**: Simple checks designers should control.
+**最适合**：设计师应该控制的简单检查。
 
-**Example**:
-
+**示例**：
 ```mermaid
 graph LR
 
-    A(📂 AND Group):::root
+    A(📂 AND组):::root
     
-    C1(💔 Health < 20):::cond
-    C2(🛡️ Shield == 0):::cond
-    C3(🚫 IsInvincible == false):::cond
+    C1(💔 生命 < 20):::cond
+    C2(🛡️ 护盾 == 0):::cond
+    C3(🚫 无敌 == false):::cond
     
-    R([✅ Result: TRUE]):::success
-    F([❌ Result: FALSE]):::fail
+    R([✅ 结果: TRUE]):::success
+    F([❌ 结果: FALSE]):::fail
 
     A --> C1
     
-    C1 -- Yes --> C2
-    C2 -- Yes --> C3
-    C3 -- Yes --> R
+    C1 -- 是 --> C2
+    C2 -- 是 --> C3
+    C3 -- 是 --> R
 
-    C1 -- No --> F
-    C2 -- No --> F
-    C3 -- No --> F
+    C1 -- 否 --> F
+    C2 -- 否 --> F
+    C3 -- 否 --> F
 
     classDef root fill:#1e40af,stroke:#0f172a,stroke-width:2px,color:#ffffff,font-weight:bold
     classDef cond fill:#b45309,stroke:#78350f,stroke-width:2px,color:#ffffff,font-weight:bold
@@ -826,47 +796,46 @@ graph LR
     linkStyle default stroke:#94a3b8,stroke-width:2px,color:#94a3b8
 ```
 
-**Pros**:
+**优点**：
 
-- No coding needed
-- Designer-friendly
-- Visual representation
-- Quick iteration
+- 无需编码
+- 设计师友好
+- 可视化表示
+- 快速迭代
 
-**Cons**:
+**缺点**：
 
-- Can't use Physics/algorithms
-- Large trees get complex
+- 无法使用Physics/算法
+- 大型树变得复杂
 
 ---
 
-### Hybrid Approach (Recommended)
+### 混合方法（推荐）
 
-Combine both for optimal results:
-
+结合两者以获得最佳结果：
 ```mermaid
 graph LR
 
     %% 节点定义
-    ROOT(📂 AND Group):::root
+    ROOT(📂 AND组):::root
     
-    C1("🏷️ Type == Fire<br/>───<br/><sub>Data: Enum</sub>"):::cond
-    C2("👤 Health < 50<br/>───<br/><sub>Source: Player</sub>"):::cond
-    C3("⚙️ IsInCombat<br/>───<br/><sub>Method: Manager</sub>"):::cond
+    C1("🏷️ 类型 == 火<br/>───<br/><sub>数据: 枚举</sub>"):::cond
+    C2("👤 生命 < 50<br/>───<br/><sub>源: Player</sub>"):::cond
+    C3("⚙️ 战斗中<br/>───<br/><sub>方法: Manager</sub>"):::cond
     
-    RES_T([✅ Result: TRUE]):::result
-    RES_F([❌ Result: FALSE]):::fail
+    RES_T([✅ 结果: TRUE]):::result
+    RES_F([❌ 结果: FALSE]):::fail
 
     %% 逻辑连接
     ROOT --> C1
     
-    C1 -- Yes --> C2
-    C2 -- Yes --> C3
-    C3 -- Yes --> RES_T
+    C1 -- 是 --> C2
+    C2 -- 是 --> C3
+    C3 -- 是 --> RES_T
 
-    C1 -- No --> RES_F
-    C2 -- No --> RES_F
-    C3 -- No --> RES_F
+    C1 -- 否 --> RES_F
+    C2 -- 否 --> RES_F
+    C3 -- 否 --> RES_F
 
     %% 样式定义
     classDef root fill:#1e40af,stroke:#0f172a,stroke-width:2px,color:#ffffff,font-weight:bold
@@ -878,158 +847,152 @@ graph LR
     linkStyle default stroke:#94a3b8,stroke-width:2px,color:#94a3b8
 ```
 
-**Guideline**:
+**指南**：
 
-- Visual Tree: Thresholds, enums, simple properties
-- Bool Methods: Physics queries, complex algorithms, cross-system checks
-
----
-
-## 🔄 Drag & Reorder
-
-**Change execution order**: Drag the handle (☰) on the left edge of any condition.
-
-**Why Order Matters**:
-
-**AND Groups**: Order doesn't affect result (all must pass).
-
-**OR Groups**: Order affects **short-circuit evaluation** (stops at first TRUE).
-
-**Optimization Example**:
-
-```
-❌ Slow:
-OR Group
-├─ ExpensivePhysicsCheck()  ← Runs first (slow!)
-└─ SimpleBoolCheck          ← May never run
-
-✅ Fast:
-OR Group
-├─ SimpleBoolCheck          ← Runs first (fast!)
-└─ ExpensivePhysicsCheck()  ← Only if needed
-```
-
-Put cheap checks first in OR groups for better performance.
+- 可视化树：阈值、枚举、简单属性
+- Bool方法：Physics查询、复杂算法、跨系统检查
 
 ---
 
-## 🚀 Performance
+## 🔄 拖放重新排序
 
-### Compilation Process
+**更改执行顺序**：拖动任何条件左边缘的句柄（☰）。
 
-**One-time cost** (scene load):
+**为什么顺序很重要**：
 
+**AND组**：顺序不影响结果（所有必须通过）。
+
+**OR组**：顺序影响**短路评估**（在第一个TRUE处停止）。
+
+**优化示例**：
 ```
-Visual Tree → Expression Tree → IL Code → Compiled Lambda
+❌ 慢：
+OR组
+├─ ExpensivePhysicsCheck()  ← 首先运行（慢！）
+└─ SimpleBoolCheck          ← 可能永远不运行
+
+✅ 快：
+OR组
+├─ SimpleBoolCheck          ← 首先运行（快！）
+└─ ExpensivePhysicsCheck()  ← 仅在需要时
 ```
 
-**Runtime execution**:
-
-```
-Event Fires → Call Compiled Lambda → Return TRUE/FALSE
-```
-
-**Benchmark**: Complex nested conditions execute in ~0.001ms (1 microsecond).
+在OR组中首先放置廉价检查以获得更好的性能。
 
 ---
 
-### Why It's Fast
+## 🚀 性能
 
-**Zero Reflection**: Direct compiled access like hand-written C#.
+### 编译过程
 
-**Expression Trees**: System generates optimized IL code at initialization.
-
+**一次性成本**（场景加载）：
 ```
-❌ Traditional: GetComponent() + GetField() + Invoke() per check
-✅ This System: Direct property access via compiled lambda
+可视化树 → 表达式树 → IL代码 → 编译的Lambda
 ```
 
-**Result**: Negligible overhead even with hundreds of events firing per frame.
+**运行时执行**：
+```
+事件触发 → 调用编译的Lambda → 返回TRUE/FALSE
+```
+
+**基准测试**：复杂嵌套条件在~0.001ms（1微秒）内执行。
 
 ---
 
-## 🧹 Tree Management
+### 为什么它快
 
-- **Enable/Disable**: Toggle checkbox to bypass all conditions (always TRUE).
-- **Reset Tree**: Click "Reset Tree" button to clear all nodes and start fresh.
+**零反射**：像手写C#一样直接编译访问。
 
-- **Collapse/Expand**: Click comparison blocks to toggle between summary and detail views.
-
----
-
-## ❓ Troubleshooting
-
-### Conditions Always Return False
-
-**Checklist**:
-
-- ✅ Is "Enable Conditions" toggle checked?
-- ✅ Are there red type mismatch warnings?
-- ✅ Are Scene Type references still valid (not destroyed)?
-- ✅ Do bool methods return expected values? (add Debug.Log)
-
----
-
-### Property Not in Dropdown
-
-**For Event Arguments**:
-
-- Must be public field or property
-- Must be supported type
-
-**For Scene Types**:
-
-- GameObject must exist in scene at Editor time
-- Component must be enabled
-- Property must be public
-- Methods must: return bool, zero parameters, public, instance (not static)
-
-**For Runtime Objects**: Use Event Argument instead of Scene Type.
-
----
-
-### Changes Not Saving
-
-**Common Causes**:
-
-- Multiple Behavior Windows open (close duplicates)
-- Script compilation during editing (wait for completion)
-- Unity didn't apply SerializedProperty changes (wait before closing)
-
----
-
-## 📖 Where It's Used
-
-The Visual Condition Tree system appears in **two contexts**:
-
-**1. Event Behaviors** → [Game Event Behavior](./game-event-behavior.md)
-
-Controls whether event actions execute:
-
+**表达式树**：系统在初始化时生成优化的IL代码。
 ```
-Event Fires → Check Conditions → Execute/Skip Actions
+❌ 传统：每次检查GetComponent() + GetField() + Invoke()
+✅ 本系统：通过编译的lambda直接属性访问
 ```
 
-**2. Flow Nodes** → Flow Node Configuration *(future documentation)*
-
-Controls whether flow nodes execute:
-
-```
-Flow Reaches Node → Check Conditions → Execute/Skip Node
-```
-
-Both use the **exact same** condition tree system.
+**结果**：即使每帧触发数百个事件，开销也可以忽略不计。
 
 ---
 
-:::tip Best Practices
+## 🧹 树管理
 
-**Simple Checks**: Use Visual Tree for thresholds, enums, basic comparisons
+- **启用/禁用**：切换复选框以绕过所有条件（始终为TRUE）。
+- **重置树**：点击"重置树"按钮清除所有节点并重新开始。
 
-**Complex Logic**: Use Bool Methods for Physics, algorithms, multi-step checks
+- **折叠/展开**：点击比较块在摘要和详细视图之间切换。
 
-**Optimal Approach**: Combine both—visual for simple, methods for complex
+---
 
-**Performance**: Put cheap checks first in OR groups for short-circuit optimization
+## ❓ 故障排除
+
+### 条件始终返回False
+
+**检查清单**：
+
+- ✅ "启用条件"切换是否已勾选？
+- ✅ 是否有红色类型不匹配警告？
+- ✅ 场景类型引用是否仍然有效（未销毁）？
+- ✅ bool方法是否返回预期值？（添加Debug.Log）
+
+---
+
+### 属性不在下拉菜单中
+
+**对于事件参数**：
+
+- 必须是公共字段或属性
+- 必须是受支持的类型
+
+**对于场景类型**：
+
+- GameObject必须在编辑器时存在于场景中
+- Component必须启用
+- 属性必须是公共的
+- 方法必须：返回bool、零参数、公共、实例（非静态）
+
+**对于运行时对象**：使用事件参数而不是场景类型。
+
+---
+
+### 更改未保存
+
+**常见原因**：
+
+- 打开了多个行为窗口（关闭重复项）
+- 编辑期间脚本编译（等待完成）
+- Unity未应用SerializedProperty更改（关闭前等待）
+
+---
+
+## 📖 使用位置
+
+可视化条件树系统出现在**两个上下文**中：
+
+**1. 事件行为** → [游戏事件行为](./game-event-behavior.md)
+
+控制事件动作是否执行：
+```
+事件触发 → 检查条件 → 执行/跳过动作
+```
+
+**2. 流程节点** → 流程节点配置*（未来文档）*
+
+控制流程节点是否执行：
+```
+流程到达节点 → 检查条件 → 执行/跳过节点
+```
+
+两者使用**完全相同**的条件树系统。
+
+---
+
+:::tip 最佳实践
+
+**简单检查**：对阈值、枚举、基本比较使用可视化树
+
+**复杂逻辑**：对Physics、算法、多步检查使用Bool方法
+
+**最佳方法**：两者结合——简单的可视化，复杂的方法
+
+**性能**：在OR组中首先放置廉价检查以进行短路优化
 
 :::

@@ -1,190 +1,188 @@
 ﻿---
-sidebar_label: 'Database & FlowGraph'
+sidebar_label: '数据库与流程图'
 sidebar_position: 2
 
 ---
 
-# Game Event Manager
+# 游戏事件管理器
 
-The **Game Event Manager** is the runtime brain of the entire system. It is responsible for loading your data (Events & Flows) into memory, managing their lifecycle, and providing real-time telemetry.
+**游戏事件管理器** 是整个系统的运行时大脑。它负责将您的数据（事件和流程）加载到内存中，管理它们的生命周期，并提供实时遥测。
 
-Unlike the Dashboard (which is a tool for *creating*), the Manager is the container that *holds* your data.
+与仪表板（用于*创建*的工具）不同，管理器是*保存*您数据的容器。
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-manager/manager-full.png)
 
 ---
 
-## 🏗️ The Data Architecture
+## 🏗️ 数据架构
 
-Before diving into the UI, it is critical to understand how this system stores data.
+在深入UI之前，理解此系统如何存储数据至关重要。
 
-### Storage Model
+### 存储模型
 
-1. **Container-Based Storage**: Events are not loose files. They are stored as **Sub-Assets** inside a parent **Database Asset** (`.asset`).
-2. **Separation of Concerns**:
-   - **Databases**: Store Event Definitions (Identity, Name, Type).
-   - **Flow Graphs**: Store Logic Nodes (Triggers, Chains, Connections).
-3. **The "Sanctuary"**: By default, all assets are created in `Assets/TinyGiantsData/GameEventSystem/`.
+1. **基于容器的存储**：事件不是松散的文件。它们作为 **子资产** 存储在父 **数据库资产**（`.asset`）内。
+2. **关注点分离**：
+   - **数据库**：存储事件定义（标识、名称、类型）。
+   - **流程图**：存储逻辑节点（触发器、链、连接）。
+3. **"保护区"**：默认情况下，所有资产都在 `Assets/TinyGiantsData/GameEventSystem/` 中创建。
 
-:::danger CRITICAL: Do Not Manually Delete Sub-Assets
+:::danger 关键：不要手动删除子资产
 
-Because events are sub-assets, **NEVER** delete them directly from the Project view by expanding the Database asset.
+因为事件是子资产，**永远不要** 通过展开数据库资产直接从项目视图中删除它们。
 
-**Correct Workflow**:
+**正确工作流**：
 
-- ✅ **To Delete an Event**: Use the **[Game Event Editor](./game-event-editor.md)**
-- ✅ **To Delete a Flow**: Use the **[Game Event Flow Editor](../flow-graph/game-event-node-editor.md)**
+- ✅ **删除事件**：使用 **[游戏事件编辑器](./game-event-editor.md)**
+- ✅ **删除流程**：使用 **[游戏事件流程编辑器](../flow-graph/game-event-node-editor.md)**
 
-**Why?** Manual deletion breaks GUID references and corrupts the database integrity.
+**为什么？** 手动删除会破坏GUID引用并损坏数据库完整性。
 :::
 
 ---
 
-## 🗃️ Database Management
+## 🗃️ 数据库管理
 
-This section controls which sets of events are active in your scene. The system supports **Multi-Database Architecture**, allowing you to split events (e.g., "Core", "Combat", "UI") and load them as needed.
+本节控制场景中哪些事件集处于活动状态。系统支持 **多数据库架构**，允许您拆分事件（例如，"Core"、"Combat"、"UI"）并根据需要加载它们。
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-manager/manager-databases.png)
 
-### Management Actions
+### 管理操作
 
-| Action                | Description                                                  |
+| 操作 | 描述 |
 | :-------------------- | :----------------------------------------------------------- |
-| **Active / Inactive** | Toggles whether this database is loaded. Inactive databases will not resolve event lookups at runtime. |
-| **Remove (×)**        | Removes the database **from this list only**. It **DOES NOT** delete the asset file from your project. |
-| **+ Create New**      | Creates a new `.asset` database file in the `TinyGiantsData/GameEventSystem/Database` folder and adds it here. |
-| **📂 Add Existing**    | Opens a file picker to add a database you created previously (This operation will search for all database assets under Assets directory and display them in the drop-down list). |
+| **活动/非活动** | 切换此数据库是否已加载。非活动数据库在运行时不会解析事件查找。 |
+| **移除（×）** | **仅从此列表** 移除数据库。它 **不会** 从项目中删除资产文件。 |
+| **+ 创建新的** | 在 `TinyGiantsData/GameEventSystem/Database` 文件夹中创建新的 `.asset` 数据库文件并在此处添加。 |
+| **📂 添加现有** | 打开文件选择器以添加您之前创建的数据库（此操作将搜索Assets目录下的所有数据库资产并在下拉列表中显示）。 |
 
-### Understanding Active vs Inactive
+### 理解活动与非活动
 
-**Active Database** (Green Badge):
+**活动数据库**（绿色徽章）：
 
-- ✅ Events are available for binding in Inspectors
-- ✅ Events can be triggered at runtime
-- ✅ Appears in Game Event Editor searches
+- ✅ 事件可在Inspector中绑定
+- ✅ 事件可在运行时触发
+- ✅ 出现在游戏事件编辑器搜索中
 
-**Inactive Database** (Yellow Badge):
+**非活动数据库**（黄色徽章）：
 
-- ⏸️ Temporarily disabled without removing from list
-- 🔒 Events cannot be triggered or bound
-- 💡 Useful for seasonal content or DLC events
+- ⏸️ 临时禁用而不从列表中移除
+- 🔒 事件无法触发或绑定
+- 💡 适用于季节性内容或DLC事件
 
-:::tip Project Context Menu
-You can also create databases directly in the Project window:
-
+:::tip 项目上下文菜单
+您也可以直接在项目窗口中创建数据库：
 ```
-Right-Click → Create → TinyGiants → Game Event System → Game Event Database
+右键点击 → Create → TinyGiants → Game Event System → Game Event Database
 ```
 
-Then add it to the Manager via **"Add Existing"** button.
+然后通过 **"Add Existing"** 按钮将其添加到管理器。
 :::
 
 ---
 
-## 🕸️ Flow Graph Management
+## 🕸️ 流程图管理
 
-Similar to databases, this section manages your **Visual Logic Containers**.
+与数据库类似，本节管理您的 **可视化逻辑容器**。
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-manager/manager-flowgraphs.png)
 
-### What is a Flow Container?
+### 什么是流程容器？
 
-A **Flow Container** is a ScriptableObject that holds multiple "Flow Graphs" (visual event sequences).
+**流程容器** 是一个ScriptableObject，它保存多个"流程图"（可视化事件序列）。
 
-**Common Workflow**:
+**常见工作流**：
 
-- **Global Flow**: Persistent logic active across all scenes (e.g., UI events, audio triggers)
-- **Level-Specific Flows**: Load/unload per scene (e.g., boss fight sequences, tutorial steps)
+- **全局流程**：跨所有场景的持久逻辑（例如，UI事件、音频触发器）
+- **关卡特定流程**：按场景加载/卸载（例如，Boss战斗序列、教程步骤）
 
-### Management Actions
+### 管理操作
 
-Same controls as databases:
+与数据库相同的控件：
 
-- **Create New**: Generate a new flow container asset
-- **Add Existing**: Register a previously created flow container
-- **Active/Inactive**: Enable or disable flow execution
-- **Remove (×)**: Unregister from manager (doesn't delete the asset)
+- **创建新的**：生成新的流程容器资产
+- **添加现有**：注册先前创建的流程容器
+- **活动/非活动**：启用或禁用流程执行
+- **移除（×）**：从管理器注销（不删除资产）
 
-:::info Editing Flow Graphs
-Flow graphs themselves are edited in the **[Game Event Flow Editor](../flow-graph/game-event-node-editor.md)**, not here. The Manager only controls **which flows are loaded**.
+:::info 编辑流程图
+流程图本身在 **[游戏事件流程编辑器](../flow-graph/game-event-node-editor.md)** 中编辑，而不是在这里。管理器仅控制 **加载哪些流程**。
 :::
 
 ---
 
-## 📊 Live Statistics (Telemetry)
+## 📊 实时统计（遥测）
 
-The Inspector provides three dedicated panels to monitor the health and composition of your event system.
+Inspector提供三个专用面板来监控事件系统的健康状况和组成。
 
-### 1. Overview Stats
+### 1. 概览统计
 
-Tracks the binding status of your events.
+跟踪事件的绑定状态。
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-manager/manager-overview.png)
 
-| Metric              | Description                                                  |
+| 指标 | 描述 |
 | :------------------ | :----------------------------------------------------------- |
-| **Total Events**    | The sum of all events across all active databases.           |
-| **Bound Events**    | The number of events that are currently **configured in the Inspector** (Visual Binding). |
-| **Runtime Binding** | Events bound via code (`AddListener`) are tracked separately in the **[Runtime Monitor](../tools/runtime-monitor.md)**. |
+| **总事件数** | 所有活动数据库中所有事件的总和。 |
+| **已绑定事件** | 当前 **在Inspector中配置** 的事件数量（可视化绑定）。 |
+| **运行时绑定** | 通过代码绑定的事件（`AddListener`）在 **[运行时监控器](../tools/runtime-monitor.md)** 中单独跟踪。 |
 
-**Progress Bar**: Shows the percentage of events that have been bound (configured with listeners).
+**进度条**：显示已绑定（配置了监听器）的事件百分比。
 
-:::tip Play Mode Auto-Refresh
-During Play Mode, the statistics panel automatically updates to reflect runtime listener registrations. The bound events count will change as you call `AddListener()` in your code.
+:::tip 播放模式自动刷新
+在播放模式期间，统计面板会自动更新以反映运行时监听器注册。当您在代码中调用 `AddListener()` 时，已绑定事件计数会发生变化。
 :::
 
 ---
 
-### 2. Composition
+### 2. 组成
 
-Shows the complexity distribution of your event architecture.
+显示事件架构的复杂度分布。
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-manager/manager-composition.png)
 
-| Category             | Definition                     | Example Use Cases                               |
+| 类别 | 定义 | 示例使用场景 |
 | :------------------- | :----------------------------- | :---------------------------------------------- |
-| **Void Events**      | Simple signals (no parameters) | `OnGameStart`, `OnPause`, `OnButtonClick`       |
-| **Single Parameter** | Typed payload events           | `OnHealthChanged(float)`, `OnScoreUpdated(int)` |
-| **With Sender**      | Source-aware events            | `OnDamage(GameObject sender, float amount)`     |
+| **空事件** | 简单信号（无参数） | `OnGameStart`、`OnPause`、`OnButtonClick` |
+| **单参数** | 类型化有效载荷事件 | `OnHealthChanged(float)`、`OnScoreUpdated(int)` |
+| **带Sender** | 源感知事件 | `OnDamage(GameObject sender, float amount)` |
 
-**Why This Matters**: 
+**为什么这很重要**：
 
-- High percentage of Void events = Simple, easy-to-maintain architecture
-- High percentage of Sender events = Complex, data-rich system with detailed tracking
+- 高百分比的空事件 = 简单、易于维护的架构
+- 高百分比的Sender事件 = 复杂、数据丰富的系统，具有详细跟踪
 
 ---
 
-### 3. Event Types Registry
+### 3. 事件类型注册表
 
-A live registry of every data type currently compiled and supported by your project.
+项目当前编译和支持的每种数据类型的实时注册表。
 
-#### Built-in Types (Out of the Box)
+#### 内置类型（开箱即用）
 
-The system comes pre-loaded with native support for **32 standard types**, categorized by usage:
+系统预装了对 **32种标准类型** 的原生支持，按使用分类：
 
 <details>
-<summary>📋 View Supported Built-in Types</summary>
+<summary>📋 查看支持的内置类型</summary>
 
 
-| C# Types | Math         | Components       | Assets          |
+| C#类型 | 数学 | 组件 | 资产 |
 | :------- | :----------- | :--------------- | :-------------- |
-| `int`    | `Vector2`    | `GameObject`     | `Sprite`        |
-| `float`  | `Vector3`    | `Transform`      | `Texture2D`     |
-| `double` | `Vector4`    | `RectTransform`  | `Material`      |
-| `bool`   | `Vector2Int` | `Rigidbody`      | `AudioClip`     |
-| `string` | `Vector3Int` | `Rigidbody2D`    | `AnimationClip` |
-| `byte`   | `Quaternion` | `Collider`       |                 |
-| `long`   | `Rect`       | `Collider2D`     |                 |
-| `char`   | `Bounds`     | `Camera`         |                 |
-|          | `Color`      | `Light`          |                 |
-|          |              | `ParticleSystem` |                 |
+| `int` | `Vector2` | `GameObject` | `Sprite` |
+| `float` | `Vector3` | `Transform` | `Texture2D` |
+| `double` | `Vector4` | `RectTransform` | `Material` |
+| `bool` | `Vector2Int` | `Rigidbody` | `AudioClip` |
+| `string` | `Vector3Int` | `Rigidbody2D` | `AnimationClip` |
+| `byte` | `Quaternion` | `Collider` | |
+| `long` | `Rect` | `Collider2D` | |
+| `char` | `Bounds` | `Camera` | |
+| | `Color` | `Light` | |
+| | | `ParticleSystem` | |
 
 </details>
 
-**What You Can Do**: Create events using any of these types immediately, without code generation.
-
+**您可以做什么**：立即使用这些类型中的任何一种创建事件，无需代码生成。
 ```csharp
-// Examples of built-in type events
+// 内置类型事件示例
 [GameEventDropdown] GameEvent<int> OnScoreChanged;
 [GameEventDropdown] GameEvent<Vector3> OnPositionUpdated;
 [GameEventDropdown] GameEvent<GameObject> OnObjectSpawned;
@@ -192,170 +190,167 @@ The system comes pre-loaded with native support for **32 standard types**, categ
 
 ---
 
-#### Custom & Sender Types
+#### 自定义与Sender类型
 
-When you create an event with a **Custom Class** (e.g., `PlayerStats`) or a **Sender Event** (e.g., `<GameObject, DamageInfo>`), those types will automatically appear in this list after code generation.
+当您使用 **自定义类**（例如，`PlayerStats`）或 **Sender事件**（例如，`<GameObject, DamageInfo>`）创建事件时，这些类型会在代码生成后自动出现在此列表中。
 
-**Example Display**:
+**示例显示**：
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-manager/manager-type.png)
 
-**Creation Process**:
+**创建过程**：
 
-1. Write your custom class in C#
-2. Use **[Game Event Creator](./game-event-creator.md)** to create event(generate code & event sub-asset)
-3. Type appears in this registry
-4. Now you can create event assets using your custom type
+1. 在C#中编写您的自定义类
+2. 使用 **[游戏事件创建器](./game-event-creator.md)** 创建事件（生成代码和事件子资产）
+3. 类型出现在此注册表中
+4. 现在您可以使用自定义类型创建事件资产
 
 ---
 
-## 🛠 Best Practices
+## 🛠 最佳实践
 
-### ✅ DO
+### ✅ 应该做
 
-**Split Your Databases**
+**拆分您的数据库**
 
-Keep a modular structure for better organization:
-
+保持模块化结构以获得更好的组织：
 ```tex
 📁 Database/
-├─ Global_DB.asset        (Core game events)
-├─ Combat_DB.asset        (Combat-specific events)
-├─ UI_DB.asset            (UI interaction events)
-└─ Tutorial_DB.asset      (Tutorial sequence events)
+├─ Global_DB.asset        (核心游戏事件)
+├─ Combat_DB.asset        (战斗特定事件)
+├─ UI_DB.asset            (UI交互事件)
+└─ Tutorial_DB.asset      (教程序列事件)
 ```
 
-**Benefits**:
+**好处**：
 
-- Clearer organization
-- Easier collaboration (different team members work on different databases)
-- Better performance (load only what you need)
-
----
-
-**Keep the Manager in Every Scene**
-
-Ensure the `GameEventManager` object exists in every scene:
-
-- The Manager persists across scenes using `DontDestroyOnLoad`
-- If it's missing, open the **[Game Event System Window](./game-event-system.md)** to auto-create it
+- 更清晰的组织
+- 更容易协作（不同团队成员处理不同数据库）
+- 更好的性能（仅加载所需内容）
 
 ---
 
-**Use "Add Existing" for Team Collaboration**
+**在每个场景中保留管理器**
 
-When working with teammates:
+确保 `GameEventManager` 对象存在于每个场景中：
 
-1. Teammate creates a database and commits to version control
-2. You pull the latest changes
-3. Open Manager Inspector → Click **"Add Existing"**
-4. Select the new database
-5. ✅ GUID references remain intact, no broken links!
+- 管理器使用 `DontDestroyOnLoad` 在场景之间持久化
+- 如果缺失，打开 **[游戏事件系统窗口](./game-event-system.md)** 自动创建它
 
 ---
 
-### ❌ DO NOT
+**使用"添加现有"进行团队协作**
 
-**Never Delete Assets Manually**
+与队友合作时：
 
+1. 队友创建数据库并提交到版本控制
+2. 您拉取最新更改
+3. 打开管理器Inspector → 点击 **"Add Existing"**
+4. 选择新数据库
+5. ✅ GUID引用保持完整，无损坏链接！
+
+---
+
+### ❌ 不要做
+
+**永远不要手动删除资产**
 ```
-❌ WRONG: Project Window → Expand Database Asset → Delete Event Sub-Asset
-✅ RIGHT: Game Event Editor → Select Event → Click Delete Button
+❌ 错误：项目窗口 → 展开数据库资产 → 删除事件子资产
+✅ 正确：游戏事件编辑器 → 选择事件 → 点击删除按钮
 ```
 
-**Why?** Manual deletion corrupts the database and breaks all references.
+**为什么？** 手动删除会损坏数据库并破坏所有引用。
 
 ---
 
-**Don't Move to Plugins Folder**
+**不要移动到Plugins文件夹**
 
-Keep your Data folder (`TinyGiantsData`) **outside** of the `Plugins` folder:
-
+将您的数据文件夹（`TinyGiantsData`）保留在 `Plugins` 文件夹 **之外**：
 ```
-✅ Correct: Assets/TinyGiantsData/GameEventSystem/
-❌ Wrong:   Assets/Plugins/TinyGiantsData/GameEventSystem/
+✅ 正确：Assets/TinyGiantsData/GameEventSystem/
+❌ 错误：Assets/Plugins/TinyGiantsData/GameEventSystem/
 ```
 
 ---
 
-## 🔧 Inspector Context Menu
+## 🔧 Inspector上下文菜单
 
-Right-click the `GameEventManager` component to access utility commands:
+右键点击 `GameEventManager` 组件以访问实用程序命令：
 
-### Clean Invalid Bindings
+### 清理无效绑定
 
-**Purpose**: Remove event bindings that no longer exist in any active database.
+**目的**：删除在任何活动数据库中不再存在的事件绑定。
 
-**When to Use**:
+**何时使用**：
 
-- After deleting events via the Game Event Editor
-- After removing a database from the manager
-- When cleaning up an old project
+- 通过游戏事件编辑器删除事件后
+- 从管理器移除数据库后
+- 清理旧项目时
 
-**What It Does**: Scans all bindings and removes orphaned references.
-
----
-
-### Sync All Database Events
-
-**Purpose**: Synchronize the manager's internal binding list with all events in active databases.
-
-**When to Use**:
-
-- After importing events from another project
-- After adding a new database with many events
-- When the binding list seems out of sync
-
-**What It Does**:
-
-- Adds bindings for new events
-- Removes bindings for deleted events
-- Preserves existing configurations
+**它的作用**：扫描所有绑定并删除孤立引用。
 
 ---
 
-## ❓ Troubleshooting
+### 同步所有数据库事件
 
-### Manager Object is Missing
+**目的**：将管理器的内部绑定列表与活动数据库中的所有事件同步。
 
-**Problem**: Can't find `GameEventManager` in the scene hierarchy
+**何时使用**：
 
-**Solution**:
+- 从另一个项目导入事件后
+- 添加包含许多事件的新数据库后
+- 当绑定列表似乎不同步时
 
-1. Open **[Game Event System Window](./game-event-system.md)** via `Tools → TinyGiants → Game Event System`
-2. Look for the status bar at the top
-3. If it shows a blue button, click **"Initialize System"**
-4. The manager will be auto-created
+**它的作用**：
 
----
-
-### Events Not Appearing in Editor
-
-**Problem**: Can't find my events in dropdown menus or search.
-
-**Checklist**:
-
-- ✅ Is the database **Active** (green badge)?
-- ✅ Is the database added to the Manager?
-- ✅ Are there actually events in the database? (Check in **[Game Event Editor](./game-event-editor.md)**)
-- ✅ Does the Manager **GameObject** exist in your scene?
+- 为新事件添加绑定
+- 删除已删除事件的绑定
+- 保留现有配置
 
 ---
 
-### Database Appears Corrupted
+## ❓ 故障排除
 
-**Problem**: Inspector shows errors about "orphaned sub-assets" or database integrity issues.
+### 管理器对象缺失
 
-**Recovery**:
+**问题**：在场景层级视图中找不到 `GameEventManager`
 
-1. Right-click the Manager component
-2. Select **"Clean Invalid Bindings"**
-3. Right-click the database asset in Project window
-4. Select **"Validate Database"** (if available)
-5. Save your scene and restart Unity
+**解决方案**：
 
-**Prevention**: Always use the Game Event Editor to delete events, never manually.
+1. 通过 `Tools → TinyGiants → Game Event System` 打开 **[游戏事件系统窗口](./game-event-system.md)**
+2. 查看顶部的状态栏
+3. 如果显示蓝色按钮，点击 **"Initialize System"**
+4. 管理器将自动创建
 
-:::tip Key Takeaway
-The Manager is your **data container**. Think of it like a library: databases are bookshelves, events are books. The Manager decides which bookshelves are open (active) and keeps track of who's reading which books (bindings).
+---
+
+### 事件未出现在编辑器中
+
+**问题**：在下拉菜单或搜索中找不到我的事件。
+
+**检查清单**：
+
+- ✅ 数据库是否 **活动**（绿色徽章）？
+- ✅ 数据库是否已添加到管理器？
+- ✅ 数据库中是否实际存在事件？（在 **[游戏事件编辑器](./game-event-editor.md)** 中检查）
+- ✅ 场景中是否存在管理器 **GameObject**？
+
+---
+
+### 数据库似乎已损坏
+
+**问题**：Inspector显示关于"孤立子资产"或数据库完整性问题的错误。
+
+**恢复**：
+
+1. 右键点击管理器组件
+2. 选择 **"Clean Invalid Bindings"**
+3. 在项目窗口中右键点击数据库资产
+4. 选择 **"Validate Database"**（如果可用）
+5. 保存场景并重启Unity
+
+**预防**：始终使用游戏事件编辑器删除事件，永远不要手动删除。
+
+:::tip 关键要点
+管理器是您的 **数据容器**。将其想象成一个图书馆：数据库是书架，事件是书籍。管理器决定哪些书架是打开的（活动的），并跟踪谁在阅读哪些书籍（绑定）。
 :::
