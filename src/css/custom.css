@@ -247,7 +247,7 @@ html[data-site-render='home'] .navbar__toggle {
     }
 
     .navbar__title {
-        max-width: 120px;
+        max-width: 100px; /* 进一步收窄标题，防止遮挡自定义导航组 */
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;

@@ -89,7 +89,7 @@
 [data-theme='dark'] .customThemeToggle:hover { background-color: rgba(255, 255, 255, 0.1); }
 
 /* ----------------------------------------------------------- */
-/* 主页自定义语言选择下拉框样式 (匹配自定义Navbar) */
+/* 主页自定义语言选择下拉框样式 */
 /* ----------------------------------------------------------- */
 
 .langDropdownContainer {
@@ -166,15 +166,6 @@
     height: 18px;
     object-fit: contain;
 }
-
-/* 移动端适配 */
-@media (max-width: 996px) {
-    .langTextMain { font-size: 0.85rem; }
-}
-
-/* ----------------------------------------------------------- */
-/* 原始功能样式续接 (不改动) */
-/* ----------------------------------------------------------- */
 
 .heroBanner {
     position: relative;
@@ -388,6 +379,40 @@
 }
 
 @media (max-width: 996px) {
+    .customNavbarRight {
+        gap: 8px; /* 极大幅度减小间距 */
+        padding: 8px 10px; /* 减小内边距，使整组图标更靠右 */
+    }
+
+    .langDropButton {
+        padding: 6px 4px; /* 减小语言按钮内部填充 */
+        gap: 4px; /* 减小图标和文字间距 */
+    }
+
+    .langTextMain {
+        font-size: 0.8rem; /* 减小字体 */
+    }
+
+    .navIcon {
+        width: 22px; /* 稍微缩小图标节省空间 */
+        height: 22px;
+    }
+
+    .navIcon img {
+        width: 22px !important;
+        height: 22px !important;
+    }
+
+    .customThemeToggle {
+        width: 32px; /* 缩小主题切换按钮 */
+        height: 32px;
+    }
+
+    .customThemeToggle svg {
+        width: 20px;
+        height: 20px;
+    }
+
     .heroBanner {
         height: 30vh;
         min-height: 220px;
