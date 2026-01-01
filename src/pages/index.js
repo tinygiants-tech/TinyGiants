@@ -248,8 +248,6 @@ function LanguageDropdown() {
 export default function Home() {
     const sectionRefs = useRef([]);
     const { i18n } = useDocusaurusContext();
-
-    // 静态资源 URL 解析
     const discordIcon = useBaseUrl('/img/home-page/discord.png');
     const unityIcon = useBaseUrl('/img/home-page/unity-forum.png');
     const mailIcon = useBaseUrl('/img/home-page/mail.png');

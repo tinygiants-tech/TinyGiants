@@ -3,7 +3,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 const config = {
   title: 'TinyGiants',
   tagline: 'Home',
-  favicon: '/img/home-page/tinygiants-logo.png', // 添加前缀 /
+  favicon: '/img/home-page/tinygiants-logo.png',
 
   url: 'https://docs.tinygiants.tech',
   baseUrl: '/',
@@ -58,7 +58,7 @@ const config = {
       title: 'TinyGiants',
       logo: {
         alt: 'TinyGiants Logo',
-        src: '/img/home-page/tinygiants-logo.png', // 添加前缀 /
+        src: '/img/home-page/tinygiants-logo.png',
       },
       items: [
         {

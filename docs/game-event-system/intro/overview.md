@@ -13,7 +13,11 @@ A production-ready, visual event architecture for Unity that transforms chaotic 
 —  ***[TinyGiants]** from China*
 :::
 
-<img src="/img/game-event-system/intro/overview/hero-main.png" alt="Hero Diagram" class="img-full" />
+<div className="img-full-wrapper">
+
+![Hero Diagram](/img/game-event-system/intro/overview/hero-main.png)
+
+</div>
 
 
 ---

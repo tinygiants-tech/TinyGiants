@@ -43,12 +43,12 @@
     position: fixed;
     top: 0;
     right: 0;
-    height: 60px; /* 强制匹配 Docusaurus 默认导航栏高度 */
+    height: 60px;
     display: flex;
-    align-items: center; /* 核心：垂直居中 */
+    align-items: center;
     justify-content: flex-end;
     gap: 20px;
-    padding: 0 20px; /* 移除上下 padding，靠 height 和 align-items 居中 */
+    padding: 0 20px;
     z-index: 101;
 }
 
@@ -93,15 +93,12 @@
 [data-theme='light'] .customThemeToggle:hover { background-color: rgba(0, 0, 0, 0.05); }
 [data-theme='dark'] .customThemeToggle:hover { background-color: rgba(255, 255, 255, 0.1); }
 
-/* ----------------------------------------------------------- */
-/* 主页自定义语言选择下拉框样式 */
-/* ----------------------------------------------------------- */
 
 .langDropdownContainer {
     position: relative;
     display: flex;
     align-items: center;
-    height: 100%; /* 让容器充满导航栏高度 */
+    height: 100%;
 }
 
 .langDropButton {
@@ -112,7 +109,7 @@
     border: none;
     cursor: pointer;
     padding: 0 12px;
-    height: 40px; /* 设定固定高度便于对齐 */
+    height: 40px;
     color: var(--ifm-color-primary);
     font-weight: 700;
     font-family: var(--font-family-heading);
@@ -130,7 +127,7 @@
 
 .langTextMain {
     font-size: 0.9rem;
-    line-height: 1; /* 消除文字行高造成的偏移 */
+    line-height: 1;
 }
 
 .langArrow {
@@ -143,7 +140,7 @@
 
 .langMenu {
     position: absolute;
-    top: 52px; /* 稍微下移，不要贴着按钮 */
+    top: 52px;
     right: 0;
     margin: 0;
     padding: 8px 0;
@@ -393,7 +390,7 @@
 
 @media (max-width: 996px) {
     .customNavbarRight {
-        height: 60px; /* 移动端同样强制高度 */
+        height: 60px;
         gap: 8px;
         padding: 0 10px;
     }
