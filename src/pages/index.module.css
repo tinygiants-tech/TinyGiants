@@ -43,15 +43,19 @@
     position: fixed;
     top: 0;
     right: 0;
+    height: 60px; /* 强制匹配 Docusaurus 默认导航栏高度 */
     display: flex;
-    align-items: center;
+    align-items: center; /* 核心：垂直居中 */
+    justify-content: flex-end;
     gap: 20px;
-    padding: 12px 20px;
+    padding: 0 20px; /* 移除上下 padding，靠 height 和 align-items 居中 */
     z-index: 101;
 }
 
 .navIcon {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 24px;
     height: 24px;
     opacity: 0.8;
@@ -62,6 +66,7 @@
     width: 24px !important;
     height: 24px !important;
     object-fit: contain;
+    display: block;
 }
 
 .navIcon:hover { opacity: 1.0; transform: scale(1.1); }
@@ -84,7 +89,7 @@
     padding: 0;
 }
 
-.customThemeToggle svg { width: 24px; height: 24px; }
+.customThemeToggle svg { width: 24px; height: 24px; display: block; }
 [data-theme='light'] .customThemeToggle:hover { background-color: rgba(0, 0, 0, 0.05); }
 [data-theme='dark'] .customThemeToggle:hover { background-color: rgba(255, 255, 255, 0.1); }
 
@@ -94,7 +99,9 @@
 
 .langDropdownContainer {
     position: relative;
-    display: inline-block;
+    display: flex;
+    align-items: center;
+    height: 100%; /* 让容器充满导航栏高度 */
 }
 
 .langDropButton {
@@ -104,7 +111,8 @@
     background: transparent;
     border: none;
     cursor: pointer;
-    padding: 8px 12px;
+    padding: 0 12px;
+    height: 40px; /* 设定固定高度便于对齐 */
     color: var(--ifm-color-primary);
     font-weight: 700;
     font-family: var(--font-family-heading);
@@ -117,22 +125,27 @@
     width: 18px;
     height: 18px;
     object-fit: contain;
+    display: block;
 }
 
-.langTextMain { font-size: 0.9rem; }
+.langTextMain {
+    font-size: 0.9rem;
+    line-height: 1; /* 消除文字行高造成的偏移 */
+}
 
 .langArrow {
     transition: transform 0.3s ease;
     opacity: 0.7;
+    display: block;
 }
 
 .langArrowOpen { transform: rotate(180deg); }
 
 .langMenu {
     position: absolute;
-    top: 100%;
+    top: 52px; /* 稍微下移，不要贴着按钮 */
     right: 0;
-    margin-top: 8px;
+    margin: 0;
     padding: 8px 0;
     list-style: none;
     background-color: var(--ifm-navbar-background-color);
@@ -380,21 +393,23 @@
 
 @media (max-width: 996px) {
     .customNavbarRight {
-        gap: 8px; /* 极大幅度减小间距 */
-        padding: 8px 10px; /* 减小内边距，使整组图标更靠右 */
+        height: 60px; /* 移动端同样强制高度 */
+        gap: 8px;
+        padding: 0 10px;
     }
 
     .langDropButton {
-        padding: 6px 4px; /* 减小语言按钮内部填充 */
-        gap: 4px; /* 减小图标和文字间距 */
+        padding: 0 4px;
+        gap: 4px;
+        height: 100%;
     }
 
     .langTextMain {
-        font-size: 0.8rem; /* 减小字体 */
+        font-size: 0.8rem;
     }
 
     .navIcon {
-        width: 22px; /* 稍微缩小图标节省空间 */
+        width: 22px;
         height: 22px;
     }
 
@@ -404,7 +419,7 @@
     }
 
     .customThemeToggle {
-        width: 32px; /* 缩小主题切换按钮 */
+        width: 32px;
         height: 32px;
     }
 
