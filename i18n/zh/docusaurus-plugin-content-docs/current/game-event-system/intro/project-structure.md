@@ -1,107 +1,106 @@
 ﻿---
-sidebar_label: 'Project Structure'
+sidebar_label: '项目结构'
 sidebar_position: 2
 ---
 
-# Project Structure
+# 项目结构
 
-Understanding the file structure is crucial for maintaining a clean project lifecycle, ensuring safe upgrades, and managing version control effectively.
+理解文件结构对于维护清晰的项目生命周期、确保安全升级以及有效管理版本控制至关重要。
 
-The **Game Event System** adheres to a strict **"Logic vs. Data" Separation Principle**.
-This architecture ensures that updating the plugin (Core Logic) **never overwrites** your created events, graphs, or generated code (User Data).
+**游戏事件系统** 遵循严格的 **"逻辑与数据"分离原则**。
+此架构确保更新插件（核心逻辑）**永远不会覆盖** 您创建的事件、图表或生成的代码（用户数据）。
 
 ---
 
-## 📂 The Directory Tree
+## 📂 目录树
 
-Below is the standard hierarchy. I use distinct icons to indicate the nature of each folder:
+下面是标准的层次结构。我使用不同的图标来指示每个文件夹的性质：
 
-*   🛡️ **Immutable Core**: Never modify, move, or rename.
-*   💾 **Mutable Data**: Your project data. Safe to commit, safe to modify.
-*   🗑️ **Disposable**: Safe to delete for optimization.
-
+*   🛡️ **不可变核心**: 永远不要修改、移动或重命名。
+*   💾 **可变数据**: 您的项目数据。可以安全提交，可以安全修改。
+*   🗑️ **可丢弃**: 可以安全删除以进行优化。
 ```bash
 Assets/
-├── 📁 TinyGiants/                  # [CORE LOGIC] The immutable plugin root
+├── 📁 TinyGiants/                  # [核心逻辑] 不可变的插件根目录
 │   └── 📁 GameEventSystem/
-│       ├── 📁 API/                 # 🛡️ Interfaces & Public APIs
-│       ├── 📁 Demo/                # 🗑️ Example Scenes & Assets (Safe to delete)
-│       ├── 📁 Editor/              # 🛡️ Custom Inspectors & Window Logic
-│       │   └── 📁 Icons/           # 🗑️ UI Textures (Delete for <1.2MB builds)
-│       ├── 📁 Runtime/             # 🛡️ Core Engine & Event Types
+│       ├── 📁 API/                 # 🛡️ 接口与公共API
+│       ├── 📁 Demo/                # 🗑️ 示例场景与资产（可以安全删除）
+│       ├── 📁 Editor/              # 🛡️ 自定义Inspector与窗口逻辑
+│       │   └── 📁 Icons/           # 🗑️ UI纹理（删除可减少<1.2MB的构建体积）
+│       ├── 📁 Runtime/             # 🛡️ 核心引擎与事件类型
 │       ├── 📄 LICENSE.txt
 │       └── 📄 Readme.txt
 │
-└── 📁 TinyGiantsData/              # [USER DATA] Your generated content sanctuary
+└── 📁 TinyGiantsData/              # [用户数据] 您生成的内容保护区
     └── 📁 GameEventSystem/
-        ├── 📁 CodeGen/             # 💾 Auto-Generated C# Classes
-        │   ├── 📁 Basic/           # 🛡️ Primitive Types (Required)
-        │   └── 📁 Custom/          # 💾 Your Custom Types (Auto-regenerated)
-        ├── 📁 Database/            # 💾 Your Event Database Assets (.asset)
-        └── 📁 FlowGraph/           # 💾 Your Visual Flow Graphs (.asset)
+        ├── 📁 CodeGen/             # 💾 自动生成的C#类
+        │   ├── 📁 Basic/           # 🛡️ 基础类型（必需）
+        │   └── 📁 Custom/          # 💾 您的自定义类型（自动重新生成）
+        ├── 📁 Database/            # 💾 您的事件数据库资产（.asset）
+        └── 📁 FlowGraph/           # 💾 您的可视化流程图（.asset）
 ```
 
-:::info Architecture Note
-**TinyGiants** contains the tool itself (The Hammer).
-**TinyGiantsData** contains what you build with it (The House).
+:::info 架构说明
+**TinyGiants** 包含工具本身（锤子）。
+**TinyGiantsData** 包含您用它构建的内容（房子）。
 :::
 
 ------
 
-## ⛔ CRITICAL: The "Plugins" Folder Warning
+## ⛔ 关键: "Plugins"文件夹警告
 
-:::danger DO NOT MOVE TO "PLUGINS"
-You **MUST NOT** move the TinyGiants or TinyGiantsData folders into the standard Assets/Plugins/ directory.
+:::danger 不要移动到"PLUGINS"
+您 **绝对不能** 将TinyGiants或TinyGiantsData文件夹移动到标准的Assets/Plugins/目录中。
 :::
 
-### Why is this critical?
+### 为什么这很关键？
 
-1. **Compilation Order (Scripting Phase)**:
-   Unity compiles the Plugins folder **before** your standard game scripts (Assembly-CSharp).
-   - Our plugin needs to reference *your* custom classes (e.g., PlayerStats, InventoryItem) to generate events for them.
-   - If the plugin sits in Plugins, it **cannot see your gameplay code**, leading to "Type Not Found" errors.
-2. **Relative Path Dependencies**:
-   The automated Code Generator and Database Manager rely on specific relative paths to locate assets. Breaking this structure may cause the "Hub" to lose track of your databases.
-3. **Asset Protection Mechanism**:
-   The plugin includes a background AssetProtector service. If it detects these folders being moved to Plugins, it will attempt to warn you or block the operation to prevent project corruption.
+1. **编译顺序（脚本阶段）**:
+   Unity在编译您的标准游戏脚本（Assembly-CSharp）**之前**编译Plugins文件夹。
+   - 我们的插件需要引用*您的*自定义类（例如PlayerStats、InventoryItem）来为它们生成事件。
+   - 如果插件位于Plugins中，它**无法看到您的游戏代码**，会导致"找不到类型"错误。
+2. **相对路径依赖**:
+   自动化代码生成器和数据库管理器依赖于特定的相对路径来定位资产。破坏此结构可能导致"Hub"无法追踪您的数据库。
+3. **资产保护机制**:
+   插件包含后台AssetProtector服务。如果检测到这些文件夹被移动到Plugins，它会尝试警告您或阻止该操作以防止项目损坏。
 
 ------
 
-## 💾 Version Control (Git/SVN) Strategy
+## 💾 版本控制（Git/SVN）策略
 
-For teams working with Source Control, here is the recommended configuration:
+对于使用源代码管理的团队，以下是推荐的配置：
 
-| Folder Path                  | Strategy   | Reasoning                                                    |
+| 文件夹路径 | 策略 | 原因 |
 | ---------------------------- | ---------- | ------------------------------------------------------------ |
-| TinyGiants/                  | **Commit** | Contains the core plugin code required for the project to run. |
-| TinyGiantsData/.../Database  | **Commit** | Contains your actual Event Assets. Critical data.            |
-| TinyGiantsData/.../FlowGraph | **Commit** | Contains your visual logic graphs. Critical data.            |
-| TinyGiantsData/.../CodeGen   | **Commit** | **Recommended.** While these *can* be regenerated, committing them ensures the project compiles immediately for other team members without needing to run the Wizard first. |
+| TinyGiants/ | **提交** | 包含项目运行所需的核心插件代码。 |
+| TinyGiantsData/.../Database | **提交** | 包含您的实际事件资产。关键数据。 |
+| TinyGiantsData/.../FlowGraph | **提交** | 包含您的可视化逻辑图表。关键数据。 |
+| TinyGiantsData/.../CodeGen | **提交** | **推荐。** 虽然这些*可以*重新生成，但提交它们可以确保项目立即为其他团队成员编译，而无需先运行向导。 |
 
 ------
 
-## 🧹 Optimization Guide: Deployment Strategy
+## 🧹 优化指南: 部署策略
 
-The Game Event System is modular. Depending on your project stage, you can strip it down to reduce build size.
+游戏事件系统是模块化的。根据您的项目阶段，您可以精简它以减少构建大小。
 
-### Deployment Tiers
+### 部署层级
 
-Use this table to decide what to keep:
+使用此表决定保留什么：
 
-| Tier            | Folder to Delete                 | Size Savings | Consequence                                                  |
+| 层级 | 要删除的文件夹 | 节省空间 | 后果 |
 | --------------- | -------------------------------- | ------------ | ------------------------------------------------------------ |
-| **Development** | *Keep Everything*                | 0 MB         | Full experience with Demos and high-res UI.                  |
-| **Production**  | TinyGiants/GameEventSystem/Demo/ | ~10 MB       | Removes examples. **Safe** for all projects once you know the basics. |
-| **Minimalist**  | .../Editor/Icons/                | ~4 MB        | **UI degrades.** Custom icons disappear; Windows use default Unity styling. Logic remains 100% functional. |
+| **开发** | *保留所有内容* | 0 MB | 完整体验，包含示例和高分辨率UI。 |
+| **生产** | TinyGiants/GameEventSystem/Demo/ | ~10 MB | 移除示例。一旦您掌握了基础知识，对所有项目都是**安全的**。 |
+| **极简** | .../Editor/Icons/ | ~4 MB | **UI降级。** 自定义图标消失；窗口使用默认Unity样式。逻辑保持100%功能。 |
 
-### 📉 Extreme Compression (< 1.2 MB)
+### 📉 极限压缩（< 1.2 MB）
 
-If you are building for ultra-lightweight platforms (e.g., Instant Games), you can achieve the **Minimalist** tier.
+如果您正在为超轻量级平台（例如即时游戏）构建，您可以达到**极简**层级。
 
-1. Delete the **Demo** folder.
-2. Delete the **Icons** folder.
-3. Ensure your **CodeGen/Custom** folder only contains event types you actually use. You can use the **[Cleanup Tools](../tools/codegen-and-cleanup.md)** to remove unused generated classes.
+1. 删除**Demo**文件夹。
+2. 删除**Icons**文件夹。
+3. 确保您的**CodeGen/Custom**文件夹只包含您实际使用的事件类型。您可以使用**[清理工具](../tools/codegen-and-cleanup.md)**来删除未使用的生成类。
 
 :::tip
-For most PC/Mobile projects, **Level 1 (Deleting Demo)** is sufficient. I recommend keeping the **Icons** folder to maintain a pleasant workflow for your designers.
+对于大多数PC/移动项目，**层级1（删除Demo）**就足够了。我建议保留**Icons**文件夹，以为您的设计师维护良好的工作流程。
 :::

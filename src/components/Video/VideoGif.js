@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 
 export default function VideoGif({ src, width = '85%', maxWidth = '800px' }) {
   const [showControls, setShowControls] = useState(false);
+  const videoSrc = useBaseUrl(src);
 
   return (
     <div
@@ -29,7 +31,7 @@ export default function VideoGif({ src, width = '85%', maxWidth = '800px' }) {
           border: '1px solid rgba(0,0,0,0.05)'
         }}
       >
-        <source src={src} type="video/mp4" />
+        <source src={videoSrc} type="video/mp4" />
       </video>
 
       {!showControls && (

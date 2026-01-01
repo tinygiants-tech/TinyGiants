@@ -1,5 +1,5 @@
 ﻿---
-sidebar_label: 'Configure Game Event'
+sidebar_label: '配置游戏事件'
 sidebar_position: 5
 ---
 
@@ -9,71 +9,70 @@ import TabItem from '@theme/TabItem';
 
 
 
-# Game Event Behavior
+# 游戏事件行为
 
-Define **what happens** when an event fires. Unlike traditional events that execute blindly, this system lets you attach conditions, delays, loops, and visual actions directly to the event asset itself.
+定义事件触发时**发生什么**。与盲目执行的传统事件不同，此系统允许您直接将条件、延迟、循环和可视化动作附加到事件资产本身。
 
 ![Game Event Behavior Window](/img/game-event-system/visual-workflow/game-event-behavior/behavior-window-full.png)
 
 ---
 
-## 🚀 Opening the Behavior Window
+## 🚀 打开行为窗口
 
-Access from the **[Game Event Editor](./game-event-editor.md)**:
+从 **[游戏事件编辑器](./game-event-editor.md)** 访问：
 ```
-Game Event Editor → Click Behavior Button (colored pill) on any event row
+游戏事件编辑器 → 点击任意事件行上的行为按钮（彩色药丸）
 ```
 
-**Button Color States**:
+**按钮颜色状态**：
 
-| Color    | Icon | Meaning                    | Details                                      |
+| 颜色 | 图标 | 含义 | 详情 |
 | -------- | ---- | -------------------------- | -------------------------------------------- |
-| 🟢 Green  | ✓    | Configured (Inspector)     | Has UnityEvent actions in Manager            |
-| 🔵 Blue   | ▶    | Runtime Active (Play Mode) | Has code-based listeners via `AddListener()` |
-| 🟡 Orange | ⚠    | Not Configured             | No actions or listeners                      |
+| 🟢 绿色 | ✓ | 已配置（Inspector） | 在Manager中有UnityEvent动作 |
+| 🔵 蓝色 | ▶ | 运行时活动（播放模式） | 通过 `AddListener()` 有基于代码的监听器 |
+| 🟡 橙色 | ⚠ | 未配置 | 无动作或监听器 |
 
-**Button Label**: Shows event type signature (e.g., `<void>`, `<int>`, `<GameObject, DamageInfo>`)
-
----
-
-## 📋 Window Overview
-
-The Behavior Window has four main sections:
-
-1. **Event Information** - Identity confirmation (name, category, GUID)
-2. **Action Condition** - Visual logic tree (execution gate)
-3. **Event Action** - UnityEvent callbacks (what to execute)
-4. **Schedule Configuration** - Timing controls (delays, loops, persistence)
+**按钮标签**：显示事件类型签名（例如，`<void>`、`<int>`、`<GameObject, DamageInfo>`）
 
 ---
 
-## 1️⃣ Event Information
+## 📋 窗口概览
 
-Read-only summary confirming you're editing the correct event.
+行为窗口有四个主要部分：
+
+1. **事件信息** - 身份确认（名称、类别、GUID）
+2. **动作条件** - 可视化逻辑树（执行门控）
+3. **事件动作** - UnityEvent回调（要执行什么）
+4. **调度配置** - 时间控制（延迟、循环、持久化）
+
+---
+
+## 1️⃣ 事件信息
+
+只读摘要，确认您正在编辑正确的事件。
 
 ![Event Information](/img/game-event-system/visual-workflow/game-event-behavior/behavior-info.png)
 
-**Displayed Data**:
-- **Event Name**: Asset name
-- **Category**: Organizational group
-- **GUID**: Unique internal identifier (preserved across renames)
+**显示的数据**：
+- **事件名称**：资产名称
+- **类别**：组织分组
+- **GUID**：唯一的内部标识符（在重命名后保留）
 
-:::tip Why GUID Matters
-The GUID ensures references stay intact even if you rename the event. This is why safe renaming works in the Editor!
+:::tip 为什么GUID很重要
+GUID确保即使您重命名事件，引用也保持完整。这就是为什么在编辑器中安全重命名有效的原因！
 :::
 
 ---
 
-## 2️⃣ Action Condition (Execution Gate)
+## 2️⃣ 动作条件（执行门控）
 
-**The Logic Engine**: Actions only execute if these conditions evaluate to `TRUE`.
+**逻辑引擎**：仅当这些条件评估为 `TRUE` 时，动作才会执行。
 
 ![Action Condition Section](/img/game-event-system/visual-workflow/game-event-behavior/behavior-condition.png)
 
-### What It Does
+### 它的作用
 
-Controls **whether actions execute** based on runtime values:
-
+根据运行时值控制**是否执行动作**：
 ```mermaid
 graph LR
 
@@ -82,234 +81,231 @@ graph LR
     classDef action fill:#334155,stroke:#020617,stroke-width:2px,color:#ffffff
     classDef ignore fill:#020617,stroke:#000000,stroke-width:2px,color:#9ca3af,font-style:italic
 
-    A("Event Raise()"):::event
-    B(🔎 Check Conditions):::condition
+    A("事件 Raise()"):::event
+    B(🔎 检查条件):::condition
 
-    C(✅ Execute Actions):::action
-    D(🚫 Ignore / No Execution):::ignore
+    C(✅ 执行动作):::action
+    D(🚫 忽略/不执行):::ignore
 
     A --> B
     B -->|TRUE| C
     B -->|FALSE| D
-
 ```
 
 
 
-### Visual Logic Tree
+### 可视化逻辑树
 
-Build complex boolean logic **without code** using:
+**无需代码**即可构建复杂的布尔逻辑，使用：
 
-- **Groups**: Combine conditions with AND/OR logic
-- **Comparisons**: Individual checks (e.g., `Health < 20`)
-- **Nesting**: Groups inside groups (unlimited depth)
+- **组**：使用AND/OR逻辑组合条件
+- **比较**：单个检查（例如，`Health < 20`）
+- **嵌套**：组内嵌套组（无限深度）
 
-### Performance
+### 性能
 
-:::tip Zero Reflection Overhead
-Conditions compile to **Expression Trees** at initialization. They run as fast as hand-written C# code!
+:::tip 零反射开销
+条件在初始化时编译为 **表达式树**。它们的运行速度与手写C#代码一样快！
 :::
 
-### Learn More
+### 了解更多
 
-The Visual Condition Tree is a powerful system with many features:
+可视化条件树是一个功能强大的系统，具有许多特性：
 
-- **4 Source Types**: Event Argument, Scene Type, Random, Constant
-- **10 Comparison Operators**: Numeric, String, Collection checks
-- **Bool Method Support**: Use custom `bool` methods as conditions
-- **Drag & Drop Reordering**: Organize logic visually
-- **Type Validation**: Auto-detects incompatible comparisons
+- **4种源类型**：事件参数、场景类型、随机、常量
+- **10种比较运算符**：数值、字符串、集合检查
+- **Bool方法支持**：使用自定义 `bool` 方法作为条件
+- **拖放重新排序**：可视化组织逻辑
+- **类型验证**：自动检测不兼容的比较
 
-**📖 Complete Guide**: **[Visual Condition Tree](./visual-condition-tree.md)**
+**📖 完整指南**：**[可视化条件树](./visual-condition-tree.md)**
 
 ---
 
-## 3️⃣ Event Action (Callback Layer)
+## 3️⃣ 事件动作（回调层）
 
-The **Action** defines the Unity callbacks that execute once an event is triggered and all conditions are met.
+**动作**定义了在事件被触发且满足所有条件后执行的Unity回调。
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-behavior/behavior-action.png)
 
-### 🧩 Understanding the UnityEvent Field
+### 🧩 理解UnityEvent字段
 
-The system leverages Unity's native **UnityEvent** architecture, ensuring seamless integration with your existing MonoBehaviours and UI components.
+系统利用Unity的原生 **UnityEvent** 架构，确保与现有的MonoBehaviour和UI组件无缝集成。
 
 ------
 
-#### 🔘 For Parameterless Events (`GameEvent`)
+#### 🔘 对于无参数事件（`GameEvent`）
 
-*Standard trigger-only logic.*
+*仅标准触发逻辑。*
 
-| Type      | Backend Field       | Compatibility                            |
+| 类型 | 后端字段 | 兼容性 |
 | --------- | ------------------- | ---------------------------------------- |
-| **Logic** | `UnityEvent (void)` | 🟢 Accepts any **zero-parameter** method. |
+| **逻辑** | `UnityEvent (void)` | 🟢 接受任何 **零参数** 方法。 |
 
-**Example:** OnGameStart ➔ AudioManager.PlayBGM(), UI.FadeIn()
+**示例：** OnGameStart ➔ AudioManager.PlayBGM()、UI.FadeIn()
 
 ------
 
-#### 🔢 For Single Parameter Events (`GameEvent<T>`)
+#### 🔢 对于单参数事件（`GameEvent<T>`）
 
-*Payload-driven logic. Passes data directly to the listener.*
+*有效载荷驱动的逻辑。直接将数据传递给监听器。*
 
-| Type      | Backend Field   | Compatibility                                       |
+| 类型 | 后端字段 | 兼容性 |
 | --------- | --------------- | --------------------------------------------------- |
-| **Logic** | `UnityEvent<T>` | 🟡 Accepts methods with **one parameter** of type T. |
+| **逻辑** | `UnityEvent<T>` | 🟡 接受具有 **一个类型T参数** 的方法。 |
 
-**Example:** OnHealthChanged(float) ➔ HealthBar.UpdateFill(float)
+**示例：** OnHealthChanged(float) ➔ HealthBar.UpdateFill(float)
 
 ------
 
-#### 👥 For Sender Events (`GameEvent<TSender, TArgs>`)
+#### 👥 对于Sender事件（`GameEvent<TSender, TArgs>`）
 
-*Context-aware logic. Passes both the source and the data payload.*
+*上下文感知逻辑。同时传递源和数据有效载荷。*
 
-| Type      | Backend Field                | Compatibility                              |
+| 类型 | 后端字段 | 兼容性 |
 | --------- | ---------------------------- | ------------------------------------------ |
-| **Logic** | `UnityEvent<TSender, TArgs>` | 🔵 Accepts methods with **two parameters**. |
+| **逻辑** | `UnityEvent<TSender, TArgs>` | 🔵 接受具有 **两个参数** 的方法。 |
 
-**Example:** OnDamage(GameObject, int) ➔ VFXManager.SpawnAt(GameObject.pos), Popup.Show(int)
+**示例：** OnDamage(GameObject, int) ➔ VFXManager.SpawnAt(GameObject.pos)、Popup.Show(int)
 
-:::info **Native Integration**
-Because we use **Native UnityEvents**, you can assign listeners directly in the Inspector or via code using AddListener(). It supports both **Static** and **Dynamic** calls.
+:::info **原生集成**
+因为我们使用 **原生UnityEvent**，您可以直接在Inspector中或通过代码使用AddListener()分配监听器。它支持 **静态** 和 **动态** 调用。
 :::
 
-:::tip **Signature Matching**
-The inspector UI will automatically filter the method list to only show functions that match the event's signature, preventing runtime errors.
+:::tip **签名匹配**
+Inspector UI将自动过滤方法列表，仅显示与事件签名匹配的函数，防止运行时错误。
 :::
 
 ------
 
-### ➕ Adding Actions (Workflow)
+### ➕ 添加动作（工作流）
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-behavior/behavior-action-add.png)
 
-Follow these three simple steps to connect your logic via the Unity Inspector.
+按照这三个简单步骤通过Unity Inspector连接您的逻辑。
 
-#### 1️⃣ Assign Target Object
+#### 1️⃣ 分配目标对象
 
-**Drag and drop** the GameObject or Component that contains your logic into the **Object** slot.
+将包含您逻辑的GameObject或Component **拖放** 到 **Object** 插槽中。
 
-- 🖱️ **Action:** Drag from Hierarchy ➔ Drop into the empty slot.
-- 📦 **Result:** The field now references the specific instance of your script.
+- 🖱️ **操作：** 从层级视图拖动 ➔ 放入空插槽。
+- 📦 **结果：** 该字段现在引用您脚本的特定实例。
 
-#### 2️⃣ Select Callback Method
+#### 2️⃣ 选择回调方法
 
-Click the **Function Dropdown** to browse all public methods available on the assigned object.
+点击 **Function Dropdown** 浏览分配对象上所有可用的公共方法。
 
-- 🔍 **Action:** Click No Function ➔ Navigate to your Script/Component.
-- ⚡ **Tip:** Only methods that match the **Event Signature** (e.g., void, int) will appear at the top for easy selection.
+- 🔍 **操作：** 点击No Function ➔ 导航到您的脚本/组件。
+- ⚡ **提示：** 只有与 **事件签名** 匹配的方法（例如，void、int）才会出现在顶部以便于选择。
 
-#### 3️⃣ Define Parameter Mapping
+#### 3️⃣ 定义参数映射
 
-Decide whether to use the event's live data or a fixed value.
+决定是使用事件的实时数据还是固定值。
 
-- ⚖️ **Dynamic Call:** Uses the **runtime value** sent by the event (e.g., the actual damage dealt).
-- ⚙️ **Static Parameters:** Uses a **fixed value** you define manually in the Inspector.
+- ⚖️ **动态调用：** 使用事件发送的 **运行时值**（例如，实际造成的伤害）。
+- ⚙️ **静态参数：** 使用您在Inspector中手动定义的 **固定值**。
 
 ------
 
-### 💡 Dynamic vs. Static: Which one to choose?
+### 💡 动态与静态：选择哪一个？
 
-| Mode        | Visual Icon | Best For...                                                  |
+| 模式 | 视觉图标 | 最适合... |
 | ----------- | ----------- | ------------------------------------------------------------ |
-| **Dynamic** | 🚀           | Real-time data (e.g., Updating a Health Bar with current HP). |
-| **Static**  | 📌           | Fixed triggers (e.g., Logging "Button Clicked" to the console). |
+| **动态** | 🚀 | 实时数据（例如，使用当前HP更新生命条）。 |
+| **静态** | 📌 | 固定触发（例如，记录"按钮已点击"到控制台）。 |
 
-:::tip **Pro Tip**
-In the dropdown, **Dynamic** methods are always listed at the **top** of the menu. If you don't see your method there, check if the parameter types match exactly!
+:::tip **专业提示**
+在下拉菜单中，**动态** 方法始终列在菜单的 **顶部**。如果您没有看到您的方法，请检查参数类型是否完全匹配！
 :::
 
 ---
 
-### Dynamic vs Static Functions
+### 动态与静态函数
 
-**Dynamic** (with event data):
+**动态**（带事件数据）：
 ```csharp
-// Receives event parameter(s)
+// 接收事件参数
 public void TakeDamage(float amount) {
     health -= amount;
 }
 
-// For Sender events
+// 对于Sender事件
 public void OnDamageReceived(GameObject attacker, DamageInfo info) {
-    // Use both sender and args
+    // 同时使用sender和args
 }
 ```
 
-**Static** (ignores event data):
+**静态**（忽略事件数据）：
 ```csharp
-// No parameters needed
+// 不需要参数
 public void PlaySound() {
     audioSource.Play();
 }
 ```
 
-**When to Use Each**:
+**何时使用每种**：
 
-| Use Dynamic When            | Use Static When        |
+| 使用动态当 | 使用静态当 |
 | --------------------------- | ---------------------- |
-| You need the event's data   | Just need notification |
-| Processing float/int values | Playing sounds/effects |
-| Checking sender reference   | Triggering animations  |
-| Data-driven reactions       | State changes          |
+| 您需要事件的数据 | 只需要通知 |
+| 处理float/int值 | 播放声音/效果 |
+| 检查sender引用 | 触发动画 |
+| 数据驱动的反应 | 状态变化 |
 
 ---
 
-### Multiple Actions & Priority
+### 多个动作与优先级
 
-**Add Multiple**: Click + repeatedly to add more actions.
+**添加多个**：重复点击+以添加更多动作。
 
-**Execution Order**: Top to bottom.
+**执行顺序**：从上到下。
 
-**Reordering**: Drag the ☰ handle on the left of each action.
+**重新排序**：拖动每个动作左侧的☰把手。
 
-**Example**:
-
+**示例**：
 ```csharp
 📜 LogDamageEvent() ➔ 
-    🥇 First (Metadata/Logging)
+    🥇 第一（元数据/日志记录）
 🎵 PlayHitSound() ➔ 
-    🥈 Second (Audio/VFX Feedback)
+    🥈 第二（音频/VFX反馈）
 📊 UpdateHealthBar(float) ➔ 
-    🥉 Third (UI/Visual Representation)
+    🥉 第三（UI/视觉表示）
 🏁 CheckDeathCondition() ➔ 
-    🏆 Final (Game State Logic)
+    🏆 最终（游戏状态逻辑）
 ```
 
 ---
 
-### Clear All Actions
+### 清除所有动作
 
-Click **"Clear All"** button (top-right) to remove all actions at once.
+点击 **"Clear All"** 按钮（右上角）一次性删除所有动作。
 
-⚠️ **Shows confirmation**: "Are you sure?"
+⚠️ **显示确认**："您确定吗？"
 
 ---
 
-## 4️⃣ Schedule Configuration
+## 4️⃣ 调度配置
 
-The **Schedule** layer determines **when** and **how often** your actions are executed after an event is raised.
+**调度**层决定在事件触发后**何时**以及**多久**执行一次您的动作。
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-behavior/behavior-schedule.png)
 
 <Tabs>
-<TabItem value="delay" label="⏱️ Action Delay" default>
+<TabItem value="delay" label="⏱️ 动作延迟" default>
 
-### Action Delay
+### 动作延迟
 
-**Time Offset.** Introduces a gap between the event trigger and the actual execution.
+**时间偏移。** 在事件触发和实际执行之间引入间隙。
 
-- 🕒 **Value:** float (Seconds)
-- 🎯 **Purpose:** Synchronize with animations, VFX, or delayed game logic.
+- 🕒 **值：** float（秒）
+- 🎯 **目的：** 与动画、VFX或延迟游戏逻辑同步。
 
-**How It Works:**
+**工作原理：**
 
-1. 🔔 **Event Raised** ➔ The signal is received.
-2. ⏳ **Delaying** ➔ System waits for the specified X seconds.
-3. 🔍 **Condition Check** ➔ Re-validates conditions *after* the wait.
-4. 🚀 **Execution** ➔ Actions fire only if conditions still pass.
-
+1. 🔔 **事件触发** ➔ 接收到信号。
+2. ⏳ **延迟中** ➔ 系统等待指定的X秒。
+3. 🔍 **条件检查** ➔ 在等待*之后*重新验证条件。
+4. 🚀 **执行** ➔ 仅当条件仍然通过时才触发动作。
 ```mermaid
 graph LR
     classDef event fill:#1e40af,stroke:#0f172a,stroke-width:2px,color:#ffffff,font-weight:bold
@@ -317,52 +313,51 @@ graph LR
     classDef decision fill:#334155,stroke:#020617,stroke-width:2px,color:#ffffff
     classDef action fill:#0f766e,stroke:#042f2e,stroke-width:2px,color:#ffffff
 
-    A(🔔 Event Raise):::event --> B(⏱ Wait: Action Delay):::wait
-    B --> C(🔍 Check Conditions):::decision
-    C -- "Pass" --> D(🚀 Execute Actions):::action
-    C -. "Fail" .-> E((❌))
+    A(🔔 事件触发):::event --> B(⏱ 等待: 动作延迟):::wait
+    B --> C(🔍 检查条件):::decision
+    C -- "通过" --> D(🚀 执行动作):::action
+    C -. "失败" .-> E((❌))
     style E fill:none,stroke:#475569,color:#475569
 ```
 
 </TabItem>
 
-<TabItem value="interval" label="🔄 Repeat Interval">
+<TabItem value="interval" label="🔄 重复间隔">
 
-### Repeat Interval
+### 重复间隔
 
-**Automatic Looping.** Enables the event to re-fire periodically without manual intervention.
+**自动循环。** 使事件能够周期性地自动重新触发，无需手动干预。
 
-- 🕒 **Parameter:** float (Seconds)
-- 🔄 **Logic:** Determines the "tick rate" of the repeat cycle.
+- 🕒 **参数：** float（秒）
+- 🔄 **逻辑：** 确定重复周期的"节拍速率"。
 
-**Value Mapping:**
+**值映射：**
 
-- 0.0s ➔ 🚫 **Disabled** (Single-shot execution)
-- \> 0s ➔ 🔁 **Active Loop** (Executes every X seconds)
+- 0.0s ➔ 🚫 **禁用**（单次执行）
+- \> 0s ➔ 🔁 **活动循环**（每X秒执行一次）
 
-:::info **Interaction with Delay**
-If both **Delay** and **Interval** are set, the first execution respects the Delay, and subsequent repeats follow the Interval.
+:::info **与延迟的交互**
+如果同时设置了 **延迟** 和 **间隔**，第一次执行遵循延迟，后续重复遵循间隔。
 :::
 
 </TabItem>
 
-<TabItem value="count" label="🔢 Repeat Count">
+<TabItem value="count" label="🔢 重复计数">
 
-### Repeat Count
+### 重复计数
 
-**Lifecycle Control.** Limits the number of times an event can repeat.
+**生命周期控制。** 限制事件可以重复的次数。
 
-**Configuration Guide:**
+**配置指南：**
 
-| Value | Behavior            | Total Executions        |
+| 值 | 行为 | 总执行次数 |
 | ----- | ------------------- | ----------------------- |
-| 0     | **No Repeats**      | 1 (Initial only)        |
-| N     | **Finite Loop**     | 1 + N                   |
-| -1    | **Infinite Loop** ♾️ | Until stopped/destroyed |
+| 0 | **不重复** | 1（仅初始） |
+| N | **有限循环** | 1 + N |
+| -1 | **无限循环** ♾️ | 直到停止/销毁 |
 
-**UI Indicator:**
-When set to -1, a **↺ Reset** button appears. Click it to quickly revert the count back to 1.
-
+**UI指示器：**
+当设置为-1时，会出现一个 **↺ 重置** 按钮。点击它可以快速将计数恢复为1。
 ```mermaid
 graph LR
     classDef event fill:#1e40af,stroke:#0f172a,stroke-width:2px,color:#ffffff,font-weight:bold
@@ -371,25 +366,24 @@ graph LR
     classDef decision fill:#334155,stroke:#020617,stroke-width:2px,color:#ffffff
     classDef system fill:#020617,stroke:#000000,stroke-width:2px,color:#ffffff
 
-    A("🔔 Event Raise()"):::event --> B(🚀 Execute Actions):::action
-    B --> C([⏱ Wait: Repeat Interval]):::wait
-    C --> D(🔄 Repeat?):::decision
+    A("🔔 事件 Raise()"):::event --> B(🚀 执行动作):::action
+    B --> C([⏱ 等待: 重复间隔]):::wait
+    C --> D(🔄 重复?):::decision
     
-    D -- "Count > 0 <br/> or -1" --> B
-    D -- "Count == 0" --> E(🏁 Done):::system
+    D -- "计数 > 0 <br/> 或 -1" --> B
+    D -- "计数 == 0" --> E(🏁 完成):::system
     linkStyle 3 stroke:#f59e0b,stroke-width:2px,stroke-dasharray: 5 5
 ```
 
 </TabItem>
 
-<TabItem value="persistent" label="🛡️ Persistent Event">
+<TabItem value="persistent" label="🛡️ 持久化事件">
 
-### Persistent Event
+### 持久化事件
 
-**Scene Survival.** Determines if the event object survives when a new Unity scene is loaded.
+**场景存活。** 决定加载新Unity场景时事件对象是否存活。
 
-🔳 **Unchecked (Default):** Event is destroyed on scene load (Standard behavior).
-
+🔳 **未选中（默认）：** 场景加载时事件被销毁（标准行为）。
 ```mermaid
 graph LR
 
@@ -398,25 +392,24 @@ graph LR
     classDef transition fill:#7c2d12,stroke:#431407,stroke-width:2px,color:#ffffff
     classDef cleanup fill:#020617,stroke:#000000,stroke-width:2px,color:#ffffff
 
-    subgraph Scene_A [Region: Scene A Active]
+    subgraph Scene_A [区域: 场景A活动]
         direction LR
-        A(🖼️ Scene A):::sceneA --> B(🔔 Event Raise):::sceneA
-        B --> C(🚀 Execute Actions):::action
+        A(🖼️ 场景A):::sceneA --> B(🔔 事件触发):::sceneA
+        B --> C(🚀 执行动作):::action
     end
     style Scene_A fill:none,stroke:#1e40af,stroke-dasharray: 5 5
 
-    C -- "🚚 Scene Transition" --> D(🔄 Load Scene B):::transition
+    C -- "🚚 场景转换" --> D(🔄 加载场景B):::transition
 
-    subgraph Scene_B [Region: Scene B / Cleanup]
+    subgraph Scene_B [区域: 场景B/清理]
         direction LR
-        D --> E(♻️ Event Unloaded):::cleanup
-        E --> F(🧹 Listeners Removed):::cleanup
+        D --> E(♻️ 事件卸载):::cleanup
+        E --> F(🧹 监听器移除):::cleanup
     end
     style Scene_B fill:none,stroke:#475569,stroke-dasharray: 5 5
 ```
 
-☑️ **Checked:** Behaves like DontDestroyOnLoad.
-
+☑️ **选中：** 行为类似DontDestroyOnLoad。
 ```mermaid
 graph LR
 
@@ -426,35 +419,35 @@ graph LR
     classDef persistence fill:#b45309,stroke:#020617,stroke-width:2px,color:#ffffff,font-weight:bold
     classDef success fill:#0f766e,stroke:#042f2e,stroke-width:2px,color:#ffffff
 
-    subgraph Scene_A [Region: Scene A Active]
+    subgraph Scene_A [区域: 场景A活动]
         direction LR
-        A(🖼️ Scene A):::sceneA --> B(🔔 Event Raise):::sceneA
-        B --> C(🚀 Execute Actions):::action
+        A(🖼️ 场景A):::sceneA --> B(🔔 事件触发):::sceneA
+        B --> C(🚀 执行动作):::action
     end
     style Scene_A fill:none,stroke:#1e40af,stroke-dasharray: 5 5
 
-    C -- "✨ DontDestroyOnLoad" --> D(🚚 Loading Scene B):::transition
+    C -- "✨ DontDestroyOnLoad" --> D(🚚 加载场景B):::transition
 
-    subgraph Scene_B [Region: Scene B - Still Alive]
+    subgraph Scene_B [区域: 场景B - 仍然存活]
         direction LR
-        D --> E(🛡️ Event Persisted):::persistence
-        E --> F(💎 Listeners Remain):::persistence
-        F --> G(🔥 Ready to Raise):::success
+        D --> E(🛡️ 事件持久化):::persistence
+        E --> F(💎 监听器保留):::persistence
+        F --> G(🔥 准备触发):::success
     end
     style Scene_B fill:none,stroke:#0f766e,stroke-dasharray: 5 5
 ```
 
-**Best Use Cases:**
+**最佳使用场景：**
 
-| ✅ Use Persistent For       | ❌ Don't Use For             |
+| ✅ 使用持久化用于 | ❌ 不要用于 |
 | -------------------------- | --------------------------- |
-| 🎵 **Global BGM Manager**   | 🏰 Level-Specific Puzzles    |
-| 💾 **Save/Load System**     | 👾 Scene-Specific AI Pathing |
-| 🏆 **Achievement Trackers** | 🖼️ Local Menu Animations     |
-| 🌐 **Multiplayer State**    | 🔦 Temporary Room Lighting   |
+| 🎵 **全局BGM管理器** | 🏰 关卡特定谜题 |
+| 💾 **保存/加载系统** | 👾 场景特定AI寻路 |
+| 🏆 **成就追踪器** | 🖼️ 本地菜单动画 |
+| 🌐 **多人游戏状态** | 🔦 临时房间照明 |
 
-:::warning **⚠️ Critical: Dependency Injection**
-Persistent events **cannot** maintain references to scene-specific objects after a transition. You must re-bind new scene objects to the persistent event via **Dependency Injection** or a **Service Locator** after OnSceneLoaded.
+:::warning **⚠️ 关键：依赖注入**
+持久化事件在转换后**无法**维护对场景特定对象的引用。您必须在OnSceneLoaded后通过 **依赖注入** 或 **服务定位器** 将新场景对象重新绑定到持久化事件。
 :::
 
 </TabItem>
@@ -462,91 +455,91 @@ Persistent events **cannot** maintain references to scene-specific objects after
 
 ---
 
-## ❓ Troubleshooting
+## ❓ 故障排除
 
-### Actions Not Executing
+### 动作未执行
 
-**Problem**: Event fires but nothing happens.
+**问题**：事件触发但什么都没发生。
 
-**Checklist**:
+**检查清单**：
 
-✅ **Check Conditions**:
+✅ **检查条件**：
 ```
-1. Are conditions enabled? (toggle in condition section)
-2. Do conditions evaluate to TRUE?
-3. Test condition logic - see Visual Condition Tree guide
-4. Add Debug.Log() to verify values
-```
-
-✅ **Check Actions**:
-```
-1. Is UnityEvent field empty? Add actions!
-2. Is target GameObject destroyed?
-3. Is target Component disabled?
-4. Check Console for errors
+1. 条件是否启用？（在条件部分切换）
+2. 条件是否评估为TRUE？
+3. 测试条件逻辑 - 参见可视化条件树指南
+4. 添加Debug.Log()以验证值
 ```
 
-✅ **Check Schedule**:
+✅ **检查动作**：
 ```
-1. Is Action Delay too long?
-2. Is Repeat Interval causing confusion?
-3. Is event Persistent when it shouldn't be?
+1. UnityEvent字段是否为空？添加动作！
+2. 目标GameObject是否被销毁？
+3. 目标Component是否被禁用？
+4. 检查控制台是否有错误
+```
+
+✅ **检查调度**：
+```
+1. 动作延迟是否太长？
+2. 重复间隔是否造成混淆？
+3. 事件是否在不应该时是持久化的？
 ```
 
 ---
 
-### "Field Not Found" Warning
+### "找不到字段"警告
 
-**Problem**: `Field 'IntGameEventAction' not found.`
+**问题**：`Field 'IntGameEventAction' not found.`
 
-**Cause**: Event type missing its binding code.
+**原因**：事件类型缺少其绑定代码。
 
-**Solution**:
+**解决方案**：
 
-Click **"Force Rebuild All (Fix Missing Bindings)"** button.
+点击 **"Force Rebuild All (Fix Missing Bindings)"** 按钮。
 
-This regenerates all binding fields:
+这会重新生成所有绑定字段：
 ```
 Assets/TinyGiantsData/GameEventSystem/CodeGen/Basic/
-└─ IntGameEvent.cs (regenerated with binding field)
+└─ IntGameEvent.cs（使用绑定字段重新生成）
 ```
 
-**After Compilation**: Reopen Behavior Window.
+**编译后**：重新打开行为窗口。
 
 ---
 
-### Actions Fire Multiple Times
+### 动作触发多次
 
-**Problem**: Actions execute more than expected.
+**问题**：动作执行次数超过预期。
 
-**Common Causes**:
+**常见原因**：
 
-**Cause 1: Repeat Settings**
+**原因1：重复设置**
 ```
-Check:
-- Repeat Interval > 0?
-- Repeat Count > 0?
+检查：
+- 重复间隔 > 0？
+- 重复计数 > 0？
 
-If yes, event is looping (intentional or accidental)
-```
-
-**Cause 2: Multiple Event Raises**
-```
-Event fires multiple times in code:
-  OnHealthChanged.Raise(newHealth);  ← Called repeatedly
-
-Solution: Ensure event only raises when needed
+如果是，事件正在循环（有意或无意）
 ```
 
-**Cause 3: Multiple Listeners**
+**原因2：多次事件触发**
 ```
-Same action added multiple times in UnityEvent
+代码中多次触发事件：
+  OnHealthChanged.Raise(newHealth);  ← 重复调用
 
-Solution: Check action list, remove duplicates
+解决方案：确保事件仅在需要时触发
+```
+
+**原因3：多个监听器**
+```
+在UnityEvent中多次添加相同动作
+
+解决方案：检查动作列表，删除重复项
 ```
 
 ---
 
-:::tip Next Steps
-Now that you understand event behaviors, explore the **[Visual Condition Tree](./visual-condition-tree.md)** to master advanced conditional logic. Or jump to **[Flow Editor](../flow-graph/game-event-node-editor.md)** to build event orchestrations!
+:::tip 下一步
+现在您已经了解了事件行为，探索 **[可视化条件树](./visual-condition-tree.md)** 以掌握高级条件逻辑。或跳转到 **[流程编辑器](../flow-graph/game-event-node-editor.md)** 构建事件编排！
 :::
