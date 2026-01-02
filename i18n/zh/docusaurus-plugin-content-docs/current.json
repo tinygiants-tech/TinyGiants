@@ -1,30 +1,30 @@
 {
   "version.label": {
-    "message": "Next",
+    "message": "下一版",
     "description": "The label for version current"
   },
   "sidebar.tutorialSidebar.category.🏠 Introduction": {
-    "message": "🏠 Introduction",
+    "message": "🏠 介绍",
     "description": "The label for category '🏠 Introduction' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.💎 Visual Workflow": {
-    "message": "💎 Visual Workflow",
+    "message": "💎 可视化工作流",
     "description": "The label for category '💎 Visual Workflow' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.🕸️ Flow Orchestration": {
-    "message": "🕸️ Flow Orchestration",
+    "message": "🕸️ 流程编排",
     "description": "The label for category '🕸️ Flow Orchestration' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.💻 Runtime API": {
-    "message": "💻 Runtime API",
+    "message": "💻 运行时 API",
     "description": "The label for category '💻 Runtime API' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.🛠 Tools & Support": {
-    "message": "🛠 Tools & Support",
+    "message": "🛠 工具与支持",
     "description": "The label for category '🛠 Tools & Support' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.📚 Examples": {
-    "message": "📚 Examples",
+    "message": "📚 示例",
     "description": "The label for category '📚 Examples' in sidebar 'tutorialSidebar'"
   }
 }

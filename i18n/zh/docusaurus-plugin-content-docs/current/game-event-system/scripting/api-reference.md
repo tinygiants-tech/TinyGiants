@@ -1,104 +1,96 @@
 ﻿---
-sidebar_label: 'API Reference'
-
+sidebar_label: 'API参考'
 sidebar_position: 5
 ---
 
 import Tabs from '@theme/Tabs'; import TabItem from '@theme/TabItem';
 
-# API Reference
+# API参考
 
-Complete API reference documentation for the GameEvent system. All event types implement strict type-safe interfaces with comprehensive functionality for event-driven architecture.
+GameEvent系统的完整API参考文档。所有事件类型都实现了严格的类型安全接口，具有用于事件驱动架构的全面功能。
 
-:::info Namespace 
+:::info 命名空间
 
-All classes and interfaces are located in the `TinyGiants.GameEventSystem.Runtime` namespace.
+所有类和接口都位于`TinyGiants.GameEventSystem.Runtime`命名空间中。
 
 :::
-
 ```csharp
 using TinyGiants.GameEventSystem.Runtime;
 ```
 
 ------
 
-## Event Types Overview
+## 事件类型概述
 
-The GameEvent system provides three event type variants
+GameEvent系统提供三种事件类型变体
 
-| Type                            | Description                                         |
+| 类型 | 描述 |
 | ------------------------------- | --------------------------------------------------- |
-| **`GameEvent`**                 | Parameterless events for simple notifications       |
-| **`GameEvent<T>`**              | Single-argument events for passing typed data       |
-| **`GameEvent<TSender, TArgs>`** | Dual-argument events for sender-aware communication |
+| **`GameEvent`** | 用于简单通知的无参数事件 |
+| **`GameEvent<T>`** | 用于传递类型化数据的单参数事件 |
+| **`GameEvent<TSender, TArgs>`** | 用于发送者感知通信的双参数事件 |
 
-All methods below are available across these types with appropriate parameter variations.
+下面的所有方法都适用于这些类型，具有适当的参数变化。
 
 ------
 
-## 🚀 Event Raising & Cancellation
+## 🚀 事件触发与取消
 
 <details>
 <summary>Raise()</summary>
 
-Triggers the event immediately, invoking all registered listeners in execution order.
+立即触发事件，按执行顺序调用所有注册的监听器。
 
-**Execution Order**: Basic → Priority → Conditional → Persistent → Triggers → Chains
+**执行顺序**：基础 → 优先级 → 条件 → 持久化 → 触发器 → 链
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 void Raise();
 ```
 
-**Example:**
-
+**示例：**
 ```csharp
 myEvent.Raise();
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 void Raise(T argument);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name       | Type | Description                               |
+| 名称 | 类型 | 描述 |
 | ---------- | ---- | ----------------------------------------- |
-| `argument` | `T`  | The data payload to pass to all listeners |
+| `argument` | `T` | 要传递给所有监听器的数据有效载荷 |
 
-**Example:**
-
+**示例：**
 ```csharp
-// Raise with float value
+// 用float值触发
 healthEvent.Raise(50.5f);
 
-// Raise with custom type
+// 用自定义类型触发
 scoreEvent.Raise(new ScoreData { points = 100, combo = 5 });
 ```
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 void Raise(TSender sender, TArgs args);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name     | Type      | Description                            |
+| 名称 | 类型 | 描述 |
 | -------- | --------- | -------------------------------------- |
-| `sender` | `TSender` | The source object triggering the event |
-| `args`   | `TArgs`   | The data payload to pass to listeners  |
+| `sender` | `TSender` | 触发事件的源对象 |
+| `args` | `TArgs` | 要传递给监听器的数据有效载荷 |
 
-**Example:**
-
+**示例：**
 ```csharp
-// Raise with GameObject sender and damage data
+// 用GameObject sender和伤害数据触发
 damageEvent.Raise(this.gameObject, new DamageInfo(10));
 
-// Raise with player sender
+// 用player sender触发
 playerEvent.Raise(playerInstance, new PlayerAction { type = "Jump" });
 ```
 
@@ -109,103 +101,95 @@ playerEvent.Raise(playerInstance, new PlayerAction { type = "Jump" });
 <details>
 <summary>Cancel()</summary>
 
-Stops any active Inspector-configured scheduled execution (delay or repeating) for this event asset.
-
+停止此事件资产的任何活动的Inspector配置的调度执行（延迟或重复）。
 ```csharp
 void Cancel();
 ```
 
-**Example:**
-
+**示例：**
 ```csharp
-// Stop automatic repeating configured in Inspector
+// 停止在Inspector中配置的自动重复
 myEvent.Cancel();
 ```
 
-:::warning Scope Limitation 
+:::warning 范围限制
 
-This **ONLY** cancels schedules initiated by the Inspector's "Schedule Configuration". It does **NOT** cancel manual schedules created via `RaiseDelayed()` or `RaiseRepeating()`. Use `CancelDelayed(handle)` or `CancelRepeating(handle)` for those. 
+这**仅**取消由Inspector的"调度配置"启动的调度。它**不会**取消通过`RaiseDelayed()`或`RaiseRepeating()`创建的手动调度。对于这些，使用`CancelDelayed(handle)`或`CancelRepeating(handle)`。
 
 :::
 
 </details>
 
-## ⏱️ Time-Based Scheduling
+## ⏱️ 基于时间的调度
 
 <details>
 <summary>RaiseDelayed()</summary>
 
-Schedules the event to fire once after a specified delay.
+调度事件在指定延迟后触发一次。
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 ScheduleHandle RaiseDelayed(float delay);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name    | Type    | Description                                      |
+| 名称 | 类型 | 描述 |
 | ------- | ------- | ------------------------------------------------ |
-| `delay` | `float` | Time in seconds to wait before raising the event |
+| `delay` | `float` | 触发事件前等待的时间（秒） |
 
-**Returns:** `ScheduleHandle` - Handle for cancellation
+**返回值：** `ScheduleHandle` - 用于取消的句柄
 
-**Example:**
-
+**示例：**
 ```csharp
-// Raise after 5 seconds
+// 5秒后触发
 ScheduleHandle handle = myEvent.RaiseDelayed(5f);
 
-// Cancel if needed
+// 如果需要，取消
 myEvent.CancelDelayed(handle);
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 ScheduleHandle RaiseDelayed(T argument, float delay);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name       | Type    | Description                                      |
+| 名称 | 类型 | 描述 |
 | ---------- | ------- | ------------------------------------------------ |
-| `argument` | `T`     | The data to pass when the event executes         |
-| `delay`    | `float` | Time in seconds to wait before raising the event |
+| `argument` | `T` | 事件执行时要传递的数据 |
+| `delay` | `float` | 触发事件前等待的时间（秒） |
 
-**Returns:** `ScheduleHandle` - Handle for cancellation
+**返回值：** `ScheduleHandle` - 用于取消的句柄
 
-**Example:**
-
+**示例：**
 ```csharp
-// Spawn enemy after 3 seconds
+// 3秒后生成敌人
 ScheduleHandle handle = spawnEvent.RaiseDelayed(enemyType, 3f);
 
-// Cancel spawn
+// 取消生成
 spawnEvent.CancelDelayed(handle);
 ```
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 ScheduleHandle RaiseDelayed(TSender sender, TArgs args, float delay);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name     | Type      | Description                                      |
+| 名称 | 类型 | 描述 |
 | -------- | --------- | ------------------------------------------------ |
-| `sender` | `TSender` | The sender to pass when the event executes       |
-| `args`   | `TArgs`   | The data to pass when the event executes         |
-| `delay`  | `float`   | Time in seconds to wait before raising the event |
+| `sender` | `TSender` | 事件执行时要传递的sender |
+| `args` | `TArgs` | 事件执行时要传递的数据 |
+| `delay` | `float` | 触发事件前等待的时间（秒） |
 
-**Returns:** `ScheduleHandle` - Handle for cancellation
+**返回值：** `ScheduleHandle` - 用于取消的句柄
 
-**Example:**
-
+**示例：**
 ```csharp
-// Delayed damage application
+// 延迟伤害应用
 ScheduleHandle handle = damageEvent.RaiseDelayed(
     attackerObject, 
     new DamageInfo(25), 
@@ -220,83 +204,77 @@ ScheduleHandle handle = damageEvent.RaiseDelayed(
 <details>
 <summary>RaiseRepeating()</summary>
 
-Schedules the event to fire repeatedly at fixed intervals.
+调度事件以固定间隔重复触发。
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 ScheduleHandle RaiseRepeating(float interval, int repeatCount = -1);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name          | Type    | Description                                                  |
+| 名称 | 类型 | 描述 |
 | ------------- | ------- | ------------------------------------------------------------ |
-| `interval`    | `float` | Seconds between each execution                               |
-| `repeatCount` | `int`   | Number of repetitions. Use `-1` for infinite (default: `-1`) |
+| `interval` | `float` | 每次执行之间的秒数 |
+| `repeatCount` | `int` | 重复次数。使用`-1`表示无限（默认：`-1`） |
 
-**Returns:** `ScheduleHandle` - Handle for cancellation
+**返回值：** `ScheduleHandle` - 用于取消的句柄
 
-**Example:**
-
+**示例：**
 ```csharp
-// Repeat 10 times
+// 重复10次
 ScheduleHandle handle = tickEvent.RaiseRepeating(1f, repeatCount: 10);
 
-// Repeat forever (infinite loop)
+// 永远重复（无限循环）
 ScheduleHandle infinite = pulseEvent.RaiseRepeating(0.5f);
 
-// Stop infinite loop
+// 停止无限循环
 pulseEvent.CancelRepeating(infinite);
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 ScheduleHandle RaiseRepeating(T argument, float interval, int repeatCount = -1);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name          | Type    | Description                                                  |
+| 名称 | 类型 | 描述 |
 | ------------- | ------- | ------------------------------------------------------------ |
-| `argument`    | `T`     | The data to pass with each execution                         |
-| `interval`    | `float` | Seconds between each execution                               |
-| `repeatCount` | `int`   | Number of repetitions. Use `-1` for infinite (default: `-1`) |
+| `argument` | `T` | 每次执行时要传递的数据 |
+| `interval` | `float` | 每次执行之间的秒数 |
+| `repeatCount` | `int` | 重复次数。使用`-1`表示无限（默认：`-1`） |
 
-**Returns:** `ScheduleHandle` - Handle for cancellation
+**返回值：** `ScheduleHandle` - 用于取消的句柄
 
-**Example:**
-
+**示例：**
 ```csharp
-// Deal damage every second, 5 times
+// 每秒造成伤害，5次
 ScheduleHandle poison = damageEvent.RaiseRepeating(5, 1f, repeatCount: 5);
 
-// Spawn waves infinitely every 30 seconds
+// 每30秒无限生成波次
 ScheduleHandle waves = waveEvent.RaiseRepeating(waveData, 30f);
 ```
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 ScheduleHandle RaiseRepeating(TSender sender, TArgs args, float interval, int repeatCount = -1);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name          | Type      | Description                                                  |
+| 名称 | 类型 | 描述 |
 | ------------- | --------- | ------------------------------------------------------------ |
-| `sender`      | `TSender` | The sender to pass with each execution                       |
-| `args`        | `TArgs`   | The data to pass with each execution                         |
-| `interval`    | `float`   | Seconds between each execution                               |
-| `repeatCount` | `int`     | Number of repetitions. Use `-1` for infinite (default: `-1`) |
+| `sender` | `TSender` | 每次执行时要传递的sender |
+| `args` | `TArgs` | 每次执行时要传递的数据 |
+| `interval` | `float` | 每次执行之间的秒数 |
+| `repeatCount` | `int` | 重复次数。使用`-1`表示无限（默认：`-1`） |
 
-**Returns:** `ScheduleHandle` - Handle for cancellation
+**返回值：** `ScheduleHandle` - 用于取消的句柄
 
-**Example:**
-
+**示例：**
 ```csharp
-// Regenerate health every 2 seconds, 10 times
+// 每2秒再生生命值，10次
 ScheduleHandle regen = healEvent.RaiseRepeating(
     playerObject,
     new HealInfo(5),
@@ -312,29 +290,27 @@ ScheduleHandle regen = healEvent.RaiseRepeating(
 <details>
 <summary>CancelDelayed()</summary>
 
-Cancels a specific delayed event created with `RaiseDelayed()`.
-
+取消用`RaiseDelayed()`创建的特定延迟事件。
 ```csharp
 bool CancelDelayed(ScheduleHandle handle);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name     | Type             | Description                             |
+| 名称 | 类型 | 描述 |
 | -------- | ---------------- | --------------------------------------- |
-| `handle` | `ScheduleHandle` | The handle returned by `RaiseDelayed()` |
+| `handle` | `ScheduleHandle` | `RaiseDelayed()`返回的句柄 |
 
-**Returns:** `bool` - `true` if successfully cancelled, `false` if already executed or invalid
+**返回值：** `bool` - 如果成功取消则为`true`，如果已执行或无效则为`false`
 
-**Example:**
-
+**示例：**
 ```csharp
 ScheduleHandle handle = explosionEvent.RaiseDelayed(5f);
 
-// Cancel before explosion happens
+// 在爆炸发生前取消
 if (explosionEvent.CancelDelayed(handle))
 {
-    Debug.Log("Explosion defused!");
+    Debug.Log("爆炸已拆除！");
 }
 ```
 
@@ -343,115 +319,107 @@ if (explosionEvent.CancelDelayed(handle))
 <details>
 <summary>CancelRepeating()</summary>
 
-Cancels a specific repeating event created with `RaiseRepeating()`.
-
+取消用`RaiseRepeating()`创建的特定重复事件。
 ```csharp
 bool CancelRepeating(ScheduleHandle handle);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name     | Type             | Description                               |
+| 名称 | 类型 | 描述 |
 | -------- | ---------------- | ----------------------------------------- |
-| `handle` | `ScheduleHandle` | The handle returned by `RaiseRepeating()` |
+| `handle` | `ScheduleHandle` | `RaiseRepeating()`返回的句柄 |
 
-**Returns:** `bool` - `true` if successfully cancelled, `false` if already finished or invalid
+**返回值：** `bool` - 如果成功取消则为`true`，如果已完成或无效则为`false`
 
-**Example:**
-
+**示例：**
 ```csharp
 ScheduleHandle handle = tickEvent.RaiseRepeating(1f);
 
-// Stop repeating
+// 停止重复
 if (tickEvent.CancelRepeating(handle))
 {
-    Debug.Log("Timer stopped!");
+    Debug.Log("计时器已停止！");
 }
 ```
 
 </details>
 
-## 🎧 Listener Management
+## 🎧 监听器管理
 
 <details>
 <summary>AddListener()</summary>
 
-Registers a basic listener with standard execution priority.
+注册具有标准执行优先级的基础监听器。
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 void AddListener(UnityAction call);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name   | Type          | Description                        |
+| 名称 | 类型 | 描述 |
 | ------ | ------------- | ---------------------------------- |
-| `call` | `UnityAction` | Callback method with no parameters |
+| `call` | `UnityAction` | 无参数的回调方法 |
 
-**Example:**
-
+**示例：**
 ```csharp
 myEvent.AddListener(OnEventTriggered);
 
 void OnEventTriggered()
 {
-    Debug.Log("Event fired!");
+    Debug.Log("事件已触发！");
 }
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 void AddListener(UnityAction<T> call);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name   | Type             | Description                              |
+| 名称 | 类型 | 描述 |
 | ------ | ---------------- | ---------------------------------------- |
-| `call` | `UnityAction<T>` | Callback method receiving typed argument |
+| `call` | `UnityAction<T>` | 接收类型化参数的回调方法 |
 
-**Example:**
-
+**示例：**
 ```csharp
 scoreEvent.AddListener(OnScoreChanged);
 
 void OnScoreChanged(int newScore)
 {
-    Debug.Log($"Score: {newScore}");
+    Debug.Log($"分数：{newScore}");
 }
 ```
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 void AddListener(UnityAction<TSender, TArgs> call);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name   | Type                          | Description                             |
+| 名称 | 类型 | 描述 |
 | ------ | ----------------------------- | --------------------------------------- |
-| `call` | `UnityAction<TSender, TArgs>` | Callback receiving sender and arguments |
+| `call` | `UnityAction<TSender, TArgs>` | 接收sender和参数的回调 |
 
-**Example:**
-
+**示例：**
 ```csharp
 damageEvent.AddListener(OnDamageDealt);
 
 void OnDamageDealt(GameObject attacker, DamageInfo info)
 {
-    Debug.Log($"{attacker.name} dealt {info.amount} damage");
+    Debug.Log($"{attacker.name}造成了{info.amount}点伤害");
 }
 ```
 
 </TabItem> </Tabs>
 
-:::tip Duplicate Prevention 
+:::tip 防止重复
 
-If the listener already exists, it will be removed and re-added to prevent duplicates. 
+如果监听器已存在，它将被删除并重新添加以防止重复。
 
 :::
 
@@ -460,58 +428,52 @@ If the listener already exists, it will be removed and re-added to prevent dupli
 <details>
 <summary>RemoveListener()</summary>
 
-Unregisters a basic listener from the event.
+从事件中注销基础监听器。
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 void RemoveListener(UnityAction call);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name   | Type          | Description                        |
+| 名称 | 类型 | 描述 |
 | ------ | ------------- | ---------------------------------- |
-| `call` | `UnityAction` | Callback method with no parameters |
+| `call` | `UnityAction` | 无参数的回调方法 |
 
-**Example:**
-
+**示例：**
 ```csharp
 myEvent.RemoveListener(OnEventTriggered);
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 void RemoveListener(UnityAction<T> call);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name   | Type             | Description                              |
+| 名称 | 类型 | 描述 |
 | ------ | ---------------- | ---------------------------------------- |
-| `call` | `UnityAction<T>` | Callback method receiving typed argument |
+| `call` | `UnityAction<T>` | 接收类型化参数的回调方法 |
 
-**Example:**
-
+**示例：**
 ```csharp
 scoreEvent.RemoveListener(OnScoreChanged);
 ```
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 void RemoveListener(UnityAction<TSender, TArgs> call);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name   | Type                          | Description                             |
+| 名称 | 类型 | 描述 |
 | ------ | ----------------------------- | --------------------------------------- |
-| `call` | `UnityAction<TSender, TArgs>` | Callback receiving sender and arguments |
+| `call` | `UnityAction<TSender, TArgs>` | 接收sender和参数的回调 |
 
-**Example:**
-
+**示例：**
 ```csharp
 damageEvent.RemoveListener(OnDamageDealt);
 ```
@@ -523,22 +485,20 @@ damageEvent.RemoveListener(OnDamageDealt);
 <details>
 <summary>RemoveAllListeners()</summary>
 
-Clears all Basic, Priority, and Conditional listeners from the event.
-
+从事件中清除所有基础、优先级和条件监听器。
 ```csharp
 void RemoveAllListeners();
 ```
 
-**Example:**
-
+**示例：**
 ```csharp
-// Clean up all listeners
+// 清理所有监听器
 myEvent.RemoveAllListeners();
 ```
 
-:::warning Scope 
+:::warning 范围
 
-Does **NOT** remove Persistent listeners or Trigger/Chain events for safety reasons. 
+出于安全原因，**不会**删除持久化监听器或触发器/链事件。
 
 :::
 
@@ -547,65 +507,59 @@ Does **NOT** remove Persistent listeners or Trigger/Chain events for safety reas
 <details>
 <summary>AddPriorityListener()</summary>
 
-Registers a listener with explicit execution priority. Higher priority values execute first.
+注册具有显式执行优先级的监听器。更高的优先级值先执行。
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 void AddPriorityListener(UnityAction call, int priority);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name       | Type          | Description                                       |
+| 名称 | 类型 | 描述 |
 | ---------- | ------------- | ------------------------------------------------- |
-| `call`     | `UnityAction` | Callback method                                   |
-| `priority` | `int`         | Execution priority (higher = earlier, default: 0) |
+| `call` | `UnityAction` | 回调方法 |
+| `priority` | `int` | 执行优先级（越高 = 越早，默认：0） |
 
-**Example:**
-
+**示例：**
 ```csharp
 myEvent.AddPriorityListener(CriticalHandler, 100);
 myEvent.AddPriorityListener(NormalHandler, 50);
 myEvent.AddPriorityListener(LowPriorityHandler, 10);
-// Execution order: CriticalHandler → NormalHandler → LowPriorityHandler
+// 执行顺序：CriticalHandler → NormalHandler → LowPriorityHandler
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 void AddPriorityListener(UnityAction<T> call, int priority);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name       | Type             | Description                                       |
+| 名称 | 类型 | 描述 |
 | ---------- | ---------------- | ------------------------------------------------- |
-| `call`     | `UnityAction<T>` | Callback method                                   |
-| `priority` | `int`            | Execution priority (higher = earlier, default: 0) |
+| `call` | `UnityAction<T>` | 回调方法 |
+| `priority` | `int` | 执行优先级（越高 = 越早，默认：0） |
 
-**Example:**
-
+**示例：**
 ```csharp
 healthEvent.AddPriorityListener(UpdateUI, 100);
 healthEvent.AddPriorityListener(PlaySound, 50);
 ```
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 void AddPriorityListener(UnityAction<TSender, TArgs> call, int priority);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name       | Type                          | Description                                       |
+| 名称 | 类型 | 描述 |
 | ---------- | ----------------------------- | ------------------------------------------------- |
-| `call`     | `UnityAction<TSender, TArgs>` | Callback method                                   |
-| `priority` | `int`                         | Execution priority (higher = earlier, default: 0) |
+| `call` | `UnityAction<TSender, TArgs>` | 回调方法 |
+| `priority` | `int` | 执行优先级（越高 = 越早，默认：0） |
 
-**Example:**
-
+**示例：**
 ```csharp
 attackEvent.AddPriorityListener(ProcessCombat, 100);
 attackEvent.AddPriorityListener(ShowVFX, 50);
@@ -618,58 +572,52 @@ attackEvent.AddPriorityListener(ShowVFX, 50);
 <details>
 <summary>RemovePriorityListener()</summary>
 
-Unregisters a priority listener.
+注销优先级监听器。
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 void RemovePriorityListener(UnityAction call);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name   | Type          | Description                        |
+| 名称 | 类型 | 描述 |
 | ------ | ------------- | ---------------------------------- |
-| `call` | `UnityAction` | Callback method with no parameters |
+| `call` | `UnityAction` | 无参数的回调方法 |
 
-**Example:**
-
+**示例：**
 ```csharp
 myEvent.RemovePriorityListener(OnEventTriggered);
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 void RemovePriorityListener(UnityAction<T> call);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name   | Type             | Description                              |
+| 名称 | 类型 | 描述 |
 | ------ | ---------------- | ---------------------------------------- |
-| `call` | `UnityAction<T>` | Callback method receiving typed argument |
+| `call` | `UnityAction<T>` | 接收类型化参数的回调方法 |
 
-**Example:**
-
+**示例：**
 ```csharp
 scoreEvent.RemovePriorityListener(OnScoreChanged);
 ```
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 void RemovePriorityListener(UnityAction<TSender, TArgs> call);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name   | Type                          | Description                             |
+| 名称 | 类型 | 描述 |
 | ------ | ----------------------------- | --------------------------------------- |
-| `call` | `UnityAction<TSender, TArgs>` | Callback receiving sender and arguments |
+| `call` | `UnityAction<TSender, TArgs>` | 接收sender和参数的回调 |
 
-**Example:**
-
+**示例：**
 ```csharp
 damageEvent.RemovePriorityListener(OnDamageDealt);
 ```
@@ -681,24 +629,22 @@ damageEvent.RemovePriorityListener(OnDamageDealt);
 <details>
 <summary>AddConditionalListener()</summary>
 
-Registers a listener that only executes when a condition evaluates to true.
+注册仅在条件评估为true时执行的监听器。
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 void AddConditionalListener(UnityAction call, Func<bool> condition, int priority = 0);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name        | Type          | Description                                |
+| 名称 | 类型 | 描述 |
 | ----------- | ------------- | ------------------------------------------ |
-| `call`      | `UnityAction` | Callback method                            |
-| `condition` | `Func<bool>`  | Predicate function (null = always execute) |
-| `priority`  | `int`         | Execution priority (default: 0)            |
+| `call` | `UnityAction` | 回调方法 |
+| `condition` | `Func<bool>` | 谓词函数（null = 始终执行） |
+| `priority` | `int` | 执行优先级（默认：0） |
 
-**Example:**
-
+**示例：**
 ```csharp
 myEvent.AddConditionalListener(
     OnHealthLow,
@@ -708,21 +654,19 @@ myEvent.AddConditionalListener(
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 void AddConditionalListener(UnityAction<T> call, Func<T, bool> condition, int priority = 0);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name        | Type             | Description                      |
+| 名称 | 类型 | 描述 |
 | ----------- | ---------------- | -------------------------------- |
-| `call`      | `UnityAction<T>` | Callback method                  |
-| `condition` | `Func<T, bool>`  | Predicate receiving the argument |
-| `priority`  | `int`            | Execution priority (default: 0)  |
+| `call` | `UnityAction<T>` | 回调方法 |
+| `condition` | `Func<T, bool>` | 接收参数的谓词 |
+| `priority` | `int` | 执行优先级（默认：0） |
 
-**Example:**
-
+**示例：**
 ```csharp
 scoreEvent.AddConditionalListener(
     OnHighScore,
@@ -732,7 +676,6 @@ scoreEvent.AddConditionalListener(
 ```
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 void AddConditionalListener(
     UnityAction<TSender, TArgs> call, 
@@ -741,16 +684,15 @@ void AddConditionalListener(
 );
 ```
 
-**Parameters:**
+**参数：**
 
-| Name        | Type                          | Description                              |
+| 名称 | 类型 | 描述 |
 | ----------- | ----------------------------- | ---------------------------------------- |
-| `call`      | `UnityAction<TSender, TArgs>` | Callback method                          |
-| `condition` | `Func<TSender, TArgs, bool>`  | Predicate receiving sender and arguments |
-| `priority`  | `int`                         | Execution priority (default: 0)          |
+| `call` | `UnityAction<TSender, TArgs>` | 回调方法 |
+| `condition` | `Func<TSender, TArgs, bool>` | 接收sender和参数的谓词 |
+| `priority` | `int` | 执行优先级（默认：0） |
 
-**Example:**
-
+**示例：**
 ```csharp
 damageEvent.AddConditionalListener(
     OnCriticalHit,
@@ -766,58 +708,52 @@ damageEvent.AddConditionalListener(
 <details>
 <summary>RemoveConditionalListener()</summary>
 
-Unregisters a conditional listener.
+注销条件监听器。
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 void RemoveConditionalListener(UnityAction call);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name   | Type          | Description                        |
+| 名称 | 类型 | 描述 |
 | ------ | ------------- | ---------------------------------- |
-| `call` | `UnityAction` | Callback method with no parameters |
+| `call` | `UnityAction` | 无参数的回调方法 |
 
-**Example:**
-
+**示例：**
 ```csharp
 myEvent.RemoveConditionalListener(OnEventTriggered);
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 void RemoveConditionalListener(UnityAction<T> call);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name   | Type             | Description                              |
+| 名称 | 类型 | 描述 |
 | ------ | ---------------- | ---------------------------------------- |
-| `call` | `UnityAction<T>` | Callback method receiving typed argument |
+| `call` | `UnityAction<T>` | 接收类型化参数的回调方法 |
 
-**Example:**
-
+**示例：**
 ```csharp
 scoreEvent.RemoveConditionalListener(OnScoreChanged);
 ```
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 void RemoveConditionalListener(UnityAction<TSender, TArgs> call);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name   | Type                          | Description                             |
+| 名称 | 类型 | 描述 |
 | ------ | ----------------------------- | --------------------------------------- |
-| `call` | `UnityAction<TSender, TArgs>` | Callback receiving sender and arguments |
+| `call` | `UnityAction<TSender, TArgs>` | 接收sender和参数的回调 |
 
-**Example:**
-
+**示例：**
 ```csharp
 damageEvent.RemoveConditionalListener(OnDamageDealt);
 ```
@@ -829,58 +765,54 @@ damageEvent.RemoveConditionalListener(OnDamageDealt);
 <details>
 <summary>AddPersistentListener()</summary>
 
-Registers a global listener that survives scene changes (DontDestroyOnLoad).
+注册在场景更改后存活的全局监听器（DontDestroyOnLoad）。
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 void AddPersistentListener(UnityAction call, int priority = 0);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name       | Type          | Description                     |
+| 名称 | 类型 | 描述 |
 | ---------- | ------------- | ------------------------------- |
-| `call`     | `UnityAction` | Callback method                 |
-| `priority` | `int`         | Execution priority (default: 0) |
+| `call` | `UnityAction` | 回调方法 |
+| `priority` | `int` | 执行优先级（默认：0） |
 
-**Example:**
-
+**示例：**
 ```csharp
 globalEvent.AddPersistentListener(OnGlobalAction, priority: 100);
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 void AddPersistentListener(UnityAction<T> call, int priority = 0);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name       | Type             | Description                     |
+| 名称 | 类型 | 描述 |
 | ---------- | ---------------- | ------------------------------- |
-| `call`     | `UnityAction<T>` | Callback method                 |
-| `priority` | `int`            | Execution priority (default: 0) |
+| `call` | `UnityAction<T>` | 回调方法 |
+| `priority` | `int` | 执行优先级（默认：0） |
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 void AddPersistentListener(UnityAction<TSender, TArgs> call, int priority = 0);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name       | Type                          | Description                     |
+| 名称 | 类型 | 描述 |
 | ---------- | ----------------------------- | ------------------------------- |
-| `call`     | `UnityAction<TSender, TArgs>` | Callback method                 |
-| `priority` | `int`                         | Execution priority (default: 0) |
+| `call` | `UnityAction<TSender, TArgs>` | 回调方法 |
+| `priority` | `int` | 执行优先级（默认：0） |
 
 </TabItem> </Tabs>
 
-:::info Persistence 
+:::info 持久性
 
-Persistent listeners remain active across scene loads. Use for global systems like save management or analytics. 
+持久化监听器在场景加载间保持活动。用于全局系统，如保存管理或分析。
 
 :::
 
@@ -889,58 +821,52 @@ Persistent listeners remain active across scene loads. Use for global systems li
 <details>
 <summary>RemovePersistentListener()</summary>
 
-Unregisters a persistent listener.
+注销持久化监听器。
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 void RemovePersistentListener(UnityAction call);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name   | Type          | Description                        |
+| 名称 | 类型 | 描述 |
 | ------ | ------------- | ---------------------------------- |
-| `call` | `UnityAction` | Callback method with no parameters |
+| `call` | `UnityAction` | 无参数的回调方法 |
 
-**Example:**
-
+**示例：**
 ```csharp
 myEvent.RemovePersistentListener(OnEventTriggered);
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 void RemovePersistentListener(UnityAction<T> call);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name   | Type             | Description                              |
+| 名称 | 类型 | 描述 |
 | ------ | ---------------- | ---------------------------------------- |
-| `call` | `UnityAction<T>` | Callback method receiving typed argument |
+| `call` | `UnityAction<T>` | 接收类型化参数的回调方法 |
 
-**Example:**
-
+**示例：**
 ```csharp
 scoreEvent.RemovePersistentListener(OnScoreChanged);
 ```
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 void RemovePersistentListener(UnityAction<TSender, TArgs> call);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name   | Type                          | Description                             |
+| 名称 | 类型 | 描述 |
 | ------ | ----------------------------- | --------------------------------------- |
-| `call` | `UnityAction<TSender, TArgs>` | Callback receiving sender and arguments |
+| `call` | `UnityAction<TSender, TArgs>` | 接收sender和参数的回调 |
 
-**Example:**
-
+**示例：**
 ```csharp
 damageEvent.RemovePersistentListener(OnDamageDealt);
 ```
@@ -949,15 +875,14 @@ damageEvent.RemovePersistentListener(OnDamageDealt);
 
 </details>
 
-## ⚡ Trigger Events (Fan-Out Pattern)
+## ⚡ 触发器事件（扇出模式）
 
 <details>
 <summary>AddTriggerEvent()</summary>
 
-Registers a target event to be triggered automatically when this event is raised.
+注册在触发此事件时自动触发的目标事件。
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 TriggerHandle AddTriggerEvent(
     GameEventBase targetEvent,
@@ -967,40 +892,38 @@ TriggerHandle AddTriggerEvent(
 );
 ```
 
-**Parameters:**
+**参数：**
 
-| Name          | Type            | Description                                             |
+| 名称 | 类型 | 描述 |
 | ------------- | --------------- | ------------------------------------------------------- |
-| `targetEvent` | `GameEventBase` | The event to trigger                                    |
-| `delay`       | `float`         | Optional delay in seconds (default: 0)                  |
-| `condition`   | `Func<bool>`    | Optional predicate to gate execution                    |
-| `priority`    | `int`           | Execution order relative to other triggers (default: 0) |
+| `targetEvent` | `GameEventBase` | 要触发的事件 |
+| `delay` | `float` | 可选延迟（秒）（默认：0） |
+| `condition` | `Func<bool>` | 可选谓词来控制执行 |
+| `priority` | `int` | 相对于其他触发器的执行顺序（默认：0） |
 
-**Returns:** `TriggerHandle` - Unique identifier for safe removal
+**返回值：** `TriggerHandle` - 用于安全移除的唯一标识符
 
-**Example:**
-
+**示例：**
 ```csharp
-// Simple trigger: door opens → light turns on
+// 简单触发器：门打开 → 灯打开
 doorOpenEvent.AddTriggerEvent(lightOnEvent);
 
-// Delayed trigger: explosion after 2 seconds
+// 延迟触发器：2秒后爆炸
 fuseEvent.AddTriggerEvent(explosionEvent, delay: 2f);
 
-// Conditional trigger
+// 条件触发器
 doorOpenEvent.AddTriggerEvent(
     alarmEvent,
     condition: () => isNightTime
 );
 
-// Priority-ordered triggers
+// 优先级排序的触发器
 bossDefeatedEvent.AddTriggerEvent(stopMusicEvent, priority: 100);
 bossDefeatedEvent.AddTriggerEvent(victoryMusicEvent, priority: 90);
 bossDefeatedEvent.AddTriggerEvent(showRewardsEvent, priority: 50);
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 TriggerHandle AddTriggerEvent(
     GameEventBase targetEvent,
@@ -1012,37 +935,36 @@ TriggerHandle AddTriggerEvent(
 );
 ```
 
-**Parameters:**
+**参数：**
 
-| Name                  | Type              | Description                                    |
+| 名称 | 类型 | 描述 |
 | --------------------- | ----------------- | ---------------------------------------------- |
-| `targetEvent`         | `GameEventBase`   | The event to trigger                           |
-| `delay`               | `float`           | Optional delay in seconds (default: 0)         |
-| `condition`           | `Func<T, bool>`   | Optional predicate receiving the argument      |
-| `passArgument`        | `bool`            | Whether to pass data to target (default: true) |
-| `argumentTransformer` | `Func<T, object>` | Optional function to transform data            |
-| `priority`            | `int`             | Execution priority (default: 0)                |
+| `targetEvent` | `GameEventBase` | 要触发的事件 |
+| `delay` | `float` | 可选延迟（秒）（默认：0） |
+| `condition` | `Func<T, bool>` | 接收参数的可选谓词 |
+| `passArgument` | `bool` | 是否将数据传递给目标（默认：true） |
+| `argumentTransformer` | `Func<T, object>` | 可选的数据转换函数 |
+| `priority` | `int` | 执行优先级（默认：0） |
 
-**Returns:** `TriggerHandle` - Unique identifier for safe removal
+**返回值：** `TriggerHandle` - 用于安全移除的唯一标识符
 
-**Example:**
-
+**示例：**
 ```csharp
-// Pass argument directly
+// 直接传递参数
 GameEvent<int> scoreEvent;
 GameEvent<int> updateUIEvent;
 scoreEvent.AddTriggerEvent(updateUIEvent, passArgument: true);
 
-// Transform argument: int → string
+// 转换参数：int → string
 GameEvent<int> scoreEvent;
 GameEvent<string> notificationEvent;
 scoreEvent.AddTriggerEvent(
     notificationEvent,
     passArgument: true,
-    argumentTransformer: score => $"Score: {score}"
+    argumentTransformer: score => $"分数：{score}"
 );
 
-// Conditional with argument check
+// 带参数检查的条件
 GameEvent<float> healthEvent;
 GameEvent lowHealthWarningEvent;
 healthEvent.AddTriggerEvent(
@@ -1053,7 +975,6 @@ healthEvent.AddTriggerEvent(
 ```
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 TriggerHandle AddTriggerEvent(
     GameEventBase targetEvent,
@@ -1065,28 +986,27 @@ TriggerHandle AddTriggerEvent(
 );
 ```
 
-**Parameters:**
+**参数：**
 
-| Name                  | Type                           | Description                                    |
+| 名称 | 类型 | 描述 |
 | --------------------- | ------------------------------ | ---------------------------------------------- |
-| `targetEvent`         | `GameEventBase`                | The event to trigger                           |
-| `delay`               | `float`                        | Optional delay in seconds (default: 0)         |
-| `condition`           | `Func<TSender, TArgs, bool>`   | Optional predicate receiving sender and args   |
-| `passArgument`        | `bool`                         | Whether to pass data to target (default: true) |
-| `argumentTransformer` | `Func<TSender, TArgs, object>` | Optional transformation function               |
-| `priority`            | `int`                          | Execution priority (default: 0)                |
+| `targetEvent` | `GameEventBase` | 要触发的事件 |
+| `delay` | `float` | 可选延迟（秒）（默认：0） |
+| `condition` | `Func<TSender, TArgs, bool>` | 接收sender和args的可选谓词 |
+| `passArgument` | `bool` | 是否将数据传递给目标（默认：true） |
+| `argumentTransformer` | `Func<TSender, TArgs, object>` | 可选转换函数 |
+| `priority` | `int` | 执行优先级（默认：0） |
 
-**Returns:** `TriggerHandle` - Unique identifier for safe removal
+**返回值：** `TriggerHandle` - 用于安全移除的唯一标识符
 
-**Example:**
-
+**示例：**
 ```csharp
-// Pass sender and args to another sender event
+// 将sender和args传递给另一个sender事件
 GameEvent<GameObject, DamageInfo> damageEvent;
 GameEvent<GameObject, DamageInfo> logEvent;
 damageEvent.AddTriggerEvent(logEvent, passArgument: true);
 
-// Transform: extract damage value only
+// 转换：仅提取伤害值
 GameEvent<GameObject, DamageInfo> damageEvent;
 GameEvent<int> damageNumberEvent;
 damageEvent.AddTriggerEvent(
@@ -1095,7 +1015,7 @@ damageEvent.AddTriggerEvent(
     argumentTransformer: (sender, info) => info.amount
 );
 
-// Conditional based on sender and args
+// 基于sender和args的条件
 GameEvent<GameObject, DamageInfo> damageEvent;
 GameEvent criticalHitEvent;
 damageEvent.AddTriggerEvent(
@@ -1108,70 +1028,66 @@ damageEvent.AddTriggerEvent(
 
 </TabItem> </Tabs>
 
-:::tip Fan-Out Pattern 
+:::tip 扇出模式
 
-Triggers execute in **parallel** - each trigger is independent. If one trigger's condition fails or throws an exception, other triggers still execute. 
+触发器**并行**执行 - 每个触发器都是独立的。如果一个触发器的条件失败或抛出异常，其他触发器仍然执行。
 
 :::
 
 </details>
 
 <details>
-<summary>RemoveTriggerEvent() (by Handle)</summary>
+<summary>RemoveTriggerEvent()（按句柄）</summary>
 
-Safely removes a specific trigger using its unique handle.
-
+使用其唯一句柄安全地移除特定触发器。
 ```csharp
 void RemoveTriggerEvent(TriggerHandle handle);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name     | Type            | Description                                |
+| 名称 | 类型 | 描述 |
 | -------- | --------------- | ------------------------------------------ |
-| `handle` | `TriggerHandle` | The handle returned by `AddTriggerEvent()` |
+| `handle` | `TriggerHandle` | `AddTriggerEvent()`返回的句柄 |
 
-**Example:**
-
+**示例：**
 ```csharp
 TriggerHandle handle = doorEvent.AddTriggerEvent(lightEvent);
 
-// Remove specific trigger
+// 移除特定触发器
 doorEvent.RemoveTriggerEvent(handle);
 ```
 
-:::tip Recommended 
+:::tip 推荐
 
-This is the **safest** removal method as it only removes your specific trigger instance. 
+这是**最安全的**移除方法，因为它只移除您的特定触发器实例。
 
 :::
 
 </details>
 
 <details>
-<summary>RemoveTriggerEvent() (by Target)</summary>
+<summary>RemoveTriggerEvent()（按目标）</summary>
 
-Removes **all** triggers pointing to a specific target event.
-
+移除指向特定目标事件的**所有**触发器。
 ```csharp
 void RemoveTriggerEvent(GameEventBase targetEvent);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name          | Type            | Description                    |
+| 名称 | 类型 | 描述 |
 | ------------- | --------------- | ------------------------------ |
-| `targetEvent` | `GameEventBase` | The target event to disconnect |
+| `targetEvent` | `GameEventBase` | 要断开连接的目标事件 |
 
-**Example:**
-
+**示例：**
 ```csharp
 doorEvent.RemoveTriggerEvent(lightEvent);
 ```
 
-:::warning Broad Impact 
+:::warning 广泛影响
 
-This removes **ALL** triggers targeting this event, including those registered by other systems. Use `RemoveTriggerEvent(handle)` for precision. 
+这会移除指向此事件的**所有**触发器，包括其他系统注册的触发器。使用`RemoveTriggerEvent(handle)`以获得精确性。
 
 :::
 
@@ -1180,29 +1096,26 @@ This removes **ALL** triggers targeting this event, including those registered b
 <details>
 <summary>RemoveAllTriggerEvents()</summary>
 
-Removes all trigger events from this event.
-
+从此事件中移除所有触发器事件。
 ```csharp
 void RemoveAllTriggerEvents();
 ```
 
-**Example:**
-
+**示例：**
 ```csharp
 myEvent.RemoveAllTriggerEvents();
 ```
 
 </details>
 
-## 🔗 Chain Events (Sequential Pattern)
+## 🔗 链事件（顺序模式）
 
 <details>
 <summary>AddChainEvent()</summary>
 
-Registers a target event to execute sequentially in a chain.
+注册在链中顺序执行的目标事件。
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 ChainHandle AddChainEvent(
     GameEventBase targetEvent,
@@ -1213,36 +1126,35 @@ ChainHandle AddChainEvent(
 );
 ```
 
-**Parameters:**
+**参数：**
 
-| Name                | Type            | Description                                     |
+| 名称 | 类型 | 描述 |
 | ------------------- | --------------- | ----------------------------------------------- |
-| `targetEvent`       | `GameEventBase` | The event to execute in the chain               |
-| `delay`             | `float`         | Delay before executing this node (default: 0)   |
-| `duration`          | `float`         | Delay after executing this node (default: 0)    |
-| `condition`         | `Func<bool>`    | Optional predicate - chain breaks if false      |
-| `waitForCompletion` | `bool`          | Wait one frame after execution (default: false) |
+| `targetEvent` | `GameEventBase` | 要在链中执行的事件 |
+| `delay` | `float` | 执行此节点前的延迟（默认：0） |
+| `duration` | `float` | 执行此节点后的延迟（默认：0） |
+| `condition` | `Func<bool>` | 可选谓词 - 如果为false则链中断 |
+| `waitForCompletion` | `bool` | 执行后等待一帧（默认：false） |
 
-**Returns:** `ChainHandle` - Unique identifier for safe removal
+**返回值：** `ChainHandle` - 用于安全移除的唯一标识符
 
-**Example:**
-
+**示例：**
 ```csharp
-// Simple sequence: A → B → C
+// 简单序列：A → B → C
 eventA.AddChainEvent(eventB);
 eventB.AddChainEvent(eventC);
 
-// Cutscene with delays
+// 带延迟的过场动画
 fadeOutEvent.AddChainEvent(loadSceneEvent, delay: 1f);
 loadSceneEvent.AddChainEvent(fadeInEvent, delay: 0.5f);
 
-// Conditional chain: only continue if condition met
+// 条件链：仅在满足条件时继续
 combatEndEvent.AddChainEvent(
     victoryEvent,
     condition: () => playerHealth > 0
 );
 
-// Chain with frame wait for async operations
+// 带异步操作帧等待的链
 showDialogEvent.AddChainEvent(
     typeTextEvent,
     waitForCompletion: true
@@ -1250,7 +1162,6 @@ showDialogEvent.AddChainEvent(
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 ChainHandle AddChainEvent(
     GameEventBase targetEvent,
@@ -1263,24 +1174,23 @@ ChainHandle AddChainEvent(
 );
 ```
 
-**Parameters:**
+**参数：**
 
-| Name                  | Type              | Description                                     |
+| 名称 | 类型 | 描述 |
 | --------------------- | ----------------- | ----------------------------------------------- |
-| `targetEvent`         | `GameEventBase`   | The event to execute in the chain               |
-| `delay`               | `float`           | Delay before executing this node (default: 0)   |
-| `duration`            | `float`           | Delay after executing this node (default: 0)    |
-| `condition`           | `Func<T, bool>`   | Optional predicate receiving the argument       |
-| `passArgument`        | `bool`            | Whether to pass data to target (default: true)  |
-| `argumentTransformer` | `Func<T, object>` | Optional transformation function                |
-| `waitForCompletion`   | `bool`            | Wait one frame after execution (default: false) |
+| `targetEvent` | `GameEventBase` | 要在链中执行的事件 |
+| `delay` | `float` | 执行此节点前的延迟（默认：0） |
+| `duration` | `float` | 执行此节点后的延迟（默认：0） |
+| `condition` | `Func<T, bool>` | 接收参数的可选谓词 |
+| `passArgument` | `bool` | 是否将数据传递给目标（默认：true） |
+| `argumentTransformer` | `Func<T, object>` | 可选转换函数 |
+| `waitForCompletion` | `bool` | 执行后等待一帧（默认：false） |
 
-**Returns:** `ChainHandle` - Unique identifier for safe removal
+**返回值：** `ChainHandle` - 用于安全移除的唯一标识符
 
-**Example:**
-
+**示例：**
 ```csharp
-// Chain with argument passing
+// 带参数传递的链
 GameEvent<int> damageEvent;
 GameEvent<int> applyDamageEvent;
 GameEvent<int> updateHealthBarEvent;
@@ -1288,7 +1198,7 @@ GameEvent<int> updateHealthBarEvent;
 damageEvent.AddChainEvent(applyDamageEvent, passArgument: true);
 applyDamageEvent.AddChainEvent(updateHealthBarEvent, passArgument: true);
 
-// Chain with transformation
+// 带转换的链
 GameEvent<int> damageEvent;
 GameEvent<float> healthPercentEvent;
 
@@ -1299,7 +1209,7 @@ damageEvent.AddChainEvent(
         (float)(currentHealth - damage) / maxHealth
 );
 
-// Conditional chain with argument check
+// 带参数检查的条件链
 GameEvent<int> damageEvent;
 GameEvent deathEvent;
 
@@ -1311,7 +1221,6 @@ damageEvent.AddChainEvent(
 ```
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 ChainHandle AddChainEvent(
     GameEventBase targetEvent,
@@ -1324,24 +1233,23 @@ ChainHandle AddChainEvent(
 );
 ```
 
-**Parameters:**
+**参数：**
 
-| Name                  | Type                           | Description                                     |
+| 名称 | 类型 | 描述 |
 | --------------------- | ------------------------------ | ----------------------------------------------- |
-| `targetEvent`         | `GameEventBase`                | The event to execute in the chain               |
-| `delay`               | `float`                        | Delay before executing this node (default: 0)   |
-| `duration`            | `float`                        | Delay after executing this node (default: 0)    |
-| `condition`           | `Func<TSender, TArgs, bool>`   | Optional predicate receiving sender and args    |
-| `passArgument`        | `bool`                         | Whether to pass data to target (default: true)  |
-| `argumentTransformer` | `Func<TSender, TArgs, object>` | Optional transformation function                |
-| `waitForCompletion`   | `bool`                         | Wait one frame after execution (default: false) |
+| `targetEvent` | `GameEventBase` | 要在链中执行的事件 |
+| `delay` | `float` | 执行此节点前的延迟（默认：0） |
+| `duration` | `float` | 执行此节点后的延迟（默认：0） |
+| `condition` | `Func<TSender, TArgs, bool>` | 接收sender和args的可选谓词 |
+| `passArgument` | `bool` | 是否将数据传递给目标（默认：true） |
+| `argumentTransformer` | `Func<TSender, TArgs, object>` | 可选转换函数 |
+| `waitForCompletion` | `bool` | 执行后等待一帧（默认：false） |
 
-**Returns:** `ChainHandle` - Unique identifier for safe removal
+**返回值：** `ChainHandle` - 用于安全移除的唯一标识符
 
-**Example:**
-
+**示例：**
 ```csharp
-// Attack sequence chain
+// 攻击序列链
 GameEvent<GameObject, AttackData> attackStartEvent;
 GameEvent<GameObject, AttackData> playAnimationEvent;
 GameEvent<GameObject, AttackData> dealDamageEvent;
@@ -1349,7 +1257,7 @@ GameEvent<GameObject, AttackData> dealDamageEvent;
 attackStartEvent.AddChainEvent(playAnimationEvent, delay: 0f);
 playAnimationEvent.AddChainEvent(dealDamageEvent, delay: 0.5f);
 
-// Extract damage value
+// 提取伤害值
 GameEvent<GameObject, AttackData> dealDamageEvent;
 GameEvent<int> showDamageNumberEvent;
 
@@ -1359,7 +1267,7 @@ dealDamageEvent.AddChainEvent(
     argumentTransformer: (attacker, data) => data.damage
 );
 
-// Victory chain with condition
+// 带条件的胜利链
 GameEvent<GameObject, AttackData> attackEndEvent;
 GameEvent<GameObject, VictoryData> victoryEvent;
 
@@ -1373,71 +1281,67 @@ attackEndEvent.AddChainEvent(
 
 </TabItem> </Tabs>
 
-:::warning Sequential Execution 
+:::warning 顺序执行
 
-Chains are **sequential** (A → B → C). If any node's condition returns `false` or throws an exception, the entire chain **stops** at that point. 
+链是**顺序的**（A → B → C）。如果任何节点的条件返回`false`或抛出异常，整个链在该点**停止**。
 
 :::
 
-:::tip Triggers vs Chains
+:::tip 触发器 vs 链
 
-- **Triggers** = Parallel (A → [B, C, D]) - all execute independently
-- **Chains** = Sequential (A → B → C) - strict order, stops on failure 
+- **触发器** = 并行（A → [B, C, D]）- 所有独立执行
+- **链** = 顺序（A → B → C）- 严格顺序，失败时停止
 
 :::
 
 </details>
 
 <details>
-<summary>RemoveChainEvent() (by Handle)</summary>
+<summary>RemoveChainEvent()（按句柄）</summary>
 
-Safely removes a specific chain node using its unique handle.
-
+使用其唯一句柄安全地移除特定链节点。
 ```csharp
 void RemoveChainEvent(ChainHandle handle);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name     | Type          | Description                              |
+| 名称 | 类型 | 描述 |
 | -------- | ------------- | ---------------------------------------- |
-| `handle` | `ChainHandle` | The handle returned by `AddChainEvent()` |
+| `handle` | `ChainHandle` | `AddChainEvent()`返回的句柄 |
 
-**Example:**
-
+**示例：**
 ```csharp
 ChainHandle handle = eventA.AddChainEvent(eventB);
 
-// Remove specific chain node
+// 移除特定链节点
 eventA.RemoveChainEvent(handle);
 ```
 
 </details>
 
 <details>
-<summary>RemoveChainEvent() (by Target)</summary>
+<summary>RemoveChainEvent()（按目标）</summary>
 
-Removes **all** chain nodes pointing to a specific target event.
-
+移除指向特定目标事件的**所有**链节点。
 ```csharp
 void RemoveChainEvent(GameEventBase targetEvent);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name          | Type            | Description                    |
+| 名称 | 类型 | 描述 |
 | ------------- | --------------- | ------------------------------ |
-| `targetEvent` | `GameEventBase` | The target event to disconnect |
+| `targetEvent` | `GameEventBase` | 要断开连接的目标事件 |
 
-**Example:**
-
+**示例：**
 ```csharp
 eventA.RemoveChainEvent(eventB);
 ```
 
-:::warning Broad Impact 
+:::warning 广泛影响
 
-This removes **ALL** chain nodes targeting this event. Use `RemoveChainEvent(handle)` for precision. 
+这会移除指向此事件的**所有**链节点。使用`RemoveChainEvent(handle)`以获得精确性。
 
 :::
 
@@ -1446,60 +1350,56 @@ This removes **ALL** chain nodes targeting this event. Use `RemoveChainEvent(han
 <details>
 <summary>RemoveAllChainEvents()</summary>
 
-Removes all chain events from this event.
-
+从此事件中移除所有链事件。
 ```csharp
 void RemoveAllChainEvents();
 ```
 
-**Example:**
-
+**示例：**
 ```csharp
 myEvent.RemoveAllChainEvents();
 ```
 
 </details>
 
-## 🔧 Configuration & Utility
+## 🔧 配置与实用工具
 
 <details>
 <summary>SetInspectorListenersActive()</summary>
 
-Controls whether Inspector-configured listeners should execute when the event is raised.
-
+控制触发事件时是否应执行Inspector配置的监听器。
 ```csharp
 void SetInspectorListenersActive(bool isActive);
 ```
 
-**Parameters:**
+**参数：**
 
-| Name       | Type   | Description                                                |
+| 名称 | 类型 | 描述 |
 | ---------- | ------ | ---------------------------------------------------------- |
-| `isActive` | `bool` | `true` to enable Inspector listeners, `false` to mute them |
+| `isActive` | `bool` | `true`启用Inspector监听器，`false`静音它们 |
 
-**Example:**
-
+**示例：**
 ```csharp
-// Mute Inspector-configured UI/Audio effects
+// 静音Inspector配置的UI/音频效果
 damageEvent.SetInspectorListenersActive(false);
 
-// Event will only trigger code-registered listeners
+// 事件将仅触发代码注册的监听器
 damageEvent.Raise(10);
 
-// Re-enable Inspector listeners
+// 重新启用Inspector监听器
 damageEvent.SetInspectorListenersActive(true);
 ```
 
-**Use Cases:**
+**使用场景：**
 
-- Temporarily silence visual/audio effects during cutscenes
-- Run backend calculations without triggering UI updates
-- Disable scene-specific behavior during loading screens
-- Simulate game logic in test/debug mode
+- 在过场动画期间临时静音视觉/音频效果
+- 运行后端计算而不触发UI更新
+- 在加载屏幕期间禁用特定于场景的行为
+- 在测试/调试模式下模拟游戏逻辑
 
-:::info Scope 
+:::info 范围
 
-This setting only affects listeners configured in the **Unity Inspector** via GameEventManager. Listeners registered via `AddListener()` in code are **not affected** and will always execute. 
+此设置仅影响通过GameEventManager在**Unity Inspector**中配置的监听器。通过代码中的`AddListener()`注册的监听器**不受影响**，将始终执行。
 
 :::
 
@@ -1507,18 +1407,18 @@ This setting only affects listeners configured in the **Unity Inspector** via Ga
 
 ------
 
-## 📊 Quick Reference Table
+## 📊 快速参考表
 
-### Method Categories
+### 方法类别
 
-| Category                  | Methods                                                      | Purpose                                     |
+| 类别 | 方法 | 目的 |
 | ------------------------- | ------------------------------------------------------------ | ------------------------------------------- |
-| **Execution**             | `Raise()`, `Cancel()`                                        | Trigger events and stop scheduled execution |
-| **Scheduling**            | `RaiseDelayed()`, `RaiseRepeating()`, `CancelDelayed()`, `CancelRepeating()` | Time-based event execution                  |
-| **Basic Listeners**       | `AddListener()`, `RemoveListener()`, `RemoveAllListeners()`  | Standard callback registration              |
-| **Priority Listeners**    | `AddPriorityListener()`, `RemovePriorityListener()`          | Ordered callback execution                  |
-| **Conditional Listeners** | `AddConditionalListener()`, `RemoveConditionalListener()`    | Gated callback execution                    |
-| **Persistent Listeners**  | `AddPersistentListener()`, `RemovePersistentListener()`      | Scene-independent callbacks                 |
-| **Trigger Events**        | `AddTriggerEvent()`, `RemoveTriggerEvent()`, `RemoveAllTriggerEvents()` | Parallel event chains                       |
-| **Chain Events**          | `AddChainEvent()`, `RemoveChainEvent()`, `RemoveAllChainEvents()` | Sequential event chains                     |
-| **Configuration**         | `SetInspectorListenersActive()`                              | Runtime behavior control                    |
+| **执行** | `Raise()`, `Cancel()` | 触发事件并停止调度执行 |
+| **调度** | `RaiseDelayed()`, `RaiseRepeating()`, `CancelDelayed()`, `CancelRepeating()` | 基于时间的事件执行 |
+| **基础监听器** | `AddListener()`, `RemoveListener()`, `RemoveAllListeners()` | 标准回调注册 |
+| **优先级监听器** | `AddPriorityListener()`, `RemovePriorityListener()` | 有序回调执行 |
+| **条件监听器** | `AddConditionalListener()`, `RemoveConditionalListener()` | 门控回调执行 |
+| **持久化监听器** | `AddPersistentListener()`, `RemovePersistentListener()` | 场景独立回调 |
+| **触发器事件** | `AddTriggerEvent()`, `RemoveTriggerEvent()`, `RemoveAllTriggerEvents()` | 并行事件链 |
+| **链事件** | `AddChainEvent()`, `RemoveChainEvent()`, `RemoveAllChainEvents()` | 顺序事件链 |
+| **配置** | `SetInspectorListenersActive()` | 运行时行为控制 |

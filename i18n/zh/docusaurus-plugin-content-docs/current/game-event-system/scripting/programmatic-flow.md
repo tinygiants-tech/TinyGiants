@@ -1,41 +1,40 @@
 ﻿---
-sidebar_label: 'Programmatic Flow'
+sidebar_label: '编程式流程'
 sidebar_position: 3
 ---
 
-# Programmatic Flow
+# 编程式流程
 
-While the **Visual Flow Graph** is excellent for static, design-time logic, game development often requires constructing event relationships **dynamically at runtime**.
+虽然**可视化流程图**非常适合静态、设计时逻辑，但游戏开发通常需要**在运行时动态**构建事件关系。
 
-The **Programmatic Flow API** allows you to build Triggers (Fan-out) and Chains (Sequences) entirely via C# code. This is essential for:
-*   **Procedural Generation:** Wiring events for objects spawned at runtime.
-*   **Dynamic Quests:** creating logic steps based on player choices.
-*   **Temporary Status Effects:** Chaining damage ticks or buffs that expire.
+**编程式流程API**允许您完全通过C#代码构建触发器（扇出）和链（序列）。这对于以下情况至关重要：
+*   **程序化生成：** 为运行时生成的对象连接事件。
+*   **动态任务：** 根据玩家选择创建逻辑步骤。
+*   **临时状态效果：** 链接到期的伤害跳动或增益。
 
 ---
 
-## ⚡ Core Concepts: Triggers vs. Chains
+## ⚡ 核心概念：触发器 vs 链
 
-Before coding, it is crucial to understand the difference between the two flow types handled by the internal managers (`GameEventTriggerManager` and `GameEventChainManager`).
+在编码之前，理解内部管理器（`GameEventTriggerManager`和`GameEventChainManager`）处理的两种流程类型之间的区别至关重要。
 
-| Feature              | ⚡ Triggers (Fan-Out)                   | 🔗 Chains (Sequence)                            |
+| 特性 | ⚡ 触发器（扇出） | 🔗 链（序列） |
 | :------------------- | :------------------------------------- | :--------------------------------------------- |
-| **Execution Mode**   | **Parallel** (Fire-and-Forget)         | **Sequential** (Blocking)                      |
-| **Failure Handling** | Independent (If A fails, B still runs) | Strict (If A fails, the chain stops)           |
-| **Timing**           | Synchronous (unless `delay` is used)   | Coroutine-based (supports `wait` & `duration`) |
-| **Ordering**         | Sorted by **Priority**                 | Executed in **Order of Addition**              |
-| **Use Case**         | VFX, Achievements, UI Updates          | Cutscenes, Tutorials, Turn Logic               |
+| **执行模式** | **并行**（即发即弃） | **顺序**（阻塞） |
+| **失败处理** | 独立（如果A失败，B仍运行） | 严格（如果A失败，链停止） |
+| **时间** | 同步（除非使用`delay`） | 基于协程（支持`wait`和`duration`） |
+| **排序** | 按**优先级**排序 | 按**添加顺序**执行 |
+| **使用场景** | VFX、成就、UI更新 | 过场动画、教程、回合逻辑 |
 
 ---
 
-## 1. Triggers (Parallel Execution)
+## 1. 触发器（并行执行）
 
-Use `AddTriggerEvent` to make one event automatically fire others. All registered triggers execute immediately (or after their individual delay) when the source event is raised.
+使用`AddTriggerEvent`使一个事件自动触发其他事件。当源事件被触发时，所有注册的触发器立即执行（或在各自的延迟后）。
 
-### Basic Usage
+### 基本用法
 
-When `onPlayerDeath` fires, automatically fire `onPlayDeathSound` and `onShowGameOverUI`.
-
+当`onPlayerDeath`触发时，自动触发`onPlayDeathSound`和`onShowGameOverUI`。
 ```csharp
 [GameEventDropdown] public GameEvent onPlayerDeath;
 [GameEventDropdown] public GameEvent onPlayDeathSound;
@@ -43,53 +42,51 @@ When `onPlayerDeath` fires, automatically fire `onPlayDeathSound` and `onShowGam
 
 void Awake()
 {
-    // These happen effectively at the same time
+    // 这些实际上同时发生
     onPlayerDeath.AddTriggerEvent(onPlayDeathSound);
     onPlayerDeath.AddTriggerEvent(onShowGameOverUI);
 }
 ```
 
-### Advanced Configuration (Priority & Conditions)
+### 高级配置（优先级与条件）
 
-You can inject logic into the connection without modifying the events themselves.
-
+您可以在不修改事件本身的情况下将逻辑注入到连接中。
 ```csharp
-// 1. High Priority: Heal first
+// 1. 高优先级：首先治疗
 onPotionUsed.AddTriggerEvent(
     targetEvent: onRegenHealth,
-    priority: 100 // Higher numbers run first
+    priority: 100 // 数字越大越先运行
 );
 
-// 2. Low Priority: Play sound after logic starts
+// 2. 低优先级：逻辑开始后播放声音
 onPotionUsed.AddTriggerEvent(
     targetEvent: onPlaySound,
-    delay: 0.2f, // Optional delay
+    delay: 0.2f, // 可选延迟
     priority: 10
 );
 
-// 3. Conditional: Only trigger particle if graphics settings allow
+// 3. 条件：仅在图形设置允许时触发粒子
 onPotionUsed.AddTriggerEvent(
     targetEvent: onParticleEffect,
     condition: () => GameSettings.EnableParticles
 );
 ```
 
-:::info Automatic Argument Passing
-By default (passArgument: true), Triggers attempt to pass the data from the Source to the Target. If types match (e.g., int to int), it flows automatically. If types mismatch, you need a **Transformer** (see below).
+:::info 自动参数传递
+默认情况下（passArgument: true），触发器尝试将数据从源传递到目标。如果类型匹配（例如，int到int），它会自动流动。如果类型不匹配，您需要一个**转换器**（见下文）。
 :::
 
 ------
 
-## 2. Chains (Sequential Execution)
+## 2. 链（顺序执行）
 
-Use `AddChainEvent` to build a strictly ordered execution list on a single event.
+使用`AddChainEvent`在单个事件上构建严格排序的执行列表。
 
-### The Sequence Logic (The Queue)
+### 序列逻辑（队列）
 
-When you add multiple chain nodes to **the same source event**, they form a **Queue**. The system executes them one by one, waiting for the previous node's `duration` to finish before starting the next node.
+当您将多个链节点添加到**同一个源事件**时，它们形成一个**队列**。系统逐个执行它们，等待前一个节点的`duration`完成后再开始下一个节点。
 
-This allows you to orchestrate a complex timeline (A → Wait → B → Wait → C) managed entirely by the source event, without linking B directly to C.
-
+这允许您编排一个复杂的时间线（A → 等待 → B → 等待 → C），完全由源事件管理，而无需直接将B链接到C。
 ```csharp
 [GameEventDropdown] public GameEvent onTurnStart;
 [GameEventDropdown] public GameEvent onDrawCard;
@@ -97,73 +94,70 @@ This allows you to orchestrate a complex timeline (A → Wait → B → Wait →
 
 void Awake()
 {
-    // --- The "Turn Start" Timeline ---
+    // --- "回合开始"时间线 ---
     
-    // Step 1: Draw Card
-    // Setting 'duration' means: "Execute this, then WAIT 0.5s before processing the next item in the list."
+    // 步骤1：抽牌
+    // 设置'duration'意味着："执行此操作，然后在处理列表中的下一项之前等待0.5秒。"
     onTurnStart.AddChainEvent(onDrawCard, duration: 0.5f);
     
-    // Step 2: Refresh Mana
-    // This runs automatically AFTER Step 1 finishes (and its 0.5s duration passes).
+    // 步骤2：刷新法力
+    // 这在步骤1完成（及其0.5秒持续时间过去）之后自动运行。
     onTurnStart.AddChainEvent(onRefreshMana);
     
-    // Note: I attach both to 'onTurnStart'. 
-    // I do NOT attach Step 2 to 'onDrawCard', because I don't want 
-    // drawing a card from a spell to accidentally trigger mana refresh.
+    // 注意：我将两者都附加到'onTurnStart'。
+    // 我不将步骤2附加到'onDrawCard'，因为我不想
+    // 从法术抽牌意外触发法力刷新。
 }
 ```
 
-### Async Waiting (waitForCompletion)
+### 异步等待（waitForCompletion）
 
-If your event listeners launch Coroutines or Async tasks, you can force the chain to wait for them.
-
+如果您的事件监听器启动协程或异步任务，您可以强制链等待它们。
 ```csharp
-// The chain will pause here until all listeners of 'onPlayCutscene' 
-// have finished their work (yield return null).
+// 链将在这里暂停，直到'onPlayCutscene'的所有监听器
+// 完成它们的工作（yield return null）。
 onLevelEnd.AddChainEvent(onPlayCutscene, waitForCompletion: true);
 
-// This runs only after the cutscene is fully processed
+// 这仅在过场动画完全处理后运行
 onLevelEnd.AddChainEvent(onLoadNextLevel);
 ```
 
-:::warning Chain Breaking
-If a condition returns false or an exception occurs in a Chain Node, **the entire subsequent chain is halted**. This is useful for conditional logic (e.g., "Stop combo attack if enemy blocked").
+:::warning 链中断
+如果条件返回false或在链节点中发生异常，**整个后续链将停止**。这对于条件逻辑很有用（例如，"如果敌人格挡则停止连击攻击"）。
 :::
 
 ------
 
-## 🔄 Data Flow & Transformers
+## 🔄 数据流与转换器
 
-The most powerful feature of the Programmatic Flow is **Argument Transformation**. This allows you to bridge events with incompatible types or extract specific data from complex objects.
+编程式流程最强大的功能是**参数转换**。这允许您桥接具有不兼容类型的事件或从复杂对象中提取特定数据。
 
-### 1. Complex to Void (Filter)
+### 1. 复杂到空（过滤器）
 
-Trigger a generic event only based on specific data.
-
+仅基于特定数据触发通用事件。
 ```csharp
-// Source: Damage Event (float amount)
-// Target: Critical Hit Event (Void)
+// 源：伤害事件（float amount）
+// 目标：暴击事件（Void）
 onDamageTaken.AddTriggerEvent(
     targetEvent: onCriticalHitEffect,
-    condition: (amount) => amount > 50f, // Only if damage > 50
-    passArgument: false // Target is void, don't pass the float
+    condition: (amount) => amount > 50f, // 仅当伤害 > 50
+    passArgument: false // 目标是void，不传递float
 );
 ```
 
-### 2. Simple Transformation (Type Casting)
+### 2. 简单转换（类型转换）
 
-Map a complex object event to a simple primitive event.
+将复杂对象事件映射到简单基本类型事件。
 
-- **Source:** `GameEvent<Enemy> (OnEnemyKilled)`
-- **Target:** `GameEvent<int> (OnAddXP)`
-
+- **源：** `GameEvent<Enemy> (OnEnemyKilled)`
+- **目标：** `GameEvent<int> (OnAddXP)`
 ```csharp
 [GameEventDropdown] public GameEvent<Enemy> onEnemyKilled;
 [GameEventDropdown] public GameEvent<int> onAddXP;
 
 void Awake()
 {
-    // Extract the 'xpValue' from the Enemy object and pass it to the int event
+    // 从Enemy对象中提取'xpValue'并将其传递给int事件
     onEnemyKilled.AddTriggerEvent(
         targetEvent: onAddXP,
         passArgument: true,
@@ -172,40 +166,38 @@ void Awake()
 }
 ```
 
-### 3. Sender & Argument Transformation
+### 3. Sender与参数转换
 
-For `GameEvent<TSender, TArgs>`, the transformer receives both parameters.
-
+对于`GameEvent<TSender, TArgs>`，转换器接收两个参数。
 ```csharp
-// Source: Player picked up item (Sender: Player, Args: ItemData)
-// Target: Notification (string)
+// 源：玩家拾取物品（Sender: Player, Args: ItemData）
+// 目标：通知（string）
 onItemPickup.AddTriggerEvent(
     targetEvent: onShowNotification,
     passArgument: true,
-    argumentTransformer: (player, item) => $"{player.Name} found a {item.Rarity} item!"
+    argumentTransformer: (player, item) => $"{player.Name}找到了一个{item.Rarity}物品！"
 );
 ```
 
 ------
 
-## 🧹 Lifecycle Management
+## 🧹 生命周期管理
 
-Unlike standard listeners (AddListener), dynamic Triggers and Chains return a **Handle**. You must manage these handles to prevent memory leaks or unwanted logic persistence, especially when pooling objects.
+与标准监听器（AddListener）不同，动态触发器和链返回一个**句柄**。您必须管理这些句柄以防止内存泄漏或不需要的逻辑持久性，特别是在对象池时。
 
-### Using Handles
-
+### 使用句柄
 ```csharp
 private TriggerHandle _triggerHandle;
 
 void OnEnable()
 {
-    // Save the handle
+    // 保存句柄
     _triggerHandle = onDoorOpen.AddTriggerEvent(onLightOn);
 }
 
 void OnDisable()
 {
-    // Use the handle to remove ONLY this specific link
+    // 使用句柄仅删除此特定链接
     if (_triggerHandle != null)
     {
         onDoorOpen.RemoveTriggerEvent(_triggerHandle);
@@ -214,35 +206,34 @@ void OnDisable()
 }
 ```
 
-### Bulk Cleanup
+### 批量清理
 
-If an object is being destroyed or returned to a pool, you can wipe all dynamic logic associated with an event.
-
+如果对象被销毁或返回到池中，您可以清除与事件关联的所有动态逻辑。
 ```csharp
 void OnDestroy()
 {
-    // Removes ALL dynamic triggers targeting this event
+    // 删除所有针对此事件的动态触发器
     myEvent.RemoveAllTriggerEvents();
     
-    // Removes ALL dynamic chains targeting this event
+    // 删除所有针对此事件的动态链
     myEvent.RemoveAllChainEvents();
 }
 ```
 
-## 📜 API Summary
+## 📜 API摘要
 
-| Method Signature                                             | Returns         | Description                          |
+| 方法签名 | 返回值 | 描述 |
 | ------------------------------------------------------------ | --------------- | ------------------------------------ |
-| **Trigger Registration**                                     |                 | *Parallel / Fire-and-Forget*         |
-| `AddTriggerEvent(GameEventBase target, float delay, Func<bool> condition, int priority)` | `TriggerHandle` | Adds a trigger to a Void event.      |
-| `AddTriggerEvent(GameEventBase target, float delay, Func<T, bool> condition, bool passArg, Func<T, object> transformer, int priority)` | `TriggerHandle` | Adds a trigger to a Typed event.     |
-| `AddTriggerEvent(GameEventBase target, float delay, Func<TSender, TArgs, bool> condition, bool passArg, Func<TSender, TArgs, object> transformer, int priority)` | `TriggerHandle` | Adds a trigger to a Sender event.    |
-| **Chain Registration**                                       |                 | *Sequential / Blocking*              |
-| `AddChainEvent(GameEventBase target, float delay, float duration, Func<bool> condition, bool wait)` | `ChainHandle`   | Adds a chain step to a Void event.   |
-| `AddChainEvent(GameEventBase target, float delay, float duration, Func<T, bool> condition, bool passArg, Func<T, object> transformer, bool wait)` | `ChainHandle`   | Adds a chain step to a Typed event.  |
-| `AddChainEvent(GameEventBase target, float delay, float duration, Func<TSender, TArgs, bool> condition, bool passArg, Func<TSender, TArgs, object> transformer, bool wait)` | `ChainHandle`   | Adds a chain step to a Sender event. |
-| **Cleanup**                                                  |                 | *Removal*                            |
-| `RemoveTriggerEvent(TriggerHandle handle)`                   | `void`          | Removes a specific trigger node.     |
-| `RemoveChainEvent(ChainHandle handle)`                       | `void`          | Removes a specific chain node.       |
-| `RemoveAllTriggerEvents()`                                   | `void`          | Clears all dynamic triggers.         |
-| `RemoveAllChainEvents()`                                     | `void`          | Clears all dynamic chains.           |
+| **触发器注册** | | *并行/即发即弃* |
+| `AddTriggerEvent(GameEventBase target, float delay, Func<bool> condition, int priority)` | `TriggerHandle` | 向Void事件添加触发器。 |
+| `AddTriggerEvent(GameEventBase target, float delay, Func<T, bool> condition, bool passArg, Func<T, object> transformer, int priority)` | `TriggerHandle` | 向类型化事件添加触发器。 |
+| `AddTriggerEvent(GameEventBase target, float delay, Func<TSender, TArgs, bool> condition, bool passArg, Func<TSender, TArgs, object> transformer, int priority)` | `TriggerHandle` | 向Sender事件添加触发器。 |
+| **链注册** | | *顺序/阻塞* |
+| `AddChainEvent(GameEventBase target, float delay, float duration, Func<bool> condition, bool wait)` | `ChainHandle` | 向Void事件添加链步骤。 |
+| `AddChainEvent(GameEventBase target, float delay, float duration, Func<T, bool> condition, bool passArg, Func<T, object> transformer, bool wait)` | `ChainHandle` | 向类型化事件添加链步骤。 |
+| `AddChainEvent(GameEventBase target, float delay, float duration, Func<TSender, TArgs, bool> condition, bool passArg, Func<TSender, TArgs, object> transformer, bool wait)` | `ChainHandle` | 向Sender事件添加链步骤。 |
+| **清理** | | *移除* |
+| `RemoveTriggerEvent(TriggerHandle handle)` | `void` | 删除特定的触发器节点。 |
+| `RemoveChainEvent(ChainHandle handle)` | `void` | 删除特定的链节点。 |
+| `RemoveAllTriggerEvents()` | `void` | 清除所有动态触发器。 |
+| `RemoveAllChainEvents()` | `void` | 清除所有动态链。 |

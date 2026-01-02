@@ -1,155 +1,150 @@
 ﻿---
-sidebar_label: 'Execute & Practices'
-
+sidebar_label: '执行与实践'
 sidebar_position: 4
 ---
 
 import Tabs from '@theme/Tabs'; import TabItem from '@theme/TabItem';
 
-# Execution Order & Best Practices
+# 执行顺序与最佳实践
 
-Understanding how GameEvent executes callbacks and manages event flow is crucial for building reliable, performant event-driven systems. This guide covers execution order, common patterns, pitfalls, and optimization strategies.
+理解GameEvent如何执行回调和管理事件流对于构建可靠、高性能的事件驱动系统至关重要。本指南涵盖执行顺序、常见模式、陷阱和优化策略。
 
 ------
 
-## 🎯 Execution Order
+## 🎯 执行顺序
 
-### Visual Timeline
+### 可视化时间线
 
-When `myEvent.Raise()` is called, execution follows this precise order:
-
+当调用`myEvent.Raise()`时，执行遵循此精确顺序：
 ```text
 myEvent.Raise() 🚀
       │
-      ├── 1️⃣ Basic Listeners (FIFO Order)
+      ├── 1️⃣ 基础监听器（FIFO顺序）
       │      │
       │      ├─► OnUpdate() 📝
-      │      │      ✓ Executed
+      │      │      ✓ 已执行
       │      │
       │      └─► OnRender() 🎨
-      │             ✓ Executed
+      │             ✓ 已执行
       │
-      ├── 2️⃣ Priority Listeners (High → Low)
+      ├── 2️⃣ 优先级监听器（高 → 低）
       │      │
-      │      ├─► [Priority 100] Critical() ⚡
-      │      │      ✓ Executed First
+      │      ├─► [优先级 100] Critical() ⚡
+      │      │      ✓ 首先执行
       │      │
-      │      ├─► [Priority 50] Normal() 📊
-      │      │      ✓ Executed Second
+      │      ├─► [优先级 50] Normal() 📊
+      │      │      ✓ 其次执行
       │      │
-      │      └─► [Priority 0] LowPriority() 📌
-      │             ✓ Executed Last
+      │      └─► [优先级 0] LowPriority() 📌
+      │             ✓ 最后执行
       │
-      ├── 3️⃣ Conditional Listeners (Priority + Condition)
+      ├── 3️⃣ 条件监听器（优先级 + 条件）
       │      │
-      │      └─► [Priority 10] IfHealthLow() 💊
+      │      └─► [优先级 10] IfHealthLow() 💊
       │             │
-      │             ├─► Condition Check: health < 20?
-      │             │      ├─► ✅ True → Execute Listener
-      │             │      └─► ❌ False → Skip Listener
+      │             ├─► 条件检查: health < 20?
+      │             │      ├─► ✅ True → 执行监听器
+      │             │      └─► ❌ False → 跳过监听器
       │             │
-      │             └─► (Next conditional checked...)
+      │             └─► (检查下一个条件...)
       │
-      ├── 4️⃣ Persistent Listeners (Cross-Scene)
+      ├── 4️⃣ 持久化监听器（跨场景）
       │      │
       │      └─► GlobalLogger() 📋
-      │             ✓ Always Executes (DontDestroyOnLoad)
+      │             ✓ 始终执行（DontDestroyOnLoad）
       │
-      ├── 5️⃣ Trigger Events (Parallel - Fan Out) 🌟
+      ├── 5️⃣ 触发器事件（并行 - 扇出）🌟
       │      │
       │      ├─────► lightOnEvent.Raise() 💡
-      │      │          (Executes independently)
+      │      │          (独立执行)
       │      │
       │      ├─────► soundEvent.Raise() 🔊
-      │      │          (Executes independently)
+      │      │          (独立执行)
       │      │
       │      └─────► particleEvent.Raise() ✨
-      │                 (Executes independently)
+      │                 (独立执行)
       │
-      │      ⚠️ If one fails, others still execute
+      │      ⚠️ 如果一个失败，其他仍然执行
       │
-      └── 6️⃣ Chain Events (Sequential - Strict Order) 🔗
+      └── 6️⃣ 链事件（顺序 - 严格顺序）🔗
              │
              └─► fadeOutEvent.Raise() 🌑
-                    ✓ Success
+                    ✓ 成功
                     │
-                    ├─► ⏱️ Wait (duration/delay)
+                    ├─► ⏱️ 等待（持续时间/延迟）
                     │
                     └─► loadSceneEvent.Raise() 🗺️
-                           ✓ Success
+                           ✓ 成功
                            │
-                           ├─► ⏱️ Wait (duration/delay)
+                           ├─► ⏱️ 等待（持续时间/延迟）
                            │
                            └─► fadeInEvent.Raise() 🌕
-                                  ✓ Success
+                                  ✓ 成功
                                   
-                                  🛑 If ANY step fails → Chain STOPS
+                                  🛑 如果任何步骤失败 → 链停止
 ```
 
 ------
 
-### Execution Characteristics
+### 执行特性
 
-| Stage                     | Pattern               | Timing                  | Failure Behavior        | Use Case                    |
+| 阶段 | 模式 | 时间 | 失败行为 | 使用场景 |
 | ------------------------- | --------------------- | ----------------------- | ----------------------- | --------------------------- |
-| **Basic Listeners**       | Sequential            | Same frame, synchronous | Continue to next        | Standard callbacks          |
-| **Priority Listeners**    | Sequential (sorted)   | Same frame, synchronous | Continue to next        | Ordered processing          |
-| **Conditional Listeners** | Sequential (filtered) | Same frame, synchronous | Skip if false, continue | State-dependent logic       |
-| **Persistent Listeners**  | Sequential            | Same frame, synchronous | Continue to next        | Cross-scene systems         |
-| **Trigger Events**        | **Parallel**          | Same frame, independent | Others unaffected       | Side effects, notifications |
-| **Chain Events**          | **Sequential**        | Multi-frame, blocking   | **Chain stops**         | Cutscenes, sequences        |
+| **基础监听器** | 顺序 | 同一帧，同步 | 继续到下一个 | 标准回调 |
+| **优先级监听器** | 顺序（排序） | 同一帧，同步 | 继续到下一个 | 有序处理 |
+| **条件监听器** | 顺序（过滤） | 同一帧，同步 | 如果false则跳过，继续 | 状态依赖逻辑 |
+| **持久化监听器** | 顺序 | 同一帧，同步 | 继续到下一个 | 跨场景系统 |
+| **触发器事件** | **并行** | 同一帧，独立 | 其他不受影响 | 副作用、通知 |
+| **链事件** | **顺序** | 多帧，阻塞 | **链停止** | 过场动画、序列 |
 
 ------
 
-### Key Differences Explained
+### 关键差异说明
 
-<Tabs> <TabItem value="listeners" label="Listeners (1-4)" default>
+<Tabs> <TabItem value="listeners" label="监听器（1-4）" default>
 
-**Characteristics:**
+**特性：**
 
-- Execute **synchronously** in the current frame
-- Run one after another in defined order
-- Each listener is independent
-- Failure in one listener doesn't stop others
+- 在当前帧中**同步**执行
+- 按定义的顺序一个接一个运行
+- 每个监听器都是独立的
+- 一个监听器的失败不会停止其他监听器
 
-**Example:**
-
+**示例：**
 ```csharp
-healthEvent.AddListener(UpdateUI);           // Runs 1st
-healthEvent.AddPriorityListener(SaveGame, 100); // Runs 2nd (higher priority)
+healthEvent.AddListener(UpdateUI);           // 第1个运行
+healthEvent.AddPriorityListener(SaveGame, 100); // 第2个运行（更高优先级）
 healthEvent.AddConditionalListener(ShowWarning, 
-    health => health < 20);                  // Runs 3rd (if condition true)
+    health => health < 20);                  // 第3个运行（如果条件为true）
 
 healthEvent.Raise(15f);
-// Order: SaveGame() → UpdateUI() → ShowWarning() (if health < 20)
+// 顺序：SaveGame() → UpdateUI() → ShowWarning()（如果health < 20）
 ```
 
-**Timeline:**
-
+**时间线：**
 ```
-🖼️ Frame 1024
+🖼️ 帧 1024
 🚀 healthEvent.Raise(15.0f)
 │
 ├─► 💾 SaveGame()          ⏱️ 0.1ms
 ├─► 🖥️ UpdateUI()          ⏱️ 0.3ms
 └─► ⚠️ ShowWarning()       ⏱️ 0.2ms
 │
-📊 Total Cost: 0.6ms | ⚡ Status: Synchronous (Same Frame)
+📊 总成本：0.6ms | ⚡ 状态：同步（同一帧）
 ```
 
-</TabItem> <TabItem value="triggers" label="Triggers (5)">
+</TabItem> <TabItem value="triggers" label="触发器（5）">
 
-**Characteristics:**
+**特性：**
 
-- Execute in **parallel** (fan-out pattern)
-- All triggers fire independently
-- One trigger's failure doesn't affect others
-- Still synchronous, but logically parallel
+- **并行**执行（扇出模式）
+- 所有触发器独立触发
+- 一个触发器的失败不影响其他触发器
+- 仍然是同步的，但逻辑上是并行的
 
-**Example:**
-
+**示例：**
 ```csharp
-// When boss dies, trigger multiple independent events
+// 当boss死亡时，触发多个独立事件
 bossDefeatedEvent.AddTriggerEvent(stopBossMusicEvent, priority: 100);
 bossDefeatedEvent.AddTriggerEvent(playVictoryMusicEvent, priority: 90);
 bossDefeatedEvent.AddTriggerEvent(spawnLootEvent, priority: 50);
@@ -157,120 +152,115 @@ bossDefeatedEvent.AddTriggerEvent(showVictoryUIEvent, priority: 40);
 bossDefeatedEvent.AddTriggerEvent(saveCheckpointEvent, priority: 10);
 
 bossDefeatedEvent.Raise();
-// All 5 events fire, sorted by priority, but independently
-// If spawnLootEvent fails, others still execute
+// 所有5个事件触发，按优先级排序，但独立
+// 如果spawnLootEvent失败，其他仍然执行
 ```
 
-**Timeline:**
-
+**时间线：**
 ```
-🖼️ Frame 2048
+🖼️ 帧 2048
 🚀 bossDefeatedEvent.Raise()
 │
-├─► 🚀 stopBossMusicEvent.Raise()     ✅ Success
-├─► 🚀 playVictoryMusicEvent.Raise()  ✅ Success
-├─► 🚀 spawnLootEvent.Raise()         ❌ Failed! (Exception Isolated)
-├─► 🚀 showVictoryUIEvent.Raise()     ✅ Executed (Resilient)
-└─► 🚀 saveCheckpointEvent.Raise()    ✅ Executed (Resilient)
+├─► 🚀 stopBossMusicEvent.Raise()     ✅ 成功
+├─► 🚀 playVictoryMusicEvent.Raise()  ✅ 成功
+├─► 🚀 spawnLootEvent.Raise()         ❌ 失败！（异常隔离）
+├─► 🚀 showVictoryUIEvent.Raise()     ✅ 已执行（弹性）
+└─► 🚀 saveCheckpointEvent.Raise()    ✅ 已执行（弹性）
 │
-📊 Result: 4/5 Success | 🛡️ Status: Fault-Tolerant (Isolated Failure)
+📊 结果：4/5成功 | 🛡️ 状态：容错（隔离失败）
 ```
 
-</TabItem> <TabItem value="chains" label="Chains (6)">
+</TabItem> <TabItem value="chains" label="链（6）">
 
-**Characteristics:**
+**特性：**
 
-- Execute **sequentially** with blocking
-- Strict order: A → B → C
-- Supports delays between steps
-- **Entire chain stops** if any step fails
+- 带阻塞的**顺序**执行
+- 严格顺序：A → B → C
+- 支持步骤之间的延迟
+- 如果任何步骤失败，**整个链停止**
 
-**Example:**
-
+**示例：**
 ```csharp
-// Cutscene sequence
+// 过场动画序列
 cutsceneStartEvent.AddChainEvent(fadeOutEvent, delay: 0f, duration: 1f);
 cutsceneStartEvent.AddChainEvent(hideUIEvent, delay: 0f, duration: 0.5f);
 cutsceneStartEvent.AddChainEvent(playCutsceneEvent, delay: 0f, duration: 5f);
 cutsceneStartEvent.AddChainEvent(fadeInEvent, delay: 0f, duration: 1f);
 cutsceneStartEvent.AddChainEvent(showUIEvent, delay: 0f, duration: 0f);
 
-// Execute the chain
+// 执行链
 cutsceneStartEvent.Raise();
 ```
 
-**Timeline:**
-
+**时间线：**
 ```
-🖼️ T+0.0s | Frame 0
+🖼️ T+0.0s | 帧 0
 🚀 cutsceneStartEvent.Raise()
-└─► 🎬 fadeOutEvent.Raise()             ✅ Initiated
+└─► 🎬 fadeOutEvent.Raise()             ✅ 已启动
 
-        ┆  (Δ 1.0s Delay)
+        ┆  (Δ 1.0s 延迟)
         ▼
-🖼️ T+1.0s | Frame 60
-└─► 🖥️ hideUIEvent.Raise()              ✅ Executed
+🖼️ T+1.0s | 帧 60
+└─► 🖥️ hideUIEvent.Raise()              ✅ 已执行
 
-        ┆  (Δ 0.5s Delay)
+        ┆  (Δ 0.5s 延迟)
         ▼
-🖼️ T+1.5s | Frame 90
-└─► 🎞️ playCutsceneEvent.Raise()         ✅ Executed
+🖼️ T+1.5s | 帧 90
+└─► 🎞️ playCutsceneEvent.Raise()         ✅ 已执行
 
-        ┆  (Δ 5.0s Delay)
+        ┆  (Δ 5.0s 延迟)
         ▼
-🖼️ T+6.5s | Frame 390
-└─► 🎬 fadeInEvent.Raise()              ✅ Executed
+🖼️ T+6.5s | 帧 390
+└─► 🎬 fadeInEvent.Raise()              ✅ 已执行
 
-        ┆  (Δ 1.0s Delay)
+        ┆  (Δ 1.0s 延迟)
         ▼
-🖼️ T+7.5s | Frame 450
-└─► 🖥️ showUIEvent.Raise()              ✅ Finalized
+🖼️ T+7.5s | 帧 450
+└─► 🖥️ showUIEvent.Raise()              ✅ 已完成
 
-📊 Total Timeline: ~7.5s | 🎞️ Total Span: 450 Frames
+📊 总时间线：~7.5s | 🎞️ 总跨度：450帧
 ```
 
-**Failure Scenario:**
-
+**失败场景：**
 ```csharp
-🖼️ T+0.0s | Frame 0
-🚀 cutsceneStartEvent.Raise()           ✅ Initiated
+🖼️ T+0.0s | 帧 0
+🚀 cutsceneStartEvent.Raise()           ✅ 已启动
 
         ┆  (Δ 1.0s)
         ▼
-🖼️ T+1.0s | Frame 60
-🚀 fadeOutEvent.Raise()                 ✅ Executed
+🖼️ T+1.0s | 帧 60
+🚀 fadeOutEvent.Raise()                 ✅ 已执行
 
         ┆  (Δ 0.5s)
         ▼
-🖼️ T+1.5s | Frame 90
-🚀 hideUIEvent.Raise()                  ✅ Executed
+🖼️ T+1.5s | 帧 90
+🚀 hideUIEvent.Raise()                  ✅ 已执行
 
         ┆  (Δ 5.0s)
         ▼
-🖼️ T+6.5s | Frame 390
-🚀 playCutsceneEvent.Raise()            ❌ CRITICAL FAILURE!
+🖼️ T+6.5s | 帧 390
+🚀 playCutsceneEvent.Raise()            ❌ 严重失败！
                                         
-        🛑 [ CIRCUIT BREAKER ACTIVE ]
-        ⚠️ Logical chain halted to prevent state desync.
+        🛑 [ 断路器激活 ]
+        ⚠️ 逻辑链停止以防止状态不同步。
 
-        ⏩ fadeInEvent.Raise()          🚫 NEVER EXECUTED
-        ⏩ showUIEvent.Raise()          🚫 NEVER EXECUTED
+        ⏩ fadeInEvent.Raise()          🚫 从未执行
+        ⏩ showUIEvent.Raise()          🚫 从未执行
 ```
 
 </TabItem> </Tabs>
 
 ------
 
-## 💡 Best Practices
+## 💡 最佳实践
 
-### 1. Listener Management
+### 1. 监听器管理
 
-#### Always Unsubscribe
+#### 始终取消订阅
 
-Memory leaks are the #1 issue with event systems. Always clean up listeners.
+内存泄漏是事件系统的第一大问题。始终清理监听器。
 
-<Tabs> <TabItem value="bad" label="❌ Bad">
-
+<Tabs> <TabItem value="bad" label="❌ 不好">
 ```csharp
 public class PlayerController : MonoBehaviour
 {
@@ -281,13 +271,12 @@ public class PlayerController : MonoBehaviour
         onPlayerDeath.AddListener(HandleDeath);
     }
     
-    // Object destroyed but listener remains in memory!
-    // This causes memory leaks and potential crashes
+    // 对象被销毁但监听器仍在内存中！
+    // 这会导致内存泄漏和潜在的崩溃
 }
 ```
 
-</TabItem> <TabItem value="good" label="✅ Good">
-
+</TabItem> <TabItem value="good" label="✅ 好">
 ```csharp
 public class PlayerController : MonoBehaviour
 {
@@ -300,13 +289,13 @@ public class PlayerController : MonoBehaviour
     
     void OnDisable()
     {
-        // Always unsubscribe to prevent memory leaks
+        // 始终取消订阅以防止内存泄漏
         onPlayerDeath.RemoveListener(HandleDeath);
     }
     
     void HandleDeath()
     {
-        Debug.Log("Player died!");
+        Debug.Log("玩家死亡！");
     }
 }
 ```
@@ -315,10 +304,9 @@ public class PlayerController : MonoBehaviour
 
 ------
 
-#### Use OnEnable/OnDisable Pattern
+#### 使用OnEnable/OnDisable模式
 
-The OnEnable/OnDisable pattern is the recommended approach for Unity.
-
+OnEnable/OnDisable模式是Unity推荐的方法。
 ```csharp
 public class HealthUI : MonoBehaviour
 {
@@ -326,59 +314,57 @@ public class HealthUI : MonoBehaviour
     
     void OnEnable()
     {
-        // Subscribe when active
+        // 活动时订阅
         healthChangedEvent.AddListener(OnHealthChanged);
     }
     
     void OnDisable()
     {
-        // Unsubscribe when inactive
+        // 非活动时取消订阅
         healthChangedEvent.RemoveListener(OnHealthChanged);
     }
     
     void OnHealthChanged(float newHealth)
     {
-        // Update UI
+        // 更新UI
     }
 }
 ```
 
-**Benefits:**
+**好处：**
 
-- Automatic cleanup when object is disabled/destroyed
-- Listeners only active when needed
-- Prevents duplicate subscriptions
-- Works with object pooling
+- 对象禁用/销毁时自动清理
+- 监听器仅在需要时活动
+- 防止重复订阅
+- 适用于对象池
 
 ------
 
-### 2. Schedule Management
+### 2. 调度管理
 
-#### Store Handles for Cancellation
+#### 存储句柄以便取消
 
-Always store `ScheduleHandle` if you need to cancel later.
+如果以后需要取消，始终存储`ScheduleHandle`。
 
-<Tabs> <TabItem value="bad" label="❌ Bad">
-
+<Tabs> <TabItem value="bad" label="❌ 不好">
 ```csharp
 public class PoisonEffect : MonoBehaviour
 {
     void ApplyPoison()
     {
-        // Can't cancel this later!
+        // 以后无法取消这个！
         poisonEvent.RaiseRepeating(damagePerTick, 1f, repeatCount: 10);
     }
     
     void CurePoison()
     {
-        // No way to stop the poison!
-        // It will keep ticking for all 10 times
+        // 无法停止毒药！
+        // 它将继续执行所有10次
     }
 }
 ```
 
-</TabItem> <TabItem value="good" label="✅ Good">
-
+</TabItem> <TabItem value="good" label="✅ 好">
 ```csharp
 public class PoisonEffect : MonoBehaviour
 {
@@ -386,7 +372,7 @@ public class PoisonEffect : MonoBehaviour
     
     void ApplyPoison()
     {
-        // Store the handle
+        // 存储句柄
         _poisonHandle = poisonEvent.RaiseRepeating(
             damagePerTick, 
             1f, 
@@ -396,16 +382,16 @@ public class PoisonEffect : MonoBehaviour
     
     void CurePoison()
     {
-        // Can cancel the poison effect
+        // 可以取消毒药效果
         if (poisonEvent.CancelRepeating(_poisonHandle))
         {
-            Debug.Log("Poison cured!");
+            Debug.Log("毒药已治愈！");
         }
     }
     
     void OnDisable()
     {
-        // Clean up on disable
+        // 禁用时清理
         poisonEvent.CancelRepeating(_poisonHandle);
     }
 }
@@ -415,10 +401,9 @@ public class PoisonEffect : MonoBehaviour
 
 ------
 
-#### Multiple Schedules Pattern
+#### 多个调度模式
 
-When managing multiple schedules, use a collection.
-
+管理多个调度时，使用集合。
 ```csharp
 public class BuffManager : MonoBehaviour
 {
@@ -428,13 +413,13 @@ public class BuffManager : MonoBehaviour
     
     public void ApplyBuff(string buffName, float interval, int duration)
     {
-        // Cancel existing buff if any
+        // 如果有，取消现有buff
         if (_activeBuffs.TryGetValue(buffName, out var existingHandle))
         {
             buffTickEvent.CancelRepeating(existingHandle);
         }
         
-        // Apply new buff
+        // 应用新buff
         var handle = buffTickEvent.RaiseRepeating(
             buffName, 
             interval, 
@@ -455,7 +440,7 @@ public class BuffManager : MonoBehaviour
     
     void OnDisable()
     {
-        // Cancel all buffs
+        // 取消所有buff
         foreach (var handle in _activeBuffs.Values)
         {
             buffTickEvent.CancelRepeating(handle);
@@ -467,14 +452,13 @@ public class BuffManager : MonoBehaviour
 
 ------
 
-### 3. Trigger and Chain Management
+### 3. 触发器和链管理
 
-#### Use Handles for Safe Removal
+#### 使用句柄以安全移除
 
-Always use handles to avoid removing other systems' triggers/chains.
+始终使用句柄以避免删除其他系统的触发器/链。
 
-<Tabs> <TabItem value="bad" label="❌ Risky">
-
+<Tabs> <TabItem value="bad" label="❌ 有风险">
 ```csharp
 public class DoorSystem : MonoBehaviour
 {
@@ -485,15 +469,14 @@ public class DoorSystem : MonoBehaviour
     
     void Cleanup()
     {
-        // DANGER: Removes ALL triggers to lightOnEvent
-        // Even those registered by other systems!
+        // 危险：删除所有到lightOnEvent的触发器
+        // 甚至是其他系统注册的！
         doorOpenEvent.RemoveTriggerEvent(lightOnEvent);
     }
 }
 ```
 
-</TabItem> <TabItem value="good" label="✅ Safe">
-
+</TabItem> <TabItem value="good" label="✅ 安全">
 ```csharp
 public class DoorSystem : MonoBehaviour
 {
@@ -501,13 +484,13 @@ public class DoorSystem : MonoBehaviour
     
     void SetupDoor()
     {
-        // Store the handle
+        // 存储句柄
         _lightTriggerHandle = doorOpenEvent.AddTriggerEvent(lightOnEvent);
     }
     
     void Cleanup()
     {
-        // Only removes YOUR specific trigger
+        // 仅删除您的特定触发器
         doorOpenEvent.RemoveTriggerEvent(_lightTriggerHandle);
     }
 }
@@ -517,20 +500,19 @@ public class DoorSystem : MonoBehaviour
 
 ------
 
-#### Organizing Multiple Triggers/Chains
+#### 组织多个触发器/链
 
-Use a structured approach for complex systems.
-
+对复杂系统使用结构化方法。
 ```csharp
 public class CutsceneManager : MonoBehaviour
 {
-    // Store all handles for cleanup
+    // 存储所有句柄以便清理
     private readonly List<ChainHandle> _cutsceneChains = new();
     private readonly List<TriggerHandle> _cutsceneTriggers = new();
     
     void SetupCutscene()
     {
-        // Build cutscene sequence
+        // 构建过场动画序列
         var chain1 = startEvent.AddChainEvent(fadeOutEvent, duration: 1f);
         var chain2 = startEvent.AddChainEvent(playVideoEvent, duration: 5f);
         var chain3 = startEvent.AddChainEvent(fadeInEvent, duration: 1f);
@@ -539,7 +521,7 @@ public class CutsceneManager : MonoBehaviour
         _cutsceneChains.Add(chain2);
         _cutsceneChains.Add(chain3);
         
-        // Add parallel triggers for effects
+        // 为效果添加并行触发器
         var trigger1 = startEvent.AddTriggerEvent(stopGameplayMusicEvent);
         var trigger2 = startEvent.AddTriggerEvent(hideCrosshairEvent);
         
@@ -549,14 +531,14 @@ public class CutsceneManager : MonoBehaviour
     
     void SkipCutscene()
     {
-        // Clean up all chains
+        // 清理所有链
         foreach (var chain in _cutsceneChains)
         {
             startEvent.RemoveChainEvent(chain);
         }
         _cutsceneChains.Clear();
         
-        // Clean up all triggers
+        // 清理所有触发器
         foreach (var trigger in _cutsceneTriggers)
         {
             startEvent.RemoveTriggerEvent(trigger);
@@ -568,24 +550,23 @@ public class CutsceneManager : MonoBehaviour
 
 ------
 
-### 4. Priority Usage
+### 4. 优先级使用
 
-#### Guidelines for Priority Values
+#### 优先级值指南
 
-Use a consistent priority scale across your project.
-
+在项目中使用一致的优先级刻度。
 ```csharp
-// Define priority constants
+// 定义优先级常量
 public static class EventPriority
 {
-    public const int CRITICAL = 1000;    // Absolutely must run first
-    public const int HIGH = 100;         // Important systems
-    public const int NORMAL = 0;         // Default priority
-    public const int LOW = -100;         // Can run later
-    public const int CLEANUP = -1000;    // Final cleanup tasks
+    public const int CRITICAL = 1000;    // 绝对必须首先运行
+    public const int HIGH = 100;         // 重要系统
+    public const int NORMAL = 0;         // 默认优先级
+    public const int LOW = -100;         // 可以稍后运行
+    public const int CLEANUP = -1000;    // 最终清理任务
 }
 
-// Usage
+// 用法
 healthEvent.AddPriorityListener(SavePlayerData, EventPriority.CRITICAL);
 healthEvent.AddPriorityListener(UpdateHealthBar, EventPriority.HIGH);
 healthEvent.AddPriorityListener(PlayDamageSound, EventPriority.NORMAL);
@@ -594,31 +575,29 @@ healthEvent.AddPriorityListener(UpdateStatistics, EventPriority.LOW);
 
 ------
 
-#### Priority Anti-Patterns
+#### 优先级反模式
 
-<Tabs> <TabItem value="bad" label="❌ Avoid">
-
+<Tabs> <TabItem value="bad" label="❌ 避免">
 ```csharp
-// Don't use random or inconsistent priorities
+// 不要使用随机或不一致的优先级
 healthEvent.AddPriorityListener(SystemA, 523);
 healthEvent.AddPriorityListener(SystemB, 891);
 healthEvent.AddPriorityListener(SystemC, 7);
 
-// Don't overuse priority when order doesn't matter
+// 当顺序不重要时不要过度使用优先级
 uiClickEvent.AddPriorityListener(PlaySound, 50);
 uiClickEvent.AddPriorityListener(PlayParticle, 49);
-// These don't need priority, use basic listeners!
+// 这些不需要优先级，使用基础监听器！
 ```
 
-</TabItem> <TabItem value="good" label="✅ Best Practice">
-
+</TabItem> <TabItem value="good" label="✅ 最佳实践">
 ```csharp
-// Use priorities only when order matters
-saveGameEvent.AddPriorityListener(ValidateData, 100);   // Must validate first
-saveGameEvent.AddPriorityListener(SerializeData, 50);   // Then serialize
-saveGameEvent.AddPriorityListener(WriteToFile, 0);      // Finally write
+// 仅在顺序重要时使用优先级
+saveGameEvent.AddPriorityListener(ValidateData, 100);   // 必须首先验证
+saveGameEvent.AddPriorityListener(SerializeData, 50);   // 然后序列化
+saveGameEvent.AddPriorityListener(WriteToFile, 0);      // 最后写入
 
-// Use basic listeners when order doesn't matter
+// 当顺序不重要时使用基础监听器
 buttonClickEvent.AddListener(PlaySound);
 buttonClickEvent.AddListener(ShowFeedback);
 buttonClickEvent.AddListener(LogAnalytics);
@@ -628,20 +607,19 @@ buttonClickEvent.AddListener(LogAnalytics);
 
 ------
 
-### 5. Conditional Listeners
+### 5. 条件监听器
 
-#### Effective Condition Design
+#### 有效的条件设计
 
-Keep conditions simple and fast.
+保持条件简单快速。
 
-<Tabs> <TabItem value="bad" label="❌ Expensive">
-
+<Tabs> <TabItem value="bad" label="❌ 昂贵">
 ```csharp
-// Don't do expensive operations in conditions
+// 不要在条件中做昂贵的操作
 enemySpawnEvent.AddConditionalListener(
     SpawnBoss,
     () => {
-        // Bad: Complex calculations in condition
+        // 不好：条件中的复杂计算
         var enemies = FindObjectsOfType<Enemy>();
         var totalHealth = enemies.Sum(e => e.Health);
         var averageLevel = enemies.Average(e => e.Level);
@@ -650,22 +628,21 @@ enemySpawnEvent.AddConditionalListener(
 );
 ```
 
-</TabItem> <TabItem value="good" label="✅ Efficient">
-
+</TabItem> <TabItem value="good" label="✅ 高效">
 ```csharp
-// Cache state, make conditions simple checks
+// 缓存状态，使条件成为简单检查
 private bool _shouldSpawnBoss = false;
 
 void UpdateGameState()
 {
-    // Update cached state occasionally, not every frame
+    // 偶尔更新缓存状态，而不是每帧
     _shouldSpawnBoss = enemyManager.TotalHealth < 100 
                     && enemyManager.AverageLevel > 5;
 }
 
 void Setup()
 {
-    // Simple, fast condition check
+    // 简单、快速的条件检查
     enemySpawnEvent.AddConditionalListener(
         SpawnBoss,
         () => _shouldSpawnBoss
@@ -677,40 +654,38 @@ void Setup()
 
 ------
 
-## ⚠️ Common Pitfalls
+## ⚠️ 常见陷阱
 
-### 1. Memory Leaks
+### 1. 内存泄漏
 
-**Problem:** Not unsubscribing listeners when objects are destroyed.
+**问题：** 对象销毁时不取消订阅监听器。
 
-**Symptoms:**
+**症状：**
 
-- Increasing memory usage over time
-- Errors about destroyed objects
-- Callbacks executing on null references
+- 随时间增加的内存使用
+- 关于销毁对象的错误
+- 回调在空引用上执行
 
-**Solution:**
-
+**解决方案：**
 ```csharp
-// Always use OnEnable/OnDisable pattern
+// 始终使用OnEnable/OnDisable模式
 void OnEnable() => myEvent.AddListener(OnCallback);
 void OnDisable() => myEvent.RemoveListener(OnCallback);
 ```
 
 ------
 
-### 2. Lost Schedule Handles
+### 2. 丢失调度句柄
 
-**Problem:** Creating schedules without storing handles.
+**问题：** 创建调度而不存储句柄。
 
-**Symptoms:**
+**症状：**
 
-- Cannot cancel repeating events
-- Events continue after object is destroyed
-- Resource waste from unneeded executions
+- 无法取消重复事件
+- 对象销毁后事件继续
+- 不需要的执行造成资源浪费
 
-**Solution:**
-
+**解决方案：**
 ```csharp
 private ScheduleHandle _handle;
 
@@ -727,20 +702,19 @@ void StopTimer()
 
 ------
 
-### 3. Broad Removal Impact
+### 3. 广泛移除影响
 
-**Problem:** Using target-based removal instead of handle-based removal.
+**问题：** 使用基于目标的移除而不是基于句柄的移除。
 
-**Symptoms:**
+**症状：**
 
-- Other systems' triggers/chains get removed unexpectedly
-- Hard-to-debug issues where events stop firing
-- Cross-system coupling and fragility
+- 其他系统的触发器/链意外被删除
+- 难以调试的问题，事件停止触发
+- 跨系统耦合和脆弱性
 
-**Solution:**
-
+**解决方案：**
 ```csharp
-// Store handles, remove precisely
+// 存储句柄，精确移除
 private TriggerHandle _myTrigger;
 
 void Setup()
@@ -750,26 +724,25 @@ void Setup()
 
 void Cleanup()
 {
-    eventA.RemoveTriggerEvent(_myTrigger);  // Safe!
+    eventA.RemoveTriggerEvent(_myTrigger);  // 安全！
 }
 ```
 
 ------
 
-### 4. Recursive Event Raises
+### 4. 递归事件触发
 
-**Problem:** Event listener raises the same event, causing infinite loop.
+**问题：** 事件监听器触发相同的事件，导致无限循环。
 
-**Symptoms:**
+**症状：**
 
-- Stack overflow exceptions
-- Unity freezes
-- Exponential execution growth
+- 堆栈溢出异常
+- Unity冻结
+- 指数执行增长
 
-**Example:**
-
+**示例：**
 ```csharp
-// ❌ DANGER: Infinite recursion!
+// ❌ 危险：无限递归！
 void Setup()
 {
     healthEvent.AddListener(OnHealthChanged);
@@ -777,24 +750,23 @@ void Setup()
 
 void OnHealthChanged(float health)
 {
-    // This triggers OnHealthChanged again!
-    healthEvent.Raise(health - 1);  // ← INFINITE LOOP
+    // 这再次触发OnHealthChanged！
+    healthEvent.Raise(health - 1);  // ← 无限循环
 }
 ```
 
-**Solution:**
-
+**解决方案：**
 ```csharp
-// ✅ Use a flag to prevent recursion
+// ✅ 使用标志防止递归
 private bool _isProcessingHealthChange = false;
 
 void OnHealthChanged(float health)
 {
-    if (_isProcessingHealthChange) return;  // Prevent recursion
+    if (_isProcessingHealthChange) return;  // 防止递归
     
     _isProcessingHealthChange = true;
     
-    // Safe to raise here now
+    // 现在这里触发是安全的
     if (health <= 0)
     {
         deathEvent.Raise();
@@ -806,31 +778,29 @@ void OnHealthChanged(float health)
 
 ------
 
-## 🚀 Performance Optimization
+## 🚀 性能优化
 
-### 1. Minimize Listener Count
+### 1. 最小化监听器数量
 
-Even though the code has been highly optimized, there will still be some overhead for each listener. Consolidate when possible.
+即使代码已经高度优化，每个监听器仍会有一些开销。尽可能合并。
 
-<Tabs> <TabItem value="bad" label="❌ Inefficient">
-
+<Tabs> <TabItem value="bad" label="❌ 低效">
 ```csharp
-// Multiple listeners for related operations
+// 相关操作的多个监听器
 healthEvent.AddListener(UpdateHealthBar);
 healthEvent.AddListener(UpdateHealthText);
 healthEvent.AddListener(UpdateHealthIcon);
 healthEvent.AddListener(UpdateHealthColor);
 ```
 
-</TabItem> <TabItem value="good" label="✅ Optimized">
-
+</TabItem> <TabItem value="good" label="✅ 优化">
 ```csharp
-// Single listener handles all UI updates
+// 单个监听器处理所有UI更新
 healthEvent.AddListener(UpdateHealthUI);
 
 void UpdateHealthUI(float health)
 {
-    // Batch all UI updates together
+    // 批量所有UI更新
     healthBar.value = health / maxHealth;
     healthText.text = $"{health:F0}";
     healthIcon.sprite = GetHealthIcon(health);
@@ -842,42 +812,40 @@ void UpdateHealthUI(float health)
 
 ------
 
-### 2. Avoid Heavy Operations in Listeners
+### 2. 避免监听器中的重操作
 
-Keep listeners lightweight. Move heavy work to coroutines/async.
+保持监听器轻量级。将重工作移到协程/异步。
 
-<Tabs> <TabItem value="bad" label="❌ Blocking">
-
+<Tabs> <TabItem value="bad" label="❌ 阻塞">
 ```csharp
 void OnDataLoaded(string data)
 {
-    // Bad: Blocks execution for all subsequent listeners
+    // 不好：阻塞所有后续监听器的执行
     var parsed = JsonUtility.FromJson<LargeData>(data);
-    ProcessComplexData(parsed);  // Takes 50ms
-    SaveToDatabase(parsed);      // Takes 100ms
+    ProcessComplexData(parsed);  // 需要50ms
+    SaveToDatabase(parsed);      // 需要100ms
 }
 ```
 
-</TabItem> <TabItem value="good" label="✅ Async">
-
+</TabItem> <TabItem value="good" label="✅ 异步">
 ```csharp
 void OnDataLoaded(string data)
 {
-    // Good: Start async processing, don't block
+    // 好：启动异步处理，不阻塞
     StartCoroutine(ProcessDataAsync(data));
 }
 
 IEnumerator ProcessDataAsync(string data)
 {
-    // Parse
+    // 解析
     var parsed = JsonUtility.FromJson<LargeData>(data);
     yield return null;
     
-    // Process
+    // 处理
     ProcessComplexData(parsed);
     yield return null;
     
-    // Save
+    // 保存
     SaveToDatabase(parsed);
 }
 ```
@@ -886,32 +854,30 @@ IEnumerator ProcessDataAsync(string data)
 
 ------
 
-### 3. Cache Delegate Allocations
+### 3. 缓存委托分配
 
-Avoid creating new delegate allocations every frame.
+避免每帧创建新的委托分配。
 
-<Tabs> <TabItem value="bad" label="❌ Allocations">
-
+<Tabs> <TabItem value="bad" label="❌ 分配">
 ```csharp
 void OnEnable()
 {
-    // Creates new delegate allocation every time
+    // 每次都创建新的委托分配
     updateEvent.AddListener(() => UpdateHealth());
 }
 ```
 
-</TabItem> <TabItem value="good" label="✅ Cached">
-
+</TabItem> <TabItem value="good" label="✅ 缓存">
 ```csharp
 void OnEnable()
 {
-    // Reuses same method reference, no allocation
+    // 重用相同的方法引用，无分配
     updateEvent.AddListener(UpdateHealth);
 }
 
 void UpdateHealth()
 {
-    // Implementation
+    // 实现
 }
 ```
 
@@ -919,44 +885,41 @@ void UpdateHealth()
 
 ------
 
-## 📊 Summary Checklist
+## 📊 总结检查清单
 
-Use this checklist when working with `GameEvent`:
+使用此检查清单处理`GameEvent`：
 
-### Listener Management
+### 监听器管理
 
-- Always unsubscribe in OnDisable
-- Use OnEnable/OnDisable pattern
-- Cache delegate references when possible
-- Keep listeners lightweight
+- 始终在OnDisable中取消订阅
+- 使用OnEnable/OnDisable模式
+- 尽可能缓存委托引用
+- 保持监听器轻量级
 
-### Schedule Management
+### 调度管理
 
-- Store ScheduleHandle when you need cancellation
-- Cancel schedules in OnDisable
-- Use collections for multiple schedules
-- Clean up on object destruction
+- 需要取消时存储ScheduleHandle
+- 在OnDisable中取消调度
+- 使用集合管理多个调度
+- 对象销毁时清理
 
-### Trigger/Chain Management
+### 触发器/链管理
 
-- Use handles for safe removal
-- Store handles in collections for cleanup
-- Choose triggers for parallel, chains for sequential
-- Remember to call ExecuteChainEvents() for chains
+- 使用句柄以安全移除
+- 在集合中存储句柄以便清理
+- 为并行选择触发器，为顺序选择链
+- 记得为链调用ExecuteChainEvents()
 
-### Performance
+### 性能
 
-- Consolidate related listeners
-- Move heavy work to coroutines/async
-- Use simple, fast conditions
-- Avoid recursive event raises
+- 合并相关监听器
+- 将重工作移到协程/异步
+- 使用简单、快速的条件
+- 避免递归事件触发
 
-### Priority & Conditions
+### 优先级与条件
 
-- Use consistent priority scale
-- Only use priority when order matters
-- Keep conditions simple and cached
-- Document priority dependencies
-
-
-
+- 使用一致的优先级刻度
+- 仅在顺序重要时使用优先级
+- 保持条件简单且缓存
+- 记录优先级依赖关系

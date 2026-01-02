@@ -1,23 +1,22 @@
 ﻿---
-sidebar_label: 'Raising & Scheduling'
+sidebar_label: '触发与调度'
 sidebar_position: 1
 ---
 
-# Raising & Scheduling
+# 触发与调度
 
-At its core, the Game Event System is about sending signals. While the Inspector handles visual bindings, the **Runtime API** gives programmers precise control over *when* and *how* these signals are fired.
+在核心层面，游戏事件系统是关于发送信号的。虽然Inspector处理可视化绑定，但**运行时API**为程序员提供对这些信号*何时*以及*如何*触发的精确控制。
 
-This guide covers immediate execution, time-based scheduling, and the cancellation of pending events.
+本指南涵盖即时执行、基于时间的调度以及取消待处理事件。
 
 ---
 
-## 🚀 Immediate Execution (`Raise`)
+## 🚀 即时执行（`Raise`）
 
-The `Raise()` method is the standard way to fire an event. It executes all listeners (Inspector, Code, Flow Graph) synchronously in the current frame.
+`Raise()` 方法是触发事件的标准方式。它在当前帧中同步执行所有监听器（Inspector、代码、流程图）。
 
-### 1. Void Events
-Events with no arguments.
-
+### 1. 空事件
+没有参数的事件。
 ```csharp
 [GameEventDropdown] public GameEvent onPlayerJump;
 
@@ -25,16 +24,15 @@ void Update()
 {
     if (Input.GetButtonDown("Jump"))
     {
-        // Fires immediately
+        // 立即触发
         onPlayerJump.Raise();
     }
 }
 ```
 
-### 2. Single Argument Events
+### 2. 单参数事件
 
-Events that carry a specific data payload (T).
-
+携带特定数据有效载荷（T）的事件。
 ```csharp
 [GameEventDropdown] public GameEvent<float> onHealthChanged;
 
@@ -42,180 +40,172 @@ public void TakeDamage(float damage)
 {
     currentHealth -= damage;
     
-    // Type-safe invocation
+    // 类型安全调用
     onHealthChanged.Raise(currentHealth);
 }
 ```
 
-### 3. Sender + Argument Events
+### 3. Sender + 参数事件
 
-Events that verify the **Source** of the event (TSender) and carry data (TArgs).
-
+验证事件的**源**（TSender）并携带数据（TArgs）的事件。
 ```csharp
-// Define types: Sender is GameObject, Arg is DamageInfo
+// 定义类型：Sender是GameObject，Arg是DamageInfo
 [GameEventDropdown] public GameEvent<GameObject, DamageInfo> onActorDamaged;
 
 public void Hit()
 {
     var info = new DamageInfo { amount = 50, type = DamageType.Fire };
     
-    // Passes 'this.gameObject' as the sender
+    // 将'this.gameObject'作为sender传递
     onActorDamaged.Raise(this.gameObject, info);
 }
 ```
 
-:::warning Auto-Scheduling Logic
-If you have configured **Action Delay** or **Repeat** settings in the Inspector for a specific event asset, calling Raise() will automatically respect those settings (e.g., it might wait 2 seconds before actually firing).
-See [Inspector Integration](#-inspector-integration) below.
+:::warning 自动调度逻辑
+如果您在Inspector中为特定事件资产配置了**动作延迟**或**重复**设置，调用Raise()将自动遵守这些设置（例如，它可能在实际触发前等待2秒）。
+请参阅下面的[Inspector集成](#-inspector集成)。
 :::
 
 ------
 
-## ⏱️ Delayed Execution (RaiseDelayed)
+## ⏱️ 延迟执行（RaiseDelayed）
 
-Sometimes you want to schedule an event for the future without using a Coroutine. The system provides a built-in scheduler.
+有时您想要在不使用协程的情况下为将来调度事件。系统提供了内置的调度器。
 
-All scheduling methods return a `ScheduleHandle`, which is crucial if you need to cancel the event before it fires.
-
+所有调度方法都返回一个`ScheduleHandle`，如果您需要在事件触发前取消它，这至关重要。
 ```csharp
 [GameEventDropdown] public GameEvent onBombExplode;
 
 public void PlantBomb()
 {
-    Debug.Log("Bomb Planted...");
+    Debug.Log("炸弹已放置...");
     
-    // Fire event after 5.0 seconds
+    // 5.0秒后触发事件
     ScheduleHandle handle = onBombExplode.RaiseDelayed(5.0f);
 }
 ```
 
-### Passing Arguments with Delay
+### 带延迟传递参数
 
-The API fully supports generics for delayed calls.
-
+API完全支持延迟调用的泛型。
 ```csharp
-// Wait 1.5s, then send the float value '100f'
+// 等待1.5秒，然后发送float值'100f'
 onScoreAdded.RaiseDelayed(100f, 1.5f);
 
-// Wait 0.5s, then pass Sender and Args
+// 等待0.5秒，然后传递Sender和Args
 onItemPickup.RaiseDelayed(this, itemData, 0.5f);
 ```
 
 ------
 
-## 🔄 Repeating Execution (RaiseRepeating)
+## 🔄 重复执行（RaiseRepeating）
 
-Use this to create loops, timers, or polling mechanisms entirely within the event system.
+使用此方法完全在事件系统内创建循环、计时器或轮询机制。
 
-| Parameter   | Description                                         |
+| 参数 | 描述 |
 | ----------- | --------------------------------------------------- |
-| interval    | Time (seconds) between each fire.                   |
-| repeatCount | How many times to fire? Set to -1 for **Infinite**. |
+| interval | 每次触发之间的时间（秒）。 |
+| repeatCount | 触发多少次？设置为-1表示**无限**。 |
 
-### Example: Poison Effect
+### 示例：毒药效果
 
-Damage the player every 1 second, for 5 ticks.
-
+每1秒伤害玩家一次，共5次。
 ```csharp
 [GameEventDropdown] public GameEvent<int> onTakeDamage;
 
 private void ApplyPoison()
 {
-    // Fire immediately (optional), then repeat 5 times every 1s
-    // Note: RaiseRepeating waits for the interval before the FIRST fire by default
+    // 立即触发（可选），然后每1秒重复5次
+    // 注意：默认情况下，RaiseRepeating在第一次触发前等待间隔
     onTakeDamage.RaiseRepeating(10, interval: 1.0f, repeatCount: 5);
 }
 ```
 
-### Example: Radar Scan (Infinite)
+### 示例：雷达扫描（无限）
 
-Ping a radar event every 2 seconds forever.
-
+每2秒永久ping一次雷达事件。
 ```csharp
 private ScheduleHandle _radarHandle;
 
 void Start()
 {
-    // -1 means execute forever until cancelled
+    // -1表示永远执行直到取消
     _radarHandle = onRadarPing.RaiseRepeating(2.0f, repeatCount: -1);
 }
 ```
 
 ------
 
-## 🔔 Monitoring & Lifecycle Callbacks
+## 🔔 监控与生命周期回调
 
-The `ScheduleHandle` is not just for cancellation. It provides three built-in callbacks that allow you to monitor the state of a scheduled task, this is essential for updating UI progress bars, triggering follow-up logic, or cleaning up resources.
-
+`ScheduleHandle` 不仅用于取消。它提供三个内置回调，允许您监控调度任务的状态，这对于更新UI进度条、触发后续逻辑或清理资源至关重要。
 ```csharp
 [GameEventDropdown] public GameEvent onStatusUpdate;
 
 private void StartTrackedLoop()
 {
-    // Start a task that repeats 5 times every 1 second
+    // 启动一个每1秒重复5次的任务
     ScheduleHandle handle = onStatusUpdate.RaiseRepeating(interval: 1.0f, repeatCount: 5);
 
-    // 1. Triggered on every tick (Step)
+    // 1. 在每次执行时触发（步骤）
     handle.OnStep += (remainingCount) => 
     {
-        Debug.Log($"[Schedule] Execution step! Cycles remaining: {remainingCount}");
+        Debug.Log($"[调度] 执行步骤！剩余循环：{remainingCount}");
     };
 
-    // 2. Triggered when the task finishes naturally
+    // 2. 当任务自然完成时触发
     handle.OnCompleted += () => 
     {
-        Debug.Log("[Schedule] Task finished successfully.");
+        Debug.Log("[调度] 任务成功完成。");
     };
 
-    // 3. Triggered if the task is stopped manually via code
+    // 3. 如果任务通过代码手动停止时触发
     handle.OnCancelled += () => 
     {
-        Debug.Log("[Schedule] Task was cancelled by the user.");
+        Debug.Log("[调度] 任务被用户取消。");
     };
 }
 ```
 
-### Callback Definitions
+### 回调定义
 
-| Callback        | Invocation Timing                                            | Typical Use Case                                             |
+| 回调 | 调用时机 | 典型使用场景 |
 | --------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| **OnStep**      | Fires immediately after each event execution. Pass the remaining repeatCount. | Updating countdown timers or "progress" UI.                  |
-| **OnCompleted** | Fires when the task reaches its repeatCount and finishes naturally. | Triggering a "Cooldown Finished" or "Combo Ended" logic.     |
-| **OnCancelled** | Fires specifically when CancelDelayed or CancelRepeating is called. | Stopping associated VFX/SFX or resetting a character's state. |
+| **OnStep** | 在每次事件执行后立即触发。传递剩余的repeatCount。 | 更新倒计时计时器或"进度"UI。 |
+| **OnCompleted** | 当任务达到其repeatCount并自然完成时触发。 | 触发"冷却完成"或"连击结束"逻辑。 |
+| **OnCancelled** | 专门在调用CancelDelayed或CancelRepeating时触发。 | 停止相关的VFX/SFX或重置角色状态。 |
 
-:::tip Handle Disposal
-You don't need to manually unsubscribe from these callbacks. The ScheduleHandle is automatically cleaned up by the internal scheduler once the task reaches a terminal state (Completed or Cancelled).
+:::tip Handle处置
+您不需要手动取消订阅这些回调。一旦任务达到终端状态（已完成或已取消），内部调度器会自动清理ScheduleHandle。
 :::
 
 ------
 
-## 🛑 Cancellation
+## 🛑 取消
 
-Stopping pending events is just as important as starting them. There are two distinct ways to cancel events, depending on how they were started.
+停止待处理事件与启动它们同样重要。有两种不同的方式取消事件，具体取决于它们是如何启动的。
 
-### 1. Canceling Manual Schedules
-If you used `RaiseDelayed` or `RaiseRepeating`, you received a **ScheduleHandle**. You must use this handle to stop that specific task.
+### 1. 取消手动调度
+如果您使用了`RaiseDelayed`或`RaiseRepeating`，您收到了一个**ScheduleHandle**。您必须使用此句柄来停止该特定任务。
 
-#### Canceling a Delayed Call
-
+#### 取消延迟调用
 ```csharp
 public void DefuseBomb()
 {
-    // Stop the pending delayed execution
+    // 停止待处理的延迟执行
     if (_bombHandle != null)
     {
-        // Returns true if successfully cancelled
+        // 如果成功取消则返回true
         bool success = onBombExplode.CancelDelayed(_bombHandle); 
     }
 }
 ```
 
-#### Canceling a Repeating Loop
-
+#### 取消重复循环
 ```csharp
 public void StopRadar()
 {
-    // Stop the manual loop
+    // 停止手动循环
     if (_radarHandle != null)
     {
         onRadarPing.CancelRepeating(_radarHandle);
@@ -223,101 +213,98 @@ public void StopRadar()
 }
 ```
 
-### 2. Canceling Automatic (Inspector) Schedules
+### 2. 取消自动（Inspector）调度
 
-If an event is looping or delaying because of its **Inspector Configuration** (Behavior Window), use the parameterless Cancel() method.
+如果事件由于其**Inspector配置**（行为窗口）而循环或延迟，请使用无参数的Cancel()方法。
 
-- **Target**: Stops the **active** auto-sequence (Delay or Loop) on this event asset.
-- **Safety**: Raise() automatically calls Cancel() internally before starting a new auto-sequence to prevent overlapping loops.
-
+- **目标**：停止此事件资产上的**活动**自动序列（延迟或循环）。
+- **安全性**：Raise()在启动新的自动序列之前会自动在内部调用Cancel()以防止重叠循环。
 ```csharp
-// Stops the "Action Delay" or "Repeat" logic currently running 
-// that was triggered by a previous .Raise() call
+// 停止当前正在运行的"动作延迟"或"重复"逻辑
+// 这是由先前的.Raise()调用触发的
 onEvent.Cancel();
 ```
 
-:::danger Important Distinction
-**Cancel() does NOT remove listeners.**
+:::danger 重要区别
+**Cancel()不会删除监听器。**
 
-- **Cancel()**: Stops time-based execution (Pending timers/loops). The event acts as if it was never fired.
-- **RemoveAllListeners()**: Unsubscribes all scripts so they no longer receive future events.
+- **Cancel()**：停止基于时间的执行（待处理的计时器/循环）。事件表现得好像从未被触发。
+- **RemoveAllListeners()**：取消订阅所有脚本，使它们不再接收未来的事件。
   :::
 
 ------
 
-## 🔌 Inspector Integration
+## 🔌 Inspector集成
 
-It is vital to understand how code interacts with the **Visual Behavior Configuration**.
+理解代码如何与**可视化行为配置**交互至关重要。
 
-When you call Raise() in code, the system checks the **Schedule Configuration** defined in the [Game Event Behavior Window](../visual-workflow/game-event-behavior.md):
+当您在代码中调用Raise()时，系统会检查[游戏事件行为窗口](../visual-workflow/game-event-behavior.md)中定义的**调度配置**：
 
-1. **Code**: myEvent.Raise() called.
-2. **System Check**: Does this event have Action Delay > 0 in Inspector?
-   - **Yes**: The system implicitly converts this to a RaiseDelayed.
-   - **No**: It fires immediately.
-3. **System Check**: Does this event have Repeat Interval > 0?
-   - **Yes**: The system starts a loop automatically.
+1. **代码**：调用myEvent.Raise()。
+2. **系统检查**：此事件在Inspector中的动作延迟是否> 0？
+   - **是**：系统隐式将其转换为RaiseDelayed。
+   - **否**：立即触发。
+3. **系统检查**：此事件的重复间隔是否> 0？
+   - **是**：系统自动启动循环。
 
-:::tip Best Practice
-If you want **pure code control**, leave the Schedule settings in the Inspector at 0.
-If you want **designers to tune timing**, use Raise() and let the Inspector control the delay.
+:::tip 最佳实践
+如果您想要**纯代码控制**，在Inspector中将调度设置保留为0。
+如果您想要**设计师调整时间**，使用Raise()并让Inspector控制延迟。
 :::
 
 ------
 
-## 🔇 Muting Visuals (SetInspectorListenersActive)
+## 🔇 静音视觉效果（SetInspectorListenersActive）
 
-In complex systems, you often want to separate **Game Logic** (Data) from **Game Feel** (Visuals/Sound).
+在复杂系统中，您经常想要将**游戏逻辑**（数据）与**游戏感觉**（视觉/声音）分离。
 
-Use SetInspectorListenersActive(false) to mute the "Visual/Scene" layer while keeping the "Logic/Code" layer running.
+使用SetInspectorListenersActive(false)来静音"视觉/场景"层，同时保持"逻辑/代码"层运行。
 
-### Use Case: Fast-Forwarding or Loading
+### 使用场景：快进或加载
 
-Imagine loading a save file. You need to fire OnItemAdded 100 times to populate the inventory, but you **don't** want to play 100 sound effects or spawn 100 UI popups.
-
+想象加载一个保存文件。您需要触发OnItemAdded 100次来填充库存，但您**不**想播放100个音效或生成100个UI弹窗。
 ```csharp
 public void LoadSaveData(List<Item> items)
 {
-    // 1. Mute the "flashy" stuff (Inspector bindings)
+    // 1. 静音"华丽"的内容（Inspector绑定）
     onItemAdded.SetInspectorListenersActive(false);
 
-    // 2. Process logic (Data listeners still run!)
+    // 2. 处理逻辑（数据监听器仍在运行！）
     foreach(var item in items)
     {
-        // This updates the backend inventory data
-        // BUT skips the UI/Sound configured in Editor
+        // 这更新后端库存数据
+        // 但跳过编辑器中配置的UI/声音
         onItemAdded.Raise(item); 
     }
 
-    // 3. Re-enable visuals
+    // 3. 重新启用视觉效果
     onItemAdded.SetInspectorListenersActive(true);
     
-    // 4. Refresh UI once
+    // 4. 一次性刷新UI
     onInventoryUpdated.Raise();
 }
 ```
 
 ------
 
-## 📜 API Summary
+## 📜 API摘要
 
-| Method Signature                                             | Returns          | Description                                                  |
+| 方法签名 | 返回值 | 描述 |
 | :----------------------------------------------------------- | :--------------- | :----------------------------------------------------------- |
-| **Immediate Execution**                                      |                  |                                                              |
-| `Raise()`                                                    | `void`           | Fires a Void event immediately.                              |
-| `Raise(T argument)`                                          | `void`           | Fires a Single-Argument event immediately.                   |
-| `Raise(TSender sender, TArgs args)`                          | `void`           | Fires a Sender+Argument event immediately.                   |
-| **Delayed Execution**                                        |                  |                                                              |
-| `RaiseDelayed(float delay)`                                  | `ScheduleHandle` | Schedules a Void event to fire after `delay` seconds.        |
-| `RaiseDelayed(T arg, float delay)`                           | `ScheduleHandle` | Schedules a Typed event to fire after `delay` seconds.       |
-| `RaiseDelayed(TSender s, TArgs a, float delay)`              | `ScheduleHandle` | Schedules a Sender event to fire after `delay` seconds.      |
-| **Repeating Execution**                                      |                  |                                                              |
-| `RaiseRepeating(float interval, int count)`                  | `ScheduleHandle` | Starts a repeating loop. Set `count` to -1 for infinite.     |
-| `RaiseRepeating(T arg, float interval, int count)`           | `ScheduleHandle` | Starts a repeating Typed loop.                               |
-| `RaiseRepeating(TSender s, TArgs a, float interval, int count)` | `ScheduleHandle` | Starts a repeating Sender loop.                              |
-| **Cancellation & Control**                                   |                  |                                                              |
-| `Cancel()`                                                   | `void`           | Stops any **Inspector-configured** auto-loops/delays for this event. |
-| `CancelDelayed(ScheduleHandle handle)`                       | `bool`           | Cancels a specific manual delayed task. Returns true if successful. |
-| `CancelRepeating(ScheduleHandle handle)`                     | `bool`           | Cancels a specific manual repeating task. Returns true if successful. |
-| `SetInspectorListenersActive(bool isActive)`                 | `void`           | Mutes or unmutes the scene-based `UnityEvent` listeners at runtime. |
-
+| **即时执行** | | |
+| `Raise()` | `void` | 立即触发Void事件。 |
+| `Raise(T argument)` | `void` | 立即触发单参数事件。 |
+| `Raise(TSender sender, TArgs args)` | `void` | 立即触发Sender+参数事件。 |
+| **延迟执行** | | |
+| `RaiseDelayed(float delay)` | `ScheduleHandle` | 调度Void事件在`delay`秒后触发。 |
+| `RaiseDelayed(T arg, float delay)` | `ScheduleHandle` | 调度类型化事件在`delay`秒后触发。 |
+| `RaiseDelayed(TSender s, TArgs a, float delay)` | `ScheduleHandle` | 调度Sender事件在`delay`秒后触发。 |
+| **重复执行** | | |
+| `RaiseRepeating(float interval, int count)` | `ScheduleHandle` | 启动重复循环。将`count`设置为-1表示无限。 |
+| `RaiseRepeating(T arg, float interval, int count)` | `ScheduleHandle` | 启动重复类型化循环。 |
+| `RaiseRepeating(TSender s, TArgs a, float interval, int count)` | `ScheduleHandle` | 启动重复Sender循环。 |
+| **取消与控制** | | |
+| `Cancel()` | `void` | 停止此事件的任何**Inspector配置的**自动循环/延迟。 |
+| `CancelDelayed(ScheduleHandle handle)` | `bool` | 取消特定的手动延迟任务。如果成功则返回true。 |
+| `CancelRepeating(ScheduleHandle handle)` | `bool` | 取消特定的手动重复任务。如果成功则返回true。 |
+| `SetInspectorListenersActive(bool isActive)` | `void` | 在运行时静音或取消静音基于场景的`UnityEvent`监听器。 |
