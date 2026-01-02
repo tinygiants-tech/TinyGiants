@@ -1,150 +1,148 @@
 ﻿---
-sidebar_label: 'Advanced Logic Patterns'
+sidebar_label: '高级逻辑模式'
 sidebar_position: 4
 ---
 
-# Advanced Logic Patterns
+# 高级逻辑模式
 
-Moving beyond simple connections, this chapter dives into the **Runtime Architecture** of the Flow System.
+超越简单连接，本章深入探讨流程系统的**运行时架构**。
 
-Understanding *how* the system executes Triggers versus Chains, and how Node configurations interact with Event configurations, is the key to mastering complex game logic.
+理解系统*如何*执行触发器与链，以及节点配置如何与事件配置交互，是掌握复杂游戏逻辑的关键。
 
 ---
 
-## ⚙️ Core Mechanics: Trigger vs. Chain
+## ⚙️ 核心机制：触发器 vs 链
 
-In the Flow Graph, a connection isn't just a line; it's a **Transfer of Control**. The type of the *Target Node* determines how that control is handled.
+在流程图中，连接不仅仅是一条线；它是**控制权的转移**。*目标节点*的类型决定了如何处理该控制权。
 
-| Feature             | 🟠 Trigger Node                           | 🟢 Chain Node                                          |
+| 特性 | 🟠 触发器节点 | 🟢 链节点 |
 | :------------------ | :--------------------------------------- | :---------------------------------------------------- |
-| **Execution Mode**  | **Parallel (Fan-Out)**                   | **Serial (Sequence)**                                 |
-| **Blocking?**       | ❌ **Non-Blocking**                       | ✅ **Blocking**                                        |
-| **Technical Impl.** | `Fire-and-Forget`                        | `Coroutine Yield`                                     |
-| **Data Flow**       | Passes data to *all* children instantly. | Passes data to the *next* child only after finishing. |
+| **执行模式** | **并行（扇出）** | **串行（序列）** |
+| **阻塞？** | ❌ **非阻塞** | ✅ **阻塞** |
+| **技术实现** | `即发即弃` | `协程Yield` |
+| **数据流** | 立即将数据传递给*所有*子节点。 | 仅在完成后将数据传递给*下一个*子节点。 |
 
-### 1. The Trigger Mechanism (Parallel)
-When the flow enters a Trigger Node:
-1.  The system calculates the **Priority** of all connected Triggers.
-2.  It executes them one by one in a loop.
-3.  **Crucially**, it **does not wait** for a Trigger to finish its tasks before starting the next one.
-4.  *Result*: To the player, all effects (Sound, UI, Particles) appear to happen simultaneously in the same frame.
+### 1. 触发器机制（并行）
+当流程进入触发器节点时：
+1.  系统计算所有连接的触发器的**优先级**。
+2.  它在循环中逐个执行它们。
+3.  **关键是**，它**不会等待**触发器完成其任务就开始下一个。
+4.  *结果*：对玩家而言，所有效果（声音、UI、粒子）似乎在同一帧同时发生。
 
-### 2. The Chain Mechanism (Sequential)
-The Chain Node has a complex lifecycle designed for pacing. It holds the flow using **Two Layers of Delay**:
+### 2. 链机制（顺序）
+链节点具有为节奏设计的复杂生命周期。它使用**两层延迟**来保持流程：
 
-1.  **Pre-Execution**: Waits for `Start Delay`.
-2.  **Execution**: Raises the event.
-3.  **Post-Execution**: Waits for `Duration` OR `Wait For Completion`.
-4.  **Signal**: Only then does it fire the Next Node.
+1.  **执行前**：等待 `开始延迟`。
+2.  **执行**：触发事件。
+3.  **执行后**：等待 `持续时间` 或 `等待完成`。
+4.  **信号**：只有这样它才会触发下一个节点。
 
 ---
 
-## ⏱️ The Timeline of Execution
+## ⏱️ 执行时间线
 
-It is vital to understand how **Node Configuration** (Graph) interacts with **Event Configuration** (Inspector).
+理解**节点配置**（图表）如何与**事件配置**（Inspector）交互至关重要。
 
-### The "Double Delay" Rule
-If you configure a delay on the **Node** AND a delay on the **Event**, they are **Additive**.
-
+### "双重延迟"规则
+如果您在**节点**和**事件**上都配置了延迟，它们是**累加的**。
 ```
-Total Time to Action = Node Start Delay + Event Action Delay
+动作的总时间 = 节点开始延迟 + 事件动作延迟
 ```
 
-### Visual Timeline
-Here is the millisecond-by-millisecond breakdown of a single Chain Node execution:
-
+### 可视化时间线
+这是单个链节点执行的逐毫秒分解：
 ```text
-[Flow Enters Node]
+[流程进入节点]
       │
-      ├── 1. Node Condition Check (Graph Layer)
-      │      🛑 If False: STOP.
+      ├── 1. 节点条件检查（图表层）
+      │      🛑 如果为False: 停止。
       │
-      ├── 2. Node Start Delay (Graph Layer) ⏱️
-      │      ⏳ Waiting...
+      ├── 2. 节点开始延迟（图表层）⏱️
+      │      ⏳ 等待中...
       │
-      ├── 3. Event Raised (Core Layer) 🚀
+      ├── 3. 事件触发（核心层）🚀
       │      │
-      │      ├── a. Event Condition Check (Inspector Layer)
-      │      │      🛑 If False: Skip Actions (But flow continues!)
+      │      ├── a. 事件条件检查（Inspector层）
+      │      │      🛑 如果为False: 跳过动作（但流程继续！）
       │      │
-      │      ├── b. Event Action Delay (Inspector Layer) ⏱️
-      │      │      ⏳ Waiting...
+      │      ├── b. 事件动作延迟（Inspector层）⏱️
+      │      │      ⏳ 等待中...
       │      │
-      │      └── c. UnityActions Invoke (Game Logic) 🎬
-      │             (e.g., Play Animation, Subtract Health)
+      │      └── c. UnityActions调用（游戏逻辑）🎬
+      │             (例如，播放动画、减少生命值)
       │
-      ├── 4. Node Duration / Wait (Graph Layer) ⏳
-      │      🛑 Flow is BLOCKED here.
-      │      (Waits for Duration seconds OR Async Completion)
+      ├── 4. 节点持续时间/等待（图表层）⏳
+      │      🛑 流程在这里被阻塞。
+      │      (等待持续时间秒数或异步完成)
       │
-      └── 5. Signal Next Node ⏭️
+      └── 5. 信号下一个节点 ⏭️
 ```
 
-:::warning Architecture Nuance
+:::warning 架构细节
 
-- **Event Conditions** only stop the *local side effects* (Action c). They **DO NOT** stop the Flow Graph from proceeding to step 4 and 5.
-- To stop the Flow Graph logic, you must use **Node Conditions** (Step 1).
+- **事件条件**仅停止*本地副作用*（动作c）。它们**不会**阻止流程图继续执行步骤4和5。
+- 要停止流程图逻辑，您必须使用**节点条件**（步骤1）。
 
 :::
 
 ------
 
-## 🛠️ Cookbook: Real-World Design Patterns
+## 🛠️ 食谱：真实世界设计模式
 
-Here are the standard architectural patterns for solving common game development problems.
+这里是解决常见游戏开发问题的标准架构模式。
 
-### 1. The "Cinematic" Pattern (Cutscene)
+### 1. "电影"模式（过场动画）
 
-**Goal**: A strictly timed sequence of events.
-**Scenario**: Camera moves -> Door opens -> Character walks in -> Dialog starts.
+**目标**：严格定时的事件序列。
+**场景**：相机移动 -> 门打开 -> 角色走进 -> 对话开始。
 
 ![alt text](/img/game-event-system/flow-graph/advanced-logic-patterns/pattern-cinematic.png)
 
-- **Structure**: Root ➔ Chain ➔ Chain ➔ Chain.
-- **Configuration**:
-  - Use **Chain Nodes (🟢)** for every step.
-  - Use **Node Duration (⏳)** to pace the sequence.
-    - *Example*: If "Door Open Anim" takes 2.0s, set the Node Duration to 2.0 to ensure the character doesn't walk through a closed door.
+- **结构**：根 ➔ 链 ➔ 链 ➔ 链。
+- **配置**：
+  - 对每个步骤使用**链节点（🟢）**。
+  - 使用**节点持续时间（⏳）**来控制序列节奏。
+    - *示例*：如果"门打开动画"需要2.0秒，将节点持续时间设置为2.0以确保角色不会穿过关闭的门。
 
-### 2. The "Broadcaster" Pattern (Player Death)
+### 2. "广播器"模式（玩家死亡）
 
-**Goal**: One state change triggering multiple independent systems.
-**Scenario**: Player dies. You need to: Play Sound, Show Game Over UI, Spawn Ragdoll, Save Game.
+**目标**：一个状态变化触发多个独立系统。
+**场景**：玩家死亡。您需要：播放声音、显示游戏结束UI、生成布娃娃、保存游戏。
 
 ![alt text](/img/game-event-system/flow-graph/advanced-logic-patterns/pattern-broadcaster.png)
 
-- **Structure**: Root ➔ Multiple Triggers.
-- **Configuration**:
-  - **Root**: OnPlayerDeath.
-  - **Children**: 4 separate **Trigger Nodes (🟠)**.
-  - **Why**: If the "Save Game" system hangs or errors out, you don't want it to block the "Game Over UI" from appearing. Parallel execution ensures safety.
+- **结构**：根 ➔ 多个触发器。
+- **配置**：
+  - **根**：OnPlayerDeath。
+  - **子节点**：4个单独的**触发器节点（🟠）**。
+  - **为什么**：如果"保存游戏"系统挂起或出错，您不希望它阻止"游戏结束UI"出现。并行执行确保安全性。
 
-### 3. The "Hybrid Boss" Pattern (Complex State)
+### 3. "混合Boss"模式（复杂状态）
 
-**Goal**: Complex AI phase transition.
-**Scenario**: Boss enters Phase 2. He roars (animation), AND SIMULTANEOUSLY the music changes and the arena turns red. WHEN the roar finishes, he starts attacking.
+**目标**：复杂的AI阶段转换。
+**场景**：Boss进入第2阶段。他咆哮（动画），同时音乐改变，竞技场变红。当咆哮结束时，他开始攻击。
 
 ![alt text](/img/game-event-system/flow-graph/advanced-logic-patterns/pattern-hybrid.png)
 
-- **Structure**:
-  1. Root (OnHealthThreshold).
-  2. **Chain Node** (BossRoarAnim) with **Wait For Completion** checked (or Duration set to anim length).
-  3. **Trigger Node** (MusicChange) attached to the Root (Parallel to Roar).
-  4. **Trigger Node** (ArenaColorChange) attached to the Root (Parallel to Roar).
-  5. **Chain Node** (StartAttack) attached to the BossRoarAnim node.
-- **Flow**:
-  - Music and Color happen *immediately* alongside the Roar.
-  - The StartAttack waits until the Roar Chain Node is fully finished (Step 4 in Timeline).
+- **结构**：
+  1. 根（OnHealthThreshold）。
+  2. **链节点**（BossRoarAnim），勾选**等待完成**（或将持续时间设置为动画长度）。
+  3. **触发器节点**（MusicChange）附加到根（与咆哮并行）。
+  4. **触发器节点**（ArenaColorChange）附加到根（与咆哮并行）。
+  5. **链节点**（StartAttack）附加到BossRoarAnim节点。
+- **流程**：
+  - 音乐和颜色与咆哮同时*立即*发生。
+  - StartAttack等待直到咆哮链节点完全完成（时间线中的步骤4）。
 
 ------
 
-## 🎯 Summary: When to use what?
+## 🎯 总结：何时使用什么？
 
-| Requirement                        | Use Node Type        | Why?                                             |
+| 需求 | 使用节点类型 | 为什么？ |
 | ---------------------------------- | -------------------- | ------------------------------------------------ |
-| **"Do X, then do Y"**              | **Chain (🟢)**        | Guarantees order via blocking.                   |
-| **"Do X, Y, and Z all at once"**   | **Trigger (🟠)**      | Fire-and-forget. Parallel execution.             |
-| **"If HP < 0, do X"**              | **Node Condition**   | Stops the flow logic entirely.                   |
-| **"Only play sound if not muted"** | **Event Condition**  | Stops the side effect, keeps flow logic running. |
-| **"Wait before doing X"**          | **Node Start Delay** | Delays the event raise.                          |
-| **"Wait after X before doing Y"**  | **Node Duration**    | (Chain Only) Delays the next node signal.        |
+| **"先做X，然后做Y"** | **链（🟢）** | 通过阻塞保证顺序。 |
+| **"同时做X、Y和Z"** | **触发器（🟠）** | 即发即弃。并行执行。 |
+| **"如果HP < 0，做X"** | **节点条件** | 完全停止流程逻辑。 |
+| **"仅在未静音时播放声音"** | **事件条件** | 停止副作用，保持流程逻辑运行。 |
+| **"在做X之前等待"** | **节点开始延迟** | 延迟事件触发。 |
+| **"在X之后等待再做Y"** | **节点持续时间** | （仅链）延迟下一个节点信号。 |

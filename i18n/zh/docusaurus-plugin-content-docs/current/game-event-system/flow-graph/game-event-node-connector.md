@@ -1,61 +1,60 @@
 ﻿---
-sidebar_label: 'Connection Types & Ports'
+sidebar_label: '连接类型与端口'
 sidebar_position: 2
 ---
 
 
 
-# Connection Types & Ports
+# 连接类型与端口
 
-Before building flows, you must understand the **visual language** of the graph. Every color, shape, and line style communicates data flow and execution behavior.
+在构建流程之前，您必须理解图表的**可视化语言**。每种颜色、形状和线条样式都传达了数据流和执行行为。
 
-:::tip Quick Reference
-The legend shown here is also available in the **Flow Editor** (right-side panel). mouse hover anywhere in the legend to see detailed tooltips.
+:::tip 快速参考
+此处显示的图例也可在**流程编辑器**（右侧面板）中找到。将鼠标悬停在图例的任何位置以查看详细工具提示。
 :::
 
 ---
 
-## 🧬 Node Types
+## 🧬 节点类型
 
-A node's **header color** indicates its execution pattern.
+节点的**标题颜色**表示其执行模式。
 
 ![Node Types](/img/game-event-system/flow-graph/game-event-node-connector/node-anatomy.png)
 
-### Execution Patterns
+### 执行模式
 
-| Color        | Type             | Behavior                                                     | Use Case                                          |
+| 颜色 | 类型 | 行为 | 使用场景 |
 | ------------ | ---------------- | ------------------------------------------------------------ | ------------------------------------------------- |
-| 🔴 **Red**    | **Root Node**    | **Entry Point** - Fires when event is raised externally      | Game start, player input, collision detection     |
-| 🟠 **Orange** | **Trigger Node** | **Parallel (Fan-Out)** - Fires and immediately continues (non-blocking) | Sound + VFX + UI updates happening simultaneously |
-| 🟢 **Green**  | **Chain Node**   | **Sequential (Blocking)** - Fires and waits before continuing | Cutscenes, delayed actions, async operations      |
+| 🔴 **红色** | **根节点** | **入口点** - 外部触发事件时触发 | 游戏开始、玩家输入、碰撞检测 |
+| 🟠 **橙色** | **触发器节点** | **并行（扇出）** - 触发后立即继续（非阻塞） | 声音 + VFX + UI更新同时发生 |
+| 🟢 **绿色** | **链节点** | **顺序（阻塞）** - 触发后等待再继续 | 过场动画、延迟动作、异步操作 |
 
 ---
 
-### Root Node Rules
+### 根节点规则
 
-**One Per Graph**: Each graph has exactly **one** root node.
+**每个图一个**：每个图表只有**一个**根节点。
 
-**Set Root**: Right-click any node to **Set as Root** to change entry point.
+**设置根**：右键点击任何节点以**设置为根**来更改入口点。
 
-**Visual**: Red header gradient makes it instantly recognizable.
+**可视化**：红色标题渐变使其立即可识别。
 
 ---
 
-### Trigger vs Chain
+### 触发器 vs 链
 
-**Trigger Pattern** (Parallel):
-
+**触发器模式**（并行）：
 ```mermaid
 graph TD
 
     classDef event fill:#1e40af,stroke:#0f172a,stroke-width:2px,color:#ffffff,font-weight:bold
     classDef sideEffect fill:#0f766e,stroke:#042f2e,stroke-width:2px,color:#ffffff
     
-    A("⚡ On Player Death"):::event
+    A("⚡ 玩家死亡"):::event
     
-    B("🔊 Play Sound Effect"):::sideEffect
-    C("🎁 Spawn Particle VFX"):::sideEffect
-    D("📱 Show Victory UI"):::sideEffect
+    B("🔊 播放音效"):::sideEffect
+    C("🎁 生成粒子VFX"):::sideEffect
+    D("📱 显示胜利UI"):::sideEffect
 
     A --- B
     A --- C
@@ -64,14 +63,13 @@ graph TD
     linkStyle default stroke:#94a3b8,stroke-width:2px
 ```
 
-:::info Triggers
+:::info 触发器
 
-All executed in parallel together!
+全部并行一起执行！
 
 :::
 
-**Chain Pattern** (Sequential):
-
+**链模式**（顺序）：
 ```mermaid
 graph LR
 
@@ -79,12 +77,12 @@ graph LR
     classDef action fill:#0f766e,stroke:#042f2e,stroke-width:2px,color:#ffffff
     classDef delay fill:#b45309,stroke:#78350f,stroke-width:2px,color:#ffffff,font-style:italic
 
-    A("🚩 Start Cutscene"):::event
-    B("🗔 Wait for Dialogue"):::action
-    C(["⏱ Delay 3.0s"]):::delay
-    D("🎬 Show Next Act<br/>───<br/><sub>Wait for Finish</sub>"):::action
-    E(["⏱ Delay 1.0s"]):::delay
-    F("🎞️ Fade Out"):::action
+    A("🚩 开始过场动画"):::event
+    B("🗔 等待对话"):::action
+    C(["⏱ 延迟3.0s"]):::delay
+    D("🎬 显示下一幕<br/>───<br/><sub>等待完成</sub>"):::action
+    E(["⏱ 延迟1.0s"]):::delay
+    F("🎞️ 淡出"):::action
 
     A --> B
     B --> C
@@ -95,102 +93,101 @@ graph LR
     linkStyle default stroke:#94a3b8,stroke-width:2px
 ```
 
-:::info Chains
+:::info 链
 
-Each waits for the previous to finish!
+每个都等待前一个完成！
 
 :::
 
 ---
 
-## 🔌 Port Types (Data Signatures)
+## 🔌 端口类型（数据签名）
 
-**Port colors** indicate the C# event signature and data payload.
+**端口颜色**表示C#事件签名和数据有效载荷。
 
 ![Port Colors](/img/game-event-system/flow-graph/game-event-node-connector/node-ports.png)
 
-### Port Color Meanings
+### 端口颜色含义
 
-| Color        | Signature          | Description                            | Example Events                                |
+| 颜色 | 签名 | 描述 | 示例事件 |
 | ------------ | ------------------ | -------------------------------------- | --------------------------------------------- |
-| 🔵 **Cyan**   | `()`               | **Void** - No data passed              | `OnGameStart`, `OnButtonClick`                |
-| 🌸 **Pink**   | `<T>`              | **Single Argument** - One data payload | `OnScoreChanged(int)`, `OnDamage(DamageInfo)` |
-| 💜 **Purple** | `<TSender, TArgs>` | **Dual Arguments** - Sender + Payload  | `OnPlayerDamaged(GameObject, DamageInfo)`     |
+| 🔵 **青色** | `()` | **Void** - 不传递数据 | `OnGameStart`、`OnButtonClick` |
+| 🌸 **粉色** | `<T>` | **单参数** - 一个数据有效载荷 | `OnScoreChanged(int)`、`OnDamage(DamageInfo)` |
+| 💜 **紫色** | `<TSender, TArgs>` | **双参数** - Sender + 有效载荷 | `OnPlayerDamaged(GameObject, DamageInfo)` |
 
 ---
 
-### Port Anatomy
+### 端口解剖
 
-- **Left Port** (Input): Receives data from previous node.
-- **Right Port** (Output): Sends data to next node.
+- **左端口**（输入）：从前一个节点接收数据。
+- **右端口**（输出）：将数据发送到下一个节点。
 
-## 🔗 Connection Compatibility
+## 🔗 连接兼容性
 
-The system provides **real-time type safety** when creating connections.
+系统在创建连接时提供**实时类型安全**。
 
 ![Connection Colors](/img/game-event-system/flow-graph/game-event-node-connector/node-connection.png)
 
-### Compatibility Levels
+### 兼容性级别
 
-| Color        | Status            | Meaning                          | Impact                            |
+| 颜色 | 状态 | 含义 | 影响 |
 | ------------ | ----------------- | -------------------------------- | --------------------------------- |
-| 🟢 **Green**  | **Perfect Match** | Types match exactly              | Zero overhead, no conversion      |
-| 🟡 **Yellow** | **Compatible**    | Safe operation with data discard | Arguments ignored, no errors      |
-| 🟠 **Orange** | **Warning**       | Type conversion required         | Auto-converts (e.g., int → float) |
-| 🔴 **Red**    | **Incompatible**  | Will fail at runtime             | Connection blocked                |
+| 🟢 **绿色** | **完美匹配** | 类型完全匹配 | 零开销，无转换 |
+| 🟡 **黄色** | **兼容** | 安全操作，数据丢弃 | 参数被忽略，无错误 |
+| 🟠 **橙色** | **警告** | 需要类型转换 | 自动转换（例如，int → float） |
+| 🔴 **红色** | **不兼容** | 运行时将失败 | 连接被阻止 |
 
 ---
 
-### Visual Feedback
+### 视觉反馈
 
-**While Dragging**:
-- Preview line shows compatibility color
-- Invalid targets appear dimmed
-- Valid targets highlight
+**拖动时**：
+- 预览线显示兼容性颜色
+- 无效目标显示为暗淡
+- 有效目标高亮显示
 
-**After Connection**:
-- Line color persists
-- Warning icon (⚠️) appears for Orange/Red
-- Hover for detailed tooltip
+**连接后**：
+- 线条颜色保持
+- 橙色/红色出现警告图标（⚠️）
+- 悬停查看详细工具提示
 
 ---
 
-## 📊 Compatibility Matrix
+## 📊 兼容性矩阵
 
-Connection color is determined by **Source Type**, **Target Type**, and **Pass Argument** setting.
+连接颜色由**源类型**、**目标类型**和**传递参数**设置决定。
 
-### Full Compatibility Table
+### 完整兼容性表
 
-| Source Event | Target Event | Pass Argument | Result   | Explanation                                     |
+| 源事件 | 目标事件 | 传递参数 | 结果 | 说明 |
 | ------------ | ------------ | ------------- | -------- | ----------------------------------------------- |
-| Any          | Any          | **OFF**       | 🟢 Green  | **Override**: Target ignores all input          |
-| Void `()`    | Void `()`    | ON            | 🟢 Green  | Perfect match - no data needed                  |
-| Void `()`    | `<T>`        | ON            | 🔴 Red    | **Error**: Target needs data, source has none   |
-| Void `()`    | `<S,T>`      | ON            | 🔴 Red    | **Error**: Target needs sender, source has none |
-| `<T>`        | Void `()`    | ON            | 🟡 Yellow | **Safe**: Argument discarded                    |
-| `<T>`        | `<T>`        | ON            | 🟢 Green  | Perfect match - same type                       |
-| `<T>`        | `<S,T>`      | ON            | 🔴 Red    | **Error**: Target needs sender, source has none |
-| `<S,T>`      | Void `()`    | ON            | 🟡 Yellow | **Safe**: Both sender & arg discarded           |
-| `<S,T>`      | `<T>`        | ON            | 🟡 Yellow | **Safe**: Sender discarded, arg passes          |
-| `<S,T>`      | `<S,T>`      | ON            | 🟢 Green  | Perfect match - sender + arg                    |
-| `<T1>`       | `<T2>`       | ON            | 🟠 Orange | **Warning**: Type conversion (int ↔ float)      |
+| 任何 | 任何 | **关** | 🟢 绿色 | **覆盖**：目标忽略所有输入 |
+| Void `()` | Void `()` | 开 | 🟢 绿色 | 完美匹配 - 不需要数据 |
+| Void `()` | `<T>` | 开 | 🔴 红色 | **错误**：目标需要数据，源没有 |
+| Void `()` | `<S,T>` | 开 | 🔴 红色 | **错误**：目标需要sender，源没有 |
+| `<T>` | Void `()` | 开 | 🟡 黄色 | **安全**：参数丢弃 |
+| `<T>` | `<T>` | 开 | 🟢 绿色 | 完美匹配 - 相同类型 |
+| `<T>` | `<S,T>` | 开 | 🔴 红色 | **错误**：目标需要sender，源没有 |
+| `<S,T>` | Void `()` | 开 | 🟡 黄色 | **安全**：sender和arg都丢弃 |
+| `<S,T>` | `<T>` | 开 | 🟡 黄色 | **安全**：sender丢弃，arg传递 |
+| `<S,T>` | `<S,T>` | 开 | 🟢 绿色 | 完美匹配 - sender + arg |
+| `<T1>` | `<T2>` | 开 | 🟠 橙色 | **警告**：类型转换（int ↔ float） |
 
 ---
 
-### Special Cases
+### 特殊情况
 
-**Pass Argument = OFF**:
+**传递参数 = 关**：
 
-Always results in 🟢 **Green** connection because target ignores all input data.
+始终产生🟢 **绿色**连接，因为目标忽略所有输入数据。
 
-**Use Case**: Chain a typed event to a void event without type errors.
-
+**使用场景**：将类型化事件链接到void事件而无类型错误。
 ```mermaid
 graph LR
 
-    subgraph Title ["<span style='color:#10b981'>✅ Result: Safe Connection</span>"]
+    subgraph Title ["<span style='color:#10b981'>✅ 结果: 安全连接</span>"]
         direction LR
-        A("🔢 OnScoreChanged(int)"):::event --> B(["⚙️ Pass Argument: OFF"]):::setting
+        A("🔢 OnScoreChanged(int)"):::event --> B(["⚙️ 传递参数: 关"]):::setting
         B --> C("🔄 OnGenericUpdate()"):::action
     end
 
@@ -205,188 +202,188 @@ graph LR
 
 ---
 
-**Numeric Conversions**:
+**数值转换**：
 
-Auto-converts between compatible numeric types (🟠 Orange):
+在兼容的数值类型之间自动转换（🟠 橙色）：
 - `int` ↔ `float`
 - `float` ↔ `double`
 - `int` ↔ `long`
 
-**Warning**: May lose precision (e.g., `float` 3.14 → `int` 3).
+**警告**：可能丢失精度（例如，`float` 3.14 → `int` 3）。
 
 ---
 
-**Incompatible Types**:
+**不兼容类型**：
 
-Blocked at connection time (🔴 Red):
+在连接时被阻止（🔴 红色）：
 - `string` → `int`
 - `GameObject` → `float`
-- Custom type mismatches
+- 自定义类型不匹配
 
-**System prevents creation** of these connections.
+**系统阻止创建**这些连接。
 
 ---
 
-## 🏷️ Status Badges
+## 🏷️ 状态徽章
 
-Badges appear at the **bottom of nodes** to show active configuration.
+徽章出现在**节点底部**以显示活动配置。
 
 ![Node Badges](/img/game-event-system/flow-graph/game-event-node-connector/node-status.png)
 
-### Badge Reference
+### 徽章参考
 
-| Icon | Badge      | Meaning                         | Applies To   |
+| 图标 | 徽章 | 含义 | 适用于 |
 | ---- | ---------- | ------------------------------- | ------------ |
-| 🧩    | **Cond**   | Visual condition tree active    | All nodes    |
-| ⏱️    | **2.5s**   | Start delay (seconds)           | All nodes    |
-| ⏳    | **3.0s**   | Blocking duration (seconds)     | Chain only   |
-| ⚓    | **Wait**   | Wait for async completion       | Chain only   |
-| ⬆️    | **+5**     | Execution priority              | Trigger only |
-| 🔗    | **Pass**   | Passing arguments to next node  | All nodes    |
-| 📌    | **Static** | Arguments blocked (static call) | All nodes    |
+| 🧩 | **Cond** | 可视化条件树活动 | 所有节点 |
+| ⏱️ | **2.5s** | 开始延迟（秒） | 所有节点 |
+| ⏳ | **3.0s** | 阻塞持续时间（秒） | 仅链 |
+| ⚓ | **Wait** | 等待异步完成 | 仅链 |
+| ⬆️ | **+5** | 执行优先级 | 仅触发器 |
+| 🔗 | **Pass** | 将参数传递给下一个节点 | 所有节点 |
+| 📌 | **Static** | 参数被阻止（静态调用） | 所有节点 |
 
 ---
 
-### Badge Examples
+### 徽章示例
 
-**Chain Node with Delay + Duration**:
+**带延迟 + 持续时间的链节点**：
 ```
-⏱️ 1.0s   ← Wait 1 second before starting
-⏳ 3.0s   ← Then block for 3 seconds
-```
-
-**Trigger Node with Condition + Priority**:
-```
-🧩 Cond   ← Only fires if condition passes
-⬆️ +10    ← Executes before other triggers
+⏱️ 1.0s   ← 开始前等待1秒
+⏳ 3.0s   ← 然后阻塞3秒
 ```
 
-**Any Node with Argument Passing**:
+**带条件 + 优先级的触发器节点**：
 ```
-🔗 Pass   ← Forwards event data to next node
+🧩 Cond   ← 仅在条件通过时触发
+⬆️ +10    ← 在其他触发器之前执行
+```
+
+**带参数传递的任何节点**：
+```
+🔗 Pass   ← 将事件数据转发到下一个节点
 ```
 
 ---
 
-## 🎨 Visual Examples
+## 🎨 可视化示例
 
-### Example 1: Perfect Match Chain
+### 示例1：完美匹配链
 
 ![Node Perfect Match](/img/game-event-system/flow-graph/game-event-node-connector/node-perfect-match.png)
 
-**Colors**:
+**颜色**：
 
-- Line 1: 🟢 Green (perfect match)
-- Line 2: 🟡 Yellow (sender discarded safely)
+- 线1：🟢 绿色（完美匹配）
+- 线2：🟡 黄色（sender安全丢弃）
 
 ---
 
-### Example 2: Type Conversion Warning
+### 示例2：类型转换警告
 
 ![Node Compatible](/img/game-event-system/flow-graph/game-event-node-connector/node-compatible.png)
 
-**Color**: 🟠 Orange (int → float conversion)
+**颜色**：🟠 橙色（int → float转换）
 
-**Risk**: Precision change, but works
+**风险**：精度变化，但有效
 
 ---
 
-### Example 3: Pass Argument
+### 示例3：传递参数
 
 ![Node Compatible](/img/game-event-system/flow-graph/game-event-node-connector/node-pass-arg.png)
 
-**Colors**: 🟢 Green (void → int)
+**颜色**：🟢 绿色（void → int）
 
-**No-Blocking:** ignore argument to match
+**无阻塞：** 忽略参数以匹配
 
 ------
 
-### Example 4: Parallel Trigger Fan-Out
+### 示例4：并行触发器扇出
 
 ![Node Compatible](/img/game-event-system/flow-graph/game-event-node-connector/node-trigger.png)
 
-**All connections:** Green (void → void), executing immediately in parallel
+**所有连接：** 绿色（void → void），立即并行执行
 
 ---
 
-## 💡 Best Practices
+## 💡 最佳实践
 
-### Use Pass Argument Wisely
+### 明智使用传递参数
 
-**When to Pass (ON)**:
-- Next node needs the event data
-- Building data pipelines
-- Forwarding damage info, scores, etc.
+**何时传递（开启）**：
+- 下一个节点需要事件数据
+- 构建数据管道
+- 转发伤害信息、分数等
 
-**When to Block (OFF)**:
-- Connecting incompatible types
-- Generic notifications (no data needed)
-- Simplifying complex type chains
-
----
-
-### Color-Code Your Flows
-
-**Green-Heavy Graphs**: Well-typed.
-
-**Yellow Connections**: Acceptable when intentionally discarding data.
-
-**Orange Lines**: Review for correctness—ensure conversions are intentional.
-
-**Red Blocks**: Fix immediately—will fail at runtime.
+**何时阻止（关闭）**：
+- 连接不兼容的类型
+- 通用通知（不需要数据）
+- 简化复杂类型链
 
 ---
 
-### Organize by Type
+### 为流程进行颜色编码
 
-**Group similar signature nodes** together:
-- Void events in one area
-- Data events in another
-- Async chains separate from triggers
+**绿色为主的图表**：类型良好。
 
-**Why**: Makes type compatibility easier to visualize.
+**黄色连接**：有意丢弃数据时可以接受。
 
----
+**橙色线条**：检查正确性——确保转换是有意的。
 
-## ❓ Common Questions
-
-### Why is my connection red?
-
-**Cause**: Type mismatch that cannot be resolved.
-
-**Fix**: 
-1. Check if target needs sender but source doesn't provide it
-2. Disable "Pass Argument" on target node
-3. Insert intermediate conversion node
+**红色块**：立即修复——运行时将失败。
 
 ---
 
-### Can I connect different numeric types?
+### 按类型组织
 
-**Yes**: The system auto-converts `int`, `float`, `double`, `long`.
+**将相似签名节点分组**在一起：
+- Void事件在一个区域
+- 数据事件在另一个区域
+- 异步链与触发器分开
 
-**Result**: 🟠 Orange connection with conversion warning.
-
-**Caution**: Watch for precision loss (float → int).
+**为什么**：使类型兼容性更容易可视化。
 
 ---
 
-### What does yellow mean?
+## ❓ 常见问题
 
-**Meaning**: Safe connection with **data discard**.
+### 为什么我的连接是红色的？
 
-**Example**: Sending `<int>` to `<void>` discards the integer.
+**原因**：无法解决的类型不匹配。
 
-**Safe?**: Yes—no runtime errors, just unused data.
+**修复**：
+1. 检查目标是否需要sender但源不提供
+2. 在目标节点上禁用"传递参数"
+3. 插入中间转换节点
 
-:::tip Quick Legend Access
+---
 
-While working in the Flow Graph Editor, the **Legend Panel** (right side) shows all node types, port colors, and connection meanings. Hover over any legend item for detailed tooltips.
+### 我可以连接不同的数值类型吗？
+
+**可以**：系统自动转换`int`、`float`、`double`、`long`。
+
+**结果**：🟠 橙色连接，带转换警告。
+
+**注意**：注意精度损失（float → int）。
+
+---
+
+### 黄色是什么意思？
+
+**含义**：安全连接，但**数据丢弃**。
+
+**示例**：将`<int>`发送到`<void>`会丢弃整数。
+
+**安全吗？**：是——无运行时错误，只是未使用的数据。
+
+:::tip 快速访问图例
+
+在流程图编辑器中工作时，**图例面板**（右侧）显示所有节点类型、端口颜色和连接含义。将鼠标悬停在任何图例项上以获取详细工具提示。
 
 :::
 
-:::warning Runtime Errors
+:::warning 运行时错误
 
-🔴 **Red connections** are blocked during creation to prevent runtime crashes. If you need to connect incompatible types, disable "Pass Argument" on the target node—this forces a 🟢 Green connection by ignoring input data.
+🔴 **红色连接**在创建期间被阻止以防止运行时崩溃。如果您需要连接不兼容的类型，请在目标节点上禁用"传递参数"——这通过忽略输入数据强制🟢 绿色连接。
 
 :::

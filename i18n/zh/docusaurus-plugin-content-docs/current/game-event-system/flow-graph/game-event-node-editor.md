@@ -1,537 +1,557 @@
 ﻿---
-sidebar_label: 'Edit Flow Graph'
+sidebar_label: '编辑流程图'
 sidebar_position: 1
 ---
 
-# Game Event Node Editor
+# 游戏事件节点编辑器
 
-The **Node Editor** is a visual orchestration tool that solves the "spaghetti code" problem by displaying complex event dependencies in a single, readable graph.
+**节点编辑器**是一个可视化编排工具，通过在单个可读图表中显示复杂的事件依赖关系来解决"意大利面条代码"问题。
 
-Instead of hunting through scattered scripts to understand *why* an event fired, you simply look at the flow graph.
+您只需查看流程图，而不是在分散的脚本中寻找以了解事件*为什么*触发。
 
 ![Flow Graph Editor Overview](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-editor-overview.png)
 
 ---
 
-## 🎯 Design Philosophy
+## 🎯 设计理念
 
-Traditional Unity events are "fire and forget"—great for decoupling, but terrible for debugging sequences.
+传统的Unity事件是"即发即弃"——非常适合解耦，但对于调试序列来说很糟糕。
 
-The Flow Graph introduces **two powerful execution patterns**:
+流程图引入了**两种强大的执行模式**：
 
-| Pattern               | Execution    | Behavior                                                     | Use Case                                                     |
+| 模式 | 执行 | 行为 | 使用场景 |
 | --------------------- | ------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| **Trigger** (Fan-Out) | **Parallel** | Non-blocking. One event fires multiple others simultaneously | "OnPlayerDeath" → Play Sound + Spawn Particles + Show UI     |
-| **Chain** (Sequence)  | **Serial**   | Blocking. Events fire one after another with delays          | "StartCutscene" → (Wait 2s) → "ShowDialog" → (Wait Input) → "EndCutscene" |
+| **触发器**（扇出） | **并行** | 非阻塞。一个事件同时触发多个其他事件 | "OnPlayerDeath" → 播放声音 + 生成粒子 + 显示UI |
+| **链**（序列） | **串行** | 阻塞。事件一个接一个地触发，带有延迟 | "StartCutscene" → (等待2秒) → "ShowDialog" → (等待输入) → "EndCutscene" |
 
-**🎯 Triggers (Fan-Out)**
+**🎯 触发器（扇出）**
 
 ![Flow Graph Editor Overview](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-trigger.png)
 
-⛓️ Chains (Sequential)
+**⛓️ 链（顺序）**
 
 ![Flow Graph Editor Overview](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-chain.png)
 
-By combining these patterns, you build logic that is both **decoupled** and **structured**.
+通过组合这些模式，您可以构建既**解耦**又**结构化**的逻辑。
 
 ---
 
-## 🚀 Opening the Editor
+## 🚀 打开编辑器
 
-Access the Flow Graph Editor from the **[Game Event Editor](../visual-workflow/game-event-editor.md)**
+从**[游戏事件编辑器](../visual-workflow/game-event-editor.md)**访问流程图编辑器
 ```
-Game Event Editor → Click "Flow Graph" button in toolbar
+游戏事件编辑器 → 点击工具栏中的"Flow Graph"按钮
 ```
 
-This ensures you're working within the correct event library context.
+这确保您在正确的事件库上下文中工作。
 
 ---
 
-## 🛠️ Toolbar Overview
+## 🛠️ 工具栏概览
 
-The toolbar manages flow graph assets and global settings.
+工具栏管理流程图资产和全局设置。
 
 ![Flow Graph Editor Overview](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-toolbar.png)
 
-### Flow Asset Dropdown
+### 流程资产下拉菜单
 
-Switch between different Flow Graph assets (e.g., `Global_Flow`, `Level_1_Flow`).
+在不同的流程图资产之间切换（例如，`Global_Flow`、`Level_1_Flow`）。
 
-**Graph content updates instantly** when switching.
+切换时**图表内容立即更新**。
 
-:::tip Asset Organization
-Create separate flow graphs for different game systems to keep logic clean and maintainable. Store graphs as sub-assets inside Flow Container assets.
+:::tip 资产组织
+为不同的游戏系统创建单独的流程图，以保持逻辑清晰和可维护。将图表作为子资产存储在流程容器资产中。
 :::
 
-### Graph Management
+### 图表管理
 
-**New Button** (`+ New`): Create new graph in current container.
+**新建按钮**（`+ New`）：在当前容器中创建新图表。
 
-**Graph Name Field**: Click to rename current graph.
+**图表名称字段**：点击重命名当前图表。
 
-**Delete Button**: Remove current graph (with confirmation).
+**删除按钮**：删除当前图表（需确认）。
 
-### Graph Controls
+### 图表控制
 
-**Snap Button** (`Snap`): Toggle grid snapping. When enabled, nodes will automatically snap to the 20-unit grid lines during movement, ensuring a perfectly organized layout.
+**对齐按钮**（`Snap`）：切换网格对齐。启用时，节点在移动期间会自动对齐到20单位网格线，确保完美组织的布局。
 
-**Align Button** (`Align`): Toggle smart alignment guides. When enabled, blue vertical or horizontal dotted lines appear when the node you are dragging aligns its edges (left, center, right) or midlines (top, center, bottom) with other nodes on the canvas.
+**对齐按钮**（`Align`）：切换智能对齐指南。启用时，当您拖动的节点的边缘（左、中、右）或中线（上、中、下）与画布上其他节点对齐时，会出现蓝色垂直或水平虚线。
 
-**Active Toggle** (🟢 / 🔴): Enable/disable entire graph at runtime.
+**活动切换**（🟢 / 🔴）：在运行时启用/禁用整个图表。
 
-**Refresh Button**: Reload container list from `GameEventManager`.
+**刷新按钮**：从`GameEventManager`重新加载容器列表。
 
-**Help Button** (`? Help`): Open Quick Reference Guide with all shortcuts and color codes.
+**帮助按钮**（`? Help`）：打开快速参考指南，包含所有快捷键和颜色代码。
 
 ![Flow Graph Editor Help](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-help.png)
 
 ---
 
-## 🖱️ Canvas Navigation
+## 🖱️ 画布导航
 
-The editor features an infinite zoomable canvas designed for large-scale logic graphs.
+编辑器具有为大规模逻辑图表设计的无限可缩放画布。
 
-### Basic Controls
+### 基本控制
 
-| Action           | Control           | Description                             |
+| 操作 | 控制 | 描述 |
 | ---------------- | ----------------- | --------------------------------------- |
-| **Pan View**     | Middle Mouse Drag | Move around the canvas                  |
-| **Zoom**         | Scroll Wheel      | Zoom in/out (centered on mouse cursor)  |
-| **Context Menu** | Right Click       | Add nodes or groups                     |
-| **Quick Create** | Double Click      | Open node creation menu on empty canvas |
+| **平移视图** | 鼠标中键拖动 | 在画布上移动 |
+| **缩放** | 滚轮 | 放大/缩小（以鼠标光标为中心） |
+| **上下文菜单** | 右键点击 | 添加节点或组 |
+| **快速创建** | 双击 | 在空画布上打开节点创建菜单 |
 
-**Zoom Range**: 0.2x - 3.0x (20% to 300%)
+**缩放范围**：0.2x - 3.0x（20%到300%）
 
-**Grid**: Minor lines every 20 units, major lines every 100 units. When **Snap** is enabled, nodes lock to the 20-unit minor grid lines.
+**网格**：次要线条每20个单位，主要线条每100个单位。启用**Snap**时，节点锁定到20单位次要网格线。
 
 ---
 
-## 🎯 Working with Nodes
+## 🎯 使用节点
 
-### Creating Nodes
+### 创建节点
 
 ![Flow Graph Editor Overview](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-basic-menu.png)
 
-| Action             | Control                | Description                      |
+| 操作 | 控制 | 描述 |
 | ------------------ | ---------------------- | -------------------------------- |
-| **Quick Create**   | Double Click Canvas    | Open node creation menu          |
-| **Context Menu**   | Right Click → Add Node | Create Trigger or Chain node     |
-| **From Selection** | Right Click Node       | Context menu for node operations |
+| **快速创建** | 双击画布 | 打开节点创建菜单 |
+| **上下文菜单** | 右键点击 → 添加节点 | 创建触发器或链节点 |
+| **从选择** | 右键点击节点 | 节点操作的上下文菜单 |
 
-**Node Types**:
-- **Trigger Node**: Parallel execution (fan-out pattern)
-- **Chain Node**: Sequential execution (sequence pattern)
+**节点类型**：
 
-### Node Selection
+- **触发器节点**：并行执行（扇出模式）
+- **链节点**：顺序执行（序列模式）
 
-| Action               | Control            | Description                                                  |
+### 节点选择
+
+| 操作 | 控制 | 描述 |
 | -------------------- | ------------------ | ------------------------------------------------------------ |
-| **Select Node**      | Left Click         | Select individual node                                       |
-| **Add to Selection** | Ctrl/Shift + Click | Toggle node in/out of selection                              |
-| **Box Select**       | Left Click + Drag  | Select all nodes in rectangle                                |
-| **Select All**       | Ctrl + A           | Select all nodes in graph                                    |
-| **Clear Selection**  | Escape             | Deselect everything                                          |
-| **Edit Node**        | Double Click Node  | Open [Node Behavior Configuration](./game-event-node-behavior.md) |
+| **选择节点** | 左键点击 | 选择单个节点 |
+| **添加到选择** | Ctrl/Shift + 点击 | 切换节点进/出选择 |
+| **框选** | 左键点击 + 拖动 | 选择矩形中的所有节点 |
+| **全选** | Ctrl + A | 选择图表中的所有节点 |
+| **清除选择** | Escape | 取消选择所有内容 |
+| **编辑节点** | 双击节点 | 打开[节点行为配置](./game-event-node-behavior.md) |
 
+### 移动节点
 
-
-### Moving Nodes
-
-| Action         | Control                    | Description                      |
+| 操作 | 控制 | 描述 |
 | -------------- | -------------------------- | -------------------------------- |
-| **Move Node**  | Left Drag                  | Move selected node               |
-| **Multi-Move** | Left Drag (with selection) | Move all selected nodes together |
+| **移动节点** | 左键拖动 | 移动选定的节点 |
+| **多重移动** | 左键拖动（带选择） | 一起移动所有选定的节点 |
 
-**Group Behavior**: When nodes belong to a group, moving them automatically updates the group bounds.
+**组行为**：当节点属于一个组时，移动它们会自动更新组边界。
 
-**Layout Assistants**:
+**布局助手**：
 
-*   **Grid Snapping**: When **Snap** is active, movement is locked to 20-pixel increments, matching the background grid.
-*   **Smart Alignment**: When **Align** is active, the editor provides visual feedback via blue dotted lines. It automatically detects alignment for:
-    *   **Vertical**: Left edges, horizontal centers, and right edges.
-    *   **Horizontal**: Top edges, vertical centers, and bottom edges.
+*   **网格对齐**：当**Snap**激活时，移动被锁定为20像素增量，与背景网格匹配。
+*   **智能对齐**：当**Align**激活时，编辑器通过蓝色虚线提供视觉反馈。它自动检测对齐：
+    *   **垂直**：左边缘、水平中心和右边缘。
+    *   **水平**：顶部边缘、垂直中心和底部边缘。
 
-### Node Context Menu
+### 节点上下文菜单
 
 ![Flow Graph Editor Overview](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-node-menu.png)
 
-Right-click on a node for quick actions:
+右键点击节点以进行快速操作：
 
-- **Edit Node**: Open [Behavior Configuration Window](./game-event-node-behavior.md)
-- **Copy Node**: Copy to clipboard
-- **Cut Node**: Copy and delete
-- **Delete Node**: Remove node and all connections
-- **Set as Root**: Mark as graph entry point
-- **Convert to Trigger/Chain**: Change node type
+- **编辑节点**：打开[行为配置窗口](./game-event-node-behavior.md)
+- **复制节点**：复制到剪贴板
+- **剪切节点**：复制并删除
+- **删除节点**：删除节点和所有连接
+- **设置为根**：标记为图表入口点
+- **转换为触发器/链**：更改节点类型
 
-### Multi-Selection Context Menu
+### 多选上下文菜单
 
 ![Flow Graph Editor Overview](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-multi-node-menu.png)
 
-When multiple nodes are selected, right-click shows:
+当选择多个节点时，右键点击显示：
 
-- **Copy N Node(s)**: Copy selection to clipboard
-- **Cut N Node(s)**: Copy and delete selection
-- **Delete N Node(s)**: Remove all selected nodes
-- **Create Group**: Create group from selected nodes (minimum 2 nodes required)
+- **复制N个节点**：将选择复制到剪贴板
+- **剪切N个节点**：复制并删除选择
+- **删除N个节点**：删除所有选定的节点
+- **创建组**：从选定的节点创建组（至少需要2个节点）
 
 ---
 
-## 🔗 Creating Connections
+## 🔗 创建连接
 
-Connections define event flow between nodes.
+连接定义节点之间的事件流。
 
-### Connection Operations
+### 连接操作
 
-| Action                  | Control                       | Description                               |
+| 操作 | 控制 | 描述 |
 | ----------------------- | ----------------------------- | ----------------------------------------- |
-| **Create Connection**   | Drag from Output Port (right) | Drag to Input Port (left) of another node |
-| **Re-route Connection** | Drag from Input Port          | Disconnect and connect to different node  |
-| **Delete Connection**   | Select + Delete               | Remove connection                         |
+| **创建连接** | 从输出端口（右）拖动 | 拖动到另一个节点的输入端口（左） |
+| **重新路由连接** | 从输入端口拖动 | 断开连接并连接到不同的节点 |
+| **删除连接** | 选择 + 删除 | 删除连接 |
 
-**Visual Feedback**: 
-- Preview line shows while dragging
-- Color indicates compatibility (see [Connection Types](./game-event-node-connector.md))
-- Invalid targets show as grayed out
+**视觉反馈**：
 
-**Connection Rules**:
-- Always drag from Output (right port) to Input (left port)
-- Root nodes have no input port
-- Nodes can have multiple incoming and outgoing connections
+- 拖动时显示预览线
+- 颜色表示兼容性（参见[连接类型](./game-event-node-connector.md)）
+- 无效目标显示为灰色
+
+**连接规则**：
+
+- 始终从输出（右端口）拖动到输入（左端口）
+- 根节点没有输入端口
+- 节点可以有多个传入和传出连接
 
 ---
 
-## 📁 Grouping System
+## 📁 分组系统
 
-Organize large graphs with visual groups to improve readability and maintainability.
+使用可视化组组织大型图表以提高可读性和可维护性。
 
 ![Flow Graph Groups](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-groups.png)
 
-### Creating Groups
+### 创建组
 
-**Method 1**: Select nodes → Right Click → **Create Group**
+**方法1**：选择节点 → 右键点击 → **创建组**
 
-**Method 2**: Use box select → Right Click selection → **Create Group**
+**方法2**：使用框选 → 右键点击选择 → **创建组**
 
-**Requirements**:
-- Minimum **2 nodes** required
-- Selected nodes will be grouped together
-- Group bounds calculated automatically from node positions
+**要求**：
 
-### Managing Groups
+- 至少需要**2个节点**
+- 选定的节点将被分组在一起
+- 根据节点位置自动计算组边界
 
-| Operation                | How To                   | Result                             |
+### 管理组
+
+| 操作 | 操作方法 | 结果 |
 | ------------------------ | ------------------------ | ---------------------------------- |
-| **Rename**               | Double-click group title | Enter edit mode (Escape to cancel) |
-| **Select Group**         | Left Click group area    | Select entire group                |
-| **Move Group**           | Drag group area          | Moves all member nodes together    |
-| **Delete Group Only**    | Delete key               | Removes group frame, keeps nodes   |
-| **Delete Group + Nodes** | Shift + Delete           | Removes group AND all nodes inside |
+| **重命名** | 双击组标题 | 进入编辑模式（Escape取消） |
+| **选择组** | 左键点击组区域 | 选择整个组 |
+| **移动组** | 拖动组区域 | 一起移动所有成员节点 |
+| **仅删除组** | Delete键 | 删除组框架，保留节点 |
+| **删除组 + 节点** | Shift + Delete | 删除组和内部所有节点 |
 
-**Visual Indicators**:
-- Selected groups: Brighter border + highlighted title
-- Group titles: Display in bottom-right corner of group bounds
-- Group bounds: Semi-transparent rounded rectangle
+**视觉指示器**：
 
-### Group Membership
+- 选定的组：更亮的边框 + 高亮标题
+- 组标题：显示在组边界的右下角
+- 组边界：半透明圆角矩形
 
-**Adding Nodes to Group**:
-1. Select existing group + nodes you want to add
-2. Right Click → **Create Group**
-3. All selected nodes will be included in the new group
-4. Old group is removed, new group is created
+### 组成员资格
 
-**Removing Nodes from Group**:
-- Delete the specific node from the group
-- Group automatically removes the node from its membership
-- If group has ≤1 node remaining, group is automatically deleted
+**向组添加节点**：
 
-**Constraints**:
-- **One Group Per Node**: Each node can only belong to one group at a time
-- **Auto-Cleanup**: Groups with ≤1 nodes are automatically removed
-- **Dynamic Bounds**: Groups resize automatically when member nodes move
+1. 选择现有组 + 要添加的节点
+2. 右键点击 → **创建组**
+3. 所有选定的节点将包含在新组中
+4. 旧组被删除，新组被创建
 
-### Group Context Menu
+**从组中删除节点**：
+
+- 从组中删除特定节点
+- 组自动从其成员资格中删除该节点
+- 如果组剩余≤1个节点，组将自动删除
+
+**约束**：
+
+- **每个节点一个组**：每个节点一次只能属于一个组
+- **自动清理**：≤1个节点的组将自动删除
+- **动态边界**：成员节点移动时组自动调整大小
+
+### 组上下文菜单
 
 ![Flow Graph Editor Overview](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-group-menu.png)
 
-Right-click on a group:
+右键点击组：
 
-- **Rename Group**: Enter rename mode
-- **Copy Group**: Copy entire group structure (nodes + internal connections)
-- **Delete Group (Keep Nodes)**: Remove group frame only
-- **Delete Group + Nodes**: Remove everything
+- **重命名组**：进入重命名模式
+- **复制组**：复制整个组结构（节点 + 内部连接）
+- **删除组（保留节点）**：仅删除组框架
+- **删除组 + 节点**：删除所有内容
 
 ---
 
-## 📋 Copy & Paste System
+## 📋 复制粘贴系统
 
-Duplicate nodes and groups to speed up workflow.
+复制节点和组以加快工作流程。
 
-### Node Copy & Paste
+### 节点复制粘贴
 
-| Action            | Control  | Description                            |
+| 操作 | 控制 | 描述 |
 | ----------------- | -------- | -------------------------------------- |
-| **Copy Node(s)**  | Ctrl + C | Copy selected node(s) to clipboard     |
-| **Cut Node(s)**   | Ctrl + X | Cut selected node(s) (copy + delete)   |
-| **Paste Node(s)** | Ctrl + V | Paste with incremental offset          |
-| **Reset Paste**   | Escape   | Reset paste counter for next operation |
+| **复制节点** | Ctrl + C | 将选定的节点复制到剪贴板 |
+| **剪切节点** | Ctrl + X | 剪切选定的节点（复制 + 删除） |
+| **粘贴节点** | Ctrl + V | 以增量偏移粘贴 |
+| **重置粘贴** | Escape | 重置下一次操作的粘贴计数器 |
 
-**Paste Behavior**:
+**粘贴行为**：
 
-- Press Escape to reset offset counter
-- Connections between pasted nodes are preserved
-- Pasted nodes are never set as root
+- 按Escape重置偏移计数器
+- 保留粘贴节点之间的连接
+- 粘贴的节点永远不会设置为根
 
-### Group Copy & Paste
+### 组复制粘贴
 
-| Action          | Control  | Description                  |
+| 操作 | 控制 | 描述 |
 | --------------- | -------- | ---------------------------- |
-| **Copy Group**  | Ctrl + C | Copy entire group structure  |
-| **Paste Group** | Ctrl + V | Paste group with 50px offset |
+| **复制组** | Ctrl + C | 复制整个组结构 |
+| **粘贴组** | Ctrl + V | 以50px偏移粘贴组 |
 
-**What's Copied**:
-- Group frame and title (with " (Copy)" suffix)
-- All member nodes with their configurations
-- Internal connections (connections between group members)
-- Relative node positions
+**复制的内容**：
 
-**What's NOT Copied**:
-- External connections (connections to/from outside nodes)
-- Root node status
-- Node IDs (new IDs generated automatically)
+- 组框架和标题（带"(Copy)"后缀）
+- 所有成员节点及其配置
+- 内部连接（组成员之间的连接）
+- 相对节点位置
 
-:::tip Copy Strategy
-**Right-click menu** shows "Copy Group" option for quick access. Both Ctrl+C and right-click menu work identically. Use groups as templates for repeated logic patterns.
+**不复制的内容**：
+
+- 外部连接（到/从外部节点的连接）
+- 根节点状态
+- 节点ID（自动生成新ID）
+
+:::tip 复制策略
+**右键菜单**显示"复制组"选项以便快速访问。Ctrl+C和右键菜单的工作方式相同。使用组作为重复逻辑模式的模板。
 :::
 
 ---
 
-## ⌨️ Keyboard Shortcuts
+## ⌨️ 键盘快捷键
 
-### Copy & Paste
+### 复制粘贴
 
-| Shortcut     | Action                               |
+| 快捷键 | 操作 |
 | ------------ | ------------------------------------ |
-| **Ctrl + C** | Copy selected node(s) or group       |
-| **Ctrl + V** | Paste with incremental offset        |
-| **Ctrl + X** | Cut selected node(s) (copy + delete) |
+| **Ctrl + C** | 复制选定的节点或组 |
+| **Ctrl + V** | 以增量偏移粘贴 |
+| **Ctrl + X** | 剪切选定的节点（复制 + 删除） |
 
-### Undo/Redo
+### 撤销/重做
 
-| Shortcut                            | Action                |
+| 快捷键 | 操作 |
 | ----------------------------------- | --------------------- |
-| **Ctrl + Z**                        | Undo (up to 50 steps) |
-| **Ctrl + Shift + Z** / **Ctrl + Y** | Redo                  |
+| **Ctrl + Z** | 撤销（最多50步） |
+| **Ctrl + Shift + Z** / **Ctrl + Y** | 重做 |
 
-**History Scope**: Tracks node creation/deletion, connections, group changes, position changes, copy/paste operations.
+**历史范围**：跟踪节点创建/删除、连接、组更改、位置更改、复制/粘贴操作。
 
-### Selection
+### 选择
 
-| Shortcut     | Action                                                   |
+| 快捷键 | 操作 |
 | ------------ | -------------------------------------------------------- |
-| **Ctrl + A** | Select all nodes                                         |
-| **Escape**   | Clear selection / Cancel operation / Reset paste counter |
+| **Ctrl + A** | 选择所有节点 |
+| **Escape** | 清除选择/取消操作/重置粘贴计数器 |
 
-### Deletion
+### 删除
 
-| Shortcut           | Action                                                |
+| 快捷键 | 操作 |
 | ------------------ | ----------------------------------------------------- |
-| **Delete**         | Delete selected items                                 |
-| **Shift + Delete** | **Cascade Delete**: Delete group AND all nodes inside |
+| **Delete** | 删除选定的项目 |
+| **Shift + Delete** | **级联删除**：删除组和内部所有节点 |
 
-**Delete Behavior**:
-- Deleting a node: Removes all connected connections and updates group membership
-- Deleting a group (Delete): Keeps member nodes
-- Deleting a group (Shift + Delete): Removes group and all member nodes
-- Deleting a connection: Removes link only
-- Groups with ≤1 remaining nodes are automatically deleted
+**删除行为**：
 
----
-
-## 🎨 Context Menu Reference
-
-### On Empty Space
-
-- **Add Trigger Node**: Create new trigger node at cursor position
-- **Add Chain Node**: Create new chain node at cursor position
-- **Paste Node(s)**: (if clipboard has nodes) Shows paste count
-- **Paste Group**: (if clipboard has group) Shows group name
-
-### On Single Node
-
-- **Edit Node**: Open [Behavior Configuration Window](./game-event-node-behavior.md)
-- **Copy Node**: Copy to clipboard
-- **Cut Node**: Copy and delete
-- **Delete Node**: Remove node and connections
-- **Set as Root**: Mark as graph entry point
-- **Convert to Trigger/Chain**: Change node type
-
-### On Multiple Nodes (Selection)
-
-- **Copy N Node(s)**: Copy selection to clipboard
-- **Cut N Node(s)**: Copy and delete selection
-- **Delete N Nodes**: Remove all selected
-- **Create Group**: Group selection (minimum 2 nodes)
-
-### On Group
-
-- **Rename Group**: Enter rename mode
-- **Copy Group**: Copy entire group structure
-- **Delete Group (Keep Nodes)**: Remove group frame only
-- **Delete Group + Nodes**: Remove group and all member nodes
+- 删除节点：删除所有连接的连接并更新组成员资格
+- 删除组（Delete）：保留成员节点
+- 删除组（Shift + Delete）：删除组和所有成员节点
+- 删除连接：仅删除链接
+- 剩余≤1个节点的组将自动删除
 
 ---
 
-## 📊 Status Bar
+## 🎨 上下文菜单参考
 
-Real-time information displayed at bottom of canvas:
+### 空白处
 
-- Current zoom level (e.g., `Zoom: 1.2x`)
-- Node count (e.g., `Nodes: 15`)
-- Connection count (e.g., `Connections: 23`)
-- Selection info (e.g., `Selected: 3 node(s), 1 group(s)`)
-- Undo/Redo stack depth
+- **添加触发器节点**：在光标位置创建新触发器节点
+- **添加链节点**：在光标位置创建新链节点
+- **粘贴节点**：（如果剪贴板有节点）显示粘贴计数
+- **粘贴组**：（如果剪贴板有组）显示组名称
+
+### 单个节点
+
+- **编辑节点**：打开[行为配置窗口](./game-event-node-behavior.md)
+- **复制节点**：复制到剪贴板
+- **剪切节点**：复制并删除
+- **删除节点**：删除节点和连接
+- **设置为根**：标记为图表入口点
+- **转换为触发器/链**：更改节点类型
+
+### 多个节点（选择）
+
+- **复制N个节点**：将选择复制到剪贴板
+- **剪切N个节点**：复制并删除选择
+- **删除N个节点**：删除所有选定的
+- **创建组**：组选择（至少2个节点）
+
+### 组
+
+- **重命名组**：进入重命名模式
+- **复制组**：复制整个组结构
+- **删除组（保留节点）**：仅删除组框架
+- **删除组 + 节点**：删除组和所有成员节点
 
 ---
 
-## 🎓 Workflow Examples
+## 📊 状态栏
 
-### Example 1: Build a Player Death Sequence
+在画布底部显示实时信息：
+
+- 当前缩放级别（例如，`Zoom: 1.2x`）
+- 节点计数（例如，`Nodes: 15`）
+- 连接计数（例如，`Connections: 23`）
+- 选择信息（例如，`Selected: 3 node(s), 1 group(s)`）
+- 撤销/重做堆栈深度
+
+---
+
+## 🎓 工作流示例
+
+### 示例1：构建玩家死亡序列
 
 ![Flow Graph Groups](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-editor-example.png)
 
-**Goal**: Create a death sequence with parallel effects and sequential menu transition.
+**目标**：创建具有并行效果和顺序菜单转换的死亡序列。
 
-**Step 1**: Create Root Node
-1. Double-click canvas → Select "Add Trigger Node"
-2. Choose `OnPlayerDeath` event
-3. Right-click node → "Set as Root"
+**步骤1**：创建根节点
 
-**Step 2**: Add Parallel Actions (Trigger Pattern)
-1. Create 3 Trigger nodes: `PlayDeathSound`, `SpawnParticles`, `ShowGameOverUI`
-2. Drag from Root output → Connect to all 3 nodes (fan-out)
+1. 双击画布 → 选择"添加触发器节点"
+2. 选择`OnPlayerDeath`事件
+3. 右键点击节点 → "设置为根"
 
-**Step 3**: Add Sequential Actions (Chain Pattern)
-1. Create Chain node: `FadeToBlack`
-2. Double-click → Set delay: 2 seconds
-3. Create Chain node: `ReturnToMenu`
-4. Connect `FadeToBlack` → `ReturnToMenu`
-4. Connect `OnPlayerDeath` → `FadeToBlack`
+**步骤2**：添加并行动作（触发器模式）
 
-**Step 4**: Organize with Groups
-1. Box select all death-related nodes
-2. Right-click → "Create Group"
-3. Double-click group title → Rename to "Death Sequence"
+1. 创建3个触发器节点：`PlayDeathSound`、`SpawnParticles`、`ShowGameOverUI`
+2. 从根输出拖动 → 连接到所有3个节点（扇出）
 
-**Result**: Clean visual representation of parallel sound/VFX execution followed by sequential menu transition.
+**步骤3**：添加顺序动作（链模式）
 
----
+1. 创建链节点：`FadeToBlack`
+2. 双击 → 设置延迟：2秒
+3. 创建链节点：`ReturnToMenu`
+4. 连接`FadeToBlack` → `ReturnToMenu`
+5. 连接`OnPlayerDeath` → `FadeToBlack`
 
-## ❓ Troubleshooting
+**步骤4**：使用组组织
 
-### Changes Not Saving
+1. 框选所有与死亡相关的节点
+2. 右键点击 → "创建组"
+3. 双击组标题 → 重命名为"Death Sequence"
 
-**Cause**: Unity hasn't serialized changes yet.
-
-**Solution**: 
-- Close window to force save
-- Switch to another graph and back
-- Press Ctrl+S in Unity
+**结果**：清晰的并行声音/VFX执行的可视化表示，然后是顺序菜单转换。
 
 ---
 
-### Graph Appears Empty
+## ❓ 故障排除
 
-**Possible Causes**:
-- Wrong graph selected in toolbar dropdown
-- Flow container not assigned in GameEventManager
+### 更改未保存
 
-**Solution**: 
-- Check toolbar graph dropdown selection
-- Verify container assignment in GameEventManager Inspector
+**原因**：Unity尚未序列化更改。
 
----
+**解决方案**：
 
-### Cannot Create Connection
-
-**Possible Causes**:
-- Dragging from Input to Output (reversed direction)
-- Trying to connect to Root node's input port
-- Connection already exists
-
-**Solution**: 
-- Always drag from **Output (right)** to **Input (left)**
-- Root nodes have no input port
+- 关闭窗口以强制保存
+- 切换到另一个图表然后返回
+- 在Unity中按Ctrl+S
 
 ---
 
-### Group Not Auto-Resizing
+### 图表显示为空
 
-**Cause**: Group bounds only update when member nodes are moved.
+**可能原因**：
 
-**Solution**: Move any member node slightly to trigger bounds recalculation.
+- 工具栏下拉菜单中选择了错误的图表
+- 流程容器未在GameEventManager中分配
 
----
+**解决方案**：
 
-### Pasted Group Missing External Connections
-
-**Expected Behavior**: Only **internal connections** (between group members) are copied.
-
-**Explanation**: External connections to nodes outside the group are intentionally not copied to allow flexible reuse of group templates.
-
-**Solution**: Manually reconnect external dependencies after pasting group.
+- 检查工具栏图表下拉选择
+- 在GameEventManager Inspector中验证容器分配
 
 ---
 
-### Cannot Create Group
+### 无法创建连接
 
-**Possible Causes**:
-- Less than 2 nodes selected
-- Trying to group already grouped nodes
+**可能原因**：
 
-**Solution**: 
-- Select at least 2 nodes
-- To regroup, delete old group first or select both group and new nodes to create new group
+- 从输入拖动到输出（方向相反）
+- 尝试连接到根节点的输入端口
+- 连接已存在
 
----
+**解决方案**：
 
-## 📖 Next Steps
-
-Now that you understand canvas navigation and organization, continue your journey:
-
-🔗 **[Connection Types & Compatibility](./game-event-node-connector.md)**
-
-> **Core Concept:** Understand port colors, line types, and type compatibility rules.
-
-⚙️ **[Node Behavior Configuration](./game-event-node-behavior.md)**
-
-> **Logic Control:** Configure delays, conditions, and execution settings.
-
-🧩 **[Advanced Patterns](./advanced-logic-patterns.md)**
-
-> **Expert Level:** Build complex event orchestrations with combined patterns.
+- 始终从**输出（右）**拖动到**输入（左）**
+- 根节点没有输入端口
 
 ---
 
-:::tip Pro Workflow Tips
+### 组未自动调整大小
 
-**Organize Early**: Create groups as you build to avoid messy graphs later.
+**原因**：仅在移动成员节点时更新组边界。
 
-**Use Undo Freely**: Ctrl+Z tracks up to 50 steps—experiment with connections without fear.
+**解决方案**：稍微移动任何成员节点以触发边界重新计算。
 
-**Build Templates**: Create reusable group templates for common patterns.
+---
 
-**Name Descriptively**: Clear graph and group names help when switching between systems.
+### 粘贴的组缺少外部连接
 
-**Set Root Nodes**: Mark clear entry points for each logical flow sequence.
+**预期行为**：仅复制**内部连接**（组成员之间）。
 
-**Copy Smart**: Build once, paste many times. Use groups as blueprints.
+**说明**：到组外节点的外部连接有意不被复制，以允许灵活重用组模板。
+
+**解决方案**：粘贴组后手动重新连接外部依赖项。
+
+---
+
+### 无法创建组
+
+**可能原因**：
+
+- 选择少于2个节点
+- 尝试对已分组的节点进行分组
+
+**解决方案**：
+
+- 至少选择2个节点
+- 要重新分组，首先删除旧组或选择组和新节点以创建新组
+
+---
+
+## 📖 下一步
+
+现在您了解了画布导航和组织，继续您的旅程：
+
+🔗 **[连接类型与兼容性](./game-event-node-connector.md)**
+
+> **核心概念：** 了解端口颜色、线条类型和类型兼容性规则。
+
+⚙️ **[节点行为配置](./game-event-node-behavior.md)**
+
+> **逻辑控制：** 配置延迟、条件和执行设置。
+
+🧩 **[高级模式](./advanced-logic-patterns.md)**
+
+> **专家级别：** 使用组合模式构建复杂的事件编排。
+
+---
+
+:::tip 专业工作流提示
+
+**尽早组织**：在构建时创建组，以避免以后出现混乱的图表。
+
+**自由使用撤销**：Ctrl+Z跟踪最多50步——无所畏惧地尝试连接。
+
+**构建模板**：为常见模式创建可重用的组模板。
+
+**描述性命名**：清晰的图表和组名称在系统之间切换时有帮助。
+
+**设置根节点**：为每个逻辑流程序列标记清晰的入口点。
+
+**智能复制**：构建一次，多次粘贴。使用组作为蓝图。
 
 :::
 
-:::info Quick Reference
+:::info 快速参考
 
-Forgot a shortcut? Click the **Help** button (`? Help`) in the toolbar to view the complete Quick Reference Guide with all keyboard shortcuts, mouse controls, and visual color legend.
+忘记了快捷键？点击工具栏中的**帮助**按钮（`? Help`）以查看包含所有键盘快捷键、鼠标控制和可视化颜色图例的完整快速参考指南。
 
 :::

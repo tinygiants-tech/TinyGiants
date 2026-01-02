@@ -166,6 +166,15 @@ article .markdown img {
     border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
+article .markdown img:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 15px 45px rgba(113, 79, 61, 0.35) !important;
+}
+
+[data-theme='dark'] article .markdown img:hover {
+    box-shadow: 0 0 25px rgba(226, 177, 60, 0.4), 0 20px 50px rgba(0, 0, 0, 0.5) !important;
+}
+
 article .markdown img.img-full,
 article .markdown .img-full-wrapper img {
     width: 100% !important;
@@ -332,7 +341,6 @@ html[lang='zh'] .navbar__item.dropdown > .navbar__link::before { background-imag
 
 .dropdown__link[href*="/zh/"]::before { background-image: url('/img/language/zh.png') !important; }
 .dropdown__link[href*="/zh/"]::after { content: '简体中文' !important; font-size: 0.9rem !important; }
-
 
 @media (max-width: 996px) {
     html:not([data-site-render='home']) .navbar__items--right {

@@ -1,5 +1,5 @@
 ﻿---
-sidebar_label: 'Configure Node Behavior'
+sidebar_label: '配置节点行为'
 sidebar_position: 3
 ---
 
@@ -9,137 +9,133 @@ import TabItem from '@theme/TabItem';
 
 
 
-# Game Event Node Behavior
+# 游戏事件节点行为
 
-While the graph shows connections, the **Node Behavior Configuration Window** controls the detailed execution logic of each individual node.
+虽然图表显示连接，但**节点行为配置窗口**控制每个单独节点的详细执行逻辑。
 
-**Access**: Double-click any node in the flow graph to open the configuration window for node behavior.
+**访问**：在流程图中双击任何节点以打开节点行为的配置窗口。
 
 ![Node Configuration Window](/img/game-event-system/flow-graph/game-event-node-behavior/node-config-window.png)
 
 ---
 
-## 🎯 Window Overview
+## 🎯 窗口概览
 
-The configuration window is divided into three main sections:
+配置窗口分为三个主要部分：
 
-| Section                | Purpose                                     | Applies To                |
+| 部分 | 目的 | 适用于 |
 | ---------------------- | ------------------------------------------- | ------------------------- |
-| **Node Information**   | View event details and type                 | All nodes                 |
-| **Node Condition**     | Visual logic gate for execution control     | All nodes                 |
-| **Node Configuration** | Timing, priority, and data passing settings | All nodes (type-specific) |
+| **节点信息** | 查看事件详情和类型 | 所有节点 |
+| **节点条件** | 用于执行控制的可视化逻辑门 | 所有节点 |
+| **节点配置** | 时间、优先级和数据传递设置 | 所有节点（特定类型） |
 
-## 📋 Node Information
+## 📋 节点信息
 
-Displays read-only details about the selected node.
+显示有关所选节点的只读详细信息。
 
 ![Node Information Card](/img/game-event-system/flow-graph/game-event-node-behavior/node-info.png)
 
-**Event Name**: The Game Event this node will raise.
+**事件名称**：此节点将触发的游戏事件。
 
-**Node Type**: Trigger (parallel) or Chain (sequential).
+**节点类型**：触发器（并行）或链（顺序）。
 
-**Event GUID**: Unique identifier for internal tracking.
+**事件GUID**：用于内部跟踪的唯一标识符。
 
-**Use Case**: Verify you're editing the correct node before making changes.
+**使用场景**：在进行更改之前验证您正在编辑正确的节点。
 
 ------
 
-## 🧩 Node Condition (Flow Gate)
+## 🧩 节点条件（流程门）
 
-Each node has its own **visual condition tree** that controls whether it executes.
+每个节点都有自己的**可视化条件树**来控制其是否执行。
 
 ![Node Condition Tree](/img/game-event-system/flow-graph/game-event-node-behavior/node-config-condition.png)
 
-### How It Works
+### 工作原理
 
-**If condition evaluates to FALSE**:
+**如果条件评估为FALSE**：
 
-- Node does **not** fire
-- Flow stops down this branch
-- Connected child nodes are skipped
+- 节点**不**触发
+- 流程沿此分支停止
+- 连接的子节点被跳过
 
-**If condition evaluates to TRUE**:
+**如果条件评估为TRUE**：
 
-- Node fires normally
-- Flow continues to children
+- 节点正常触发
+- 流程继续到子节点
 
 ---
 
-### Condition Context
+### 条件上下文
 
-You have access to:
+您可以访问：
 
-**Event Argument** (`Arg`): Data from the incoming event
-
+**事件参数**（`Arg`）：来自传入事件的数据
 ```
-Example: Arg.amount > 50
-```
-
-**Sender** (`Sender`): Source object (for sender events)
-
-```
-Example: Sender.tag == "Enemy"
+示例：Arg.amount > 50
 ```
 
-**Scene Objects**: Any GameObject/Component in the scene
-
+**Sender**（`Sender`）：源对象（用于sender事件）
 ```
-Example: Player.Health < 20
+示例：Sender.tag == "Enemy"
+```
+
+**场景对象**：场景中的任何GameObject/Component
+```
+示例：Player.Health < 20
 ```
 
 ---
 
-### Visual Builder
+### 可视化构建器
 
-The condition system uses the same **Visual Condition Tree** as **Event Behaviors**.
+条件系统使用与**事件行为**相同的**可视化条件树**。
 
-**Full Documentation**: See **[Visual Condition Tree](../visual-workflow/visual-condition-tree.md)** for complete guide on:
+**完整文档**：请参阅**[可视化条件树](../visual-workflow/visual-condition-tree.md)**获取完整指南：
 
-- Building logic gates (AND/OR groups)
-- Source types (Event Argument, Scene Type, Random, Constant)
-- Comparison operators
-- Type validation
-- Best practices
+- 构建逻辑门（AND/OR组）
+- 源类型（事件参数、场景类型、随机、常量）
+- 比较运算符
+- 类型验证
+- 最佳实践
 
-:::tip Reusable Logic
-The visual condition system is identical across:
+:::tip 可重用逻辑
+可视化条件系统在以下位置相同：
 
-- **Event Behaviors** (in Event Inspector)
-- **Flow Nodes** (this window)
+- **事件行为**（在事件Inspector中）
+- **流程节点**（此窗口）
 
-Learn it once, use it everywhere!
+学一次，到处用！
 :::
 
 ---
 
-### Practical Example
+### 实际示例
 
-**Scenario**: Only play "Low Health Warning" when health is critical.
+**场景**：仅在生命值危急时播放"低生命值警告"。
 
-**Condition Tree**:
-
+**条件树**：
 ```mermaid
 graph LR
 
-	A(📂 AND Group):::root
+	A(📂 AND组):::root
     
-    C1(⚔️ Damage > 20):::cond
-    C2(💔 Health < 30):::cond
-    C3(🛡️ Has Shield: No):::cond
+    C1(⚔️ 伤害 > 20):::cond
+    C2(💔 生命 < 30):::cond
+    C3(🛡️ 有护盾: 否):::cond
     
-    R([✅ Result: TRUE]):::success
-    F([❌ Result: FALSE]):::fail
+    R([✅ 结果: TRUE]):::success
+    F([❌ 结果: FALSE]):::fail
 
     A --> C1
     
-    C1 -- Yes --> C2
-    C2 -- Yes --> C3
-    C3 -- Yes --> R
+    C1 -- 是 --> C2
+    C2 -- 是 --> C3
+    C3 -- 是 --> R
 
-    C1 -- No --> F
-    C2 -- No --> F
-    C3 -- No --> F
+    C1 -- 否 --> F
+    C2 -- 否 --> F
+    C3 -- 否 --> F
 
     classDef root fill:#1e40af,stroke:#0f172a,stroke-width:2px,color:#ffffff,font-weight:bold
     classDef cond fill:#b45309,stroke:#78350f,stroke-width:2px,color:#ffffff,font-weight:bold
@@ -149,74 +145,72 @@ graph LR
     linkStyle default stroke:#94a3b8,stroke-width:2px,color:#94a3b8
 ```
 
-**Result**: Sound only plays when **all three** conditions pass.
+**结果**：仅当**所有三个**条件都通过时才播放声音。
 
 ---
 
-## ⚙️ Node Configuration
+## ⚙️ 节点配置
 
-Settings that control **timing**, **priority**, and **data flow**.
+控制**时间**、**优先级**和**数据流**的设置。
 
-### General Settings (All Nodes)
+### 通用设置（所有节点）
 
 ![Node Config General](/img/game-event-system/flow-graph/game-event-node-behavior/node-config-general.png)
 
 <details>
-<summary>Start Delay</summary>
+<summary>开始延迟</summary>
 
-**Unit**: Seconds (float)
+**单位**：秒（float）
 
-**Effect**: Node waits this duration **before** raising its event.
+**效果**：节点在触发其事件**之前**等待此持续时间。
 
-**Use Cases**:
+**使用场景**：
 
-- Staggered explosions (0.2s apart)
-- Delayed reactions to events
-- Timed sequences
+- 交错爆炸（间隔0.2秒）
+- 对事件的延迟反应
+- 定时序列
 
-**Example**:
-
+**示例**：
 ```
-🔘 Raise: OnButtonPressed
+🔘 触发：OnButtonPressed
 │
 ├─► ⏱️ 0.5s ──┐
 │             ▼
-│            🎵 PlayClickSound        ✅ Executed
+│            🎵 PlayClickSound        ✅ 已执行
 │
 ├─► ⏱️ 1.0s ────────┐
 │                   ▼
-│                  💬 ShowConfirmation  ✅ Executed
+│                  💬 ShowConfirmation  ✅ 已执行
 │
 └─► ⏱️ 2.0s ──────────────────┐
                               ▼
-                             🚪 CloseMenu        ✅ Finalized
+                             🚪 CloseMenu        ✅ 已完成
 ```
 
-**Visual Indicator**: Badge shows ⏱️ **0.5s** at bottom of node.
+**可视化指示器**：徽章在节点底部显示⏱️ **0.5s**。
 
 </details>
 
 <details>
-<summary>Pass Argument</summary>
+<summary>传递参数</summary>
 
-**Type**: Boolean toggle
+**类型**：布尔切换
 
-**Effect**: Controls whether event data flows to this node.
+**效果**：控制事件数据是否流向此节点。
 
 ---
 
-### ✅ Checked (Pass Argument: ON)
+### ✅ 选中（传递参数：开启）
 
-Node receives data from previous event (if types are compatible).
+节点从前一个事件接收数据（如果类型兼容）。
 
-**When to Use**:
+**何时使用**：
 
-- Forwarding damage info
-- Passing scores/values
-- Data pipelines
+- 转发伤害信息
+- 传递分数/值
+- 数据管道
 
-**Example**:
-
+**示例**：
 ```mermaid
 graph LR
 
@@ -225,102 +219,100 @@ graph LR
     classDef action fill:#0f766e,stroke:#042f2e,stroke-width:2px,color:#ffffff
     classDef result fill:#059669,stroke:#064e3b,stroke-width:2px,color:#ffffff,font-weight:bold
 
-    A("🔢 OnScoreChanged(int)"):::event --> B(["⚙️ Pass Argument: ON"]):::setting
+    A("🔢 OnScoreChanged(int)"):::event --> B(["⚙️ 传递参数: 开"]):::setting
     B --> C("📱 UpdateUI(int)"):::action
-    C --> D(["📩 Receives Actual Score"]):::result
+    C --> D(["📩 接收实际分数"]):::result
 
     linkStyle default stroke:#94a3b8,stroke-width:2px
 ```
 
-**Connection Color**: Depends on type compatibility (Green/Yellow/Orange).
+**连接颜色**：取决于类型兼容性（绿色/黄色/橙色）。
 
 ---
 
-### ❌ Unchecked (Pass Argument: OFF)
+### ❌ 未选中（传递参数：关闭）
 
-Node fires as **static call** with default/null arguments.
+节点作为**静态调用**触发，使用默认/空参数。
 
-**When to Use**:
+**何时使用**：
 
-- Connecting incompatible types
-- Generic notifications (no data needed)
-- Forcing type-safe connections
+- 连接不兼容的类型
+- 通用通知（不需要数据）
+- 强制类型安全连接
 
-**Example**:
-
+**示例**：
 ```
-🚀 Event: OnDamageReceived(DamageInfo)
-│   (Payload: { amount: 20.0, ... })
+🚀 事件：OnDamageReceived(DamageInfo)
+│   (有效载荷: { amount: 20.0, ... })
 │
-🛡️ Filter: [ Pass Argument: OFF ]
-│   (Logic: Trigger Only / Data Dropped)
+🛡️ 过滤器: [ 传递参数: 关 ]
+│   (逻辑: 仅触发/数据丢弃)
 │
-└─► 🔊 Callback: PlayGenericSound()
+└─► 🔊 回调：PlayGenericSound()
 │
-🎯 Result: Sound plays reliably without needing DamageInfo data.
+🎯 结果：声音可靠播放，无需DamageInfo数据。
 ```
 
-**Connection Color**: Always 🟢 **Green** (forced safe).
+**连接颜色**：始终🟢 **绿色**（强制安全）。
 
 ---
 
-### Impact on Connections
+### 对连接的影响
 
-**Pass Argument** directly affects connection line colors:
+**传递参数**直接影响连接线颜色：
 
-| Pass    | Source Type | Target Type | Result                    |
+| 传递 | 源类型 | 目标类型 | 结果 |
 | ------- | ----------- | ----------- | ------------------------- |
-| **OFF** | Any         | Any         | 🟢 Green (always safe)     |
-| **ON**  | `<int>`     | `<int>`     | 🟢 Green (perfect match)   |
-| **ON**  | `<int>`     | `<void>`    | 🟡 Yellow (data discarded) |
-| **ON**  | `<int>`     | `<float>`   | 🟠 Orange (conversion)     |
-| **ON**  | `<int>`     | `<string>`  | 🔴 Red (blocked)           |
+| **关** | 任何 | 任何 | 🟢 绿色（始终安全） |
+| **开** | `<int>` | `<int>` | 🟢 绿色（完美匹配） |
+| **开** | `<int>` | `<void>` | 🟡 黄色（数据丢弃） |
+| **开** | `<int>` | `<float>` | 🟠 橙色（转换） |
+| **开** | `<int>` | `<string>` | 🔴 红色（阻止） |
 
-**Recommendation**: Use **OFF** when connecting incompatible types to avoid red connections.
+**建议**：连接不兼容类型时使用**关**以避免红色连接。
 
 </details>
 
 ---
 
-### Type-Specific Settings
+### 特定类型设置
 
-Configuration options change based on node type (Trigger vs Chain).
+配置选项根据节点类型（触发器vs链）而变化。
 
 <details>
-<summary>Trigger Node</summary>
+<summary>触发器节点</summary>
 
-## Trigger Node (🟠 Orange)
+## 触发器节点（🟠 橙色）
 
-**Execution**: Parallel (fan-out) - fires and immediately continues.
+**执行**：并行（扇出）- 触发后立即继续。
 
 ![Trigger Node Settings](/img/game-event-system/flow-graph/game-event-node-behavior/node-config-trigger.png)
 
 ---
 
-### Priority
+### 优先级
 
-**Type**: Integer (default: 0)
+**类型**：整数（默认：0）
 
-**Rule**: **Higher number = Earlier execution**
+**规则**：**数字越大 = 越早执行**
 
-**Use Case**: Control execution order when multiple Triggers connect to the same parent.
+**使用场景**：当多个触发器连接到同一父节点时控制执行顺序。
 
 ---
 
-### How Priority Works
+### 优先级工作原理
 
-**Scenario**: Three Triggers connected to one Root node.
-
+**场景**：三个触发器连接到一个根节点。
 ```mermaid
 graph LR
 
-    ROOT(["⚡ Root Event"]):::root
+    ROOT(["⚡ 根事件"]):::root
 
-    ROOT ==>|① 1st - Priority: 10| A1("🔊 Play Sound"):::action
-    ROOT ==>|② 2nd - Priority: 5 | A2("✨ Spawn VFX"):::action
-    ROOT ==>|③ 3rd - Priority: 0 | A3("📱 Update UI"):::action
+    ROOT ==>|① 第1 - 优先级: 10| A1("🔊 播放声音"):::action
+    ROOT ==>|② 第2 - 优先级: 5 | A2("✨ 生成VFX"):::action
+    ROOT ==>|③ 第3 - 优先级: 0 | A3("📱 更新UI"):::action
 
-    subgraph Queue ["Execution Order (High to Low)"]
+    subgraph Queue ["执行顺序（从高到低）"]
     A1
     A2
     A3
@@ -334,139 +326,134 @@ graph LR
     linkStyle default stroke:#64748b,stroke-width:2px,color:#64748b,font-weight:bold
 ```
 
-**Execution Order**: 10 → 5 → 0 (high to low)
+**执行顺序**：10 → 5 → 0（从高到低）
 
 ---
 
-### Priority Values
+### 优先级值
 
-| Value        | Meaning          | Use Case                                 |
+| 值 | 含义 | 使用场景 |
 | ------------ | ---------------- | ---------------------------------------- |
-| **Positive** | Higher priority  | Critical actions (sound, input blocking) |
-| **0**        | Default priority | Normal actions                           |
-| **Negative** | Lower priority   | Cleanup, logging, analytics              |
+| **正数** | 更高优先级 | 关键动作（声音、输入阻止） |
+| **0** | 默认优先级 | 普通动作 |
+| **负数** | 更低优先级 | 清理、日志记录、分析 |
 
-**Example Use Cases**:
+**示例使用场景**：
 
-- **+100**: Block player input
-- **+50**: Play critical sound
-- **0**: Standard VFX
-- **-50**: Log to analytics
-- **-100**: Cleanup temporary objects
+- **+100**：阻止玩家输入
+- **+50**：播放关键声音
+- **0**：标准VFX
+- **-50**：记录到分析
+- **-100**：清理临时对象
 
 ---
 
-### Visual Indicator
+### 可视化指示器
 
-Badge shows ⬆️ **+10** at bottom of node.
+徽章在节点底部显示⬆️ **+10**。
 
 </details>
 
 <details>
-<summary>Chain Node</summary>
+<summary>链节点</summary>
 
-## Chain Node (🟢 Green)
+## 链节点（🟢 绿色）
 
-**Execution**: Sequential (blocking) - fires and waits before continuing.
+**执行**：顺序（阻塞）- 触发并在继续之前等待。
 
 ![Chain Node Settings](/img/game-event-system/flow-graph/game-event-node-behavior/node-config-chain.png)
 
 ---
 
-### Duration
+### 持续时间
 
-**Type**: Seconds (float)
+**类型**：秒（float）
 
-**Effect**: Forces graph to **pause** at this node for specified time **after** event fires.
+**效果**：强制图表在事件触发**之后**在此节点**暂停**指定时间。
 
-**Use Case**: Wait for animations, timed sequences, cooldowns.
+**使用场景**：等待动画、定时序列、冷却时间。
 
 ---
 
-### Duration Examples
+### 持续时间示例
 
-**Animation Wait**:
-
+**动画等待**：
 ```
-🖼️ T+0.0s | Initiation
+🖼️ T+0.0s | 启动
 ⚔️ PlayAttackAnimation()
 │
-┆  (Δ 1.5s Delay: Animation Duration)
+┆  (Δ 1.5s 延迟: 动画持续时间)
 ▼
-🖼️ T+1.5s | Execution
+🖼️ T+1.5s | 执行
 💥 DealDamage()
 │
-📊 Result: 1.5s total duration | ✅ Chain Completed
+📊 结果：总持续时间1.5s | ✅ 链完成
 ```
 
-**Timed Sequence**:
-
+**定时序列**：
 ```
-🖼️ T+0.0s | Activation
+🖼️ T+0.0s | 激活
 ⚠️ ShowWarning()
 │
-┆  (Δ 3.0s Display Duration)
+┆  (Δ 3.0s 显示持续时间)
 ▼
-🖼️ T+3.0s | Cleanup
+🖼️ T+3.0s | 清理
 🙈 HideWarning()
 │
-📊 Lifecycle: 3.0s Active | ✅ Auto-Cleanup Completed
+📊 生命周期：3.0s活动 | ✅ 自动清理完成
 ```
 
-**Visual Indicator**: Badge shows ⏳ **3.0s** at bottom of node.
+**可视化指示器**：徽章在节点底部显示⏳ **3.0s**。
 
 ---
 
-### Wait for Completion
+### 等待完成
 
-**Type**: Boolean toggle
+**类型**：布尔切换
 
-**Effect**: Graph waits for **async operations** to finish before continuing.
+**效果**：图表等待**异步操作**完成后再继续。
 
-**Requirements**: Event listener must return `Task` or `IEnumerator`.
+**要求**：事件监听器必须返回`Task`或`IEnumerator`。
 
 ---
 
-### Async Support
+### 异步支持
 
-**Coroutines** (`IEnumerator`):
-
+**协程**（`IEnumerator`）：
 ```csharp
 public IEnumerator OnLoadLevel()
 {
     yield return SceneManager.LoadSceneAsync("Level2");
-    Debug.Log("Load complete");
+    Debug.Log("加载完成");
 }
 ```
 
-**Async/Await** (`Task`):
-
+**异步/等待**（`Task`）：
 ```csharp
 public async Task OnDownloadData()
 {
     await DownloadFromServer();
-    Debug.Log("Download complete");
+    Debug.Log("下载完成");
 }
 ```
 
-**Flow Behavior**:
-
+**流程行为**：
 ```mermaid
 graph LR
     %% 节点定义
-    A("🔄 Start Loading"):::event
-    B(["⏳ Async Processing"]):::wait
-    C("✅ Show Success UI"):::action
+    A("🔄 开始加载"):::event
+    B(["⏳ 异步处理"]):::wait
+    C("✅ 显示成功UI"):::action
 
     %% 逻辑路径
-    A ==>|Wait: ON| B
+    A ==>|等待: 开| B
     B -- "OnTaskComplete" --> C
 
     %% --- 样式定义 (保持实心质感 & 适配黑白主题) ---
     %% Event: 深蓝色实心 + 亮蓝边框
     classDef event fill:#1e40af,stroke:#3b82f6,stroke-width:2px,color:#ffffff,font-weight:bold
     
-    %% Wait: 琥珀色实心胶囊。用颜色暗示这是一个“中间状态”
+    %% Wait: 琥珀色实心胶囊。用颜色暗示这是一个"中间状态"
     classDef wait fill:#b45309,stroke:#d97706,stroke-width:2px,color:#ffffff,font-style:italic
     
     %% Action: 深绿色实心 + 亮绿边框
@@ -476,71 +463,68 @@ graph LR
     linkStyle default stroke:#64748b,stroke-width:2px,color:#64748b,font-size:11px
 ```
 
-Without "Wait for Completion", `ShowSuccessMessage` would fire immediately (before loading finishes).
+如果没有"等待完成"，`ShowSuccessMessage`会立即触发（在加载完成之前）。
 
 ---
 
-### Duration + Wait Combined
+### 持续时间 + 等待组合
 
-**Both settings work together**:
+**两个设置一起工作**：
 
-**Scenario A: Task < Duration (Minimum Floor)**
+**场景A：任务 < 持续时间（最小下限）**
 
-*Example: The cutscene finishes quickly (1.5s), but we want to maintain the 2.0s pacing.*
-
+*示例：过场动画快速完成（1.5秒），但我们想保持2.0秒的节奏。*
 ```csharp
-🖼️ T+0.0s | Initiation
-🎬 PlayCutscene() ➔ [Task Starts]
+🖼️ T+0.0s | 启动
+🎬 PlayCutscene() ➔ [任务开始]
 │
-├─ ⏱️ 1.5s: [Task Completed Internally]
-│  ⏳ Status: Still Waiting (Safety Floor active)
+├─ ⏱️ 1.5s: [任务内部完成]
+│  ⏳ 状态：仍在等待（安全下限激活）
 │
-└─ 🏁 T+2.0s: Logic Continues
+└─ 🏁 T+2.0s: 逻辑继续
 │
-📊 Result: Exact 2.0s duration (Pacing Maintained)
+📊 结果：精确2.0秒持续时间（节奏保持）
 ```
 
-**Scenario B: Task > Duration (Async Wait)**
+**场景B：任务 > 持续时间（异步等待）**
 
-*Example: The cutscene takes longer (5.0s) due to loading. The system waits for the task to finish.*
-
+*示例：由于加载，过场动画需要更长时间（5.0秒）。系统等待任务完成。*
 ```
-🖼️ T+0.0s | Initiation
-🎬 PlayCutscene() ➔ [Task Starts]
+🖼️ T+0.0s | 启动
+🎬 PlayCutscene() ➔ [任务开始]
 │
-├─ ⏱️ 2.0s: [Safety Floor Reached]
-│  ⏳ Status: Task still running... (Async Wait active)
+├─ ⏱️ 2.0s: [安全下限达到]
+│  ⏳ 状态：任务仍在运行...（异步等待激活）
 │
-└─ 🏁 T+5.0s: [Task Finally Completed] ➔ Logic Continues
+└─ 🏁 T+5.0s: [任务最终完成] ➔ 逻辑继续
 │
-📊 Result: 5.0s duration (Full Completion Guaranteed)
+📊 结果：5.0秒持续时间（完全完成保证）
 ```
 
-**Visual Indicators**: 
+**可视化指示器**：
 
-- ⏳ **2.0s** (duration badge)
-- ⚓ **Wait** (completion badge)
+- ⏳ **2.0s**（持续时间徽章）
+- ⚓ **等待**（完成徽章）
 
 </details>
 
 ---
 
-## 💡 Configuration Examples
+## 💡 配置示例
 
-### Example 1: Delayed Trigger Sequence
+### 示例1：延迟触发序列
 
-**Goal**: Play 3 sounds with staggered timing.
-
+**目标**：以交错时间播放3个声音。
 ```mermaid
 graph LR
 
-	ROOT(["💥 Raise: OnExplosion"]):::trigger
+	ROOT(["💥 触发: OnExplosion"]):::trigger
 
-    ROOT -->|Immediate| S1("🔊 Sound 1 <br/> Priority: 10"):::action
-    ROOT -->|Wait 0.3s| S2("🔊 Sound 2 <br/> Priority: 5"):::action
-    ROOT -->|Wait 0.6s| S3("🔊 Sound 3 <br/> Priority: 0"):::action
+    ROOT -->|立即| S1("🔊 声音1 <br/> 优先级: 10"):::action
+    ROOT -->|等待0.3s| S2("🔊 声音2 <br/> 优先级: 5"):::action
+    ROOT -->|等待0.6s| S3("🔊 声音3 <br/> 优先级: 0"):::action
 
-    subgraph Timeline ["Execution Schedule"]
+    subgraph Timeline ["执行计划"]
     S1
     S2
     S3
@@ -556,18 +540,17 @@ graph LR
 
 ---
 
-### Example 2: Conditional Chain with Wait
+### 示例2：带等待的条件链
 
-**Goal**: Load level only if player completed tutorial.
-
+**目标**：仅在玩家完成教程后加载关卡。
 ```mermaid
 graph LR
     %% 节点定义：保持实心配色，增加亮色边框适配黑白模式
     A("🏆 OnLevelComplete"):::event
-    B("🔍 Check Tutorial"):::cond
-    C("🔄 Load Next Level"):::action
-    D(["⏳ Waiting..."]):::wait
-    E("✨ Show Level Start"):::action
+    B("🔍 检查教程"):::cond
+    C("🔄 加载下一关卡"):::action
+    D(["⏳ 等待中..."]):::wait
+    E("✨ 显示关卡开始"):::action
 
     %% 串行路径：将元数据(条件/时间)放在连线上
     A --> B
@@ -592,118 +575,118 @@ graph LR
     linkStyle default stroke:#64748b,stroke-width:2px,color:#64748b,font-size:11px
 ```
 
-**Flow**:
+**流程**：
 
-1. Level completes
-2. Check condition (passes if tutorial done)
-3. Start async load, wait for completion
-4. Show level start UI
-
----
-
-## 🔄 Quick Node Type Conversion
-
-Changed your mind about node type? **No need to delete and recreate!**
-
-**How To**:
-
-1. Right-click the node in graph
-2. Select **"Convert to Trigger"** or **"Convert to Chain"**
-
-**What's Preserved**:
-
-- ✅ Event assignment
-- ✅ Connections
-- ✅ Start Delay
-- ✅ Pass Argument
-- ✅ Conditions
-
-**What Changes**:
-
-- Trigger → Chain: Priority removed, Duration/Wait added
-- Chain → Trigger: Duration/Wait removed, Priority added
+1. 关卡完成
+2. 检查条件（如果教程完成则通过）
+3. 开始异步加载，等待完成
+4. 显示关卡开始UI
 
 ---
 
-## ❓ Troubleshooting
+## 🔄 快速节点类型转换
 
-### Node Doesn't Fire
+改变了对节点类型的想法？**无需删除并重新创建！**
 
-**Checklist**:
+**操作方法**：
 
-1. ✅ Is condition enabled and passing?
-2. ✅ Is parent node firing?
-3. ✅ Is connection intact?
-4. ✅ Is graph enabled in toolbar?
+1. 在图表中右键点击节点
+2. 选择**"转换为触发器"**或**"转换为链"**
 
-**Debug**: Add temporary condition-less node to test flow.
+**保留的内容**：
 
----
+- ✅ 事件分配
+- ✅ 连接
+- ✅ 开始延迟
+- ✅ 传递参数
+- ✅ 条件
 
-### "Pass Argument" Grayed Out
+**变化的内容**：
 
-**Cause**: Event type is `void` (no arguments to pass).
-
-**Solution**: This is expected—void events have no data to forward.
-
----
-
-### Duration Not Working
-
-**Common Issues**:
-
-- Node type is Trigger (duration only works on Chain nodes)
-- Duration set to 0
-- "Wait for Completion" blocking longer than duration
-
-**Solution**: Verify node type and check both duration and wait settings.
+- 触发器 → 链：优先级移除，添加持续时间/等待
+- 链 → 触发器：持续时间/等待移除，添加优先级
 
 ---
 
-### Async Not Waiting
+## ❓ 故障排除
 
-**Cause**: "Wait for Completion" is unchecked.
+### 节点不触发
 
-**Solution**: Enable "Wait for Completion" toggle.
+**检查清单**：
 
-**Requirement**: Event listener must return `Task` or `IEnumerator`.
+1. ✅ 条件是否启用并通过？
+2. ✅ 父节点是否触发？
+3. ✅ 连接是否完整？
+4. ✅ 工具栏中的图表是否启用？
 
----
-
-## 📖 Next Steps
-
-Now that you can configure individual nodes, learn advanced patterns:
-
-**[Advanced Logic Patterns](./advanced-logic-patterns.md)**  
-
-Build complex orchestrations with best practices
-
-**[Visual Condition Tree](../visual-workflow/visual-condition-tree.md)**  
-
-Master the condition builder (full reference)
+**调试**：添加临时无条件节点以测试流程。
 
 ---
 
-:::tip Configuration Workflow
+### "传递参数"显示为灰色
 
-**Best Practice**: Configure nodes as you build, not after.
+**原因**：事件类型为`void`（无参数可传递）。
 
-1. Add node to graph
-2. Double-click to configure
-3. Set conditions first (prevents unwanted execution)
-4. Add timing settings
-5. Test in isolation before connecting
+**解决方案**：这是预期的——void事件没有要转发的数据。
+
+---
+
+### 持续时间不起作用
+
+**常见问题**：
+
+- 节点类型是触发器（持续时间仅适用于链节点）
+- 持续时间设置为0
+- "等待完成"阻塞时间超过持续时间
+
+**解决方案**：验证节点类型并检查持续时间和等待设置。
+
+---
+
+### 异步不等待
+
+**原因**："等待完成"未选中。
+
+**解决方案**：启用"等待完成"切换。
+
+**要求**：事件监听器必须返回`Task`或`IEnumerator`。
+
+---
+
+## 📖 下一步
+
+现在您可以配置单个节点，学习高级模式：
+
+**[高级逻辑模式](./advanced-logic-patterns.md)**
+
+使用最佳实践构建复杂编排
+
+**[可视化条件树](../visual-workflow/visual-condition-tree.md)**
+
+掌握条件构建器（完整参考）
+
+---
+
+:::tip 配置工作流
+
+**最佳实践**：在构建时配置节点，而不是之后。
+
+1. 将节点添加到图表
+2. 双击配置
+3. 首先设置条件（防止不需要的执行）
+4. 添加时间设置
+5. 在连接之前单独测试
 
 :::
 
-:::info Auto-Save
+:::info 自动保存
 
-Changes save automatically when you:
+当您执行以下操作时更改会自动保存：
 
-- Close the window
-- Switch to another node
-- Click outside the window
+- 关闭窗口
+- 切换到另一个节点
+- 点击窗口外部
 
-No manual save button needed!
+无需手动保存按钮！
 
 :::
