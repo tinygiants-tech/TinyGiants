@@ -333,7 +333,7 @@
     "message": "游戏事件系统"
   },
   "homepage.feature1.description": {
-    "message": "专业的、可视化的、类型安全的 Unity 事件架构。通过我们基于 ScriptableObject 的图形编辑器简化开发流程，专为性能和可维护性而设计。"
+    "message": "一个专业的、可视化的、类型安全的 Unity 事件架构。通过我们基于 ScriptableObject 的图形编辑器简化开发流程，专为性能和可维护性而设计。"
   },
   "homepage.feature.viewDocs": {
     "message": "查看文档"

@@ -1,179 +1,179 @@
 ﻿---
-sidebar_label: '02 Basic Types Event'
+sidebar_label: '02 基本类型事件'
 sidebar_position: 3
 ---
 
 import VideoGif from '@site/src/components/Video/VideoGif';
 
-# 02 Basic Types Event: Passing Data with Events
+# 02 基本类型事件：用事件传递数据
 
 <!-- <VideoGif src="/video/game-event-system/02-basic-types-event.mp4" /> -->
 
-## 📋 Overview
+## 📋 概述
 
-While void events are great for simple signals, most games need to pass data: *"How much damage?"*, *"Which item?"*, *"Where to spawn?"*. This demo showcases the **Generic Event System**, which allows you to pass standard C# and Unity types as event parameters without writing custom event classes.
+虽然void事件非常适合简单的信号，但大多数游戏需要传递数据：*"造成多少伤害？"*、*"哪个物品？"*、*"在哪里生成？"*。此演示展示了**泛型事件系统**，它允许您将标准的C#和Unity类型作为事件参数传递，而无需编写自定义事件类。
 
-:::tip 💡 What You'll Learn
-- How to create generic events for different data types
-- How the system auto-generates type-safe event classes
-- How to raise and receive events with parameters
-- Type safety enforcement in the Editor
+:::tip 💡 您将学到
+- 如何为不同的数据类型创建泛型事件
+- 系统如何自动生成类型安全的事件类
+- 如何触发和接收带参数的事件
+- 编辑器中的类型安全强制执行
 
 :::
 
 ---
 
-## 🎬 Demo Scene
+## 🎬 演示场景
 ```
 Assets/TinyGiants/GameEventSystem/Demo/02_BasicTypesEvent/02_BasicTypesEvent.unity
 ```
 
-### Scene Composition
+### 场景组成
 
-**UI Layer (Canvas):**
-- 🎮 **Four Buttons** - Located at the bottom of the screen
-  - "Raise (String)" → Triggers `BasicTypesEventRaiser.RaiseString()`
-  - "Raise (Vector3)" → Triggers `BasicTypesEventRaiser.RaiseVector3()`
-  - "Raise (GameObject)" → Triggers `BasicTypesEventRaiser.RaiseGameObject()`
-  - "Raise (Material)" → Triggers `BasicTypesEventRaiser.RaiseMaterial()`
+**UI层（Canvas）：**
+- 🎮 **四个按钮** - 位于屏幕底部
+  - "Raise (String)" → 触发`BasicTypesEventRaiser.RaiseString()`
+  - "Raise (Vector3)" → 触发`BasicTypesEventRaiser.RaiseVector3()`
+  - "Raise (GameObject)" → 触发`BasicTypesEventRaiser.RaiseGameObject()`
+  - "Raise (Material)" → 触发`BasicTypesEventRaiser.RaiseMaterial()`
 
-**Game Logic Layer (Demo Scripts):**
-- 📤 **BasicTypesEventRaiser** - GameObject with the raiser script
-  - Holds references to 4 different generic events: `GameEvent<string>`, `GameEvent<Vector3>`, `GameEvent<GameObject>`, `GameEvent<Material>`
-  - Each button triggers a different raise method with specific data
+**游戏逻辑层（演示脚本）：**
+- 📤 **BasicTypesEventRaiser** - 带有触发器脚本的GameObject
+  - 持有对4个不同泛型事件的引用：`GameEvent<string>`、`GameEvent<Vector3>`、`GameEvent<GameObject>`、`GameEvent<Material>`
+  - 每个按钮使用特定数据触发不同的触发方法
 
-- 📥 **BasicTypesEventReceiver** - GameObject with the receiver script
-  - Listens to all 4 events through visual binding in Game Event Editor
-  - References various scene objects to apply event data
+- 📥 **BasicTypesEventReceiver** - 带有接收器脚本的GameObject
+  - 通过游戏事件编辑器中的可视化绑定监听所有4个事件
+  - 引用各种场景对象以应用事件数据
 
-**Visual Feedback Layer (Demo Objects):**
-- 📝 **HoloDisplay** - TextMeshPro object displaying received string messages
-- 🎲 **Cube** - 3D object that moves when Vector3 event fires and changes color when Material event fires
-- 📍 **TargetPosition** - Transform marking the spawn location for GameObject events
-- 🏠 **Plane** - Ground surface for visual context
-
----
-
-## 🎮 How to Interact
-
-### Step 1: Enter Play Mode
-
-Press the **Play** button in Unity.
-
-### Step 2: Test Each Event Type
-
-**Click "Raise (String)":**
-- 📝 The HoloDisplay text updates with "Hello World [count]"
-- 🔢 Counter increments with each click
-- 📊 Console logs: `[Sender] Raised String Event` → `[Receiver] String Event Processed`
-
-**Click "Raise (Vector3)":**
-- 🎲 The blue cube teleports to a random position
-- 📊 Position is randomized within range (-2 to 2, 0 to 3, 0)
-- 📝 Console shows the exact coordinates sent and received
-
-**Click "Raise (GameObject)":**
-- 🎁 A random prefab (Cube or Sphere) spawns at TargetPosition
-- 🔄 Previous spawn is destroyed before creating new one
-- 📝 Console logs which prefab was instantiated
-
-**Click "Raise (Material)":**
-- 🎨 The cube changes to a random color (Red/Green/Blue/Yellow)
-- ✨ Material change is instant
-- 📝 Console logs the material name applied
+**视觉反馈层（演示对象）：**
+- 📝 **HoloDisplay** - 显示接收到的字符串消息的TextMeshPro对象
+- 🎲 **Cube** - 当Vector3事件触发时移动的3D对象，当Material事件触发时改变颜色
+- 📍 **TargetPosition** - 标记GameObject事件生成位置的Transform
+- 🏠 **Plane** - 用于视觉上下文的地面表面
 
 ---
 
-## 🏗️ Scene Architecture
+## 🎮 如何交互
 
-### Event Definitions
+### 步骤1：进入播放模式
 
-Open the **Game Event Editor** window to see the 4 pre-configured events:
+按Unity中的**播放**按钮。
+
+### 步骤2：测试每种事件类型
+
+**点击"Raise (String)"：**
+- 📝 HoloDisplay文本更新为"Hello World [计数]"
+- 🔢 每次点击计数器递增
+- 📊 控制台日志：`[Sender] Raised String Event` → `[Receiver] String Event Processed`
+
+**点击"Raise (Vector3)"：**
+- 🎲 蓝色立方体传送到随机位置
+- 📊 位置在范围内随机（-2到2，0到3，0）
+- 📝 控制台显示发送和接收的确切坐标
+
+**点击"Raise (GameObject)"：**
+- 🎁 随机预制体（立方体或球体）在TargetPosition生成
+- 🔄 创建新对象前销毁之前的生成对象
+- 📝 控制台记录实例化了哪个预制体
+
+**点击"Raise (Material)"：**
+- 🎨 立方体变为随机颜色（红色/绿色/蓝色/黄色）
+- ✨ 材质变化是即时的
+- 📝 控制台记录应用的材质名称
+
+---
+
+## 🏗️ 场景架构
+
+### 事件定义
+
+打开**游戏事件编辑器**窗口以查看4个预配置的事件：
 
 ![Game Event Editor](/img/game-event-system/examples/02-basic-types-event/demo-02-editor.png)
 
-**Events in Database:**
+**数据库中的事件：**
 
-| Event Name     | Type                    | Purpose                                 |
+| 事件名称 | 类型 | 目的 |
 | -------------- | ----------------------- | --------------------------------------- |
-| `OnString`     | `GameEvent<string>`     | Update text displays                    |
-| `OnVector3`    | `GameEvent<Vector3>`    | Send position/movement data             |
-| `OnGameObject` | `GameEvent<GameObject>` | Pass prefab references for spawning     |
-| `OnMaterial`   | `GameEvent<Material>`   | Send material assets for visual changes |
+| `OnString` | `GameEvent<string>` | 更新文本显示 |
+| `OnVector3` | `GameEvent<Vector3>` | 发送位置/移动数据 |
+| `OnGameObject` | `GameEvent<GameObject>` | 传递用于生成的预制体引用 |
+| `OnMaterial` | `GameEvent<Material>` | 发送用于视觉变化的材质资产 |
 
-**Notice the Behavior Column:**
-Each event shows a colored type indicator (e.g., **(String)**, **(Vector3)**) in the Behavior column. Clicking these icons opens the Behavior Window where you can configure callback bindings—the same visual binding system you saw in the previous demo.
+**注意行为列：**
+每个事件在行为列中显示彩色类型指示器（例如，**(String)**、**(Vector3)**）。点击这些图标会打开行为窗口，您可以在其中配置回调绑定——与您在上一个演示中看到的相同的可视化绑定系统。
 
-:::note 🔧 Auto-Generation
-You don't need to manually create `StringGameEvent` or `Vector3GameEvent` classes. The system automatically generates concrete types like `GameEvent<T>` when you create a new event in the Editor.
+:::note 🔧 自动生成
+您不需要手动创建`StringGameEvent`或`Vector3GameEvent`类。当您在编辑器中创建新事件时，系统会自动生成像`GameEvent<T>`这样的具体类型。
 :::
 
 ---
 
-### Sender Setup (BasicTypesEventRaiser)
+### 发送者设置（BasicTypesEventRaiser）
 
-Select the **BasicTypesEventRaiser** GameObject in the Hierarchy:
+在层级视图中选择**BasicTypesEventRaiser** GameObject：
 
 ![BasicTypesEventRaiser Inspector](/img/game-event-system/examples/02-basic-types-event/demo-02-inspector.png)
 
-**Configuration Details:**
+**配置详情：**
 
-**1. C# Type (String)**
-- `Message Event` → `OnString` (type-filtered dropdown)
-- `Message To Send` → "Hello World" (template text)
+**1. C#类型（String）**
+- `Message Event` → `OnString`（类型过滤下拉菜单）
+- `Message To Send` → "Hello World"（模板文本）
 
-**2. Math Type (Vector3)**
+**2. 数学类型（Vector3）**
 - `Movement Event` → `OnVector3`
-- `Target Position` → (0, 5.41, -1.45) (reference position)
+- `Target Position` → (0, 5.41, -1.45)（参考位置）
 
-**3. Component Type (GameObject)**
+**3. 组件类型（GameObject）**
 - `Spawn Event` → `OnGameObject`
-- `Prefabs To Spawn` → List of 4 primitive prefabs (Cube, Sphere, etc.)
+- `Prefabs To Spawn` → 4个基本预制体的列表（立方体、球体等）
 
-**4. Asset Type (Material)**
+**4. 资产类型（Material）**
 - `Change Material Event` → `OnMaterial`
-- `Target Materials` → List of 5 colored materials
+- `Target Materials` → 5个彩色材质的列表
 
-**Type Safety in Action:**
-- The `[GameEventDropdown]` attribute automatically filters events by type
-- You can only assign `GameEvent<string>` to the "Message Event" slot
-- Attempting to assign a `GameEvent<Vector3>` to the string slot is prevented by the Editor
-- This compile-time type safety prevents runtime errors
+**类型安全实践：**
+- `[GameEventDropdown]`特性自动按类型过滤事件
+- 您只能将`GameEvent<string>`分配给"Message Event"槽
+- 尝试将`GameEvent<Vector3>`分配给字符串槽会被编辑器阻止
+- 这种编译时类型安全防止运行时错误
 
 ---
 
-### Receiver Setup (BasicTypesEventReceiver)
+### 接收者设置（BasicTypesEventReceiver）
 
-Select the **BasicTypesEventReceiver** GameObject in the Hierarchy to see its scene references:
+在层级视图中选择**BasicTypesEventReceiver** GameObject以查看其场景引用：
 
-**Scene References:**
-- `Log Text` → HoloDisplay (TextMeshPro component)
-- `Moving Cube` → Cube (Transform component)
-- `Changing Cube Renderer` → Cube (MeshRenderer component)
-- `Spawn Point` → TargetPosition (Transform component)
+**场景引用：**
+- `Log Text` → HoloDisplay（TextMeshPro组件）
+- `Moving Cube` → Cube（Transform组件）
+- `Changing Cube Renderer` → Cube（MeshRenderer组件）
+- `Spawn Point` → TargetPosition（Transform组件）
 
-**Behavior Binding:**
+**行为绑定：**
 
-Each of the 4 events is bound to a corresponding receiver method through the **Behavior Window** in the Game Event Editor (similar to what you configured in the Void Event demo):
+4个事件中的每一个都通过游戏事件编辑器中的**行为窗口**绑定到相应的接收器方法（类似于您在Void事件演示中配置的内容）：
 
-| Event          | Bound Method         | Signature                  |
+| 事件 | 绑定方法 | 签名 |
 | -------------- | -------------------- | -------------------------- |
-| `OnString`     | `OnMessageReceived`  | `void (string msg)`        |
-| `OnVector3`    | `OnMoveReceived`     | `void (Vector3 pos)`       |
-| `OnGameObject` | `OnSpawnReceived`    | `void (GameObject prefab)` |
-| `OnMaterial`   | `OnMaterialReceived` | `void (Material mat)`      |
+| `OnString` | `OnMessageReceived` | `void (string msg)` |
+| `OnVector3` | `OnMoveReceived` | `void (Vector3 pos)` |
+| `OnGameObject` | `OnSpawnReceived` | `void (GameObject prefab)` |
+| `OnMaterial` | `OnMaterialReceived` | `void (Material mat)` |
 
-:::tip 🎯 Type Matching
+:::tip 🎯 类型匹配
 
-The Behavior Window's method dropdown automatically filters methods based on the event's parameter type. For `GameEvent<string>`, you'll only see methods with a `(string)` parameter. This ensures type safety at configuration time!
+行为窗口的方法下拉菜单根据事件的参数类型自动过滤方法。对于`GameEvent<string>`，您只会看到带有`(string)`参数的方法。这在配置时确保类型安全！
 
 :::
 
 ---
 
-## 💻 Code Breakdown
+## 💻 代码分解
 
-### 📤 BasicTypesEventRaiser.cs (Sender)
+### 📤 BasicTypesEventRaiser.cs（发送者）
 ```csharp
 using UnityEngine;
 using TinyGiants.GameEventSystem.Runtime;
@@ -181,19 +181,19 @@ using System.Collections.Generic;
 
 public class BasicTypesEventRaiser : MonoBehaviour
 {
-    [Header("1. C# Type (String)")]
+    [Header("1. C#类型（String）")]
     [GameEventDropdown] public GameEvent<string> messageEvent;
     public string messageToSend = "Hello World";
 
-    [Header("2. Math Type (Vector3)")]
+    [Header("2. 数学类型（Vector3）")]
     [GameEventDropdown] public GameEvent<Vector3> movementEvent;
     public Vector3 targetPosition = new Vector3(0, 2, 0);
 
-    [Header("3. Component Type (GameObject)")]
+    [Header("3. 组件类型（GameObject）")]
     [GameEventDropdown] public GameEvent<GameObject> spawnEvent;
     public List<GameObject> prefabsToSpawn = new List<GameObject>();
 
-    [Header("4. Asset Type (Material)")]
+    [Header("4. 资产类型（Material）")]
     [GameEventDropdown] public GameEvent<Material> changeMaterialEvent;
     public List<Material> targetMaterials = new List<Material>();
 
@@ -201,25 +201,25 @@ public class BasicTypesEventRaiser : MonoBehaviour
     private AudioSource _audioSource;
 
     /// <summary>
-    /// Raises a GameEvent<string> with dynamic text content.
-    /// The receiver must have signature: void MethodName(string value)
+    /// 用动态文本内容触发GameEvent<string>。
+    /// 接收者必须有签名：void MethodName(string value)
     /// </summary>
     public void RaiseString()
     {
         if (messageEvent == null)
         {
-            Debug.LogWarning("[MessageEvent] No GameEvent assigned.");
+            Debug.LogWarning("[MessageEvent] 未分配GameEvent。");
             return;
         }
 
-        // Pass dynamic string with incremented counter
+        // 传递带递增计数器的动态字符串
         messageEvent.Raise($"{messageToSend} [{_count++}]");
-        Debug.Log($"[Sender] Raised String Event: {messageEvent.name}");
+        Debug.Log($"[Sender] 触发了String事件：{messageEvent.name}");
     }
 
     /// <summary>
-    /// Raises a GameEvent<Vector3> with random position data.
-    /// Useful for movement, directions, or physics forces.
+    /// 用随机位置数据触发GameEvent<Vector3>。
+    /// 对于移动、方向或物理力很有用。
     /// </summary>
     public void RaiseVector3()
     {
@@ -232,13 +232,13 @@ public class BasicTypesEventRaiser : MonoBehaviour
         if (movementEvent != null)
         {
             movementEvent.Raise(randomPos);
-            Debug.Log($"[Sender] Raised Vector3 Event: {randomPos}");
+            Debug.Log($"[Sender] 触发了Vector3事件：{randomPos}");
         }
     }
 
     /// <summary>
-    /// Raises a GameEvent<GameObject> with a prefab reference.
-    /// Demonstrates passing Unity Object references safely.
+    /// 用预制体引用触发GameEvent<GameObject>。
+    /// 演示安全地传递Unity对象引用。
     /// </summary>
     public void RaiseGameObject()
     {
@@ -246,17 +246,17 @@ public class BasicTypesEventRaiser : MonoBehaviour
         {
             GameObject randomPrefab = prefabsToSpawn[Random.Range(0, prefabsToSpawn.Count)];
             spawnEvent.Raise(randomPrefab);
-            Debug.Log($"[Sender] Raised GameObject Event. Spawning: {randomPrefab?.name ?? "null"}");
+            Debug.Log($"[Sender] 触发了GameObject事件。生成：{randomPrefab?.name ?? "null"}");
         }
         else
         {
-            Debug.LogWarning("[Sender] RaiseGameObject failed: Event or prefab list is null/empty.");
+            Debug.LogWarning("[Sender] RaiseGameObject失败：事件或预制体列表为null/空。");
         }
     }
 
     /// <summary>
-    /// Raises a GameEvent<Material> with a material asset reference.
-    /// Perfect for runtime visual customization.
+    /// 用材质资产引用触发GameEvent<Material>。
+    /// 非常适合运行时视觉定制。
     /// </summary>
     public void RaiseMaterial()
     {
@@ -264,25 +264,25 @@ public class BasicTypesEventRaiser : MonoBehaviour
         {
             Material randomMaterial = targetMaterials[Random.Range(0, targetMaterials.Count)];
             changeMaterialEvent.Raise(randomMaterial);
-            Debug.Log($"[Sender] Raised Material Event. Material: {randomMaterial?.name ?? "null"}");
+            Debug.Log($"[Sender] 触发了Material事件。材质：{randomMaterial?.name ?? "null"}");
         }
         else
         {
-            Debug.LogWarning("[Sender] RaiseMaterial failed: Event or material list is null/empty.");
+            Debug.LogWarning("[Sender] RaiseMaterial失败：事件或材质列表为null/空。");
         }
     }
 }
 ```
 
-**Key Points:**
-- 🎯 **Generic Syntax** - `GameEvent<T>` automatically handles different types
-- 🔒 **Type Safety** - Each event can only accept its declared parameter type
-- 📦 **Data Passing** - `.Raise(value)` method accepts the typed parameter
-- 🔇 **Decoupling** - Sender has no knowledge of who or what responds
+**关键点：**
+- 🎯 **泛型语法** - `GameEvent<T>`自动处理不同类型
+- 🔒 **类型安全** - 每个事件只能接受其声明的参数类型
+- 📦 **数据传递** - `.Raise(value)`方法接受类型化参数
+- 🔇 **解耦** - 发送者不知道谁或什么响应
 
 ---
 
-### 📥 BasicTypesEventReceiver.cs (Listener)
+### 📥 BasicTypesEventReceiver.cs（监听器）
 ```csharp
 using UnityEngine;
 using TMPro;
@@ -295,38 +295,38 @@ public class BasicTypesEventReceiver : MonoBehaviour
     [SerializeField] private Transform spawnPoint;
 
     /// <summary>
-    /// Bound to 'OnString' event via Game Event Editor's Behavior Window.
-    /// Signature: void (string)
+    /// 通过游戏事件编辑器的行为窗口绑定到'OnString'事件。
+    /// 签名：void (string)
     /// </summary>
     public void OnMessageReceived(string msg)
     {
         if (logText != null)
-            logText.text = $"Received String: \n<color=yellow>{msg}</color>";
+            logText.text = $"接收到字符串：\n<color=yellow>{msg}</color>";
             
-        Debug.Log($"[Receiver] String Event Processed: {msg}");
+        Debug.Log($"[Receiver] 处理了String事件：{msg}");
     }
 
     /// <summary>
-    /// Bound to 'OnVector3' event via Game Event Editor's Behavior Window.
-    /// Signature: void (Vector3)
+    /// 通过游戏事件编辑器的行为窗口绑定到'OnVector3'事件。
+    /// 签名：void (Vector3)
     /// </summary>
     public void OnMoveReceived(Vector3 pos)
     {
         if (movingCube != null)
             movingCube.localPosition = pos;
             
-        Debug.Log($"[Receiver] Moving Cube to: {pos}");
+        Debug.Log($"[Receiver] 将立方体移动到：{pos}");
     }
 
     /// <summary>
-    /// Bound to 'OnGameObject' event via Game Event Editor's Behavior Window.
-    /// Signature: void (GameObject)
+    /// 通过游戏事件编辑器的行为窗口绑定到'OnGameObject'事件。
+    /// 签名：void (GameObject)
     /// </summary>
     public void OnSpawnReceived(GameObject prefab)
     {
         if (prefab != null && spawnPoint != null)
         {
-            // Clear previous spawn
+            // 清除之前的生成对象
             if (spawnPoint.childCount > 0)
             {
                 foreach(Transform child in spawnPoint) 
@@ -334,62 +334,62 @@ public class BasicTypesEventReceiver : MonoBehaviour
             }
 
             Instantiate(prefab, spawnPoint.position, Quaternion.identity, spawnPoint);
-            Debug.Log($"[Receiver] Spawned Instance of: {prefab.name}");
+            Debug.Log($"[Receiver] 生成了实例：{prefab.name}");
         }
     }
 
     /// <summary>
-    /// Bound to 'OnMaterial' event via Game Event Editor's Behavior Window.
-    /// Signature: void (Material)
+    /// 通过游戏事件编辑器的行为窗口绑定到'OnMaterial'事件。
+    /// 签名：void (Material)
     /// </summary>
     public void OnMaterialReceived(Material mat)
     {
         if (changingCubeRenderer != null && mat != null)
         {
             changingCubeRenderer.material = mat;
-            Debug.Log($"[Receiver] Material Changed to: {mat.name}");
+            Debug.Log($"[Receiver] 材质更改为：{mat.name}");
         }
     }
 }
 ```
 
-**Key Points:**
-- 🎯 **Signature Matching** - Each method parameter must match the event type exactly
-- 🔒 **Type Safety** - Editor's Behavior Window only shows compatible methods
-- 🎨 **Direct Usage** - Received data can be used immediately (no casting needed)
-- 🔇 **Decoupling** - Receiver has no knowledge of the sender
+**关键点：**
+- 🎯 **签名匹配** - 每个方法参数必须完全匹配事件类型
+- 🔒 **类型安全** - 编辑器的行为窗口仅显示兼容的方法
+- 🎨 **直接使用** - 接收到的数据可以立即使用（无需转换）
+- 🔇 **解耦** - 接收者不知道发送者
 
 ---
 
-## 🔑 Key Takeaways
+## 🔑 关键要点
 
-| Concept               | Implementation                                               |
+| 概念 | 实现 |
 | --------------------- | ------------------------------------------------------------ |
-| 🎯 **Generic Events**  | `GameEvent<T>` supports any serializable type                |
-| 🔒 **Type Safety**     | Editor enforces matching types at configuration time         |
-| 🏭 **Auto-Generation** | No manual event class creation needed                        |
-| 📦 **Data Passing**    | `.Raise(value)` passes typed parameters seamlessly           |
-| 🔄 **Flexibility**     | One system handles strings, vectors, objects, materials, and more |
+| 🎯 **泛型事件** | `GameEvent<T>`支持任何可序列化类型 |
+| 🔒 **类型安全** | 编辑器在配置时强制执行匹配类型 |
+| 🏭 **自动生成** | 不需要手动创建事件类 |
+| 📦 **数据传递** | `.Raise(value)`无缝传递类型化参数 |
+| 🔄 **灵活性** | 一个系统处理字符串、向量、对象、材质等 |
 
-:::note 🎓 Design Insight
+:::note 🎓 设计洞察
 
-The generic system eliminates boilerplate code. Instead of creating `StringGameEvent`, `Vector3GameEvent`, etc., you simply use `GameEvent<T>` with any type. The system handles code generation and type enforcement automatically!
+泛型系统消除了样板代码。您不需要创建`StringGameEvent`、`Vector3GameEvent`等，只需使用任何类型的`GameEvent<T>`。系统自动处理代码生成和类型强制执行！
 
 :::
 
 ---
 
-## 🎯 What's Next?
+## 🎯 下一步？
 
-You've learned how to pass built-in types. But what about **your own custom classes**?
+您已经学会了如何传递内置类型。但是**您自己的自定义类**呢？
 
-**Next Chapter**: Create events with custom data types in **[03 Custom Type Event](./03-custom-type-event.md)**
+**下一章**：在**[03 自定义类型事件](./03-custom-type-event.md)**中使用自定义数据类型创建事件
 
 ---
 
-## 📚 Related Documentation
+## 📚 相关文档
 
-- **[Game Event Creator](../visual-workflow/game-event-creator.md)** - How to create generic events in the Editor
-- **[Game Event Behavior](../visual-workflow/game-event-behavior.md)** - Detailed guide to callback binding
-- **[Raising Events](../scripting/raising-and-scheduling.md)** - API reference for `.Raise()` methods
-- **[API Reference](../scripting/api-reference.md)** - Complete generic event API
+- **[游戏事件创建器](../visual-workflow/game-event-creator.md)** - 如何在编辑器中创建泛型事件
+- **[游戏事件行为](../visual-workflow/game-event-behavior.md)** - 回调绑定的详细指南
+- **[触发事件](../scripting/raising-and-scheduling.md)** - `.Raise()`方法的API参考
+- **[API参考](../scripting/api-reference.md)** - 完整的泛型事件API

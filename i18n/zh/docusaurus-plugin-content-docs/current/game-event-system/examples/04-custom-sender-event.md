@@ -1,134 +1,134 @@
 ﻿---
-sidebar_label: '04 Custom Sender Event'
+sidebar_label: '04 自定义Sender事件'
 sidebar_position: 5
 ---
 
 import VideoGif from '@site/src/components/Video/VideoGif';
 
-# 04 Custom Sender Event: Context-Aware Events
+# 04 自定义Sender事件：上下文感知事件
 
 <!-- <VideoGif src="/video/game-event-system/04-custom-sender-event.mp4" /> -->
 
-## 📋 Overview
+## 📋 概述
 
-In previous demos, events carried data but were anonymous. In complex games, **context matters**. This demo introduces **Sender-Aware Events** (`GameEvent<TSender, TArgs>`), allowing receivers to know **WHO** triggered the event, enabling context-sensitive logic like "Face the Attacker" or "Display Attacker Profile".
+在之前的演示中，事件携带数据但是匿名的。在复杂游戏中，**上下文很重要**。此演示介绍了**Sender感知事件**（`GameEvent<TSender, TArgs>`），允许接收者知道**谁**触发了事件，实现上下文敏感逻辑，如"面向攻击者"或"显示攻击者配置文件"。
 
-:::tip 💡 What You'll Learn
-- How to create dual-generic events with sender information
-- The difference between GameObject senders and pure C# class senders
-- How receivers can use sender context for spatial and logical reactions
-- When to use sender-aware events vs simple events
+:::tip 💡 您将学到
+- 如何使用发送者信息创建双泛型事件
+- GameObject发送者和纯C#类发送者之间的区别
+- 接收者如何使用发送者上下文进行空间和逻辑反应
+- 何时使用sender感知事件vs简单事件
 
 :::
 
 ---
 
-## 🎬 Demo Scene
+## 🎬 演示场景
 ```
 Assets/TinyGiants/GameEventSystem/Demo/04_CustomSenderTypeEvent/04_CustomSenderTypeEvent.unity
 ```
 
-### Scene Composition
+### 场景组成
 
-**UI Layer (Canvas):**
-- 🎮 **Three Attack Buttons** - Located at the bottom of the screen
-  - "Raise (Turret Damage)" → Triggers `CustomSenderTypeEventRaiser.RaiseTurretDamage()`
-  - "Raise (Turret2 Damage)" → Triggers `CustomSenderTypeEventRaiser.RaiseTurret2Damage()`
-  - "Raise (System Damage)" → Triggers `CustomSenderTypeEventRaiser.RaiseSystemDamage()`
+**UI层（Canvas）：**
+- 🎮 **三个攻击按钮** - 位于屏幕底部
+  - "Raise (Turret Damage)" → 触发`CustomSenderTypeEventRaiser.RaiseTurretDamage()`
+  - "Raise (Turret2 Damage)" → 触发`CustomSenderTypeEventRaiser.RaiseTurret2Damage()`
+  - "Raise (System Damage)" → 触发`CustomSenderTypeEventRaiser.RaiseSystemDamage()`
 
-**Game Logic Layer (Demo Scripts):**
-- 📤 **CustomSenderTypeEventRaiser** - GameObject with the raiser script
-  - Manages two physical turrets (Red and Blue) with `GameEvent<GameObject, DamageInfo>`
-  - Handles system-level attacks with `GameEvent<PlayerStats, DamageInfo>`
-  - Controls turret aiming, projectile firing, and event raising
+**游戏逻辑层（演示脚本）：**
+- 📤 **CustomSenderTypeEventRaiser** - 带有触发器脚本的GameObject
+  - 使用`GameEvent<GameObject, DamageInfo>`管理两个物理炮塔（红色和蓝色）
+  - 使用`GameEvent<PlayerStats, DamageInfo>`处理系统级攻击
+  - 控制炮塔瞄准、抛射物发射和事件触发
 
-- 📥 **CustomSenderTypeEventReceiver** - GameObject with the receiver script
-  - Listens to both turret and system events through visual binding
-  - Implements sender-aware logic: rotation toward physical senders, profile display for logical senders
+- 📥 **CustomSenderTypeEventReceiver** - 带有接收器脚本的GameObject
+  - 通过可视化绑定监听炮塔和系统事件
+  - 实现sender感知逻辑：旋转面向物理发送者，为逻辑发送者显示配置文件
 
-**Visual Feedback Layer (Demo Objects):**
-- 🎯 **TargetDummy** - The victim capsule in the center
-  - Has a green "visor" indicating its facing direction
-  - Contains Rigidbody for knockback physics
-  - Displays attacker name/info above via TextMeshPro
-- 🔴 **SentryTurret_Red** - Physical attacker on the left
-  - Consists of Head (rotates to aim) and MuzzlePoint (projectile spawn)
-- 🔵 **SentryTurret_Blue** - Physical attacker on the right
-  - Independent aiming and firing system
-- 🔥 **Projectile System** - Visual projectiles with explosion effects
-- 🏠 **Plane** - Ground surface for scene context
-
----
-
-## 🎮 How to Interact
-
-### Step 1: Enter Play Mode
-
-Press the **Play** button in Unity.
-
-### Step 2: Test Different Attack Sources
-
-**Click "Raise (Turret Damage)":**
-- 🎯 Red turret quickly aims at the dummy
-- 🚀 Projectile fires and travels toward target
-- 💥 On impact: 
-  - Dummy **rotates to face the Red turret**
-  - Info text shows: "SenderName: SentryTurret_Red"
-  - Yellow floating text "15" appears
-  - Physics knockback applied
-- 📝 Console logs: `[Sender1] Target acquired. Aiming...` → `[Receiver] Ouch! Hit by SentryTurret_Red.`
-
-**Click "Raise (Turret2 Damage)":**
-- 🎯 Blue turret quickly aims at the dummy
-- 🚀 Projectile fires from the right side
-- 💥 On impact:
-  - Dummy **rotates to face the Blue turret**
-  - Info text shows: "SenderName: SentryTurret_Blue"
-  - Yellow floating text "15" appears
-- 📝 The dummy clearly tracks which turret attacked
-
-**Click "Raise (System Damage)":**
-- 💥 Instant damage (no projectile)
-- 🎯 Dummy **does NOT rotate** (no physical sender to face)
-- Info text shows: "SenderName: DragonSlayer_99"
-  - This is from the `PlayerStats` class, not a GameObject
-- 🟣 Magenta floating text "50!" appears
-- 📹 Camera shake effect (critical damage)
-- 📝 Console logs: `[Receiver] Logical attack received from DragonSlayer_99. FactionID: 1`
+**视觉反馈层（演示对象）：**
+- 🎯 **TargetDummy** - 中心的受害者胶囊体
+  - 有一个绿色的"护目镜"指示其面向方向
+  - 包含用于击退物理的Rigidbody
+  - 通过TextMeshPro在上方显示攻击者名称/信息
+- 🔴 **SentryTurret_Red** - 左侧的物理攻击者
+  - 由Head（旋转以瞄准）和MuzzlePoint（抛射物生成）组成
+- 🔵 **SentryTurret_Blue** - 右侧的物理攻击者
+  - 独立的瞄准和发射系统
+- 🔥 **抛射物系统** - 带有爆炸效果的可视化抛射物
+- 🏠 **平面** - 场景上下文的地面表面
 
 ---
 
-## 🏗️ Scene Architecture
+## 🎮 如何交互
 
-### Two Types of Sender-Aware Events
+### 步骤1：进入播放模式
 
-This demo showcases the flexibility of the sender system with two distinct scenarios:
+按Unity中的**播放**按钮。
 
-#### Scenario A: Physical Sender (GameObject)
+### 步骤2：测试不同的攻击源
+
+**点击"Raise (Turret Damage)"：**
+- 🎯 红色炮塔快速瞄准假人
+- 🚀 抛射物发射并向目标飞行
+- 💥 撞击时：
+  - 假人**旋转面向红色炮塔**
+  - 信息文本显示："SenderName: SentryTurret_Red"
+  - 黄色漂浮文本"15"出现
+  - 应用物理击退
+- 📝 控制台日志：`[Sender1] Target acquired. Aiming...` → `[Receiver] Ouch! Hit by SentryTurret_Red.`
+
+**点击"Raise (Turret2 Damage)"：**
+- 🎯 蓝色炮塔快速瞄准假人
+- 🚀 抛射物从右侧发射
+- 💥 撞击时：
+  - 假人**旋转面向蓝色炮塔**
+  - 信息文本显示："SenderName: SentryTurret_Blue"
+  - 黄色漂浮文本"15"出现
+- 📝 假人清楚地跟踪哪个炮塔攻击了它
+
+**点击"Raise (System Damage)"：**
+- 💥 即时伤害（无抛射物）
+- 🎯 假人**不旋转**（没有物理发送者可面向）
+- 信息文本显示："SenderName: DragonSlayer_99"
+  - 这来自`PlayerStats`类，而不是GameObject
+- 🟣 品红色漂浮文本"50!"出现
+- 📹 相机震动效果（严重伤害）
+- 📝 控制台日志：`[Receiver] Logical attack received from DragonSlayer_99. FactionID: 1`
+
+---
+
+## 🏗️ 场景架构
+
+### 两种类型的Sender感知事件
+
+此演示通过两个不同的场景展示了sender系统的灵活性：
+
+#### 场景A：物理Sender（GameObject）
 ```csharp
 GameEvent<GameObject, DamageInfo>
 ```
 
-**Use Case:** When the sender has a physical presence in the scene
-- **Sender Type:** Unity `GameObject` (The Turret)
-- **Context Available:** Transform, position, rotation, components
-- **Receiver Logic:** Spatial reactions (look at, move toward, draw trajectory line)
+**使用场景：** 当发送者在场景中具有物理存在时
+- **Sender类型：** Unity `GameObject`（炮塔）
+- **可用上下文：** Transform、位置、旋转、组件
+- **接收器逻辑：** 空间反应（看向、移向、绘制轨迹线）
 
-#### Scenario B: Logical Sender (Pure C# Class)
+#### 场景B：逻辑Sender（纯C#类）
 ```csharp
 GameEvent<PlayerStats, DamageInfo>
 ```
 
-**Use Case:** When the sender is a data object without scene representation
-- **Sender Type:** Custom C# class `PlayerStats`
-- **Context Available:** Player name, level, faction ID, custom properties
-- **Receiver Logic:** Data-driven reactions (display profile, check faction, apply modifiers)
+**使用场景：** 当发送者是没有场景表示的数据对象时
+- **Sender类型：** 自定义C#类`PlayerStats`
+- **可用上下文：** 玩家名称、等级、派系ID、自定义属性
+- **接收器逻辑：** 数据驱动反应（显示配置文件、检查派系、应用修饰符）
 
 ---
 
-### The PlayerStats Class
+### PlayerStats类
 
-A pure C# class demonstrating that senders don't need to inherit from `MonoBehaviour`:
+一个纯C#类，演示sender不需要继承自`MonoBehaviour`：
 ```csharp
 [System.Serializable]
 public class PlayerStats
@@ -146,111 +146,111 @@ public class PlayerStats
 }
 ```
 
-**Key Point:** This proves the event system works with **any serializable type**, not just Unity objects.
+**关键点：** 这证明事件系统适用于**任何可序列化类型**，而不仅仅是Unity对象。
 
 ---
 
-### Event Definitions
+### 事件定义
 
-Open the **Game Event Editor** window to see the dual-generic events:
+打开**游戏事件编辑器**窗口以查看双泛型事件：
 
 ![Game Event Editor](/img/game-event-system/examples/04-custom-sender-event/demo-04-editor.png)
 
-**Events in Database:**
+**数据库中的事件：**
 
-| Event Name                 | Type                                 | Purpose                      |
+| 事件名称 | 类型 | 目的 |
 | -------------------------- | ------------------------------------ | ---------------------------- |
-| `OnGameObjectDamageInfo`   | `GameEvent<GameObject, DamageInfo>`  | Red turret physical attacks  |
-| `OnGameObjectDamageInfo_1` | `GameEvent<GameObject, DamageInfo>`  | Blue turret physical attacks |
-| `OnPlayerStatsDamageInfo`  | `GameEvent<PlayerStats, DamageInfo>` | System-level logical damage  |
+| `OnGameObjectDamageInfo` | `GameEvent<GameObject, DamageInfo>` | 红色炮塔物理攻击 |
+| `OnGameObjectDamageInfo_1` | `GameEvent<GameObject, DamageInfo>` | 蓝色炮塔物理攻击 |
+| `OnPlayerStatsDamageInfo` | `GameEvent<PlayerStats, DamageInfo>` | 系统级逻辑伤害 |
 
-**Notice the Behavior Column:**
-- First two events show **(GameObject,DamageInfo)** - for physical senders
-- Third event shows **(PlayerStats,DamageInfo)** - for logical senders
+**注意行为列：**
+- 前两个事件显示**(GameObject,DamageInfo)** - 用于物理发送者
+- 第三个事件显示**(PlayerStats,DamageInfo)** - 用于逻辑发送者
 
-These complex generic classes were **automatically generated** by the plugin when creating sender-aware events.
+这些复杂的泛型类是在创建sender感知事件时由插件**自动生成**的。
 
-:::note 🔧 Creating Sender Events
+:::note 🔧 创建Sender事件
 
-When creating events in the Game Event Creator:
+在游戏事件创建器中创建事件时：
 
-1. Set **Event Mode** to **"With Sender"**
-2. **Sender Type**: Choose `GameObject` for physical objects or search for custom classes like `PlayerStats`
-3. **Argument Type**: Select the data payload type (e.g., `DamageInfo`)
-4. The system generates the complete `GameEvent<TSender, TArgs>` class automatically
+1. 将**事件模式**设置为**"With Sender"**
+2. **Sender类型**：为物理对象选择`GameObject`或搜索像`PlayerStats`这样的自定义类
+3. **参数类型**：选择数据有效载荷类型（例如，`DamageInfo`）
+4. 系统自动生成完整的`GameEvent<TSender, TArgs>`类
 
 :::
 
 ---
 
-### Sender Setup (CustomSenderTypeEventRaiser)
+### 发送者设置（CustomSenderTypeEventRaiser）
 
-Select the **CustomSenderTypeEventRaiser** GameObject in the Hierarchy:
+在层级视图中选择**CustomSenderTypeEventRaiser** GameObject：
 
 ![CustomSenderTypeEventRaiser Inspector](/img/game-event-system/examples/04-custom-sender-event/demo-04-inspector.png)
 
-**Turret Configurations:**
+**炮塔配置：**
 
-**Turret 1 (Red):**
+**炮塔1（红色）：**
 - `Name`: "Sender1"
-- `Attack Event`: `OnGameObjectDamageInfo` (GameObject sender)
-- `Head`: SentryTurret_Red/Head (Transform for aiming)
-- `Muzzle Position`: Head/MuzzlePoint (Transform for projectile spawn)
+- `Attack Event`: `OnGameObjectDamageInfo`（GameObject sender）
+- `Head`: SentryTurret_Red/Head（用于瞄准的Transform）
+- `Muzzle Position`: Head/MuzzlePoint（抛射物生成的Transform）
 
-**Turret 2 (Blue):**
+**炮塔2（蓝色）：**
 - `Name`: "Sender2"
-- `Attack Event`: `OnGameObjectDamageInfo_1` (GameObject sender)
+- `Attack Event`: `OnGameObjectDamageInfo_1`（GameObject sender）
 - `Head`: SentryTurret_Blue/Head
 - `Muzzle Position`: Head/MuzzlePoint
 
-**Global System Event:**
-- `Global System Event`: `OnPlayerStatsDamageInfo` (PlayerStats sender)
+**全局系统事件：**
+- `Global System Event`: `OnPlayerStatsDamageInfo`（PlayerStats sender）
 
-**Shared Resources:**
-- `Hit Target`: TargetDummy (Transform)
-- `Projectile Prefab`: Projectile prefab for visual effect
-- `Muzzle Flash VFX`: Particle system for firing effect
+**共享资源：**
+- `Hit Target`: TargetDummy（Transform）
+- `Projectile Prefab`: 用于视觉效果的抛射物预制体
+- `Muzzle Flash VFX`: 用于发射效果的粒子系统
 
-**How It Works:**
-1. Button click initiates turret attack sequence
-2. Turret rotates toward target (smooth tracking)
-3. When aligned, projectile spawns and travels
-4. On impact, event is raised with **turret GameObject as sender** and DamageInfo as data
-5. For system damage, a `PlayerStats` instance is created and used as sender
+**工作原理：**
+1. 按钮点击启动炮塔攻击序列
+2. 炮塔旋转向目标（平滑跟踪）
+3. 对齐时，抛射物生成并飞行
+4. 撞击时，事件被触发，**炮塔GameObject作为sender**和DamageInfo作为数据
+5. 对于系统伤害，创建`PlayerStats`实例并用作sender
 
 ---
 
-### Receiver Setup (CustomSenderTypeEventReceiver)
+### 接收者设置（CustomSenderTypeEventReceiver）
 
-Select the **CustomSenderTypeEventReceiver** GameObject in the Hierarchy:
+在层级视图中选择**CustomSenderTypeEventReceiver** GameObject：
 
 ![CustomSenderTypeEventReceiver Inspector](/img/game-event-system/examples/04-custom-sender-event/demo-04-receiver.png)
 
-**Reference Configuration:**
-- `Floating Text Prefab`: DamageFloatingText (Text Mesh Pro)
-- `Target Renderer`: TargetDummy (Mesh Renderer for flash effect)
-- `Target Rigidbody`: TargetDummy (Rigidbody for physics)
-- `Attacker Info Text`: LogText (Text Mesh Pro for displaying sender name)
+**引用配置：**
+- `Floating Text Prefab`: DamageFloatingText（Text Mesh Pro）
+- `Target Renderer`: TargetDummy（用于闪烁效果的Mesh Renderer）
+- `Target Rigidbody`: TargetDummy（用于物理的Rigidbody）
+- `Attacker Info Text`: LogText（用于显示sender名称的Text Mesh Pro）
 
-**Behavior Binding:**
+**行为绑定：**
 
-Two separate receiver methods handle different sender types:
+两个单独的接收器方法处理不同的sender类型：
 
-| Event                      | Bound Method             | Signature                                    |
+| 事件 | 绑定方法 | 签名 |
 | -------------------------- | ------------------------ | -------------------------------------------- |
-| `OnGameObjectDamageInfo`   | `OnTurretAttackReceived` | `void (GameObject sender, DamageInfo args)`  |
-| `OnGameObjectDamageInfo_1` | `OnTurretAttackReceived` | `void (GameObject sender, DamageInfo args)`  |
-| `OnPlayerStatsDamageInfo`  | `OnSystemAttackReceived` | `void (PlayerStats sender, DamageInfo args)` |
+| `OnGameObjectDamageInfo` | `OnTurretAttackReceived` | `void (GameObject sender, DamageInfo args)` |
+| `OnGameObjectDamageInfo_1` | `OnTurretAttackReceived` | `void (GameObject sender, DamageInfo args)` |
+| `OnPlayerStatsDamageInfo` | `OnSystemAttackReceived` | `void (PlayerStats sender, DamageInfo args)` |
 
-**Context-Aware Logic:**
-- **Physical sender:** Uses `sender.transform.position` for spatial rotation
-- **Logical sender:** Uses `sender.playerName` and `sender.level` for display
+**上下文感知逻辑：**
+- **物理sender：** 使用`sender.transform.position`进行空间旋转
+- **逻辑sender：** 使用`sender.playerName`和`sender.level`进行显示
 
 ---
 
-## 💻 Code Breakdown
+## 💻 代码分解
 
-### 📤 CustomSenderTypeEventRaiser.cs (Sender)
+### 📤 CustomSenderTypeEventRaiser.cs（发送者）
 ```csharp
 using UnityEngine;
 using TinyGiants.GameEventSystem.Runtime;
@@ -267,24 +267,24 @@ public class CustomSenderTypeEventRaiser : MonoBehaviour
         [HideInInspector] public bool isAttacking;
     }
 
-    [Header("Turret Configurations")]
+    [Header("炮塔配置")]
     [SerializeField] private TurretConfig turret1;
     [SerializeField] private TurretConfig turret2;
 
-    [Header("Global System Event")]
+    [Header("全局系统事件")]
     [GameEventDropdown] public GameEvent<PlayerStats, DamageInfo> globalSystemEvent;
 
     private PlayerStats _localPlayerStats;
 
     private void Start()
     {
-        // Create a logical sender (no GameObject representation)
+        // 创建一个逻辑发送者（没有GameObject表示）
         _localPlayerStats = new PlayerStats("DragonSlayer_99", 99, 1);
     }
 
     /// <summary>
-    /// Called by Turret Damage button.
-    /// Initiates attack sequence: Aim → Fire → Hit → Raise Event with GameObject sender
+    /// 由炮塔伤害按钮调用。
+    /// 启动攻击序列：瞄准 → 发射 → 击中 → 用GameObject sender触发事件
     /// </summary>
     public void RaiseTurretDamage()
     {
@@ -292,7 +292,7 @@ public class CustomSenderTypeEventRaiser : MonoBehaviour
     }
 
     /// <summary>
-    /// Called by Turret2 Damage button.
+    /// 由炮塔2伤害按钮调用。
     /// </summary>
     public void RaiseTurret2Damage()
     {
@@ -304,7 +304,7 @@ public class CustomSenderTypeEventRaiser : MonoBehaviour
         if (turret.attackEvent == null) return;
         
         turret.isAttacking = true;
-        Debug.Log($"[{turret.name}] Target acquired. Aiming...");
+        Debug.Log($"[{turret.name}] 目标已锁定。瞄准中...");
     }
 
     private void OnProjectileHit(TurretConfig turret)
@@ -312,43 +312,43 @@ public class CustomSenderTypeEventRaiser : MonoBehaviour
         if (turret.attackEvent == null) return;
 
         Vector3 hitPos = hitTarget.position;
-        DamageInfo info = new DamageInfo(15f, false, DamageType.Physical, hitPos, "Sentry Turret");
+        DamageInfo info = new DamageInfo(15f, false, DamageType.Physical, hitPos, "哨兵炮塔");
 
-        // KEY: Pass the turret's GameObject as sender
+        // 关键：将炮塔的GameObject作为sender传递
         GameObject turretRoot = turret.head.parent.gameObject;
         turret.attackEvent.Raise(turretRoot, info);
         
-        Debug.Log($"[{turret.name}] Projectile Impact! Event Raised.");
+        Debug.Log($"[{turret.name}] 抛射物撞击！事件已触发。");
     }
 
     /// <summary>
-    /// Simulates a system-level attack from a logical entity.
+    /// 模拟来自逻辑实体的系统级攻击。
     /// </summary>
     public void RaiseSystemDamage()
     {
         if (globalSystemEvent == null) return;
 
         Vector3 hitPos = hitTarget != null ? hitTarget.position : Vector3.zero;
-        DamageInfo info = new DamageInfo(50f, true, DamageType.Void, hitPos, "GameMaster");
+        DamageInfo info = new DamageInfo(50f, true, DamageType.Void, hitPos, "游戏管理员");
         
-        // KEY: Pass the PlayerStats instance as sender (not a GameObject)
+        // 关键：将PlayerStats实例作为sender传递（不是GameObject）
         globalSystemEvent.Raise(_localPlayerStats, info);
         
-        Debug.Log("[GameMaster] Global system damage event raised.");
+        Debug.Log("[游戏管理员] 全局系统伤害事件已触发。");
     }
 }
 ```
 
-**Key Points:**
-- 🎯 **Dual-Generic Syntax** - `GameEvent<TSender, TArgs>` requires two type parameters
-- 🏗️ **Sender Flexibility** - Can pass `GameObject` OR custom C# classes
-- 📦 **`.Raise(sender, data)`** - Two-parameter method provides both context and payload
-- 🎮 **Physical Senders** - Use actual scene GameObjects for spatial context
-- 💡 **Logical Senders** - Use data classes for non-spatial context
+**关键点：**
+- 🎯 **双泛型语法** - `GameEvent<TSender, TArgs>`需要两个类型参数
+- 🏗️ **Sender灵活性** - 可以传递`GameObject`或自定义C#类
+- 📦 **`.Raise(sender, data)`** - 两参数方法同时提供上下文和有效载荷
+- 🎮 **物理Sender** - 使用实际场景GameObjects提供空间上下文
+- 💡 **逻辑Sender** - 使用数据类提供非空间上下文
 
 ---
 
-### 📥 CustomSenderTypeEventReceiver.cs (Listener)
+### 📥 CustomSenderTypeEventReceiver.cs（监听器）
 ```csharp
 using UnityEngine;
 using TMPro;
@@ -362,68 +362,68 @@ public class CustomSenderTypeEventReceiver : MonoBehaviour
     [SerializeField] private TextMeshPro attackerInfoText;
 
     /// <summary>
-    /// Bound to: GameEvent<GameObject, DamageInfo>
-    /// Handles physical attackers with scene presence.
+    /// 绑定到：GameEvent<GameObject, DamageInfo>
+    /// 处理具有场景存在的物理攻击者。
     /// </summary>
-    /// <param name="sender">The GameObject that attacked (the Turret)</param>
-    /// <param name="args">The damage details</param>
+    /// <param name="sender">攻击的GameObject（炮塔）</param>
+    /// <param name="args">伤害详情</param>
     public void OnTurretAttackReceived(GameObject sender, DamageInfo args)
     {
-        // Use sender's Transform for spatial logic
+        // 使用sender的Transform进行空间逻辑
         if (sender != null)
         {
-            // Smoothly rotate to face the attacker
+            // 平滑旋转面向攻击者
             StartCoroutine(SmoothLookAtRoutine(sender.transform.position));
-            Debug.Log($"[Receiver] Ouch! Hit by {sender.name}.");
+            Debug.Log($"[Receiver] 哎哟！被{sender.name}击中。");
         }
 
-        // Display the sender's GameObject name
+        // 显示sender的GameObject名称
         if (attackerInfoText != null)
         {
-            attackerInfoText.text = $"SenderName : <color=yellow>{sender.name}</color>";
+            attackerInfoText.text = $"发送者名称：<color=yellow>{sender.name}</color>";
         }
 
-        // Common feedback: floating text, flash, knockback
+        // 通用反馈：漂浮文本、闪烁、击退
         ProcessCommonFeedback(args, Color.yellow);
     }
 
     /// <summary>
-    /// Bound to: GameEvent<PlayerStats, DamageInfo>
-    /// Handles logical attackers without scene representation.
+    /// 绑定到：GameEvent<PlayerStats, DamageInfo>
+    /// 处理没有场景表示的逻辑攻击者。
     /// </summary>
-    /// <param name="sender">The PlayerStats object with profile data</param>
-    /// <param name="args">The damage details</param>
+    /// <param name="sender">带有配置文件数据的PlayerStats对象</param>
+    /// <param name="args">伤害详情</param>
     public void OnSystemAttackReceived(PlayerStats sender, DamageInfo args)
     {
-        // Use sender's properties for data-driven logic
+        // 使用sender的属性进行数据驱动逻辑
         if (attackerInfoText != null)
         {
-            attackerInfoText.text = $"SenderName : <color=yellow>{sender.playerName}</color>";
+            attackerInfoText.text = $"发送者名称：<color=yellow>{sender.playerName}</color>";
         }
         
-        Debug.Log($"[Receiver] Logical attack from {sender.playerName}. " +
-                  $"FactionID: {sender.factionId}");
+        Debug.Log($"[Receiver] 来自{sender.playerName}的逻辑攻击。" +
+                  $"派系ID：{sender.factionId}");
         
-        // Common feedback with different color for system damage
+        // 系统伤害使用不同颜色的通用反馈
         ProcessCommonFeedback(args, Color.magenta);
     }
     
     private void ProcessCommonFeedback(DamageInfo args, Color color)
     {
-        // Floating damage text
+        // 漂浮伤害文本
         if (floatingTextPrefab)
         {
             string text = args.isCritical ? $"{args.amount}!" : args.amount.ToString();
             ShowFloatingText(text, color, args.hitPoint);
         }
         
-        // Color flash
+        // 颜色闪烁
         StartCoroutine(FlashColorRoutine(Color.red));
 
-        // Physics knockback (stronger for crits)
+        // 物理击退（暴击更强）
         ApplyPhysicsKnockback(args);
         
-        // Camera shake for critical hits
+        // 暴击的相机震动
         if (args.isCritical)
         {
             StartCoroutine(ShakeCameraRoutine(0.2f, 0.4f));
@@ -441,7 +441,7 @@ public class CustomSenderTypeEventReceiver : MonoBehaviour
             float time = 0f;
             Quaternion startRot = transform.rotation;
             
-            // Smooth rotation over time
+            // 随时间平滑旋转
             while(time < 1f)
             {
                 time += Time.deltaTime * 5f;
@@ -453,44 +453,44 @@ public class CustomSenderTypeEventReceiver : MonoBehaviour
 }
 ```
 
-**Key Points:**
-- 🎯 **Signature Matching** - Each method signature must match its event's generic types
-- 🧭 **Spatial Logic** - `GameObject` senders enable position-based reactions (rotation, distance checks)
-- 📊 **Data Logic** - `PlayerStats` senders enable profile-based reactions (name display, faction checks)
-- 🔀 **Unified Feedback** - Common effects (flash, knockback) apply to both sender types
-- 🎨 **Context-Specific Behavior** - Rotation only happens for physical senders
+**关键点：**
+- 🎯 **签名匹配** - 每个方法签名必须匹配其事件的泛型类型
+- 🧭 **空间逻辑** - `GameObject` sender启用基于位置的反应（旋转、距离检查）
+- 📊 **数据逻辑** - `PlayerStats` sender启用基于配置文件的反应（名称显示、派系检查）
+- 🔀 **统一反馈** - 通用效果（闪烁、击退）适用于两种sender类型
+- 🎨 **上下文特定行为** - 旋转仅对物理sender发生
 
 ---
 
-## 🔑 Key Takeaways
+## 🔑 关键要点
 
-| Concept                   | Implementation                                               |
+| 概念 | 实现 |
 | ------------------------- | ------------------------------------------------------------ |
-| 🎯 **Dual-Generic Events** | `GameEvent<TSender, TArgs>` provides both sender context and data payload |
-| 🏗️ **Sender Flexibility**  | Supports both Unity GameObjects and pure C# classes          |
-| 🧭 **Spatial Context**     | GameObject senders enable position/rotation-based logic      |
-| 📊 **Data Context**        | Custom class senders enable profile/property-based logic     |
-| 🔀 **Unified Handling**    | One receiver can handle multiple sender types intelligently  |
+| 🎯 **双泛型事件** | `GameEvent<TSender, TArgs>`同时提供sender上下文和数据有效载荷 |
+| 🏗️ **Sender灵活性** | 支持Unity GameObjects和纯C#类 |
+| 🧭 **空间上下文** | GameObject sender启用基于位置/旋转的逻辑 |
+| 📊 **数据上下文** | 自定义类sender启用基于配置文件/属性的逻辑 |
+| 🔀 **统一处理** | 一个接收器可以智能地处理多个sender类型 |
 
-:::note 🎓 Design Insight
+:::note 🎓 设计洞察
 
-Sender-aware events are perfect when **who triggered the event** matters as much as **what happened**. Use GameObject senders for spatial reactions (facing, targeting, distance) and custom class senders for data-driven logic (profiles, factions, stats). This pattern is ideal for combat systems, AI reactions, and multiplayer attribution!
+当**谁触发了事件**与**发生了什么**同样重要时，sender感知事件是完美的选择。对空间反应（面向、瞄准、距离）使用GameObject sender，对数据驱动逻辑（配置文件、派系、统计）使用自定义类sender。这种模式非常适合战斗系统、AI反应和多人游戏归因！
 
 :::
 
 ---
 
-## 🎯 What's Next?
+## 🎯 下一步？
 
-You've mastered sender-aware events. Now let's explore how to **control event execution order** with priority systems.
+您已经掌握了sender感知事件。现在让我们探索如何使用优先级系统**控制事件执行顺序**。
 
-**Next Chapter**: Learn about event priorities in **[05 Priority Event](./05-priority-event.md)**
+**下一章**：在**[05 优先级事件](./05-priority-event.md)**中学习事件优先级
 
 ---
 
-## 📚 Related Documentation
+## 📚 相关文档
 
-- **[Game Event Creator](../visual-workflow/game-event-creator.md)** - How to create sender-aware events
-- **[Raising Events](../scripting/raising-and-scheduling.md)** - API for `.Raise(sender, args)`
-- **[Listening Strategies](../scripting/listening-strategies.md)** - Advanced callback patterns
-- **[API Reference](../scripting/api-reference.md)** - Complete dual-generic event API
+- **[游戏事件创建器](../visual-workflow/game-event-creator.md)** - 如何创建sender感知事件
+- **[触发事件](../scripting/raising-and-scheduling.md)** - `.Raise(sender, args)`的API
+- **[监听策略](../scripting/listening-strategies.md)** - 高级回调模式
+- **[API参考](../scripting/api-reference.md)** - 完整的双泛型事件API

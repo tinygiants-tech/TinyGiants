@@ -77,7 +77,7 @@ This is a **living plugin**—your feedback directly shapes future development.
 
 Have a feature request or improvement suggestion? I want to hear it!
 
-- Post in the **#feature-requests** channel on Discord
+- Post in the #ges-features channel on Discord
 - Vote on upcoming features in community polls
 - Participate in priority discussions
 

@@ -1,364 +1,354 @@
 ﻿---
-sidebar_label: 'Runtime Monitor'
-
+sidebar_label: '运行时监控'
 sidebar_position: 2
 ---
 
-# Runtime Monitor
+# 运行时监控
 
-The **Game Event Monitor** is a powerful real-time debugging and analysis tool that provides comprehensive insights into your event system's behavior during runtime. It helps you identify performance bottlenecks, track event flows, monitor listener relationships, and debug complex event chains.
+**游戏事件监控器**是一个强大的实时调试和分析工具，提供对运行时事件系统行为的全面洞察。它帮助您识别性能瓶颈、跟踪事件流、监控监听器关系并调试复杂的事件链。
 
 ------
 
-## 🎯 Why Use the Runtime Monitor?
+## 🎯 为什么使用运行时监控器？
 
-### Powerful Capabilities
+### 强大的功能
 
-The Runtime Monitor transforms the way you develop and debug event-driven games:
+运行时监控器改变了您开发和调试事件驱动游戏的方式：
 
-- **🔍 Real-Time Visibility** - See exactly when and how events are triggered as they happen
-- **⚡ Performance Profiling** - Identify slow listeners and optimize execution times
-- **📊 Statistical Analysis** - Track event frequency, patterns, and usage trends
-- **🔗 Flow Visualization** - Understand complex trigger and chain relationships at a glance
-- **⚠️ Automatic Warnings** - Catch performance issues and potential problems early
-- **👂 Listener Inspector** - Monitor all active subscriptions and their sources
-- **📝 Event Logs** - Complete execution history with stack traces for debugging
+- **🔍 实时可见性** - 准确地看到事件何时以及如何在发生时被触发
+- **⚡ 性能分析** - 识别慢速监听器并优化执行时间
+- **📊 统计分析** - 跟踪事件频率、模式和使用趋势
+- **🔗 流程可视化** - 一目了然地理解复杂的触发器和链关系
+- **⚠️ 自动警告** - 及早发现性能问题和潜在问题
+- **👂 监听器检查器** - 监控所有活动订阅及其来源
+- **📝 事件日志** - 完整的执行历史记录，带有用于调试的堆栈跟踪
 
-### What This Means for Your Development
+### 这对您的开发意味着什么
 
-:::tip Development Benefits
+:::tip 开发优势
 
-- **Faster Debugging**: Instantly see which events fired and in what order
-- **Performance Optimization**: Identify and fix slow listeners before they impact gameplay
-- **Architecture Understanding**: Visualize event flows to maintain clean system design
-- **Proactive Problem Detection**: Catch issues like memory leaks and recursive calls automatically
-- **Team Collaboration**: Share visual representations of event flows with team members 
+- **更快的调试**：立即查看哪些事件触发以及按什么顺序
+- **性能优化**：在影响游戏玩法之前识别并修复慢速监听器
+- **架构理解**：可视化事件流以维护清晰的系统设计
+- **主动问题检测**：自动捕获内存泄漏和递归调用等问题
+- **团队协作**：与团队成员共享事件流的可视化表示
 
 :::
 
 ------
 
-## 🚀 Opening the Monitor
+## 🚀 打开监控器
 
-The utility is located within the **[Game Event System](../visual-workflow/game-event-system)**, you can access through the following method:
+该实用工具位于**[游戏事件系统](../visual-workflow/game-event-system)**中，您可以通过以下方法访问：
 
-**From the System Dashboard:**
-
+**从系统仪表板：**
 ```tex
-Game Event System Window → Click "Game Event Monitor"
+游戏事件系统窗口 → 点击"Game Event Monitor"
 ```
 
 ![alt text](/img/game-event-system/tools/runtime-monitor/hub-core-tools.png)
 
-:::info Window Management
+:::info 窗口管理
 
-The monitor window can be docked alongside your other Unity editor windows for convenient access during play mode. I recommend docking it near your Console or Inspector windows. 
+监控器窗口可以与其他Unity编辑器窗口一起停靠，以便在播放模式期间方便访问。我建议将其停靠在控制台或Inspector窗口附近。
 
 :::
 
 ------
 
-## 📱 Interface Overview
+## 📱 界面概览
 
-### Initial Window State
+### 初始窗口状态
 
-When you first open the Game Event Monitor, you'll see the window in its **stopped state** (not in Play Mode):
+当您第一次打开游戏事件监控器时，您将看到窗口处于**停止状态**（不在播放模式）：
 
 ![Monitor Window - Stopped State](/img/game-event-system/tools/runtime-monitor/monitor-stopped.png)
 
-**Key Elements in Stopped State:**
+**停止状态下的关键元素：**
 
-- **Header Bar** - Displays the Game Event System logo and window title
-- **Status Indicator** - Shows "○ Stopped" in gray (not in Play Mode)
-- **Debugger Toggle** - Button to enable/disable event tracking
-- **Tab Navigation** - 8 main tabs (grayed out until Play Mode)
-- **Play Mode Prompt** - Central message guiding you to enter Play Mode
+- **标题栏** - 显示游戏事件系统徽标和窗口标题
+- **状态指示器** - 显示灰色的"○ Stopped"（不在播放模式）
+- **调试器切换** - 启用/禁用事件跟踪的按钮
+- **选项卡导航** - 8个主要选项卡（在播放模式之前呈灰色）
+- **播放模式提示** - 引导您进入播放模式的中央消息
 
-:::warning Requires Play Mode 
+:::warning 需要播放模式
 
-The Runtime Monitor only collects and displays data during **Play Mode**. All monitoring features are disabled in Edit Mode to avoid performance overhead. 
+运行时监控器仅在**播放模式**期间收集和显示数据。在编辑模式下禁用所有监控功能以避免性能开销。
 
 :::
 
 ------
 
-### Window Components
+### 窗口组件
 
-The monitor interface consists of several key areas:
+监控器界面由几个关键区域组成：
 
-#### 1. Header Bar
+#### 1. 标题栏
 
-Located at the top of the window, the header contains:
+位于窗口顶部，标题包含：
 
-- **🎮 Logo & Title** - Visual branding and window identification
+- **🎮 徽标与标题** - 视觉品牌和窗口标识
 
-- Status Badge
+- **状态徽章** - 显示当前状态：
 
-   \- Shows current state:
+  - **Running**（绿色）- 播放模式处于活动状态，监控事件
+  - **Stopped**（灰色）- 编辑模式，无监控
 
-  - **Running** (green) - Play Mode is active, monitoring events
-  - **Stopped** (gray) - Edit Mode, no monitoring
+- **调试器切换** - 控制是否正在跟踪事件：
 
-- Debugger Toggle
+  - **Debugger ON**（绿色）- 主动记录事件
+  - **Debugger OFF**（红色）- 不记录（节省性能）
 
-   \- Controls whether events are being tracked:
+#### 2. 导航工具栏
 
-  - **Debugger ON** (green) - Actively recording events
-  - **Debugger OFF** (red) - Not recording (saves performance)
+在标题下方，您会找到主导航选项卡：
 
-#### 2. Navigation Toolbar
-
-Below the header, you'll find the main navigation tabs:
-
-| Tab             | Icon | Purpose                               |
+| 选项卡 | 图标 | 目的 |
 | --------------- | ---- | ------------------------------------- |
-| **Dashboard**   | 📊    | Overview of all monitoring data       |
-| **Performance** | ⚡    | Execution time analysis and profiling |
-| **Recent**      | 📝    | Chronological event log               |
-| **Statistics**  | 📈    | Event frequency and usage patterns    |
-| **Warnings**    | ⚠    | Performance issues and problems       |
-| **Listeners**   | 👂    | Active subscriptions overview         |
-| **Automation**  | 🔗    | Trigger and chain flow visualization  |
-| **Details**     | 🔍    | Deep dive into selected events        |
+| **Dashboard** | 📊 | 所有监控数据的概览 |
+| **Performance** | ⚡ | 执行时间分析和分析 |
+| **Recent** | 📝 | 按时间顺序排列的事件日志 |
+| **Statistics** | 📈 | 事件频率和使用模式 |
+| **Warnings** | ⚠ | 性能问题和问题 |
+| **Listeners** | 👂 | 活动订阅概览 |
+| **Automation** | 🔗 | 触发器和链流程可视化 |
+| **Details** | 🔍 | 深入了解选定的事件 |
 
-#### 3. Search & Controls
+#### 3. 搜索与控制
 
-On the right side of the toolbar:
+在工具栏右侧：
 
-- **Search Field** - Filter events across all tabs
-- **Clear Menu** - Options to clear different data types
+- **搜索字段** - 跨所有选项卡过滤事件
+- **清除菜单** - 清除不同数据类型的选项
 
 ------
 
-## 📊 Dashboard Tab
+## 📊 仪表板选项卡
 
-The **Dashboard** provides a high-level overview of your entire event system's health and activity.
+**仪表板**提供整个事件系统健康状况和活动的高级概览。
 
 ![Dashboard Tab - Running State](/img/game-event-system/tools/runtime-monitor/monitor-dashboard.png)
 
-### Metric Cards
+### 指标卡
 
-At the top, four metric cards display key statistics:
+在顶部，四个指标卡显示关键统计信息：
 
-#### 📊 Total Events
+#### 📊 总事件数
 
-- **What it shows**: Number of unique events in your game
-- **Includes**: All events across all active databases
-- **Use case**: Understand the scale of your event system
+- **显示内容**：游戏中唯一事件的数量
+- **包括**：所有活动数据库中的所有事件
+- **使用场景**：了解事件系统的规模
 
-#### 📝 Total Logs
+#### 📝 总日志数
 
-- **What it shows**: Number of event executions recorded
-- **Updates**: In real-time as events fire
-- **Use case**: Track overall system activity
+- **显示内容**：记录的事件执行数量
+- **更新**：事件触发时实时更新
+- **使用场景**：跟踪整体系统活动
 
-#### ⚡ Monitored
+#### ⚡ 已监控
 
-- **What it shows**: Number of events with performance data
-- **Criteria**: Only events that have been triggered
-- **Use case**: See which events have profiling info
+- **显示内容**：具有性能数据的事件数量
+- **标准**：仅触发的事件
+- **使用场景**：查看哪些事件有分析信息
 
-#### ⚠ Warnings
+#### ⚠ 警告
 
-- **What it shows**: Count of active performance warnings
-- **Color**: Red if any warnings exist
-- **Use case**: Quick problem detection
+- **显示内容**：活动性能警告的计数
+- **颜色**：如果存在任何警告则为红色
+- **使用场景**：快速问题检测
 
-### Active Databases Section
+### 活动数据库部分
 
-Displays all currently loaded Game Event Databases:
-
+显示所有当前加载的游戏事件数据库：
 ```tex
-📁 Active Databases (2)
-├─ CoreEvents          [42 Events]  [PRIMARY]
-└─ UIEvents            [18 Events]
+📁 活动数据库 (2)
+├─ CoreEvents          [42个事件]  [PRIMARY]
+└─ UIEvents            [18个事件]
 ```
 
-**Information Displayed:**
+**显示的信息：**
 
-- Database name and asset reference
-- Total event count per database
-- **PRIMARY** badge for the main database
-- Click database name to select it in Project window
+- 数据库名称和资产引用
+- 每个数据库的总事件计数
+- 主数据库的**PRIMARY**徽章
+- 点击数据库名称在项目窗口中选择它
 
-### Performance Overview
+### 性能概览
 
-Visual representation of event execution health:
+事件执行健康状况的可视化表示：
 
-**Performance Levels:**
+**性能级别：**
 
-- **✓ Good** (Green) - Execution time < 1ms
-- **⚠ Warning** (Yellow) - Execution time 1-10ms
-- **❌ Critical** (Red) - Execution time > 10ms
+- **✓ 良好**（绿色）- 执行时间 < 1ms
+- **⚠ 警告**（黄色）- 执行时间 1-10ms
+- **❌ 严重**（红色）- 执行时间 > 10ms
 
-**Visual Breakdown:**
+**可视化分解：**
 
-- Color-coded bar showing distribution
-- Percentage of events in each category
-- Average execution time across all events
-- Click "View All →" to jump to Performance tab
+- 显示分布的彩色条
+- 每个类别中的事件百分比
+- 所有事件的平均执行时间
+- 点击"View All →"跳转到性能选项卡
 
-:::tip Performance Target
+:::tip 性能目标
 
-Aim for keeping 90%+ of your events in the "Good" category for smooth gameplay. Events in "Critical" should be optimized immediately. 
+目标是将90%以上的事件保持在"良好"类别中，以实现流畅的游戏玩法。"严重"类别中的事件应立即优化。
 
 :::
 
-### Recent Activity
+### 最近活动
 
-Shows the last 15 events that fired:
+显示最后触发的15个事件：
 
-**Each Entry Displays:**
+**每个条目显示：**
 
-- **[Timestamp]** - When the event was raised (HH:MM:SS.mmm)
-- **Event Name** - The event that was triggered
-- **Event Type** - Generic type (e.g., `GameEvent<int>`)
+- **[时间戳]** - 事件触发时间（HH:MM:SS.mmm）
+- **事件名称** - 触发的事件
+- **事件类型** - 泛型类型（例如，`GameEvent<int>`）
 
-**Quick Actions:**
+**快速操作：**
 
-- Click any entry to view full details
-- Entries update in real-time during Play Mode
-- Click "View All →" to see complete history
+- 点击任何条目查看完整详情
+- 条目在播放模式期间实时更新
+- 点击"View All →"查看完整历史记录
 
-### Quick Warnings
+### 快速警告
 
-If any warnings are active, they appear at the bottom:
+如果有任何警告处于活动状态，它们会出现在底部：
 
-**Warning Types:**
+**警告类型：**
 
-- 🔥 **Performance** - Events executing too slowly
-- ⚠️ **High Frequency** - Events firing too often
-- 💾 **Memory** - Potential memory issues
-- 🔄 **Recursive** - Possible infinite loops
+- 🔥 **性能** - 事件执行太慢
+- ⚠️ **高频率** - 事件触发太频繁
+- 💾 **内存** - 潜在的内存问题
+- 🔄 **递归** - 可能的无限循环
 
-**For Each Warning:**
+**对于每个警告：**
 
-- Severity indicator (color-coded)
-- Clear description of the issue
-- Number of affected events
-- Click "View All →" to see full list
+- 严重性指示器（颜色编码）
+- 问题的清晰描述
+- 受影响的事件数量
+- 点击"View All →"查看完整列表
 
 ------
 
-## ⚡ Performance Tab
+## ⚡ 性能选项卡
 
-Detailed performance profiling for every event that has been triggered.
+每个已触发事件的详细性能分析。
 
 ![Performance Tab - Running State](/img/game-event-system/tools/runtime-monitor/monitor-performance.png)
 
-### Sorting Controls
+### 排序控制
 
-At the top of the tab, you can sort the performance data:
+在选项卡顶部，您可以对性能数据进行排序：
 
-**Sort Options:**
+**排序选项：**
 
-- **Avg Time** ⬇️ - Average execution time (default, descending)
-- **Max Time** - Maximum recorded execution time
-- **Exec Count** - Number of times executed
-- **Listeners** - Average number of listeners
+- **Avg Time** ⬇️ - 平均执行时间（默认，降序）
+- **Max Time** - 最大记录执行时间
+- **Exec Count** - 执行次数
+- **Listeners** - 平均监听器数量
 
-**Sort Direction:**
+**排序方向：**
 
-- ⬇️ Descending (high to low)
-- ⬆️ Ascending (low to high)
-- Click the same button again to toggle direction
+- ⬇️ 降序（从高到低）
+- ⬆️ 升序（从低到高）
+- 再次点击同一按钮以切换方向
 
-### Performance Table
+### 性能表
 
-Each row displays comprehensive metrics for a single event:
+每行显示单个事件的综合指标：
 
-| Column         | Description                    | Color Coding                           |
+| 列 | 描述 | 颜色编码 |
 | -------------- | ------------------------------ | -------------------------------------- |
-| **Icon**       | Performance level indicator    | 🟢 Good / 🟡 Warning / 🔴 Critical        |
-| **Event Name** | Full name of the event         | Blue (clickable)                       |
-| **Avg Time**   | Average execution duration     | Green < 1ms, Yellow 1-10ms, Red > 10ms |
-| **Min Time**   | Fastest execution recorded     | Gray                                   |
-| **Max Time**   | Slowest execution recorded     | Red if > 10ms                          |
-| **Count**      | Total number of executions     | White                                  |
-| **Listeners**  | Average number of listeners    | White                                  |
-| **GC**         | Garbage collection allocations | Red if > 0, Gray if 0                  |
-| **👂**          | View listeners button          | Opens Listeners tab                    |
+| **图标** | 性能级别指示器 | 🟢 良好 / 🟡 警告 / 🔴 严重 |
+| **事件名称** | 事件的完整名称 | 蓝色（可点击） |
+| **平均时间** | 平均执行持续时间 | 绿色 < 1ms，黄色 1-10ms，红色 > 10ms |
+| **最小时间** | 记录的最快执行 | 灰色 |
+| **最大时间** | 记录的最慢执行 | 如果 > 10ms则为红色 |
+| **计数** | 总执行次数 | 白色 |
+| **监听器** | 平均监听器数量 | 白色 |
+| **GC** | 垃圾回收分配 | 如果 > 0则为红色，如果为0则为灰色 |
+| **👂** | 查看监听器按钮 | 打开监听器选项卡 |
 
-### Reading Performance Data
+### 读取性能数据
 
-**Example Row:**
-
+**示例行：**
 ```tex
 🟢 PlayerHealthChanged  1.2ms  0.8ms  3.5ms  Count: 156  Listeners: 4  GC: 0  [👂]
 ```
 
-**Interpretation:**
+**解释：**
 
-- ✅ Event is performing well (green icon)
-- Executes in 1.2ms on average (acceptable)
-- Fastest execution was 0.8ms
-- Slowest execution was 3.5ms
-- Has been triggered 156 times
-- Has 4 active listeners
-- No GC allocations (excellent!)
+- ✅ 事件性能良好（绿色图标）
+- 平均执行1.2ms（可接受）
+- 最快执行为0.8ms
+- 最慢执行为3.5ms
+- 已触发156次
+- 有4个活动监听器
+- 无GC分配（优秀！）
 
-:::warning Performance Red Flags
+:::warning 性能红旗
 
-- **Avg Time > 5ms**: Should be optimized
-- **Max Time > 16ms**: Will cause frame drops
-- **GC > 0**: Creating garbage, refactor to avoid allocations
-- **High Listener Count**: Consider consolidating listeners 
+- **平均时间 > 5ms**：应该优化
+- **最大时间 > 16ms**：将导致帧丢失
+- **GC > 0**：创建垃圾，重构以避免分配
+- **高监听器计数**：考虑合并监听器
 
 :::
 
-### Quick Actions
+### 快速操作
 
-- **👂 Button**: Jump to Listeners tab for this specific event
-- **Click Row**: Select event to view in Details tab
-- **Search**: Filter events by name in real-time
+- **👂 按钮**：跳转到此特定事件的监听器选项卡
+- **点击行**：选择事件以在详情选项卡中查看
+- **搜索**：实时按名称过滤事件
 
 ------
 
-## 📝 Recent Events Tab
+## 📝 最近事件选项卡
 
-Complete chronological log of all event executions.
+所有事件执行的完整时间顺序日志。
 
 ![Recent Events Tab - Running State](/img/game-event-system/tools/runtime-monitor/monitor-recent.png)
 
-### Control Options
+### 控制选项
 
-At the top of the tab:
+在选项卡顶部：
 
-**Toggle Options:**
+**切换选项：**
 
-- ☑️ **Auto Scroll** - Automatically scrolls to newest events
-- ☐ **Show Stack Trace** - Displays call stack for each event
+- ☑️ **自动滚动** - 自动滚动到最新事件
+- ☐ **显示堆栈跟踪** - 显示每个事件的调用堆栈
 
-**Status Indicator:**
+**状态指示器：**
 
-- "Showing X of Y" - Displays how many events are visible
+- "Showing X of Y" - 显示有多少事件可见
 
-**Actions:**
+**操作：**
 
-- **🗑 Clear Logs** - Removes all logged events
+- **🗑 清除日志** - 删除所有记录的事件
 
-### Log Entry Format
+### 日志条目格式
 
-Each log entry shows:
-
+每个日志条目显示：
 ```tex
 [14:23:45.123]  F:1250  PlayerTakeDamage  <GameEvent<GameObject, DamageInfo>>  [Details]
   📍 Called by: EnemyController.Attack()
 ```
 
-**Entry Components:**
+**条目组件：**
 
-- **[Timestamp]** - Precise time of execution (HH:MM:SS.mmm)
-- **F:####** - Frame number when event fired
-- **Event Name** - Name of the triggered event
-- **[Type]** - Generic type signature
-- **[Details]** - Button to view full information
-- **📍 Caller Info** - Method that raised the event
+- **[时间戳]** - 精确的执行时间（HH:MM:SS.mmm）
+- **F:####** - 事件触发时的帧号
+- **事件名称** - 触发的事件名称
+- **[类型]** - 泛型类型签名
+- **[Details]** - 查看完整信息的按钮
+- **📍 调用者信息** - 触发事件的方法
 
-### Stack Trace View
+### 堆栈跟踪视图
 
-When **Show Stack Trace** is enabled, each entry expands to show:
-
+当启用**显示堆栈跟踪**时，每个条目展开以显示：
 ```tex
 at GameEventSystem.GameEvent.Raise()
 at PlayerController.TakeDamage(float amount) in Assets/Scripts/Player.cs:line 45
@@ -366,277 +356,269 @@ at EnemyController.Attack() in Assets/Scripts/Enemy.cs:line 89
 ...
 ```
 
-**Use Cases:**
+**使用场景：**
 
-- Track down where events are being triggered
-- Debug unexpected event calls
-- Understand execution flow
-- Identify performance bottlenecks in calling code
+- 追踪事件触发的位置
+- 调试意外的事件调用
+- 理解执行流程
+- 识别调用代码中的性能瓶颈
 
-### Search & Filter
+### 搜索与过滤
 
-Use the search box to filter logs by:
+使用搜索框按以下方式过滤日志：
 
-- Event name (e.g., "Player")
-- Event type (e.g., "GameObject")
-- Partial matches work
+- 事件名称（例如，"Player"）
+- 事件类型（例如，"GameObject"）
+- 部分匹配有效
 
-:::tip Debugging Workflow
+:::tip 调试工作流
 
-1. Enable **Auto Scroll** to see events as they happen
-2. When you spot an issue, disable auto scroll
-3. Enable **Show Stack Trace** to see call hierarchy
-4. Click **Details** to view full event information
-5. Use this data to track down and fix the problem 
+1. 启用**自动滚动**以查看事件发生时的情况
+2. 当您发现问题时，禁用自动滚动
+3. 启用**显示堆栈跟踪**以查看调用层次结构
+4. 点击**Details**查看完整的事件信息
+5. 使用此数据追踪并修复问题
 
 :::
 
 ------
 
-## 📈 Statistics Tab
+## 📈 统计选项卡
 
-Analyze event usage patterns and frequency over time.
+分析事件使用模式和随时间变化的频率。
 
 ![Statistics Tab - Running State](/img/game-event-system/tools/runtime-monitor/monitor-statistics.png)
 
-### Sorting Controls
+### 排序控制
 
-Sort statistics by different metrics:
+按不同指标对统计信息进行排序：
 
-**Sort Options:**
+**排序选项：**
 
-- **Count** ⬇️ - Total number of triggers (default)
-- **Frequency** - Triggers per second
-- **Last Trigger** - Most recently fired events
+- **Count** ⬇️ - 总触发次数（默认）
+- **Frequency** - 每秒触发次数
+- **Last Trigger** - 最近触发的事件
 
-### Statistics Table
+### 统计表
 
-Each row displays usage metrics:
+每行显示使用指标：
 
-| Column           | Description                   | Interpretation            |
+| 列 | 描述 | 解释 |
 | ---------------- | ----------------------------- | ------------------------- |
-| **Event Name**   | Name of the event             | Blue, clickable           |
-| **Count**        | Total executions              | Green, higher = more used |
-| **Freq/sec**     | Triggers per second           | Red if > 60/sec           |
-| **Avg Interval** | Average time between triggers | In seconds                |
-| **Last Trigger** | Time since last execution     | Relative time             |
-| **View Logs**    | See all logs for this event   | Opens Details tab         |
+| **事件名称** | 事件名称 | 蓝色，可点击 |
+| **计数** | 总执行次数 | 绿色，越高 = 使用越多 |
+| **频率/秒** | 每秒触发次数 | 如果 > 60/秒则为红色 |
+| **平均间隔** | 触发之间的平均时间 | 以秒为单位 |
+| **上次触发** | 自上次执行以来的时间 | 相对时间 |
+| **查看日志** | 查看此事件的所有日志 | 打开详情选项卡 |
 
-### Understanding Frequency Data
+### 理解频率数据
 
-**Example Row:**
-
+**示例行：**
 ```tex
 PlayerMoved  Count: 2,450  Freq/sec: 30.2/s  Avg Interval: 0.033s  Last Trigger: 2s ago  [View Logs]
 ```
 
-**Analysis:**
+**分析：**
 
-- Event has fired 2,450 times total
-- Triggering ~30 times per second (every frame at 30 FPS)
-- Average of 0.033 seconds between triggers
-- Last fired 2 seconds ago
+- 事件总共触发了2,450次
+- 每秒触发约30次（30 FPS时每帧）
+- 触发之间平均0.033秒
+- 2秒前最后触发
 
-**Frequency Interpretation:**
+**频率解释：**
 
-- **< 1/sec**: Rare events (boss spawns, level transitions)
-- **1-10/sec**: Regular events (ability cooldowns, pickups)
-- **10-60/sec**: High frequency (movement, input polling)
-- **> 60/sec**: ⚠️ Very high, may need optimization
+- **< 1/秒**：罕见事件（boss生成、关卡转换）
+- **1-10/秒**：常规事件（能力冷却、拾取）
+- **10-60/秒**：高频率（移动、输入轮询）
+- **> 60/秒**：⚠️ 非常高，可能需要优化
 
-:::warning High Frequency 
+:::warning 高频率警告
 
-​		Warning Events firing at > 60/sec appear in **red**. While this isn't always a problem, it may indicate:
+触发频率 > 60/秒的事件显示为**红色**。虽然这并不总是问题，但它可能表明：
 
-- Redundant event raises
-- Events in Update() that should be in FixedUpdate()
-- Unnecessary event traffic that could be batched 
+- 冗余的事件触发
+- Update()中的事件应该在FixedUpdate()中
+- 可以批处理的不必要的事件流量
 
 :::
 
-### Use Cases
+### 使用场景
 
-**Identify Unused Events:**
+**识别未使用的事件：**
 
-- Sort by **Count** ascending
-- Events with low counts may be dead code
+- 按**计数**升序排序
+- 计数低的事件可能是死代码
 
-**Find Performance Hotspots:**
+**查找性能热点：**
 
-- Sort by **Frequency** descending
-- High-frequency events should be highly optimized
+- 按**频率**降序排序
+- 高频率事件应该高度优化
 
-**Debug Event Timing:**
+**调试事件时间：**
 
-- Check **Avg Interval** to understand event patterns
-- Irregular intervals may indicate bugs
+- 检查**平均间隔**以理解事件模式
+- 不规则间隔可能表明错误
 
-**Track Recent Activity:**
+**跟踪最近活动：**
 
-- Sort by **Last Trigger** descending
-- See which events are currently active
+- 按**上次触发**降序排序
+- 查看哪些事件当前处于活动状态
 
 ------
 
-## ⚠️ Warnings Tab
+## ⚠️ 警告选项卡
 
-Automatic detection of performance issues and potential problems.
+自动检测性能问题和潜在问题。
 
 ![Warnings Tab - Running State](/img/game-event-system/tools/runtime-monitor/monitor-warnings.png)
 
-### Warning Categories
+### 警告类别
 
-The system automatically detects several types of issues:
+系统自动检测几种类型的问题：
 
-#### 🔥 Performance Issues
+#### 🔥 性能问题
 
-**Slow Execution:**
-
+**慢执行：**
 ```tex
-❌ CRITICAL
-Slow Event Execution
-Events are taking too long to execute (> 10ms average)
-Affected Events (3): PlayerUpdate, EnemyAI, PhysicsSync
+❌ 严重
+慢事件执行
+事件执行时间过长（平均 > 10ms）
+受影响的事件 (3): PlayerUpdate, EnemyAI, PhysicsSync
 ```
 
-**Detection Criteria:**
+**检测标准：**
 
-- Average execution time > 10ms
-- Maximum execution time > 16ms (one frame at 60 FPS)
+- 平均执行时间 > 10ms
+- 最大执行时间 > 16ms（60 FPS时一帧）
 
-**Impact:** Can cause frame drops and stuttering
+**影响：** 可能导致帧丢失和卡顿
 
-**Solution:** Optimize listener code, move heavy work to coroutines
+**解决方案：** 优化监听器代码，将重工作移到协程
 
-#### ⚡ High Frequency Warnings
+#### ⚡ 高频率警告
 
-**Excessive Triggering:**
-
+**过度触发：**
 ```tex
-⚠️ WARNING  
-High Frequency Events
-Events are firing more than 60 times per second
-Affected Events (2): OnMouseMove, OnColliderCheck
+⚠️ 警告
+高频率事件
+事件每秒触发超过60次
+受影响的事件 (2): OnMouseMove, OnColliderCheck
 ```
 
-**Detection Criteria:**
+**检测标准：**
 
-- Triggers per second > 60
+- 每秒触发次数 > 60
 
-**Impact:** CPU overhead, potential unnecessary work
+**影响：** CPU开销，潜在的不必要工作
 
-**Solution:** Batch updates, use throttling, consider alternative patterns
+**解决方案：** 批处理更新，使用节流，考虑替代模式
 
-#### 💾 Memory Warnings
+#### 💾 内存警告
 
-**GC Allocations:**
-
+**GC分配：**
 ```tex
-⚠️ WARNING
-Garbage Collection Detected
-Events are causing GC allocations during execution
-Affected Events (5): SpawnParticle, CreateUI, LoadAsset
+⚠️ 警告
+检测到垃圾回收
+事件在执行期间导致GC分配
+受影响的事件 (5): SpawnParticle, CreateUI, LoadAsset
 ```
 
-**Detection Criteria:**
+**检测标准：**
 
-- GC allocations > 0 per execution
+- 每次执行的GC分配 > 0
 
-**Impact:** Garbage collection pauses, frame drops
+**影响：** 垃圾回收暂停，帧丢失
 
-**Solution:** Use object pooling, avoid creating new objects in hot paths
+**解决方案：** 使用对象池，避免在热路径中创建新对象
 
-#### 🔄 Recursive Call Detection
+#### 🔄 递归调用检测
 
-**Potential Infinite Loops:**
-
+**潜在的无限循环：**
 ```tex
-❌ CRITICAL
-Possible Recursive Event
-Event may be triggering itself, creating a loop
-Affected Events (1): OnValueChanged
+❌ 严重
+可能的递归事件
+事件可能正在触发自身，创建循环
+受影响的事件 (1): OnValueChanged
 ```
 
-**Detection Criteria:**
+**检测标准：**
 
-- Event raised from within its own listener
-- Stack trace shows recursion
+- 事件从其自己的监听器内触发
+- 堆栈跟踪显示递归
 
-**Impact:** Stack overflow, Unity freeze
+**影响：** 堆栈溢出，Unity冻结
 
-**Solution:** Add recursion guards, redesign event flow
+**解决方案：** 添加递归保护，重新设计事件流
 
-### Warning Card Layout
+### 警告卡布局
 
-Each warning displays:
+每个警告显示：
 
-**Header:**
+**标题：**
 
-- Icon (🔥/⚠️/ℹ️) indicating severity
-- Warning type (e.g., "Slow Execution")
-- Severity badge (CRITICAL / WARNING / INFO)
+- 图标（🔥/⚠️/ℹ️）表示严重性
+- 警告类型（例如，"慢执行"）
+- 严重性徽章（严重/警告/信息）
 
-**Body:**
+**正文：**
 
-- Clear description of the problem
-- Impact explanation
-- Affected event count
+- 问题的清晰描述
+- 影响说明
+- 受影响的事件计数
 
-**Event List:**
+**事件列表：**
 
-- Shows up to 5 affected events
-- Each with **[View]** button to inspect
-- "...and X more" if > 5 events affected
+- 显示最多5个受影响的事件
+- 每个都有**[View]**按钮来检查
+- 如果 > 5个事件受影响则显示"...and X more"
 
-### Severity Levels
+### 严重性级别
 
-| Level        | Color    | Priority  | Action Required     |
+| 级别 | 颜色 | 优先级 | 需要的操作 |
 | ------------ | -------- | --------- | ------------------- |
-| **CRITICAL** | 🔴 Red    | Immediate | Fix before shipping |
-| **WARNING**  | 🟡 Yellow | Important | Should be optimized |
-| **INFO**     | 🔵 Blue   | Optional  | Informational only  |
+| **严重** | 🔴 红色 | 立即 | 发布前修复 |
+| **警告** | 🟡 黄色 | 重要 | 应该优化 |
+| **信息** | 🔵 蓝色 | 可选 | 仅供参考 |
 
-### No Warnings State
+### 无警告状态
 
-When everything is working well:
-
+当一切运行良好时：
 ```tex
-✅ All Good!
-No performance issues or warnings detected.
+✅ 一切正常！
+未检测到性能问题或警告。
 ```
 
-:::tip Best Practice 
+:::tip 最佳实践
 
-Check the Warnings tab regularly during development. Addressing warnings early prevents performance problems from accumulating and becoming harder to fix later. 
+在开发期间定期检查警告选项卡。及早解决警告可防止性能问题积累并变得更难修复。
 
 :::
 
-## 👂 Listeners Tab
+## 👂 监听器选项卡
 
-Comprehensive overview of all active event subscriptions.
+所有活动事件订阅的综合概览。
 
 ![Listeners Tab - Running State](/img/game-event-system/tools/runtime-monitor/monitor-listeners.png)
 
-### Listener Cards
+### 监听器卡
 
-Each event with active listeners is displayed as an expandable card:
+每个具有活动监听器的事件显示为可展开的卡：
 
-**Card Header:**
-
+**卡标题：**
 ```tex
-EventName  ⭐ (if persistent)     Total: 12
+EventName  ⭐ (如果持久化)     Total: 12
 ```
 
-- **Event Name**: Name of the event (blue, bold)
-- **⭐ Icon**: Appears for persistent events (survives scene loads)
-- **Total Count**: Sum of all listener types (green)
+- **事件名称**：事件名称（蓝色，粗体）
+- **⭐ 图标**：出现在持久化事件上（在场景加载间存活）
+- **总计数**：所有监听器类型的总和（绿色）
 
-### Listener Type Breakdown
+### 监听器类型分解
 
-Each card shows 6 blocks representing different listener types:
+每个卡显示6个块，代表不同的监听器类型：
 
-#### Visual Layout
-
+#### 可视化布局
 ```tex
 ┌─────────────┬─────────────┬─────────────┬─────────────┬─────────────┬─────────────┐
 │ Basic(Insp) │ Basic(API)  │Priority(API)│ Cond(API)   │Persist(Insp)│Persist(API) │
@@ -644,171 +626,167 @@ Each card shows 6 blocks representing different listener types:
 └─────────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────┘
 ```
 
-#### Block Types
+#### 块类型
 
-| Block              | Description                     | Source             |
+| 块 | 描述 | 来源 |
 | ------------------ | ------------------------------- | ------------------ |
-| **Basic (Insp)**   | Basic listeners from Inspector  | 🔵 Blue (Inspector) |
-| **Basic (API)**    | Basic listeners from code       | ⚫ Dark (API)       |
-| **Priority (API)** | Priority listeners from code    | ⚫ Dark (API)       |
-| **Cond (API)**     | Conditional listeners from code | ⚫ Dark (API)       |
-| **Persist (Insp)** | Persistent from Inspector       | 🔵 Blue (Inspector) |
-| **Persist (API)**  | Persistent from code            | ⚫ Dark (API)       |
+| **Basic (Insp)** | 来自Inspector的基础监听器 | 🔵 蓝色（Inspector） |
+| **Basic (API)** | 来自代码的基础监听器 | ⚫ 深色（API） |
+| **Priority (API)** | 来自代码的优先级监听器 | ⚫ 深色（API） |
+| **Cond (API)** | 来自代码的条件监听器 | ⚫ 深色（API） |
+| **Persist (Insp)** | 来自Inspector的持久化 | 🔵 蓝色（Inspector） |
+| **Persist (API)** | 来自代码的持久化 | ⚫ 深色（API） |
 
-#### Color Coding
+#### 颜色编码
 
-- **🔵 Blue Blocks**: Configured in Unity Inspector (GameEventManager)
-- **⚫ Dark Blocks**: Registered via code (`AddListener`, `AddPriorityListener`, etc.)
-- **Faded/Gray**: No listeners of this type (count = 0)
-- **White Numbers**: Active listeners present
+- **🔵 蓝色块**：在Unity Inspector中配置（GameEventManager）
+- **⚫ 深色块**：通过代码注册（`AddListener`、`AddPriorityListener`等）
+- **淡化/灰色**：此类型无监听器（计数 = 0）
+- **白色数字**：存在活动监听器
 
-### Understanding the Data
+### 理解数据
 
-**Example Card:**
-
+**示例卡：**
 ```tex
 PlayerHealthChanged     Total: 8
 
 Basic(Insp): 2  Basic(API): 1  Priority(API): 3  Cond(API): 1  Persist(Insp): 0  Persist(API): 1
 ```
 
-**Interpretation:**
+**解释：**
 
-- 8 total listeners subscribed to this event
-- 2 basic listeners configured in GameEventManager
-- 1 basic listener added via code
-- 3 priority listeners (code-based, with custom priorities)
-- 1 conditional listener (code-based, executes conditionally)
-- 1 persistent listener (code-based, survives scene changes)
+- 8个总监听器订阅此事件
+- 2个在GameEventManager中配置的基础监听器
+- 1个通过代码添加的基础监听器
+- 3个优先级监听器（基于代码，具有自定义优先级）
+- 1个条件监听器（基于代码，有条件执行）
+- 1个持久化监听器（基于代码，在场景更改间存活）
 
-### Special Indicators
+### 特殊指示器
 
-**Persistent Event Card:**
+**持久化事件卡：**
 
-- Has a **⭐ star icon** next to the name
-- Tooltip: "Persistent Event"
-- `Basic (Insp)` count shows as 0
-- `Persist (Insp)` shows the Inspector listener count instead
+- 名称旁边有**⭐ 星号图标**
+- 工具提示："持久化事件"
+- `Basic (Insp)`计数显示为0
+- `Persist (Insp)`显示Inspector监听器计数
 
-**Selected Event:**
+**选定事件：**
 
-- Card has blue highlight background
-- Indicates this event is selected for detailed viewing
+- 卡具有蓝色高亮背景
+- 指示此事件已选择以进行详细查看
 
-### Use Cases
+### 使用场景
 
-**Debugging Subscription Issues:**
+**调试订阅问题：**
 
-- Verify listeners are properly registered
-- Check if listeners are being removed correctly
-- Identify memory leaks from forgotten subscriptions
+- 验证监听器是否正确注册
+- 检查监听器是否被正确删除
+- 识别被遗忘的订阅导致的内存泄漏
 
-**Architecture Analysis:**
+**架构分析：**
 
-- See the balance between Inspector and code-based listeners
-- Identify heavily-subscribed events that may need optimization
-- Understand listener distribution across your system
+- 查看Inspector和基于代码的监听器之间的平衡
+- 识别可能需要优化的大量订阅事件
+- 理解整个系统的监听器分布
 
-**Performance Planning:**
+**性能规划：**
 
-- High listener counts mean more CPU time per event
-- Consider consolidating multiple listeners into one
-- Evaluate if all listeners are necessary
+- 高监听器计数意味着每个事件的CPU时间更多
+- 考虑将多个监听器合并为一个
+- 评估是否所有监听器都是必需的
 
-:::tip Memory Leak Detection 
+:::tip 内存泄漏检测
 
-If you see listener counts growing over time (especially during scene transitions), you may have a memory leak. Objects should properly unsubscribe in `OnDisable()` or `OnDestroy()`. 
+如果您看到监听器计数随时间增长（特别是在场景转换期间），您可能有内存泄漏。对象应在`OnDisable()`或`OnDestroy()`中正确取消订阅。
 
 :::
 
 ------
 
-## 🔗 Automation Tab
+## 🔗 自动化选项卡
 
-Visual representation of trigger and chain event flows.
+触发器和链事件流的可视化表示。
 
-### View Modes
+### 视图模式
 
-**Toggle Options:**
+**切换选项：**
 
-- ☑️ **Tree View** - Shows only root events with full hierarchy
-- ☐ **Flat View** - Shows all events with automation, no hierarchy
+- ☑️ **树视图** - 仅显示具有完整层次结构的根事件
+- ☐ **平面视图** - 显示所有具有自动化的事件，无层次结构
 
-### Tree View (Recommended)
+### 树视图（推荐）
 
 ![Automation Tab - Full Tree](/img/game-event-system/tools/runtime-monitor/monitor-automation-tree.png)
 
-Displays automation flows starting from root events (events that are not triggered by other events):
+显示从根事件（不被其他事件触发的事件）开始的自动化流程：
 
-**Tree Structure**
-
+**树结构**
 ```tex
-▶ RootEvent                                      🎯 Source
+▶ RootEvent                                      🎯 源
   └─ 🕹️ ChildTrigger1                            
   └─ 🕹️ ChildTrigger2                            
-  └─ 🔗 ChainNode1                                ⏱ 2s Wait
-     └─ 🔗 ChainNode2                             ⏳ 1s Wait
+  └─ 🔗 ChainNode1                                ⏱ 2s 等待
+     └─ 🔗 ChainNode2                             ⏳ 1s 等待
         └─ 🔗 ChainNode3
 ```
 
-### Flat View
+### 平面视图
 
 ![Automation Tab - Flat Tree](/img/game-event-system/tools/runtime-monitor/monitor-automation-flat.png)
 
-Displays automation flows as a chronological list, flattening the hierarchy to show events linked linearly.
+将自动化流程显示为时间顺序列表，扁平化层次结构以线性显示链接的事件。
 
-**Flat Structure**
-
+**平面结构**
 ```tex
-▶ RootEvent                                      🎯 Source
+▶ RootEvent                                      🎯 源
   └─ 🕹️ ChildTrigger1                            
         
-▶ RootEvent                                      🎯 Source                       
+▶ RootEvent                                      🎯 源                       
   └─ 🕹️ ChildTrigger2                            
 
-▶ RootEvent                                      🎯 Source                          
-  └─ 🔗 ChainNode1                                ⏱ 2s Wait
+▶ RootEvent                                      🎯 源                          
+  └─ 🔗 ChainNode1                                ⏱ 2s 等待
 
-▶ 🔗 ChainNode1                                      🎯 Source
-  └─ 🔗 ChainNode2                                ⏳ 1s Wait                            
+▶ 🔗 ChainNode1                                      🎯 源
+  └─ 🔗 ChainNode2                                ⏳ 1s 等待                            
 
-▶ 🔗 ChainNode2                                      🎯 Source
+▶ 🔗 ChainNode2                                      🎯 源
   └─ 🔗 ChainNode3                                
 ```
 
-### Understanding the Visualization
+### 理解可视化
 
-#### Node Types
+#### 节点类型
 
-| Icon  | Type    | Description                            | Color    |
+| 图标 | 类型 | 描述 | 颜色 |
 | ----- | ------- | -------------------------------------- | -------- |
-| **▶** | Root    | Source event (not triggered by others) | 🔵 Cyan   |
-| **🕹️** | Trigger | Parallel fan-out node                  | 🟢 Green  |
-| **🔗** | Chain   | Sequential blocking node               | 🟠 Orange |
+| **▶** | 根 | 源事件（不被其他事件触发） | 🔵 青色 |
+| **🕹️** | 触发器 | 并行扇出节点 | 🟢 绿色 |
+| **🔗** | 链 | 顺序阻塞节点 | 🟠 橙色 |
 
-#### Node Information
+#### 节点信息
 
-Each node displays:
+每个节点显示：
 
-**Left Side:**
+**左侧：**
 
-- Tree connector line (└─)
-- Type icon (▶/🕹️/🔗)
-- Event name (colored by type)
-- Event GUID (faded, for debugging)
+- 树连接线（└─）
+- 类型图标（▶/🕹️/🔗）
+- 事件名称（按类型着色）
+- 事件GUID（淡化，用于调试）
 
-**Right Side Status Icons:**
+**右侧状态图标：**
 
-- **🎯 Source** - This is a root event
-- **🧩** - Has a condition function
-- **⏱ Xs Wait** - Has a delay before execution
-- **⏳ Xs Wait** - Has a duration after execution
-- **⏩** - Waits for async completion
+- **🎯 源** - 这是根事件
+- **🧩** - 有条件函数
+- **⏱ Xs 等待** - 执行前有延迟
+- **⏳ Xs 等待** - 执行后有持续时间
+- **⏩** - 等待异步完成
 
-### Reading Flow Patterns
+### 读取流程模式
 
-#### Simple Fan-Out (Triggers)
-
+#### 简单扇出（触发器）
 ```tex
 ▶ ButtonClicked
   └─ 🕹️ PlaySound
@@ -816,141 +794,140 @@ Each node displays:
   └─ 🕹️ LogAnalytics
 ```
 
-**Pattern**: Parallel execution **Behavior**: All three events fire simultaneously when button clicks **Use Case**: Independent side effects
+**模式**：并行执行
+**行为**：按钮点击时所有三个事件同时触发
+**使用场景**：独立的副作用
 
-#### Sequential Chain
-
+#### 顺序链
 ```tex
 ▶ StartCutscene
-  └─ 🔗 FadeOut        ⏱ 0s Wait  ⏳ 1s Wait
-     └─ 🔗 LoadScene   ⏱ 0s Wait  ⏳ 2s Wait
-        └─ 🔗 FadeIn   ⏱ 0.5s Wait
+  └─ 🔗 FadeOut        ⏱ 0s 等待  ⏳ 1s 等待
+     └─ 🔗 LoadScene   ⏱ 0s 等待  ⏳ 2s 等待
+        └─ 🔗 FadeIn   ⏱ 0.5s 等待
 ```
 
-**Pattern**: Sequential with delays **Behavior**:
+**模式**：带延迟的顺序
+**行为**：
 
-1. FadeOut executes, waits 1 second
-2. LoadScene executes, waits 2 seconds
-3. After 0.5 second delay, FadeIn executes
+1. FadeOut执行，等待1秒
+2. LoadScene执行，等待2秒
+3. 延迟0.5秒后，FadeIn执行
 
-**Use Case**: Cutscenes, tutorials, loading sequences
+**使用场景**：过场动画、教程、加载序列
 
-#### Complex Hybrid
-
+#### 复杂混合
 ```tex
 ▶ EnemyDefeated
   └─ 🕹️ StopMusic
   └─ 🕹️ PlayVictorySound
-  └─ 🔗 ShowRewards     ⏱ 1s Wait
+  └─ 🔗 ShowRewards     ⏱ 1s 等待
      └─ 🔗 SaveGame     
   └─ 🕹️ SpawnLoot       🧩
 ```
 
-**Pattern**: Mix of parallel and sequential **Behavior**:
+**模式**：并行和顺序的混合
+**行为**：
 
-- Music/sound effects fire immediately (parallel)
-- Rewards shown after 1 second, then saves game (sequential)
-- Loot spawns conditionally (parallel with condition)
+- 音乐/音效立即触发（并行）
+- 1秒后显示奖励，然后保存游戏（顺序）
+- 战利品有条件地生成（带条件的并行）
 
-### Event Flow Analysis
+### 事件流分析
 
-**Example Real-World Flow:**
-
+**示例真实世界流程：**
 ```tex
 ▶ OnPlayerDeath
   └─ 🕹️ StopPlayerInput
   └─ 🕹️ DisablePlayerCollider
-  └─ 🔗 PlayDeathAnimation    ⏳ 2s Wait
-     └─ 🔗 ShowDeathUI         ⏱ 0.5s Wait  ⏳ 3s Wait
+  └─ 🔗 PlayDeathAnimation    ⏳ 2s 等待
+     └─ 🔗 ShowDeathUI         ⏱ 0.5s 等待  ⏳ 3s 等待
         └─ 🔗 RespawnPlayer    🧩
            └─ 🕹️ ResetPlayerState
            └─ 🕹️ UpdateCheckpoint
 ```
 
-**Flow Breakdown:**
+**流程分解：**
 
-1. **Immediate Actions** (Triggers):
-   - Stop player input
-   - Disable collision
-2. **Death Animation** (Chain):
-   - Play animation
-   - Wait 2 seconds for animation to complete
-3. **Show UI** (Chain):
-   - Wait 0.5 seconds (transition delay)
-   - Show death screen
-   - Wait 3 seconds (player can see screen)
-4. **Conditional Respawn** (Chain with condition 🧩):
-   - Only if player has lives remaining
-   - Respawn player at checkpoint
-5. **Cleanup** (Triggers):
-   - Reset player stats
-   - Save new checkpoint
+1. **即时动作**（触发器）：
+   - 停止玩家输入
+   - 禁用碰撞
+2. **死亡动画**（链）：
+   - 播放动画
+   - 等待2秒让动画完成
+3. **显示UI**（链）：
+   - 等待0.5秒（过渡延迟）
+   - 显示死亡屏幕
+   - 等待3秒（玩家可以看到屏幕）
+4. **条件复活**（带条件的链🧩）：
+   - 仅当玩家有剩余生命时
+   - 在检查点复活玩家
+5. **清理**（触发器）：
+   - 重置玩家统计
+   - 保存新检查点
 
-### Status Icon Reference
+### 状态图标参考
 
-| Icon         | Meaning       | Details                                        |
+| 图标 | 含义 | 详情 |
 | ------------ | ------------- | ---------------------------------------------- |
-| **🎯 Source** | Root event    | Not triggered by any other event               |
-| **🧩**        | Conditional   | Has a condition check (may not execute)        |
-| **⏱ Xs**     | Start Delay   | Waits X seconds before executing               |
-| **⏳ Xs**     | Duration Wait | Waits X seconds after executing (blocks chain) |
-| **⏩**        | Async Wait    | Waits for coroutine/async completion           |
+| **🎯 源** | 根事件 | 不被任何其他事件触发 |
+| **🧩** | 条件 | 有条件检查（可能不执行） |
+| **⏱ Xs** | 开始延迟 | 执行前等待X秒 |
+| **⏳ Xs** | 持续时间等待 | 执行后等待X秒（阻塞链） |
+| **⏩** | 异步等待 | 等待协程/异步完成 |
 
-### Recursive Detection
+### 递归检测
 
-If an event triggers itself (directly or indirectly), the tree stops at the recursive node to prevent infinite display:
-
+如果事件触发自身（直接或间接），树会在递归节点处停止以防止无限显示：
 ```tex
 ▶ OnValueChanged
   └─ 🔗 UpdateValue
-     └─ 🔗 OnValueChanged  ⚠️ (Recursive - stopped)
+     └─ 🔗 OnValueChanged  ⚠️ (递归 - 已停止)
 ```
 
-:::warning Recursion Warning 
+:::warning 递归警告
 
-Recursive event flows appear in the **Warnings** tab as potential infinite loops. Always use guards in your code to prevent actual recursion. 
+递归事件流出现在**警告**选项卡中作为潜在的无限循环。始终在代码中使用保护以防止实际递归。
 
 :::
 
 ------
 
-## 🔍 Details Tab
+## 🔍 详情选项卡
 
-Deep dive into individual event information and execution history.
+深入了解单个事件信息和执行历史。
 
 ![Details Tab - Log View](/img/game-event-system/tools/runtime-monitor/monitor-details-log.png)
 
-### Navigation
+### 导航
 
-The Details tab opens automatically when you:
+当您执行以下操作时，详情选项卡会自动打开：
 
-- Click **[Details]** button from Recent Events
-- Click **[View Logs]** button from Statistics
-- Click **[View]** button from Warnings
+- 从最近事件点击**[Details]**按钮
+- 从统计点击**[View Logs]**按钮
+- 从警告点击**[View]**按钮
 
-At the top:
+在顶部：
 
-- **← Back to [Previous Tab]** - Return to where you came from
+- **← 返回[上一选项卡]** - 返回您来自的地方
 
-### Log Details View
+### 日志详情视图
 
-When viewing a specific log entry:
+查看特定日志条目时：
 
-**Event Information Card:**
+**事件信息卡：**
 
-| Field          | Description                             |
+| 字段 | 描述 |
 | -------------- | --------------------------------------- |
-| **Event Name** | Full name of the event                  |
-| **Event Type** | Generic type (e.g., `GameEvent<float>`) |
-| **Time**       | Precise timestamp (HH:MM:SS.mmm)        |
-| **Frame**      | Frame number when executed              |
-| **Arguments**  | Argument values passed                  |
-| **Called By**  | Method that raised the event            |
+| **事件名称** | 事件的完整名称 |
+| **事件类型** | 泛型类型（例如，`GameEvent<float>`） |
+| **时间** | 精确时间戳（HH:MM:SS.mmm） |
+| **帧** | 执行时的帧号 |
+| **参数** | 传递的参数值 |
+| **调用者** | 触发事件的方法 |
 
-**Stack Trace Section:**
-
+**堆栈跟踪部分：**
 ```tex
-Stack Trace:
+堆栈跟踪:
 at TinyGiants.GameEventSystem.Runtime.GameEvent`1.Raise(T argument)
 at PlayerController.TakeDamage(Int32 damage) in Assets/Scripts/PlayerController.cs:line 142
 at EnemyController.Attack() in Assets/Scripts/EnemyController.cs:line 89
@@ -958,47 +935,45 @@ at EnemyController.Update() in Assets/Scripts/EnemyController.cs:line 52
 ...
 ```
 
-**Use Cases:**
+**使用场景：**
 
-- Track down where events originate
-- Debug unexpected event calls
-- Understand call chains
-- Identify performance bottlenecks
+- 追踪事件起源位置
+- 调试意外的事件调用
+- 理解调用链
+- 识别性能瓶颈
 
-### Event Statistics View
+### 事件统计视图
 
 ![Details Tab - Statistics View](/img/game-event-system/tools/runtime-monitor/monitor-details-stats.png)
 
-When viewing all logs for a specific event:
+查看特定事件的所有日志时：
 
-**Header:**
-
+**标题：**
 ```tex
 Event: PlayerHealthChanged     Total: 245 triggers
 ```
 
-**Usage Statistics Card:**
+**使用统计卡：**
 
-| Metric            | Description                        |
+| 指标 | 描述 |
 | ----------------- | ---------------------------------- |
-| **Trigger Count** | Total executions                   |
-| **Frequency**     | Triggers per second                |
-| **Avg Interval**  | Time between triggers              |
-| **Last Trigger**  | Relative time since last execution |
+| **触发计数** | 总执行次数 |
+| **频率** | 每秒触发次数 |
+| **平均间隔** | 触发之间的时间 |
+| **上次触发** | 自上次执行以来的相对时间 |
 
-**Performance Metrics Card** (if available):
+**性能指标卡**（如果可用）：
 
-| Metric       | Description                | Color            |
+| 指标 | 描述 | 颜色 |
 | ------------ | -------------------------- | ---------------- |
-| **Avg Time** | Average execution duration | Green/Yellow/Red |
-| **Max Time** | Slowest execution          | White            |
-| **Min Time** | Fastest execution          | Gray             |
-| **GC Alloc** | Garbage collections        | Red if > 0       |
+| **平均时间** | 平均执行持续时间 | 绿色/黄色/红色 |
+| **最大时间** | 最慢执行 | 白色 |
+| **最小时间** | 最快执行 | 灰色 |
+| **GC分配** | 垃圾回收 | 如果 > 0则为红色 |
 
-**Recent Logs:**
+**最近日志：**
 
-Shows the last 50 executions of this event in reverse chronological order:
-
+以相反的时间顺序显示此事件的最后50次执行：
 ```tex
 [14:52:33.145]  F:3201  PlayerHealthChanged  <GameEvent<float>>  [Details]
   📍 Called by: DamageSystem.ApplyDamage()
@@ -1009,64 +984,63 @@ Shows the last 50 executions of this event in reverse chronological order:
 ...
 ```
 
-### Use Cases
+### 使用场景
 
-**Debugging Event Issues:**
+**调试事件问题：**
 
-1. Go to Recent Events tab
-2. Find problematic event execution
-3. Click **[Details]** to see stack trace
-4. Identify calling code
-5. Fix the issue
+1. 进入最近事件选项卡
+2. 找到有问题的事件执行
+3. 点击**[Details]**查看堆栈跟踪
+4. 识别调用代码
+5. 修复问题
 
-**Performance Analysis:**
+**性能分析：**
 
-1. Go to Statistics tab
-2. Click **[View Logs]** on slow event
-3. Review performance metrics
-4. Check execution patterns
-5. Optimize based on data
+1. 进入统计选项卡
+2. 点击慢事件上的**[View Logs]**
+3. 查看性能指标
+4. 检查执行模式
+5. 基于数据优化
 
-**Event Flow Understanding:**
+**事件流理解：**
 
-1. Trigger an event chain
-2. View logs for each event
-3. Verify execution order
-4. Check timing between events
-5. Validate behavior
+1. 触发事件链
+2. 查看每个事件的日志
+3. 验证执行顺序
+4. 检查事件之间的时间
+5. 验证行为
 
 ------
 
-## 🛠️ Advanced Features
+## 🛠️ 高级功能
 
-### Debugger Control
+### 调试器控制
 
-**Debugger Toggle Button** (in header):
+**调试器切换按钮**（在标题中）：
 
-- **● Debugger ON** (green) - Actively recording all event data
-- **○ Debugger OFF** (red) - Not recording (saves performance)
+- **● Debugger ON**（绿色）- 主动记录所有事件数据
+- **○ Debugger OFF**（红色）- 不记录（节省性能）
 
-**When to Disable:**
+**何时禁用：**
 
-- During performance-critical gameplay testing
-- When recording gameplay footage
-- To reduce Editor overhead
-- When you don't need monitoring
+- 在性能关键的游戏玩法测试期间
+- 录制游戏画面时
+- 减少编辑器开销
+- 不需要监控时
 
-:::info Performance Impact 
+:::info 性能影响
 
-The debugger has minimal overhead (~0.1-0.5ms per event), but disabling it during final performance testing gives you the most accurate metrics. 
+调试器的开销很小（每个事件约0.1-0.5ms），但在最终性能测试期间禁用它会给您最准确的指标。
 
 :::
 
-### Clear Data Options
+### 清除数据选项
 
-Click the **🗑 Clear** button to access options:
+点击**🗑 清除**按钮以访问选项：
 
-**Clear Menu:**
+**清除菜单：**
 
-- **Clear Logs Only** - Removes event execution history
-- **Clear Statistics Only** - Resets trigger counts and frequency data
-- **Clear Performance Data** - Resets execution time measurements
-- **Clear All Data** - Complete reset (requires confirmation
-
+- **仅清除日志** - 删除事件执行历史
+- **仅清除统计** - 重置触发计数和频率数据
+- **清除性能数据** - 重置执行时间测量
+- **清除所有数据** - 完全重置（需要确认）

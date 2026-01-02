@@ -1,309 +1,309 @@
 ﻿---
-sidebar_label: '05 Priority Event'
+sidebar_label: '05 优先级事件'
 sidebar_position: 6
 ---
 
 import VideoGif from '@site/src/components/Video/VideoGif';
 
-# 05 Priority Event: Execution Order Matters
+# 05 优先级事件：执行顺序很重要
 
 <!-- <VideoGif src="/video/game-event-system/05-priority-event.mp4" /> -->
 
-## 📋 Overview
+## 📋 概述
 
-In game logic, **sequence matters**. When multiple actions respond to a single event, their execution order can dramatically change the outcome. This demo demonstrates how visual Editor configuration—without any code changes—can turn a weak hit into a devastating critical strike.
+在游戏逻辑中，**顺序很重要**。当多个动作响应单个事件时，它们的执行顺序可以显著改变结果。此演示展示了可视化编辑器配置——无需任何代码更改——如何将弱攻击转变为毁灭性的暴击。
 
-:::tip 💡 What You'll Learn
-- Why execution order affects gameplay logic
-- How to configure listener priority in the Behavior Window
-- The "Buff-Then-Attack" pattern in action
-- How to debug order-dependent logic issues
+:::tip 💡 您将学到
+- 为什么执行顺序影响游戏玩法逻辑
+- 如何在行为窗口中配置监听器优先级
+- "增益-然后-攻击"模式的实际应用
+- 如何调试顺序依赖的逻辑问题
 
 :::
 
 ---
 
-## 🎬 Demo Scene
+## 🎬 演示场景
 ```
 Assets/TinyGiants/GameEventSystem/Demo/05_PriorityEvent/05_PriorityEvent.unity
 ```
 
-### Scene Composition
+### 场景组成
 
-**UI Layer (Canvas):**
-- 🎮 **Two Attack Buttons** - Located at the bottom of the screen
-  - "Raise (Chaotic Hit)" → Triggers `PriorityEventRaiser.FireChaoticSequence()` (incorrect order)
-  - "Raise (Ordered Hit)" → Triggers `PriorityEventRaiser.FireOrderedSequence()` (correct order)
+**UI层（Canvas）：**
+- 🎮 **两个攻击按钮** - 位于屏幕底部
+  - "Raise (Chaotic Hit)" → 触发`PriorityEventRaiser.FireChaoticSequence()`（错误顺序）
+  - "Raise (Ordered Hit)" → 触发`PriorityEventRaiser.FireOrderedSequence()`（正确顺序）
 
-**Game Logic Layer (Demo Scripts):**
-- 📤 **PriorityEventRaiser** - GameObject with the raiser script
-  - Manages turret aiming and projectile firing
-  - Holds references to two events: `OnChaoticHit` and `OnOrderedHit`
-  - Both events use the same `GameEvent<GameObject, DamageInfo>` type
+**游戏逻辑层（演示脚本）：**
+- 📤 **PriorityEventRaiser** - 带有触发器脚本的GameObject
+  - 管理炮塔瞄准和抛射物发射
+  - 持有对两个事件的引用：`OnChaoticHit`和`OnOrderedHit`
+  - 两个事件都使用相同的`GameEvent<GameObject, DamageInfo>`类型
 
-- 📥 **PriorityEventReceiver** - GameObject with the receiver script
-  - Has TWO listener methods bound to each event:
-    - **ActivateBuff** - Enables critical damage mode
-    - **ResolveHit** - Calculates damage based on current buff state
-  - The order of these methods determines the combat outcome
+- 📥 **PriorityEventReceiver** - 带有接收器脚本的GameObject
+  - 有两个监听器方法绑定到每个事件：
+    - **ActivateBuff** - 启用暴击伤害模式
+    - **ResolveHit** - 根据当前增益状态计算伤害
+  - 这些方法的顺序决定了战斗结果
 
-**Visual Feedback Layer (Demo Objects):**
-- 🎯 **SentryTurret** - The attacker
-  - Changes from grey to **gold** when buffed
-  - Spawns particle aura effect when activated
-- 🎯 **TargetDummy** - The victim capsule
-  - Has Rigidbody for knockback physics
-- 💥 **VFX Systems** - Different effects for normal vs critical hits
-  - Normal: Small smoke puff
-  - Critical: Large explosion + camera shake
-- 🏠 **Plane** - Ground surface
-
----
-
-## 🎮 How to Interact
-
-### The Experiment Setup
-
-Both buttons fire the same physical projectile, but trigger different events with **different listener order configurations**.
-
-### Step 1: Enter Play Mode
-
-Press the **Play** button in Unity.
-
-### Step 2: Test the Wrong Order (Chaotic Hit)
-
-**Click "Raise (Chaotic Hit)" (Left Button):**
-
-**What Happens:**
-1. 🎯 Turret aims and fires projectile
-2. 💥 Projectile hits target
-3. 🔴 **PROBLEM:** Damage calculated FIRST (ResolveHit executes)
-   - Result: `-10` weak damage (grey text)
-   - Effect: Small smoke VFX
-4. ✨ Buff activates SECOND (ActivateBuff executes)
-   - Turret turns gold with particle aura
-   - **Too late!** The damage was already calculated
-
-**Console Output:**
-```
-[Receiver] (B) RESOLVE: No buff detected. Weak hit. (Check Priority Order!)
-[Receiver] (A) BUFF ACTIVATED! Systems at 300% power.
-```
-
-**Result:** ❌ Normal hit because buff wasn't active when damage was calculated
+**视觉反馈层（演示对象）：**
+- 🎯 **SentryTurret** - 攻击者
+  - 增益时从灰色变为**金色**
+  - 激活时生成粒子光环效果
+- 🎯 **TargetDummy** - 受害者胶囊体
+  - 具有用于击退物理的Rigidbody
+- 💥 **VFX系统** - 普通vs暴击的不同效果
+  - 普通：小烟雾
+  - 暴击：大爆炸 + 相机震动
+- 🏠 **平面** - 地面表面
 
 ---
 
-### Step 3: Test the Correct Order (Ordered Hit)
+## 🎮 如何交互
 
-**Click "Raise (Ordered Hit)" (Right Button):**
+### 实验设置
 
-**What Happens:**
-1. 🎯 Turret aims and fires projectile
-2. 💥 Projectile hits target
-3. ✨ **CORRECT:** Buff activates FIRST (ActivateBuff executes)
-   - Turret turns gold with particle aura
-   - Internal `_isBuffActive` flag set to `true`
-4. 🔴 Damage calculated SECOND (ResolveHit executes)
-   - Checks buff flag: **ACTIVE!**
-   - Result: `CRIT! -50` (orange text, 5x damage multiplier)
-   - Effect: Massive explosion VFX + camera shake
+两个按钮发射相同的物理抛射物，但触发具有**不同监听器顺序配置**的不同事件。
 
-**Console Output:**
+### 步骤1：进入播放模式
+
+按Unity中的**播放**按钮。
+
+### 步骤2：测试错误顺序（混乱击中）
+
+**点击"Raise (Chaotic Hit)"（左按钮）：**
+
+**发生了什么：**
+1. 🎯 炮塔瞄准并发射抛射物
+2. 💥 抛射物击中目标
+3. 🔴 **问题：** 首先计算伤害（ResolveHit执行）
+   - 结果：`-10`弱伤害（灰色文本）
+   - 效果：小烟雾VFX
+4. ✨ 其次激活增益（ActivateBuff执行）
+   - 炮塔变为金色并带有粒子光环
+   - **太晚了！**伤害已经计算完成
+
+**控制台输出：**
 ```
-[Receiver] (A) BUFF ACTIVATED! Systems at 300% power.
-[Receiver] (B) RESOLVE: Buff detected! CRITICAL EXPLOSION.
+[Receiver] (B) RESOLVE: 未检测到增益。弱攻击。（检查优先级顺序！）
+[Receiver] (A) 增益已激活！系统功率达到300%。
 ```
 
-**Result:** ✅ Critical hit because buff was active when damage was calculated
+**结果：** ❌ 普通攻击，因为计算伤害时增益未激活
 
 ---
 
-## 🏗️ Scene Architecture
+### 步骤3：测试正确顺序（有序击中）
 
-### The "Buff-Then-Attack" Problem
+**点击"Raise (Ordered Hit)"（右按钮）：**
 
-This is a common pattern in game development:
+**发生了什么：**
+1. 🎯 炮塔瞄准并发射抛射物
+2. 💥 抛射物击中目标
+3. ✨ **正确：** 首先激活增益（ActivateBuff执行）
+   - 炮塔变为金色并带有粒子光环
+   - 内部`_isBuffActive`标志设置为`true`
+4. 🔴 其次计算伤害（ResolveHit执行）
+   - 检查增益标志：**激活！**
+   - 结果：`CRIT! -50`（橙色文本，5倍伤害倍数）
+   - 效果：大爆炸VFX + 相机震动
+
+**控制台输出：**
 ```
-⚡ Event Raised: OnHit
+[Receiver] (A) 增益已激活！系统功率达到300%。
+[Receiver] (B) RESOLVE: 检测到增益！严重爆炸。
+```
+
+**结果：** ✅ 暴击，因为计算伤害时增益已激活
+
+---
+
+## 🏗️ 场景架构
+
+### "增益-然后-攻击"问题
+
+这是游戏开发中的常见模式：
+```
+⚡ 事件触发：OnHit
 │
-├─ 🥇 1st Action: [Priority 10]
-│  └─ 🛡️ ActivateBuff() ➔ Sets `_isBuffActive = true` 🟢
+├─ 🥇 第1个动作：[优先级 10]
+│  └─ 🛡️ ActivateBuff() ➔ 设置 `_isBuffActive = true` 🟢
 │
-└─ 🥈 2nd Action: [Priority 5]
-   └─ ⚔️ ResolveHit()  ➔ If (_isBuffActive) ? 💥 CRIT : 🛡️ NORMAL
+└─ 🥈 第2个动作：[优先级 5]
+   └─ ⚔️ ResolveHit()  ➔ If (_isBuffActive) ? 💥 暴击 : 🛡️ 普通
 │
-🎯 Result: CRITICAL HIT (Logic resolved with updated state)
+🎯 结果：暴击（逻辑用更新的状态解决）
 ```
 
-**The Challenge:**
-If `ResolveHit` runs before `ActivateBuff`, the flag hasn't been set yet, resulting in normal damage even though the buff is "attached" to the same event!
+**挑战：**
+如果`ResolveHit`在`ActivateBuff`之前运行，标志尚未设置，即使增益"附加"到同一事件，也会导致普通伤害！
 
 ---
 
-### Event Definitions
+### 事件定义
 
-Both events use the same type but have different behavior configurations:
+两个事件使用相同的类型，但具有不同的行为配置：
 
 ![Game Event Editor](/img/game-event-system/examples/05-priority-event/demo-05-editor.png)
 
-| Event Name     | Type                                | Listener Order                        |
+| 事件名称 | 类型 | 监听器顺序 |
 | -------------- | ----------------------------------- | ------------------------------------- |
-| `OnChaoticHit` | `GameEvent<GameObject, DamageInfo>` | ❌ ResolveHit → ActivateBuff (Wrong)   |
-| `OnOrderedHit` | `GameEvent<GameObject, DamageInfo>` | ✅ ActivateBuff → ResolveHit (Correct) |
+| `OnChaoticHit` | `GameEvent<GameObject, DamageInfo>` | ❌ ResolveHit → ActivateBuff（错误） |
+| `OnOrderedHit` | `GameEvent<GameObject, DamageInfo>` | ✅ ActivateBuff → ResolveHit（正确） |
 
-:::note 🔧 Same Type, Different Order
+:::note 🔧 相同类型，不同顺序
 
-Both events are `GameEvent<GameObject, DamageInfo>`. The only difference is the **listener execution order** configured in the [Behavior Window](../visual-workflow/game-event-behavior.md).
+两个事件都是`GameEvent<GameObject, DamageInfo>`。唯一的区别是在[行为窗口](../visual-workflow/game-event-behavior.md)中配置的**监听器执行顺序**。
 
 :::
 
 ---
 
-### Behavior Configuration Comparison
+### 行为配置比较
 
-The critical difference is in the **Behavior Window** configuration.
+关键区别在于**行为窗口**配置。
 
-#### ❌ Wrong Order (OnChaoticHit)
+#### ❌ 错误顺序（OnChaoticHit）
 
 ![Chaotic Behavior](/img/game-event-system/examples/05-priority-event/demo-05-behavior-chaotic.png)
 
-**Execution Sequence:**
-1. `ResolveHit` (Top position - executes first)
-2. `ActivateBuff` (Bottom position - executes second)
+**执行序列：**
+1. `ResolveHit`（顶部位置 - 首先执行）
+2. `ActivateBuff`（底部位置 - 其次执行）
 
-**Result:** Damage calculated before buff applied = Normal Hit
+**结果：** 应用增益前计算伤害 = 普通攻击
 
-#### ✅ Correct Order (OnOrderedHit)
+#### ✅ 正确顺序（OnOrderedHit）
 
 ![Ordered Behavior](/img/game-event-system/examples/05-priority-event/demo-05-behavior-ordered.png)
 
-**Execution Sequence:**
-1. `ActivateBuff` (Top position - executes first)
-2. `ResolveHit` (Bottom position - executes second)
+**执行序列：**
+1. `ActivateBuff`（顶部位置 - 首先执行）
+2. `ResolveHit`（底部位置 - 其次执行）
 
-**Result:** Buff applied before damage calculated = Critical Hit
+**结果：** 计算伤害前应用增益 = 暴击
 
-:::tip 🎯 Drag & Drop Reordering
+:::tip 🎯 拖放重新排序
 
-You can change the execution order by **dragging the handle** (`≡`) on the left side of each listener in the Behavior Window. This is a visual, no-code way to modify gameplay logic!
+您可以通过**拖动句柄**（`≡`）在行为窗口中每个监听器的左侧来更改执行顺序。这是一种可视化的、无代码的方式来修改游戏玩法逻辑！
 
 :::
 
 ---
 
-### Sender Setup (PriorityEventRaiser)
+### 发送者设置（PriorityEventRaiser）
 
-Select the **PriorityEventRaiser** GameObject in the Hierarchy:
+在层级视图中选择**PriorityEventRaiser** GameObject：
 
 ![PriorityEventRaiser Inspector](/img/game-event-system/examples/05-priority-event/demo-05-inspector.png)
 
-**Event Channels:**
-- `Ordered Hit Event`: `OnOrderedHit` (configured correctly)
-  - Tooltip: "Apply Buff → Then Fire"
-- `Chaotic Hit Event`: `OnChaoticHit` (configured incorrectly)
-  - Tooltip: "Fire → Then Apply Buff (Too late!)"
+**事件频道：**
+- `Ordered Hit Event`: `OnOrderedHit`（配置正确）
+  - 工具提示："应用增益 → 然后发射"
+- `Chaotic Hit Event`: `OnChaoticHit`（配置错误）
+  - 工具提示："发射 → 然后应用增益（太晚了！）"
 
-**Settings:**
-- `Turret Head`: SentryTurret/Head (Transform for aiming)
-- `Turret Muzzle Position`: Head/MuzzlePoint (projectile spawn)
-- `Projectile Prefab`: Projectile visual effect
-- `Muzzle Flash VFX`: Particle system for firing
-- `Hit Target`: TargetDummy (Transform)
+**设置：**
+- `Turret Head`: SentryTurret/Head（用于瞄准的Transform）
+- `Turret Muzzle Position`: Head/MuzzlePoint（抛射物生成）
+- `Projectile Prefab`: 抛射物视觉效果
+- `Muzzle Flash VFX`: 用于发射的粒子系统
+- `Hit Target`: TargetDummy（Transform）
 
 ---
 
-### Receiver Setup (PriorityEventReceiver)
+### 接收者设置（PriorityEventReceiver）
 
-Select the **PriorityEventReceiver** GameObject in the Hierarchy:
+在层级视图中选择**PriorityEventReceiver** GameObject：
 
 ![PriorityEventReceiver Inspector](/img/game-event-system/examples/05-priority-event/demo-05-receiver.png)
 
-**Visual Configuration:**
-- `Turret Root`: SentryTurret (Transform)
-- `Turret Renderers`: Array of 1 renderer (the turret body)
-- `Normal Mat`: Grey material (default state)
-- `Buffed Mat`: Gold material (buffed state)
-- `Buff Aura Prefab`: Cyan particle effect for buff visualization
+**视觉配置：**
+- `Turret Root`: SentryTurret（Transform）
+- `Turret Renderers`: 1个渲染器的数组（炮塔主体）
+- `Normal Mat`: 灰色材质（默认状态）
+- `Buffed Mat`: 金色材质（增益状态）
+- `Buff Aura Prefab`: 用于增益可视化的青色粒子效果
 
-**VFX Configuration:**
-- `Hit Normal VFX`: Small smoke particle system
-- `Hit Crit VFX`: Large explosion particle system
-- `Floating Text Prefab`: Damage number display
+**VFX配置：**
+- `Hit Normal VFX`: 小烟雾粒子系统
+- `Hit Crit VFX`: 大爆炸粒子系统
+- `Floating Text Prefab`: 伤害数字显示
 
-**Target References:**
-- `Hit Target`: TargetDummy (Transform)
-- `Target Rigidbody`: TargetDummy (Rigidbody for knockback)
+**目标引用：**
+- `Hit Target`: TargetDummy（Transform）
+- `Target Rigidbody`: TargetDummy（用于击退的Rigidbody）
 
 ---
 
-## 💻 Code Breakdown
+## 💻 代码分解
 
-### 📤 PriorityEventRaiser.cs (Sender)
+### 📤 PriorityEventRaiser.cs（发送者）
 ```csharp
 using UnityEngine;
 using TinyGiants.GameEventSystem.Runtime;
 
 public class PriorityEventRaiser : MonoBehaviour
 {
-    [Header("Event Channels")]
-    [Tooltip("Configured in Editor: Apply Buff -> Then Fire.")]
+    [Header("事件频道")]
+    [Tooltip("在编辑器中配置：应用增益 -> 然后发射。")]
     [GameEventDropdown] public GameEvent<GameObject, DamageInfo> orderedHitEvent;
 
-    [Tooltip("Configured in Editor: Fire -> Then Apply Buff (Too late!).")]
+    [Tooltip("在编辑器中配置：发射 -> 然后应用增益（太晚了！）。")]
     [GameEventDropdown] public GameEvent<GameObject, DamageInfo> chaoticHitEvent;
 
     private GameEvent<GameObject, DamageInfo> _pendingEvent;
 
     /// <summary>
-    /// Button A: Starts attack sequence that triggers the "Ordered" event.
+    /// 按钮A：启动触发"有序"事件的攻击序列。
     /// </summary>
     public void FireOrderedSequence()
     {
         if (orderedHitEvent == null) return;
         _pendingEvent = orderedHitEvent;
         _isAttacking = true;
-        Debug.Log("[Sender] Initiating ORDERED attack sequence...");
+        Debug.Log("[Sender] 启动有序攻击序列...");
     }
 
     /// <summary>
-    /// Button B: Starts attack sequence that triggers the "Chaotic" event.
+    /// 按钮B：启动触发"混乱"事件的攻击序列。
     /// </summary>
     public void FireChaoticSequence()
     {
         if (chaoticHitEvent == null) return;
         _pendingEvent = chaoticHitEvent;
         _isAttacking = true;
-        Debug.Log("[Sender] Initiating CHAOTIC attack sequence...");
+        Debug.Log("[Sender] 启动混乱攻击序列...");
     }
 
     private void FireProjectile()
     {
-        // ... Projectile creation logic ...
+        // ... 抛射物创建逻辑 ...
         
         shell.Initialize(hitTarget.position, 15f, () => 
         {
             DamageInfo info = new DamageInfo(10f, false, DamageType.Physical, 
-                                            hitTarget.position, "Sentry Turret");
+                                            hitTarget.position, "哨兵炮塔");
             
-            // Raise whichever event was queued (Ordered or Chaotic)
+            // 触发排队的任何事件（有序或混乱）
             if(_pendingEvent != null) 
                 _pendingEvent.Raise(this.gameObject, info);
             
-            Debug.Log($"[Sender] Impact! Event '{_pendingEvent?.name}' Raised.");
+            Debug.Log($"[Sender] 撞击！事件'{_pendingEvent?.name}'已触发。");
         });
     }
 }
 ```
 
-**Key Points:**
-- 🎯 **Same Sender Code** - Both events use identical raise logic
-- 📦 **Event Selection** - `_pendingEvent` determines which event fires
-- 🔇 **Order Agnostic** - Sender has no knowledge of listener order
+**关键点：**
+- 🎯 **相同的发送者代码** - 两个事件使用相同的触发逻辑
+- 📦 **事件选择** - `_pendingEvent`决定触发哪个事件
+- 🔇 **顺序无关** - 发送者不知道监听器顺序
 
 ---
 
-### 📥 PriorityEventReceiver.cs (Listener)
+### 📥 PriorityEventReceiver.cs（监听器）
 ```csharp
 using UnityEngine;
 using System.Collections;
@@ -314,21 +314,21 @@ public class PriorityEventReceiver : MonoBehaviour
     [SerializeField] private Material buffedMat;
     [SerializeField] private ParticleSystem buffAuraPrefab;
     
-    private bool _isBuffActive; // The critical state flag
+    private bool _isBuffActive; // 关键状态标志
 
     /// <summary>
-    /// [Listener Method A]
-    /// Activates the buff state and visual effects.
+    /// [监听器方法A]
+    /// 激活增益状态和视觉效果。
     /// 
-    /// PRIORITY IMPACT:
-    /// - If configured ABOVE ResolveHit: Buff applies BEFORE damage calculation → CRITICAL HIT
-    /// - If configured BELOW ResolveHit: Buff applies AFTER damage calculation → NORMAL HIT
+    /// 优先级影响：
+    /// - 如果配置在ResolveHit之上：增益在伤害计算之前应用 → 暴击
+    /// - 如果配置在ResolveHit之下：增益在伤害计算之后应用 → 普通攻击
     /// </summary>
     public void ActivateBuff(GameObject sender, DamageInfo args)
     {
-        _isBuffActive = true; // <-- THE CRITICAL STATE CHANGE
+        _isBuffActive = true; // <-- 关键状态变化
         
-        // Visual feedback: Gold material + particle aura
+        // 视觉反馈：金色材质 + 粒子光环
         foreach (var r in turretRenderers) 
             if(r) r.material = buffedMat;
 
@@ -340,16 +340,16 @@ public class PriorityEventReceiver : MonoBehaviour
             _activeBuffEffect.Play();
         }
 
-        Debug.Log("<color=cyan>[Receiver] (A) BUFF ACTIVATED! " +
-                  "Systems at 300% power.</color>");
+        Debug.Log("<color=cyan>[Receiver] (A) 增益已激活！" +
+                  "系统功率达到300%。</color>");
     }
     
     /// <summary>
-    /// [Listener Method B]
-    /// Calculates damage and spawns VFX based on CURRENT buff state.
+    /// [监听器方法B]
+    /// 根据当前增益状态计算伤害并生成VFX。
     /// 
-    /// LOGIC: Checks _isBuffActive at the EXACT MOMENT of execution.
-    /// For correct behavior, ActivateBuff must execute BEFORE this method.
+    /// 逻辑：在执行的确切时刻检查_isBuffActive。
+    /// 为了正确的行为，ActivateBuff必须在此方法之前执行。
     /// </summary>
     public void ResolveHit(GameObject sender, DamageInfo args)
     {
@@ -357,27 +357,27 @@ public class PriorityEventReceiver : MonoBehaviour
         bool isCrit = false;
         ParticleSystem vfxToPlay;
 
-        // Check the flag at THIS EXACT MOMENT
+        // 在此确切时刻检查标志
         if (_isBuffActive)
         {
-            // CRITICAL PATH
-            finalDamage *= 5f; // 5x damage multiplier
+            // 暴击路径
+            finalDamage *= 5f; // 5倍伤害倍数
             isCrit = true;
             vfxToPlay = hitCritVFX;
             
             StartCoroutine(ShakeCameraRoutine(0.2f, 0.4f));
-            Debug.Log("<color=green>[Receiver] (B) RESOLVE: Buff detected! " +
-                      "CRITICAL EXPLOSION.</color>");
+            Debug.Log("<color=green>[Receiver] (B) RESOLVE: 检测到增益！" +
+                      "严重爆炸。</color>");
         }
         else
         {
-            // NORMAL PATH
+            // 普通路径
             vfxToPlay = hitNormalVFX;
-            Debug.Log("<color=red>[Receiver] (B) RESOLVE: No buff detected. " +
-                      "Weak hit. (Check Priority Order!)</color>");
+            Debug.Log("<color=red>[Receiver] (B) RESOLVE: 未检测到增益。" +
+                      "弱攻击。（检查优先级顺序！）</color>");
         }
 
-        // Spawn appropriate VFX
+        // 生成适当的VFX
         if (vfxToPlay != null)
         {
             var vfx = Instantiate(vfxToPlay, args.hitPoint, Quaternion.identity);
@@ -385,7 +385,7 @@ public class PriorityEventReceiver : MonoBehaviour
             Destroy(vfx.gameObject, 2.0f);
         }
 
-        // Apply physics and UI feedback
+        // 应用物理和UI反馈
         ApplyPhysicsKnockback(args, isCrit);
         ShowFloatingText(finalDamage, isCrit, hitTarget.position);
         
@@ -395,55 +395,55 @@ public class PriorityEventReceiver : MonoBehaviour
     private IEnumerator ResetRoutine()
     {
         yield return new WaitForSeconds(1.5f);
-        _isBuffActive = false; // Reset for next attack
-        // ... Reset visuals ...
+        _isBuffActive = false; // 为下一次攻击重置
+        // ... 重置视觉效果 ...
     }
 }
 ```
 
-**Key Points:**
-- 🎯 **State Dependency** - `ResolveHit` behavior depends entirely on `_isBuffActive` flag
-- ⏱️ **Timing Critical** - The flag must be set BEFORE damage calculation
-- 🔀 **Order-Dependent Logic** - Same code, different results based on execution order
-- 🎨 **Visual Feedback** - Different VFX, text size, and effects for each path
+**关键点：**
+- 🎯 **状态依赖** - `ResolveHit`行为完全取决于`_isBuffActive`标志
+- ⏱️ **时间关键** - 标志必须在伤害计算之前设置
+- 🔀 **顺序依赖逻辑** - 相同的代码，根据执行顺序产生不同的结果
+- 🎨 **视觉反馈** - 每条路径的不同VFX、文本大小和效果
 
 ---
 
-## 🔑 Key Takeaways
+## 🔑 关键要点
 
-| Concept                    | Implementation                                               |
+| 概念 | 实现 |
 | -------------------------- | ------------------------------------------------------------ |
-| 🎯 **Execution Order**      | Listener order directly affects gameplay logic               |
-| 🎨 **Visual Configuration** | Drag-and-drop in Behavior Window—no code changes             |
-| 🔀 **State Management**     | Order matters when listeners modify shared state             |
-| 🐛 **Debug Pattern**        | Console logs help identify order-related bugs                |
-| 🔄 **Gameplay Design**      | Enable/disable order controls combo systems, buff stacking, etc. |
+| 🎯 **执行顺序** | 监听器顺序直接影响游戏玩法逻辑 |
+| 🎨 **可视化配置** | 在行为窗口中拖放——无需代码更改 |
+| 🔀 **状态管理** | 当监听器修改共享状态时，顺序很重要 |
+| 🐛 **调试模式** | 控制台日志帮助识别与顺序相关的错误 |
+| 🔄 **游戏玩法设计** | 启用/禁用顺序控制连击系统、增益堆叠等 |
 
-:::note 🎓 Design Insight
+:::note 🎓 设计洞察
 
-Execution order is critical for:
+执行顺序对以下情况至关重要：
 
-- **Buff systems** - Apply modifiers before calculating effects
-- **Combo chains** - Validate conditions before triggering next action
-- **Shield mechanics** - Check absorption before applying damage
-- **Trigger sequences** - Ensure prerequisites are met before executing dependent logic
+- **增益系统** - 在计算效果之前应用修饰符
+- **连击链** - 在触发下一个动作之前验证条件
+- **护盾机制** - 在应用伤害之前检查吸收
+- **触发序列** - 在执行依赖逻辑之前确保满足先决条件
 
-Always test both orders to ensure your logic works as intended!
+始终测试两种顺序以确保您的逻辑按预期工作！
 
 :::
 
 ---
 
-## 🎯 What's Next?
+## 🎯 下一步？
 
-You've mastered execution order. Now let's explore **conditional event triggering** to make events smarter.
+您已经掌握了执行顺序。现在让我们探索**条件事件触发**以使事件更智能。
 
-**Next Chapter**: Learn about conditional logic in **[06 Conditional Event](./06-conditional-event.md)**
+**下一章**：在**[06 条件事件](./06-conditional-event.md)**中学习条件逻辑
 
 ---
 
-## 📚 Related Documentation
+## 📚 相关文档
 
-- **[Game Event Behavior](../visual-workflow/game-event-behavior.md)** - Detailed guide to listener configuration
-- **[Best Practices](../scripting/best-practices.md)** - Patterns for order-dependent logic
-- **[Listening Strategies](../scripting/listening-strategies.md)** - Advanced callback patterns
+- **[游戏事件行为](../visual-workflow/game-event-behavior.md)** - 监听器配置的详细指南
+- **[最佳实践](../scripting/best-practices.md)** - 顺序依赖逻辑的模式
+- **[监听策略](../scripting/listening-strategies.md)** - 高级回调模式

@@ -1,197 +1,197 @@
 ﻿---
-sidebar_label: '03 Custom Type Event'
+sidebar_label: '03 自定义类型事件'
 sidebar_position: 4
 ---
 
 import VideoGif from '@site/src/components/Video/VideoGif';
 
-# 03 Custom Type Event: Automated Code Generation
+# 03 自定义类型事件：自动代码生成
 
 <!-- <VideoGif src="/video/game-event-system/03-custom-type-event.mp4" /> -->
 
-## 📋 Overview
+## 📋 概述
 
-In real games, passing a single `float` for damage is rarely enough. You often need to bundle data: *Who attacked? Was it a crit? What damage type? Where did it hit?* This demo demonstrates how to create events for **custom C# classes** and leverage the **automatic code generation** system to maintain type safety.
+在真实游戏中，传递单个`float`表示伤害通常是不够的。您经常需要打包数据：*谁攻击的？是暴击吗？什么伤害类型？击中哪里？*此演示展示了如何为**自定义C#类**创建事件，并利用**自动代码生成**系统来维护类型安全。
 
-:::tip 💡 What You'll Learn
-- How to create events with custom data classes
-- How the system auto-generates `GameEvent<T>` for your types
-- How to pass complex data structures through events
-- How one event payload can drive multiple feedback systems
+:::tip 💡 您将学到
+- 如何使用自定义数据类创建事件
+- 系统如何为您的类型自动生成`GameEvent<T>`
+- 如何通过事件传递复杂的数据结构
+- 一个事件有效载荷如何驱动多个反馈系统
 
 :::
 
 ---
 
-## 🎬 Demo Scene
+## 🎬 演示场景
 ```
 Assets/TinyGiants/GameEventSystem/Demo/03_CustomTypeEvent/03_CustomTypeEvent.unity
 ```
 
-### Scene Composition
+### 场景组成
 
-**UI Layer (Canvas):**
-- 🎮 **Three Attack Buttons** - Located at the bottom of the screen
-  - "Raise (Physical Damage)" → Triggers `CustomEventRaiser.DealPhysicalDamage()`
-  - "Raise (Fire Damage)" → Triggers `CustomEventRaiser.DealFireDamage()`
-  - "Raise (Critical Strike)" → Triggers `CustomEventRaiser.DealCriticalStrike()`
+**UI层（Canvas）：**
+- 🎮 **三个攻击按钮** - 位于屏幕底部
+  - "Raise (Physical Damage)" → 触发`CustomEventRaiser.DealPhysicalDamage()`
+  - "Raise (Fire Damage)" → 触发`CustomEventRaiser.DealFireDamage()`
+  - "Raise (Critical Strike)" → 触发`CustomEventRaiser.DealCriticalStrike()`
 
-**Game Logic Layer (Demo Scripts):**
-- 📤 **CustomTypeEventRaiser** - GameObject with the raiser script
-  - Holds references to 3 events: `GameEvent<DamageInfo>` for Physical, Fire, and Critical attacks
-  - Constructs `DamageInfo` objects with different properties and raises corresponding events
+**游戏逻辑层（演示脚本）：**
+- 📤 **CustomTypeEventRaiser** - 带有触发器脚本的GameObject
+  - 持有对3个事件的引用：物理、火焰和暴击攻击的`GameEvent<DamageInfo>`
+  - 构造具有不同属性的`DamageInfo`对象并触发相应的事件
 
-- 📥 **CustomTypeEventReceiver** - GameObject with the receiver script
-  - Listens to all 3 damage events through visual binding in Game Event Editor
-  - Parses the `DamageInfo` payload to trigger appropriate visual and physics feedback
+- 📥 **CustomTypeEventReceiver** - 带有接收器脚本的GameObject
+  - 通过游戏事件编辑器中的可视化绑定监听所有3个伤害事件
+  - 解析`DamageInfo`有效载荷以触发适当的视觉和物理反馈
 
-**Visual Feedback Layer (Demo Objects):**
-- 🎯 **Capsule** - The damage target (dummy)
-  - Has Rigidbody for physics knockback
-  - Has Renderer for color flash effects
-- 🔥 **Particle Effects** - Fire hit VFX spawned at impact points
-- 💬 **Floating Text** - Damage numbers displayed above the capsule
-- 🏠 **Plane** - Ground surface for scene context
-
----
-
-## 🎮 How to Interact
-
-### Step 1: Enter Play Mode
-
-Press the **Play** button in Unity.
-
-### Step 2: Test Different Attack Types
-
-**Click "Raise (Physical Damage)":**
-- ⚪ White color flash on capsule
-- 💬 Floating text shows "10" in white
-- 🎯 Small knockback force applied
-- 📝 Console logs: `[Combat Log] Dealt 10 (Physical) damage. Crit: False, Attacker: Player01`
-
-**Click "Raise (Fire Damage)":**
-- 🟠 Orange color flash on capsule
-- 💬 Floating text shows randomized damage (15-25) in orange
-- 🔥 Fire particle effect spawns at the hit point
-- 🎯 Standard knockback force applied
-- 📝 Console logs fire damage details with attacker "Player02"
-
-**Click "Raise (Critical Strike)":**
-- 🟣 Purple color flash on capsule
-- 💬 Larger floating text shows high damage (50-80) with "!" suffix
-- 📹 **Camera shake effect** for dramatic impact
-- 🎯 **Strong knockback force** applied
-- 📝 Console logs critical strike details with attacker "Player03"
+**视觉反馈层（演示对象）：**
+- 🎯 **胶囊体** - 伤害目标（假人）
+  - 具有用于物理击退的Rigidbody
+  - 具有用于颜色闪烁效果的Renderer
+- 🔥 **粒子效果** - 在撞击点生成的火焰击中VFX
+- 💬 **漂浮文本** - 在胶囊体上方显示的伤害数字
+- 🏠 **平面** - 场景上下文的地面表面
 
 ---
 
-## 🏗️ Scene Architecture
+## 🎮 如何交互
 
-### The Custom Data Structure
+### 步骤1：进入播放模式
 
-The `DamageInfo` class bundles all combat-related data into a single packet:
+按Unity中的**播放**按钮。
+
+### 步骤2：测试不同的攻击类型
+
+**点击"Raise (Physical Damage)"：**
+- ⚪ 胶囊体上的白色闪烁
+- 💬 漂浮文本显示白色的"10"
+- 🎯 应用小击退力
+- 📝 控制台日志：`[Combat Log] Dealt 10 (Physical) damage. Crit: False, Attacker: Player01`
+
+**点击"Raise (Fire Damage)"：**
+- 🟠 胶囊体上的橙色闪烁
+- 💬 漂浮文本显示橙色的随机伤害（15-25）
+- 🔥 火焰粒子效果在击中点生成
+- 🎯 应用标准击退力
+- 📝 控制台记录攻击者"Player02"的火焰伤害详情
+
+**点击"Raise (Critical Strike)"：**
+- 🟣 胶囊体上的紫色闪烁
+- 💬 更大的漂浮文本显示高伤害（50-80），带有"!"后缀
+- 📹 **相机震动效果**以产生戏剧性冲击
+- 🎯 应用**强击退力**
+- 📝 控制台记录攻击者"Player03"的暴击详情
+
+---
+
+## 🏗️ 场景架构
+
+### 自定义数据结构
+
+`DamageInfo`类将所有战斗相关数据打包到一个单一数据包中：
 ```csharp
 [Serializable]
 public class DamageInfo
 {
-    public int amount;          // Damage value
-    public bool isCritical;     // Critical hit flag
-    public DamageType type;     // Physical, Fire, or Void
-    public Vector3 hitPoint;    // Impact position for VFX spawning
-    public string attacker;     // Name of damage source
+    public int amount;          // 伤害值
+    public bool isCritical;     // 暴击标志
+    public DamageType type;     // 物理、火焰或虚空
+    public Vector3 hitPoint;    // VFX生成的撞击位置
+    public string attacker;     // 伤害来源的名称
 }
 ```
 
-**Why Bundle Data?**
-- ✅ One event call passes all necessary information
-- ✅ Easier to extend (add new properties without changing event signatures)
-- ✅ Type-safe serialization and validation
-- ✅ Clear data contract between sender and receiver
+**为什么打包数据？**
+- ✅ 一次事件调用传递所有必要信息
+- ✅ 更易于扩展（添加新属性而无需更改事件签名）
+- ✅ 类型安全的序列化和验证
+- ✅ 发送者和接收者之间的清晰数据契约
 
 ---
 
-### Event Definitions
+### 事件定义
 
-Open the **Game Event Editor** window to see the 3 damage events:
+打开**游戏事件编辑器**窗口以查看3个伤害事件：
 
 ![Game Event Editor](/img/game-event-system/examples/03-custom-type-event/demo-03-editor.png)
 
-**Events in Database:**
+**数据库中的事件：**
 
-| Event Name         | Type                    | Purpose                   |
+| 事件名称 | 类型 | 目的 |
 | ------------------ | ----------------------- | ------------------------- |
-| `OnPhysicalDamage` | `GameEvent<DamageInfo>` | Standard physical attacks |
-| `OnFireDamage`     | `GameEvent<DamageInfo>` | Fire-based magical damage |
-| `OnCriticalStrike` | `GameEvent<DamageInfo>` | High-impact critical hits |
+| `OnPhysicalDamage` | `GameEvent<DamageInfo>` | 标准物理攻击 |
+| `OnFireDamage` | `GameEvent<DamageInfo>` | 基于火焰的魔法伤害 |
+| `OnCriticalStrike` | `GameEvent<DamageInfo>` | 高冲击力暴击 |
 
-**Notice the Behavior Column:**
-All three events show **(DamageInfo)** as the type indicator. These `GameEvent<DamageInfo>` classes were **automatically generated** by the plugin when you created the events—no manual coding required!
+**注意行为列：**
+所有三个事件都显示**(DamageInfo)**作为类型指示器。这些`GameEvent<DamageInfo>`类是在您创建事件时由插件**自动生成**的——无需手动编码！
 
-:::note 🔧 Code Generation
+:::note 🔧 代码生成
 
-When you create an event with a custom type in the Game Event Creator, the plugin automatically:
+当您在游戏事件创建器中使用自定义类型创建事件时，插件会自动：
 
-1. Generates the `GameEvent<YourType>` class
-2. Creates corresponding listener interfaces
-3. Ensures type safety in Inspector dropdowns and method binding
+1. 生成`GameEvent<YourType>`类
+2. 创建相应的监听器接口
+3. 确保Inspector下拉菜单和方法绑定中的类型安全
 
 :::
 
 ---
 
-### Sender Setup (CustomTypeEventRaiser)
+### 发送者设置（CustomTypeEventRaiser）
 
-Select the **CustomTypeEventRaiser** GameObject in the Hierarchy:
+在层级视图中选择**CustomTypeEventRaiser** GameObject：
 
 ![CustomTypeEventRaiser Inspector](/img/game-event-system/examples/03-custom-type-event/demo-03-inspector.png)
 
-**Configuration Details:**
+**配置详情：**
 
-**GameEvent Section:**
+**GameEvent部分：**
 - `Physical Damage Event` → `OnPhysicalDamage`
 - `Fire Damage Event` → `OnFireDamage`
 - `Critical Strike Event` → `OnCriticalStrike`
 
-**Settings Section:**
-- `Hit Target` → Capsule (Transform) - Used to calculate random hit points
+**设置部分：**
+- `Hit Target` → 胶囊体（Transform）- 用于计算随机击中点
 
-**Type Safety in Action:**
-- The dropdown only shows `GameEvent<DamageInfo>` assets
-- You cannot assign a `GameEvent<string>` or `GameEvent<Vector3>` to these slots
-- This prevents runtime type mismatch errors
+**类型安全实践：**
+- 下拉菜单仅显示`GameEvent<DamageInfo>`资产
+- 您不能将`GameEvent<string>`或`GameEvent<Vector3>`分配给这些槽
+- 这防止运行时类型不匹配错误
 
 ---
 
-### Receiver Setup (CustomTypeEventReceiver)
+### 接收者设置（CustomTypeEventReceiver）
 
-Select the **CustomTypeEventReceiver** GameObject in the Hierarchy:
+在层级视图中选择**CustomTypeEventReceiver** GameObject：
 
 ![CustomTypeEventReceiver Inspector](/img/game-event-system/examples/03-custom-type-event/demo-03-receiver.png)
 
-**Reference Configuration:**
-- `Floating Text Prefab` → DamageFloatingText (GameObject)
-- `Hit Particle Prefab` → FireHitVFX (ParticleSystem)
-- `Target Renderer` → Capsule (Mesh Renderer)
-- `Target Rigidbody` → Capsule (Rigidbody)
+**引用配置：**
+- `Floating Text Prefab` → DamageFloatingText（GameObject）
+- `Hit Particle Prefab` → FireHitVFX（ParticleSystem）
+- `Target Renderer` → 胶囊体（Mesh Renderer）
+- `Target Rigidbody` → 胶囊体（Rigidbody）
 
-**Behavior Binding:**
+**行为绑定：**
 
-All three damage events are bound to the same receiver method through the **Behavior Window**:
+所有三个伤害事件都通过**行为窗口**绑定到相同的接收器方法：
 
-| Event              | Bound Method       | Signature                |
+| 事件 | 绑定方法 | 签名 |
 | ------------------ | ------------------ | ------------------------ |
 | `OnPhysicalDamage` | `OnDamageReceived` | `void (DamageInfo info)` |
-| `OnFireDamage`     | `OnDamageReceived` | `void (DamageInfo info)` |
+| `OnFireDamage` | `OnDamageReceived` | `void (DamageInfo info)` |
 | `OnCriticalStrike` | `OnDamageReceived` | `void (DamageInfo info)` |
 
-**Smart Routing:**
-The single receiver method intelligently routes feedback based on the `DamageInfo` properties—checking `type` for fire particles, `isCritical` for camera shake, etc.
+**智能路由：**
+单个接收器方法根据`DamageInfo`属性智能地路由反馈——检查`type`以显示火焰粒子，检查`isCritical`以显示相机震动等。
 
 ---
 
-## 💻 Code Breakdown
+## 💻 代码分解
 
-### 📤 CustomTypeEventRaiser.cs (Sender)
+### 📤 CustomTypeEventRaiser.cs（发送者）
 ```csharp
 using UnityEngine;
 using TinyGiants.GameEventSystem.Runtime;
@@ -199,7 +199,7 @@ using TinyGiants.GameEventSystem.Runtime;
 public class CustomEventRaiser : MonoBehaviour
 {
     [Header("GameEvent")]
-    // Notice: GameEvent<DamageInfo> was AUTO-GENERATED by the plugin
+    // 注意：GameEvent<DamageInfo>由插件自动生成
     [GameEventDropdown] public GameEvent<DamageInfo> physicalDamageEvent;
     [GameEventDropdown] public GameEvent<DamageInfo> fireDamageEvent;
     [GameEventDropdown] public GameEvent<DamageInfo> criticalStrikeEvent;
@@ -208,8 +208,8 @@ public class CustomEventRaiser : MonoBehaviour
     public Transform hitTarget;
 
     /// <summary>
-    /// Simulates a standard physical attack from "Player01".
-    /// Sends fixed damage with Physical type.
+    /// 模拟来自"Player01"的标准物理攻击。
+    /// 发送具有物理类型的固定伤害。
     /// </summary>
     public void DealPhysicalDamage()
     {
@@ -217,8 +217,8 @@ public class CustomEventRaiser : MonoBehaviour
     }
 
     /// <summary>
-    /// Simulates a fire spell from "Player02".
-    /// Demonstrates randomized damage generation (15-25).
+    /// 模拟来自"Player02"的火焰法术。
+    /// 演示随机伤害生成（15-25）。
     /// </summary>
     public void DealFireDamage()
     {
@@ -227,8 +227,8 @@ public class CustomEventRaiser : MonoBehaviour
     }
 
     /// <summary>
-    /// Simulates a critical strike from "Player03".
-    /// Sets isCritical flag to trigger special effects (camera shake, larger text).
+    /// 模拟来自"Player03"的暴击。
+    /// 设置isCritical标志以触发特殊效果（相机震动、更大文本）。
     /// </summary>
     public void DealCriticalStrike()
     {
@@ -237,19 +237,19 @@ public class CustomEventRaiser : MonoBehaviour
     }
 
     /// <summary>
-    /// Constructs the DamageInfo packet and raises the event.
+    /// 构造DamageInfo数据包并触发事件。
     /// </summary>
     private void SendDamage(GameEvent<DamageInfo> gameEvent, float baseDamage, 
                            bool isCrit, DamageType type, string attacker)
     {
         if (gameEvent == null) return;
         
-        // Calculate random hit point to simulate impact variation
+        // 计算随机击中点以模拟撞击变化
         Vector3 randomPoint = hitTarget != null 
             ? hitTarget.position + Random.insideUnitSphere * 0.5f 
             : Vector3.zero;
         
-        // Construct the data packet
+        // 构造数据包
         DamageInfo info = new DamageInfo(
             Mathf.RoundToInt(baseDamage), 
             isCrit, 
@@ -258,24 +258,24 @@ public class CustomEventRaiser : MonoBehaviour
             attacker
         );
 
-        // Raise the event with the complex object
+        // 用复杂对象触发事件
         gameEvent.Raise(info);
         
-        Debug.Log($"[Combat Log] Dealt {info.amount} ({info.type}) damage. " +
-                  $"Crit: {info.isCritical}, Attacker: {info.attacker}");
+        Debug.Log($"[Combat Log] 造成了 {info.amount} ({info.type}) 伤害。" +
+                  $"暴击：{info.isCritical}，攻击者：{info.attacker}");
     }
 }
 ```
 
-**Key Points:**
-- 🎯 **Custom Type Support** - `GameEvent<DamageInfo>` handles complex objects
-- 🏗️ **Data Construction** - Build the packet with all relevant properties
-- 📦 **Single Call** - `.Raise(info)` passes the entire data structure
-- 🔇 **Decoupling** - No knowledge of what visual effects will be triggered
+**关键点：**
+- 🎯 **自定义类型支持** - `GameEvent<DamageInfo>`处理复杂对象
+- 🏗️ **数据构造** - 使用所有相关属性构建数据包
+- 📦 **单次调用** - `.Raise(info)`传递整个数据结构
+- 🔇 **解耦** - 不知道将触发什么视觉效果
 
 ---
 
-### 📥 CustomTypeEventReceiver.cs (Listener)
+### 📥 CustomTypeEventReceiver.cs（监听器）
 ```csharp
 using UnityEngine;
 using TMPro;
@@ -292,22 +292,22 @@ public class CustomTypeEventReceiver : MonoBehaviour
     private Camera _mainCamera;
 
     /// <summary>
-    /// Listener method for GameEvent<DamageInfo>.
-    /// Parses the complex data to trigger multiple feedback systems.
+    /// GameEvent<DamageInfo>的监听器方法。
+    /// 解析复杂数据以触发多个反馈系统。
     /// </summary>
     public void OnDamageReceived(DamageInfo info)
     {
-        // 1. Visual: Color flash based on damage type
+        // 1. 视觉：基于伤害类型的颜色闪烁
         Color effectColor = GetColorByType(info.type);
         StartCoroutine(FlashColorRoutine(effectColor));
 
-        // 2. UI: Floating damage text
+        // 2. UI：漂浮伤害文本
         if (floatingTextPrefab != null)
         {
             ShowFloatingText(info, effectColor);
         }
         
-        // 3. VFX: Fire particles for fire damage
+        // 3. VFX：火焰伤害的火焰粒子
         if (info.type == DamageType.Fire && hitParticlePrefab != null)
         {
             Vector3 centerToHitDir = (info.hitPoint - transform.position).normalized;
@@ -321,7 +321,7 @@ public class CustomTypeEventReceiver : MonoBehaviour
             Destroy(vfxInstance.gameObject, 2.0f);
         }
 
-        // 4. Physics: Knockback force (stronger for crits)
+        // 4. 物理：击退力（暴击更强）
         if (targetRigidbody != null)
         {
             Vector3 forceDir = (info.hitPoint - transform.position).normalized * -1f;
@@ -332,7 +332,7 @@ public class CustomTypeEventReceiver : MonoBehaviour
                                      ForceMode.Impulse);
         }
         
-        // 5. Camera: Screen shake for critical hits
+        // 5. 相机：暴击的屏幕震动
         if (info.isCritical)
         {
             StartCoroutine(ShakeCameraRoutine(0.2f, 0.4f));
@@ -347,7 +347,7 @@ public class CustomTypeEventReceiver : MonoBehaviour
         
         if (tmp != null)
         {
-            // Critical hits get "!" suffix and larger font
+            // 暴击获得"!"后缀和更大的字体
             tmp.text = info.isCritical ? $"{info.amount}!" : info.amount.ToString();
             tmp.color = color;
             tmp.fontSize = info.isCritical ? 10 : 6;
@@ -402,42 +402,42 @@ public class CustomTypeEventReceiver : MonoBehaviour
 }
 ```
 
-**Key Points:**
-- 🎯 **Property-Based Routing** - Check `info.type` and `info.isCritical` to decide actions
-- 🎨 **Multiple Feedback Systems** - Color flash, floating text, VFX, physics, camera shake
-- 📍 **Spatial Data Usage** - `info.hitPoint` determines VFX spawn location
-- 🔇 **Decoupling** - No knowledge of which button or raiser triggered the event
+**关键点：**
+- 🎯 **基于属性的路由** - 检查`info.type`和`info.isCritical`来决定操作
+- 🎨 **多个反馈系统** - 颜色闪烁、漂浮文本、VFX、物理、相机震动
+- 📍 **空间数据使用** - `info.hitPoint`确定VFX生成位置
+- 🔇 **解耦** - 不知道哪个按钮或触发器触发了事件
 
 ---
 
-## 🔑 Key Takeaways
+## 🔑 关键要点
 
-| Concept               | Implementation                                               |
+| 概念 | 实现 |
 | --------------------- | ------------------------------------------------------------ |
-| 🎯 **Custom Types**    | `GameEvent<YourClass>` supports any serializable C# class    |
-| 🏭 **Auto-Generation** | Plugin generates event classes automatically—no manual coding |
-| 📦 **Data Bundling**   | Pass complex objects with multiple properties in one call    |
-| 🔀 **Smart Routing**   | Single receiver method can handle different logic paths based on data |
-| 🎨 **Rich Feedback**   | One event payload drives multiple coordinated systems        |
+| 🎯 **自定义类型** | `GameEvent<YourClass>`支持任何可序列化的C#类 |
+| 🏭 **自动生成** | 插件自动生成事件类——无需手动编码 |
+| 📦 **数据打包** | 一次调用传递具有多个属性的复杂对象 |
+| 🔀 **智能路由** | 单个接收器方法可以根据数据处理不同的逻辑路径 |
+| 🎨 **丰富反馈** | 一个事件有效载荷驱动多个协调系统 |
 
-:::note 🎓 Design Insight
+:::note 🎓 设计洞察
 
-Custom type events are perfect for complex game systems like combat, dialogue, or inventory. Instead of firing 5 separate events (`OnDamage`, `OnDamageType`, `OnCritical`, etc.), you fire **one event with all the data**, keeping your event system clean and efficient!
+自定义类型事件非常适合复杂的游戏系统，如战斗、对话或库存。您不需要触发5个单独的事件（`OnDamage`、`OnDamageType`、`OnCritical`等），而是触发**一个包含所有数据的事件**，保持事件系统的清晰和高效！
 
 :::
 
 ---
 
-## 🎯 What's Next?
+## 🎯 下一步？
 
-You've mastered custom data types. Now let's explore how to **add custom sender information** to track event sources.
+您已经掌握了自定义数据类型。现在让我们探索如何**添加自定义发送者信息**来跟踪事件来源。
 
-**Next Chapter**: Learn about sender tracking in **[04 Custom Sender Event](./04-custom-sender-event.md)**
+**下一章**：在**[04 自定义Sender事件](./04-custom-sender-event.md)**中学习发送者跟踪
 
 ---
 
-## 📚 Related Documentation
+## 📚 相关文档
 
-- **[Game Event Creator](../visual-workflow/game-event-creator.md)** - How to create events with custom types
-- **[Code Generation](../tools/codegen-and-cleanup.md)** - Understanding the automatic code generation system
-- **[API Reference](../scripting/api-reference.md)** - Generic event API for custom types
+- **[游戏事件创建器](../visual-workflow/game-event-creator.md)** - 如何使用自定义类型创建事件
+- **[代码生成](../tools/codegen-and-cleanup.md)** - 理解自动代码生成系统
+- **[API参考](../scripting/api-reference.md)** - 自定义类型的泛型事件API

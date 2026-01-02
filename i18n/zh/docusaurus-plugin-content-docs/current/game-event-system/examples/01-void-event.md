@@ -1,149 +1,149 @@
 ﻿---
-sidebar_label: '01 Void Event'
+sidebar_label: '01 Void事件'
 sidebar_position: 2
 ---
 
 import VideoGif from '@site/src/components/Video/VideoGif';
 
-# 01 Void Event: The Decoupled Architecture
+# 01 Void事件：解耦架构
 
 <!-- <VideoGif src="/video/game-event-system/01-void-event.mp4" /> -->
 
-## 📋 Overview
+## 📋 概述
 
-This demo illustrates the core **Observer Pattern** workflow using the Game Event System. The most important takeaway is that the **Sender** (VoidEventRaiser) and **Receiver** (VoidEventReceiver) scripts are completely decoupled—they do not reference each other in code!
+此演示展示了使用游戏事件系统的核心**观察者模式**工作流。最重要的要点是**发送者**（VoidEventRaiser）和**接收者**（VoidEventReceiver）脚本完全解耦——它们在代码中不相互引用！
 
-:::tip 💡 What You'll Learn
-- How to create a parameterless (void) event
-- How to raise events without knowing who listens
-- How to bind callbacks visually in the Game Event Editor
-- The power of decoupled architecture
+:::tip 💡 您将学到
+- 如何创建无参数（void）事件
+- 如何在不知道谁在监听的情况下触发事件
+- 如何在游戏事件编辑器中可视化绑定回调
+- 解耦架构的力量
 
 :::
 
 ---
 
-## 🎬 Demo Scene
+## 🎬 演示场景
 ```
 Assets/TinyGiants/GameEventSystem/Demo/01_VoidEvent/01_VoidEvent.unity
 ```
 
-### Scene Composition
+### 场景组成
 
-**UI Layer (Canvas):**
-- 🎮 **Button** - Canvas UI button located at the bottom center
-  - `OnClick()` event is wired to → `VoidEventRaiser.RaiseBasicEvent()`
-  - This is standard Unity UI event binding
+**UI层（Canvas）：**
+- 🎮 **按钮** - 位于底部中心的Canvas UI按钮
+  - `OnClick()`事件连接到 → `VoidEventRaiser.RaiseBasicEvent()`
+  - 这是标准的Unity UI事件绑定
 
-**Game Logic Layer (Demo Scripts):**
-- 📤 **VoidEventRaiser** - GameObject with `VoidEventRaiser.cs` script
-  - Holds a reference to the `OnVoidEvent` GameEvent asset
-  - When `RaiseBasicEvent()` is called by the Button, it triggers `voidEvent.Raise()`
-  - Also plays UI audio feedback
+**游戏逻辑层（演示脚本）：**
+- 📤 **VoidEventRaiser** - 带有`VoidEventRaiser.cs`脚本的GameObject
+  - 持有对`OnVoidEvent` GameEvent资产的引用
+  - 当按钮调用`RaiseBasicEvent()`时，它触发`voidEvent.Raise()`
+  - 还播放UI音频反馈
   
-- 📥 **VoidEventReceiver** - GameObject with `VoidEventReceiver.cs` script
-  - Listens to `OnVoidEvent` through visual binding in Game Event Editor
-  - References the blue cube's Rigidbody to apply physics responses
+- 📥 **VoidEventReceiver** - 带有`VoidEventReceiver.cs`脚本的GameObject
+  - 通过游戏事件编辑器中的可视化绑定监听`OnVoidEvent`
+  - 引用蓝色立方体的Rigidbody以应用物理响应
 
-**Visual Feedback Layer (Demo Objects):**
-- 🎲 **Blue Cube** - 3D object in the scene
-  - Has a Rigidbody component for physics simulation
-  - Responds with jump and spin when the event fires
-  - Ground plane below for landing surface
-
----
-
-## 🎮 How to Interact
-
-### Step 1: Enter Play Mode
-
-Press the **Play** button in Unity to start the demo.
-
-### Step 2: Click the "Raise" Button
-
-Click the **"Raise"** button at the bottom of the Game View.
-
-**Event Flow:**
-1. 🖱️ Unity's Button `OnClick()` triggers → `VoidEventRaiser.RaiseBasicEvent()`
-2. 🔊 Audio feedback plays from VoidEventRaiser
-3. 📡 `voidEvent.Raise()` broadcasts the signal through GameEventManager
-4. 📥 VoidEventReceiver's `OnEventReceived()` method is invoked automatically
-5. 🎲 The cube jumps upward with random horizontal drift and spin
-6. 📝 Console logs confirm each step: `[VoidEvent] Raise()` → `[VoidEvent] OnEventReceived()`
+**视觉反馈层（演示对象）：**
+- 🎲 **蓝色立方体** - 场景中的3D对象
+  - 具有用于物理模拟的Rigidbody组件
+  - 当事件触发时以跳跃和旋转响应
+  - 下方的地面平面作为着陆表面
 
 ---
 
-## 🏗️ Scene Architecture
+## 🎮 如何交互
 
-### Event Definition
+### 步骤1：进入播放模式
 
-Open the **Game Event Editor** window (`Tools → TinyGiants → Game Event Editor`):
+按Unity中的**播放**按钮以启动演示。
+
+### 步骤2：点击"Raise"按钮
+
+点击游戏视图底部的**"Raise"**按钮。
+
+**事件流：**
+1. 🖱️ Unity的按钮`OnClick()`触发 → `VoidEventRaiser.RaiseBasicEvent()`
+2. 🔊 VoidEventRaiser播放音频反馈
+3. 📡 `voidEvent.Raise()`通过GameEventManager广播信号
+4. 📥 VoidEventReceiver的`OnEventReceived()`方法被自动调用
+5. 🎲 立方体向上跳跃，带有随机的水平漂移和旋转
+6. 📝 控制台日志确认每个步骤：`[VoidEvent] Raise()` → `[VoidEvent] OnEventReceived()`
+
+---
+
+## 🏗️ 场景架构
+
+### 事件定义
+
+打开**游戏事件编辑器**窗口（`Tools → TinyGiants → Game Event Editor`）：
 
 ![Game Event Editor](/img/game-event-system/examples/01-void-event/demo-01-editor.png)
 
-**Key Components:**
-- **Event Name**: `OnVoidEvent`
-- **Event Type**: `void` (parameterless)
-- **Database**: `GameEventDatabase_Void`
-- **Behavior Column**: Shows a green **(void)** icon indicating callback binding
+**关键组件：**
+- **事件名称**：`OnVoidEvent`
+- **事件类型**：`void`（无参数）
+- **数据库**：`GameEventDatabase_Void`
+- **行为列**：显示绿色的**(void)**图标，表示回调绑定
 
-This ScriptableObject acts as the **signal channel** between sender and receiver.
+此ScriptableObject充当发送者和接收者之间的**信号通道**。
 
 ---
 
-### Sender Setup (VoidEventRaiser)
+### 发送者设置（VoidEventRaiser）
 
-Select the **VoidEventRaiser** GameObject in the Hierarchy (`Demo Scripts/VoidEventRaiser`):
+在层级视图中选择**VoidEventRaiser** GameObject（`Demo Scripts/VoidEventRaiser`）：
 
 ![VoidEventRaiser Inspector](/img/game-event-system/examples/01-void-event/demo-01-inspector.png)
 
-**Configuration:**
-- **GameObject Section**:
-  - `Void Event` field uses `[GameEventDropdown]` attribute
-  - Set to `OnVoidEvent` asset
+**配置：**
+- **GameObject部分**：
+  - `Void Event`字段使用`[GameEventDropdown]`特性
+  - 设置为`OnVoidEvent`资产
   
-- **Audio Section**:
-  - `UI Clip` assigned for button click feedback
+- **音频部分**：
+  - 为按钮点击反馈分配了`UI Clip`
 
-The script simply calls `voidEvent.Raise()` when the button triggers it—**no knowledge of who listens**.
+脚本在按钮触发时简单地调用`voidEvent.Raise()`——**不知道谁在监听**。
 
 ---
 
-### Receiver Binding (Behavior Configuration)
+### 接收者绑定（行为配置）
 
-This is where the **decoupling magic** happens! The connection between event and callback is configured entirely in the Editor.
+这就是**解耦魔法**发生的地方！事件和回调之间的连接完全在编辑器中配置。
 
-**How to Configure:**
+**如何配置：**
 
-1. In the **Game Event Editor** window, find `OnVoidEvent` in the event list
-2. Look at the **Behavior** column on the right
-3. Click the green **(void)** icon to open the **Behavior Window**
+1. 在**游戏事件编辑器**窗口中，在事件列表中找到`OnVoidEvent`
+2. 查看右侧的**Behavior**列
+3. 点击绿色的**(void)**图标以打开**行为窗口**
 
 ![Behavior Window](/img/game-event-system/examples/01-void-event/demo-01-behavior.png)
 
-**Configuration Details:**
+**配置详情：**
 
-**Event Action Section:**
-- **Mode**: `Runtime Only` (executes at runtime, not in Editor)
-- **Target Object**: `VoidEventReceiver` GameObject
-- **Method**: `VoidEventReceiver.OnEventReceived` (void method)
+**事件动作部分：**
+- **模式**：`Runtime Only`（在运行时执行，而不是在编辑器中）
+- **目标对象**：`VoidEventReceiver` GameObject
+- **方法**：`VoidEventReceiver.OnEventReceived`（void方法）
 
-This binding tells the GameEventManager: *"When `OnVoidEvent.Raise()` is called, automatically invoke `VoidEventReceiver.OnEventReceived()`"*
+此绑定告诉GameEventManager：*"当调用`OnVoidEvent.Raise()`时，自动调用`VoidEventReceiver.OnEventReceived()`"*
 
-:::note 🎯 Visual Binding Benefits
+:::note 🎯 可视化绑定的好处
 
-- ✅ No code references needed between Raiser and Receiver
-- ✅ Easy to add/remove listeners without touching scripts
-- ✅ Clear visual overview of event → callback relationships
-- ✅ Runtime-only mode prevents accidental Editor execution
+- ✅ Raiser和Receiver之间不需要代码引用
+- ✅ 无需接触脚本即可轻松添加/删除监听器
+- ✅ 清晰的事件→回调关系的可视化概览
+- ✅ 仅运行时模式防止意外的编辑器执行
 
 :::
 
 ---
 
-## 💻 Code Breakdown
+## 💻 代码分解
 
-### 📤 VoidEventRaiser.cs (Event Sender)
+### 📤 VoidEventRaiser.cs（事件发送者）
 ```csharp
 using TinyGiants.GameEventSystem.Runtime;
 using UnityEngine;
@@ -164,9 +164,9 @@ public class VoidEventRaiser : MonoBehaviour
     }
 
     /// <summary>
-    /// [Input Trigger]
-    /// This method is called by the Button's OnClick() event (configured in Inspector).
-    /// It broadcasts the event signal without knowing who is listening.
+    /// [输入触发器]
+    /// 此方法由按钮的OnClick()事件（在Inspector中配置）调用。
+    /// 它在不知道谁在监听的情况下广播事件信号。
     /// </summary>
     public void RaiseBasicEvent()
     {
@@ -174,25 +174,25 @@ public class VoidEventRaiser : MonoBehaviour
         
         if (voidEvent == null)
         {
-            Debug.LogWarning("[VoidEvent] No GameEvent assigned on VoidEventRaiser.");
+            Debug.LogWarning("[VoidEvent] VoidEventRaiser上未分配GameEvent。");
             return;
         }
         
         voidEvent.Raise();
-        Debug.Log("[VoidEvent] Raise() called on GameEvent.");
+        Debug.Log("[VoidEvent] 在GameEvent上调用了Raise()。");
     }
 }
 ```
 
-**Key Points:**
-- 🎯 **`[GameEventDropdown]`** - Provides a dropdown to select events in Inspector
-- 🔊 **Audio Feedback** - Plays sound before raising the event
-- 📢 **`voidEvent.Raise()`** - Single line broadcasts to all listeners
-- 🔇 **Zero coupling** - No references to VoidEventReceiver or the cube
+**关键点：**
+- 🎯 **`[GameEventDropdown]`** - 在Inspector中提供下拉菜单以选择事件
+- 🔊 **音频反馈** - 在触发事件前播放声音
+- 📢 **`voidEvent.Raise()`** - 单行代码广播到所有监听器
+- 🔇 **零耦合** - 没有对VoidEventReceiver或立方体的引用
 
 ---
 
-### 📥 VoidEventReceiver.cs (Event Listener)
+### 📥 VoidEventReceiver.cs（事件监听器）
 ```csharp
 using UnityEngine;
 
@@ -205,19 +205,19 @@ public class VoidEventReceiver : MonoBehaviour
     private float spinStrength = 5.0f;
     
     /// <summary>
-    /// [Event Callback]
-    /// This method is NOT called by VoidEventRaiser directly.
-    /// It is bound to 'OnVoidEvent' via the Game Event Editor's Behavior Window.
+    /// [事件回调]
+    /// 此方法不是由VoidEventRaiser直接调用的。
+    /// 它通过游戏事件编辑器的行为窗口绑定到'OnVoidEvent'。
     /// 
-    /// Effect: Resets vertical velocity, then applies jump + random drift + spin.
+    /// 效果：重置垂直速度，然后应用跳跃 + 随机漂移 + 旋转。
     /// </summary>
     public void OnEventReceived()
     {
-        Debug.Log("[VoidEvent] OnEventReceived() called on GameEvent.");
+        Debug.Log("[VoidEvent] 在GameEvent上调用了OnEventReceived()。");
         
         if (targetRigidbody != null)
         {
-            // Reset vertical velocity for consistent jump height
+            // 重置垂直速度以获得一致的跳跃高度
             Vector3 currentVel;
 #if UNITY_6000_0_OR_NEWER
             currentVel = targetRigidbody.linearVelocity;
@@ -232,61 +232,61 @@ public class VoidEventReceiver : MonoBehaviour
             targetRigidbody.velocity = currentVel;
 #endif
             
-            // Apply jump with random horizontal drift
+            // 应用带随机水平漂移的跳跃
             Vector2 randomCircle = Random.insideUnitCircle * horizontalRandomness;
             Vector3 sideForce = new Vector3(randomCircle.x, 0, randomCircle.y);
             Vector3 finalForce = (Vector3.up * jumpForce) + sideForce;
             targetRigidbody.AddForce(finalForce, ForceMode.Impulse);
 
-            // Apply random spin
+            // 应用随机旋转
             Vector3 randomTorque = Random.insideUnitSphere * spinStrength;
             targetRigidbody.AddTorque(randomTorque, ForceMode.Impulse);
         }
         else
         {
-            Debug.LogWarning("VoidEventReceiver: Please assign targetRigidbody in Inspector!");
+            Debug.LogWarning("VoidEventReceiver: 请在Inspector中分配targetRigidbody！");
         }
     }
 }
 ```
 
-**Key Points:**
-- 🎲 **Velocity Reset** - Ensures consistent jump height by zeroing Y velocity first
-- 🎯 **Physics Response** - Combines upward impulse + random horizontal drift + random torque
-- 🔇 **Zero coupling** - No references to VoidEventRaiser or Button
-- 🔄 **Unity Version Compatibility** - Handles both legacy and Unity 6's physics API
+**关键点：**
+- 🎲 **速度重置** - 通过首先将Y速度归零来确保一致的跳跃高度
+- 🎯 **物理响应** - 结合向上冲量 + 随机水平漂移 + 随机扭矩
+- 🔇 **零耦合** - 没有对VoidEventRaiser或按钮的引用
+- 🔄 **Unity版本兼容性** - 处理旧版和Unity 6的物理API
 
 ---
 
-## 🔑 Key Takeaways
+## 🔑 关键要点
 
-| Concept                | Implementation                                               |
+| 概念 | 实现 |
 | ---------------------- | ------------------------------------------------------------ |
-| 🎯 **Decoupling**       | Raiser and Receiver never reference each other               |
-| 📡 **Broadcasting**     | Single `Raise()` call notifies all listeners                 |
-| 🎨 **Visual Binding**   | Event callbacks configured in Behavior Window, not in code   |
-| 🔗 **Layer Separation** | UI → Logic (Raiser) → Event System → Logic (Receiver) → Visual |
-| 🔄 **Scalability**      | Add more receivers without modifying sender code             |
+| 🎯 **解耦** | Raiser和Receiver永远不相互引用 |
+| 📡 **广播** | 单个`Raise()`调用通知所有监听器 |
+| 🎨 **可视化绑定** | 在行为窗口中配置事件回调，而不是在代码中 |
+| 🔗 **层分离** | UI → 逻辑（Raiser）→ 事件系统 → 逻辑（Receiver）→ 视觉 |
+| 🔄 **可扩展性** | 无需修改发送者代码即可添加更多接收者 |
 
-:::note 🧠 Design Pattern
+:::note 🧠 设计模式
 
-This demonstrates the classic **Observer Pattern**, where subjects (events) notify observers (listeners) without tight coupling. The Button only knows about VoidEventRaiser, VoidEventRaiser only knows about the GameEvent, and VoidEventReceiver only knows about the GameEvent through Editor binding—perfect decoupling!
+这展示了经典的**观察者模式**，其中主体（事件）在没有紧密耦合的情况下通知观察者（监听器）。按钮只知道VoidEventRaiser，VoidEventRaiser只知道GameEvent，VoidEventReceiver只通过编辑器绑定知道GameEvent——完美的解耦！
 
 :::
 
 ---
 
-## 🎯 What's Next?
+## 🎯 下一步？
 
-Now that you understand parameterless events, let's explore how to **pass data** between systems.
+现在您了解了无参数事件，让我们探索如何在系统之间**传递数据**。
 
-**Next Chapter**: Learn how to send parameters with events in **[02 Basic Types Event](./02-basic-types-event.md)**
+**下一章**：学习如何在**[02 基本类型事件](./02-basic-types-event.md)**中使用事件发送参数
 
 ---
 
-## 📚 Related Documentation
+## 📚 相关文档
 
-- **[Game Event Editor](../visual-workflow/game-event-editor.md)** - Detailed guide to event configuration
-- **[Game Event Behavior](../visual-workflow/game-event-behavior.md)** - How to configure event callbacks
-- **[Raising Events](../scripting/raising-and-scheduling.md)** - Runtime API for triggering events
-- **[Listening Strategies](../scripting/listening-strategies.md)** - Different ways to respond to events
+- **[游戏事件编辑器](../visual-workflow/game-event-editor.md)** - 事件配置的详细指南
+- **[游戏事件行为](../visual-workflow/game-event-behavior.md)** - 如何配置事件回调
+- **[触发事件](../scripting/raising-and-scheduling.md)** - 用于触发事件的运行时API
+- **[监听策略](../scripting/listening-strategies.md)** - 响应事件的不同方式

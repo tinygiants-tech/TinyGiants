@@ -1,110 +1,110 @@
 ﻿---
-sidebar_label: 'Community & Support'
+sidebar_label: '社区与支持'
 sidebar_position: 3
 ---
 
-# Community & Support
+# 社区与支持
 
-## 💌 A Note from the Developer
+## 💌 来自开发者的话
 
-Hello! I'm the creator behind **TinyGiants**, and I want to share the heart behind this tool.
+你好！我是**TinyGiants**背后的创造者，我想分享这个工具背后的初衷。
 
-As an indie developer, I learned that the Event System is the **nervous system of any game**—it touches everything. Early in my career, I battled endless "spaghetti code": events scattered across dozens of scripts, mysterious sound triggers, and UI windows that opened for reasons I couldn't trace.
+作为一名独立开发者，我了解到事件系统是**任何游戏的神经系统**——它触及一切。在我职业生涯的早期，我与无尽的"意大利面条代码"作斗争：事件分散在数十个脚本中，神秘的声音触发器，以及我无法追踪原因而打开的UI窗口。
 
-I tried existing solutions, but each had compromises:
-- **Visual-only tools** were great for organization but lacked coding flexibility.
-- **Code-heavy frameworks** offered power but became impossible to visualize.
-- **Performance** was often sacrificed for convenience.
+我尝试过现有的解决方案，但每个都有妥协：
+- **纯视觉工具**在组织方面很好，但缺乏编码灵活性。
+- **重代码框架**提供了强大功能，但变得无法可视化。
+- **性能**经常为了便利而被牺牲。
 
-### The Solution I Built
-I created the tool I always wished existed—one that delivers:
+### 我构建的解决方案
+我创建了我一直希望存在的工具——一个提供以下功能的工具：
 
-| 🎨 Visual Management               | ⚡ Code Control                     | 🚀 Zero Overhead              |
+| 🎨 可视化管理 | ⚡ 代码控制 | 🚀 零开销 |
 | --------------------------------- | ---------------------------------- | ---------------------------- |
-| Organization and flow at a glance | Complex logic and full flexibility | Production-ready performance |
+| 一目了然的组织和流程 | 复杂逻辑和完全灵活性 | 生产就绪的性能 |
 
-### The TinyGiants Vision
-**TinyGiants** represents my commitment to creating professional-grade tools for the Unity community. The Game Event System is my flagship product—the first of many high-quality solutions designed to empower developers.
+### TinyGiants愿景
+**TinyGiants**代表了我对为Unity社区创建专业级工具的承诺。游戏事件系统是我的旗舰产品——旨在赋能开发者的众多高质量解决方案中的第一个。
 
-When you choose this tool, you're not just purchasing a plugin; you're joining a journey of continuous improvement. I'm here to support your project as if it were my own.
+当您选择此工具时，您不仅仅是购买插件；您正在加入持续改进的旅程。我在这里支持您的项目，就像它是我自己的一样。
 
-*Happy coding,*
+*祝编码愉快，*
 **[Tiny Giants]**
 
 ------
 
-## 🤝 Get Support
+## 🤝 获取支持
 
-I'm here to ensure your success. Whether you've hit a bug, need architecture advice, or just want to discuss implementation patterns, there are multiple ways to connect.
+我在这里确保您的成功。无论您遇到错误、需要架构建议，还是只是想讨论实现模式，都有多种方式与我联系。
 
-### 💬 Discord Community (Recommended)
+### 💬 Discord社区（推荐）
 
-The **fastest way** to get help and connect with other developers.
+获得帮助并与其他开发者联系的**最快方式**。
 
-**Why join?**
+**为什么加入？**
 
-- Real-time answers from myself and experienced community members
-- Early access to roadmap updates and beta features
-- 24/7 community support across global timezones
-- Share screenshots, debug together, and learn best practices
+- 从我自己和经验丰富的社区成员那里获得实时答案
+- 提前访问路线图更新和测试版功能
+- 跨全球时区的24/7社区支持
+- 分享截图、一起调试并学习最佳实践
 
-**[👉 Join Discord Server](https://discord.tinygiants.tech)**
-
-------
-
-### 📧 Email Support
-
-For private inquiries, business discussions, or sensitive bug reports.
-
-- **Contact**: [support@tinygiants.tech](mailto:support@tinygiants.tech)
-- **Response Time**: Within 24-48 hours
+**[👉 加入Discord服务器](https://discord.tinygiants.tech)**
 
 ------
 
-### 🎮 Unity Forum
+### 📧 邮件支持
 
-Join the conversation in my official Unity Forum thread.
+用于私人咨询、商业讨论或敏感的错误报告。
 
-**[👉 Visit Forum Thread](https://forum.unity.com/your-thread-link)**
+- **联系方式**：[support@tinygiants.tech](mailto:support@tinygiants.tech)
+- **响应时间**：24-48小时内
 
 ------
 
-## 🗺️ Roadmap & Your Voice Matters
+### 🎮 Unity论坛
 
-This is a **living plugin**—your feedback directly shapes future development.
+在我的官方Unity论坛主题中加入对话。
 
-### Share Your Ideas
+**[👉 访问论坛主题](https://forum.unity.com/your-thread-link)**
 
-Have a feature request or improvement suggestion? I want to hear it!
+------
 
-- Post in the **#feature-requests** channel on Discord
-- Vote on upcoming features in community polls
-- Participate in priority discussions
+## 🗺️ 路线图与您的声音很重要
 
-### What's Coming Next
+这是一个**活跃的插件**——您的反馈直接塑造未来的开发。
 
-I publish the development roadmap and run feature polls exclusively on Discord. Join to see what's in the pipeline and influence what gets built next.
+### 分享您的想法
 
-:::tip Lifetime License Guarantee 
+有功能请求或改进建议？我想听听！
 
-Your purchase includes **lifetime updates** to the Game Event System. All future versions, improvements, and new features are **completely free**—no subscriptions again.
+- 在Discord的`#ges-features`频道发帖
+- 在社区投票中对即将推出的功能投票
+- 参与优先级讨论
+
+### 接下来会有什么
+
+我在Discord上独家发布开发路线图并进行功能投票。加入以查看正在进行的工作并影响下一步构建的内容。
+
+:::tip 终身许可保证
+
+您的购买包括游戏事件系统的**终身更新**。所有未来版本、改进和新功能都是**完全免费的**——不再有订阅。
 
 :::
 
 ------
 
-## ❤️ Enjoying the Plugin?
+## ❤️ 喜欢这个插件吗？
 
-If the Game Event System has saved you time, cleaned up your codebase, or made your project more maintainable, please consider sharing your experience.
+如果游戏事件系统为您节省了时间、清理了代码库或使您的项目更易于维护，请考虑分享您的体验。
 
-### Leave a Review
+### 留下评论
 
-As a solo developer, **reviews are essential** to the plugin's growth. A 5-star rating helps other developers discover the tool and allows me to dedicate more resources to updates and innovation.
+作为独立开发者，**评论对插件的成长至关重要**。5星评级帮助其他开发者发现该工具，并允许我将更多资源投入到更新和创新中。
 
-**[🌟 Rate on Asset Store](https://assetstore.unity.com/packages/slug/your-package-id)**
+**[🌟 在Asset Store上评分](https://assetstore.unity.com/packages/slug/your-package-id)**
 
 ------
 
-**Thank you for being part of the TinyGiants journey!**
+**感谢您成为TinyGiants旅程的一部分！**
 
-*Together, I'm building better tools for better games.*
+*我们一起，正在为更好的游戏构建更好的工具。*
