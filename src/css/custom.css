@@ -361,7 +361,7 @@ html[lang='zh'] .navbar__item.dropdown > .navbar__link::before { background-imag
     }
 
     .navbar__title {
-        max-width: 100px;
+        max-width: 120px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
