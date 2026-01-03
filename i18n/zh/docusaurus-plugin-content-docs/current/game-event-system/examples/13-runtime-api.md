@@ -1,107 +1,107 @@
 ﻿---
-sidebar_label: '13 Runtime API'
+sidebar_label: '13 运行时API'
 sidebar_position: 14
 ---
 
 import VideoGif from '@site/src/components/Video/VideoGif';
 
-# 13 Runtime API: Code-First Workflow
+# 13 运行时API：代码工作流
 
 <!-- <VideoGif src="/video/game-event-system/13-runtime-api.mp4" /> -->
 
-## 📋 Overview
+## 📋 概述
 
-Previous demos (01-11) demonstrated the **Visual Workflow**—binding listeners in Inspector, configuring conditions in Behavior windows, and building flow graphs visually. This approach is perfect for designers and rapid prototyping. However, programmers often prefer **full control in code** for complex systems, dynamic behavior, or when visual tools become limiting.
+之前的示例（01-11）演示了**可视化工作流**——在检查器中绑定监听器、在行为窗口中配置条件以及可视化构建流程图。这种方法非常适合设计师和快速原型开发。然而，程序员通常更喜欢**完全的代码控制**，用于复杂系统、动态行为或可视化工具变得受限时。
 
-**Demo 13 proves a critical architectural principle:** Every feature you've seen in the visual workflow has a **complete, type-safe C# API**. This demo revisits all 11 previous scenarios, removing all Inspector bindings and Graph configurations, replacing them with runtime code.
+**Demo 13证明了一个关键的架构原则：** 您在可视化工作流中看到的每个功能都有一个**完整的、类型安全的C# API**。本示例重新访问所有11个先前的场景，移除所有检查器绑定和图表配置，用运行时代码替换它们。
 
-:::tip 💡 What You'll Learn
-- How to register/remove listeners programmatically (`AddListener`, `RemoveListener`)
-- Dynamic priority control (`AddPriorityListener`)
-- Runtime condition registration (`AddConditionalListener`)
-- Scheduling APIs (`RaiseDelayed`, `RaiseRepeating`, `Cancel`)
-- Building Flow Graphs in code (`AddTriggerEvent`, `AddChainEvent`)
-- Persistent listener management (`AddPersistentListener`)
-- Lifecycle management (`OnEnable`, `OnDisable`, cleanup patterns)
+:::tip 💡 您将学到
+- 如何以编程方式注册/移除监听器（`AddListener`、`RemoveListener`）
+- 动态优先级控制（`AddPriorityListener`）
+- 运行时条件注册（`AddConditionalListener`）
+- 调度API（`RaiseDelayed`、`RaiseRepeating`、`Cancel`）
+- 在代码中构建流程图（`AddTriggerEvent`、`AddChainEvent`）
+- 持久化监听器管理（`AddPersistentListener`）
+- 生命周期管理（`OnEnable`、`OnDisable`、清理模式）
 
 :::
 
 ---
 
-## 🎬 Demo Structure
+## 🎬 示例结构
 ```
 📁 Assets/TinyGiants/GameEventSystem/Demo/13_RuntimeAPI/
 │
-├── 📁 01_VoidEvent             ➔ 🔘 [ Code-based void event binding ]
-├── 📁 02_BasicTypesEvent       ➔ 🔢 [ Generic event registration ]
-├── 📁 03_CustomTypeEvent       ➔ 💎 [ Custom class binding ]
-├── 📁 04_CustomSenderTypeEvent ➔ 👥 [ Dual-generic listeners ]
+├── 📁 01_VoidEvent             ➔ 🔘 [ 基于代码的void事件绑定 ]
+├── 📁 02_BasicTypesEvent       ➔ 🔢 [ 泛型事件注册 ]
+├── 📁 03_CustomTypeEvent       ➔ 💎 [ 自定义类绑定 ]
+├── 📁 04_CustomSenderTypeEvent ➔ 👥 [ 双泛型监听器 ]
 │
-├── 📁 05_PriorityEvent         ➔ 🥇 [ Priority management in code ]
-├── 📁 06_ConditionalEvent      ➔ 🛡️ [ Predicate-based filtering ]
-├── 📁 07_DelayedEvent          ➔ ⏱️ [ Scheduling & cancellation ]
-├── 📁 08_RepeatingEvent        ➔ 🔄 [ Loop management & callbacks ]
+├── 📁 05_PriorityEvent         ➔ 🥇 [ 代码中的优先级管理 ]
+├── 📁 06_ConditionalEvent      ➔ 🛡️ [ 基于谓词的过滤 ]
+├── 📁 07_DelayedEvent          ➔ ⏱️ [ 调度和取消 ]
+├── 📁 08_RepeatingEvent        ➔ 🔄 [ 循环管理和回调 ]
 │
-├── 📁 09_PersistentEvent       ➔ 🛡️ [ Cross-scene listener survival ]
-├── 📁 10_TriggerEvent          ➔ 🕸️ [ Parallel graph construction ]
-└── 📁 11_ChainEvent            ➔ ⛓️ [ Sequential pipeline building ]
+├── 📁 09_PersistentEvent       ➔ 🛡️ [ 跨场景监听器存活 ]
+├── 📁 10_TriggerEvent          ➔ 🕸️ [ 并行图表构建 ]
+└── 📁 11_ChainEvent            ➔ ⛓️ [ 顺序管道构建 ]
 ```
 
-**Key Difference from 01-11:**
-- **Scene Setup:** Identical (same turrets, targets, UI buttons)
-- **Visual Configuration:** ❌ REMOVED (no Behavior window configs, no Flow Graphs)
-- **Code Implementation:** All logic moved to `OnEnable`/`OnDisable`/lifecycle methods
+**与01-11的关键区别：**
+- **场景设置：** 相同（相同的炮塔、目标、UI按钮）
+- **可视化配置：** ❌ 移除（无行为窗口配置、无流程图）
+- **代码实现：** 所有逻辑移至 `OnEnable`/`OnDisable`/生命周期方法
 
 ---
 
-## 🔄 Visual vs Code Paradigm Shift
+## 🔄 可视化与代码范式转变
 
-| Feature                | Visual Workflow (01-11)                 | Code Workflow (Demo 13)                                      |
-| ---------------------- | --------------------------------------- | ------------------------------------------------------------ |
-| **Listener Binding**   | Drag & drop in Behavior window          | `event.AddListener(Method)` in `OnEnable`                    |
-| **Conditional Logic**  | Condition Tree in Inspector             | `event.AddConditionalListener(Method, Predicate)`            |
-| **Execution Priority** | Drag to reorder in Behavior window      | `event.AddPriorityListener(Method, priority)`                |
-| **Delay/Repeat**       | Delay nodes in Behavior window          | `event.RaiseDelayed(seconds)`, `event.RaiseRepeating(interval, count)` |
-| **Flow Graphs**        | Visual connections in Flow Graph window | `event.AddTriggerEvent(target, ...)`, `event.AddChainEvent(target, ...)` |
-| **Cleanup**            | Automatic when GameObject destroyed     | **Manual** in `OnDisable`/`OnDestroy`                        |
+| 功能           | 可视化工作流（01-11）          | 代码工作流（Demo 13）                                          |
+| -------------- | ------------------------------ | -------------------------------------------------------------- |
+| **监听器绑定** | 在行为窗口中拖放               | `OnEnable` 中的 `event.AddListener(Method)`                   |
+| **条件逻辑**   | 检查器中的条件树               | `event.AddConditionalListener(Method, Predicate)`             |
+| **执行优先级** | 在行为窗口中拖动重新排序       | `event.AddPriorityListener(Method, priority)`                 |
+| **延迟/重复**  | 行为窗口中的延迟节点           | `event.RaiseDelayed(seconds)`、`event.RaiseRepeating(interval, count)` |
+| **流程图**     | 流程图窗口中的可视化连接       | `event.AddTriggerEvent(target, ...)`、`event.AddChainEvent(target, ...)` |
+| **清理**       | 游戏对象销毁时自动             | `OnDisable`/`OnDestroy` 中**手动**                            |
 
-:::warning ⚠️ Critical Lifecycle Rule
+:::warning  关键生命周期规则
 
-**Manual registration = Manual cleanup**. Every `AddListener` in `OnEnable` MUST have corresponding `RemoveListener` in `OnDisable`. Failure to cleanup causes:
+**手动注册 = 手动清理**。`OnEnable` 中的每个 `AddListener` 必须在 `OnDisable` 中有对应的 `RemoveListener`。清理失败会导致：
 
-- Memory leaks
-- Duplicate listener execution
-- Listeners executing on destroyed objects (NullReferenceException)
+- 内存泄漏
+- 监听器重复执行
+- 在已销毁对象上执行监听器（NullReferenceException）
 
 :::
 
 ---
 
-## 📚 API Scenarios
+## 📚 API场景
 
-### 01 Void Event: Basic Registration
+### 01 Void事件：基本注册
 
-**Visual → Code Translation:**
-- ❌ Inspector: Drag `OnEventReceived` into Behavior window
-- ✅ Code: Call `AddListener` in `OnEnable`
+**可视化 → 代码转换：**
+- ❌ 检查器：将 `OnEventReceived` 拖到行为窗口
+- ✅ 代码：在 `OnEnable` 中调用 `AddListener`
 
-**RuntimeAPI_VoidEventRaiser.cs:**
+**RuntimeAPI_VoidEventRaiser.cs：**
 ```csharp
 using TinyGiants.GameEventSystem.Runtime;
 
 public class RuntimeAPI_VoidEventRaiser : MonoBehaviour
 {
     [GameEventDropdown] 
-    public GameEvent voidEvent;  // ← Still uses asset reference
+    public GameEvent voidEvent;  // ← 仍使用资产引用
 
     public void RaiseBasicEvent()
     {
-        if (voidEvent) voidEvent.Raise();  // ← Identical to visual workflow
+        if (voidEvent) voidEvent.Raise();  // ← 与可视化工作流相同
     }
 }
 ```
 
-**RuntimeAPI_VoidEventReceiver.cs:**
+**RuntimeAPI_VoidEventReceiver.cs：**
 ```csharp
 using TinyGiants.GameEventSystem.Runtime;
 
@@ -112,40 +112,40 @@ public class RuntimeAPI_VoidEventReceiver : MonoBehaviour
 
     [SerializeField] private Rigidbody targetRigidbody;
 
-    // ✅ REGISTER: When enabled
+    // ✅ 注册：启用时
     private void OnEnable()
     {
-        voidEvent.AddListener(OnEventReceived);  // ← Replaces Inspector binding
+        voidEvent.AddListener(OnEventReceived);  // ← 替换检查器绑定
     }
 
-    // ✅ CLEANUP: When disabled
+    // ✅ 清理：禁用时
     private void OnDisable()
     {
-        voidEvent.RemoveListener(OnEventReceived);  // ← MANDATORY cleanup
+        voidEvent.RemoveListener(OnEventReceived);  // ← 强制清理
     }
     
-    // Listener method (same as visual workflow)
+    // 监听器方法（与可视化工作流相同）
     public void OnEventReceived()
     {
-        // Apply physics...
+        // 应用物理...
         targetRigidbody.AddForce(Vector3.up * 5f, ForceMode.Impulse);
     }
 }
 ```
 
-**Key Points:**
-- 🎯 **Event Asset:** Still referenced via `[GameEventDropdown]`
-- 🔗 **Registration:** `AddListener(MethodName)` in `OnEnable`
-- 🧹 **Cleanup:** `RemoveListener(MethodName)` in `OnDisable`
-- ⚡ **Signature:** Method must match event type (`void` for `GameEvent`)
+**要点：**
+- 🎯 **事件资产：** 仍通过 `[GameEventDropdown]` 引用
+- 🔗 **注册：** `OnEnable` 中的 `AddListener(MethodName)`
+- 🧹 **清理：** `OnDisable` 中的 `RemoveListener(MethodName)`
+- ⚡ **签名：** 方法必须匹配事件类型（`GameEvent` 为 `void`）
 
 ---
 
-### 02 Basic Types: Generic Registration
+### 02 基本类型：泛型注册
 
-**Demonstrates:** Type inference for generic events
+**演示：** 泛型事件的类型推断
 
-**RuntimeAPI_BasicTypesEventRaiser.cs:**
+**RuntimeAPI_BasicTypesEventRaiser.cs：**
 ```csharp
 [GameEventDropdown] public GameEvent<string> messageEvent;
 [GameEventDropdown] public GameEvent<Vector3> movementEvent;
@@ -154,7 +154,7 @@ public class RuntimeAPI_VoidEventReceiver : MonoBehaviour
 
 public void RaiseString()
 {
-    messageEvent.Raise("Hello World");  // ← Type inferred from event
+    messageEvent.Raise("Hello World");  // ← 从事件推断类型
 }
 
 public void RaiseVector3()
@@ -163,11 +163,11 @@ public void RaiseVector3()
 }
 ```
 
-**RuntimeAPI_BasicTypesEventReceiver.cs:**
+**RuntimeAPI_BasicTypesEventReceiver.cs：**
 ```csharp
 private void OnEnable()
 {
-    // Compiler infers <string>, <Vector3>, etc. from method signatures
+    // 编译器从方法签名推断 <string>、<Vector3> 等
     messageEvent.AddListener(OnMessageReceived);     // void(string)
     movementEvent.AddListener(OnMoveReceived);       // void(Vector3)
     spawnEvent.AddListener(OnSpawnReceived);         // void(GameObject)
@@ -188,18 +188,18 @@ public void OnSpawnReceived(GameObject prefab) { /* ... */ }
 public void OnMaterialReceived(Material mat) { /* ... */ }
 ```
 
-**Key Points:**
-- ✅ **Type Safety:** Compiler enforces signature match
-- ✅ **Auto-Inference:** No manual type specification needed
-- ⚠️ **Mismatch Error:** `void(int)` cannot bind to `GameEvent<string>`
+**要点：**
+- ✅ **类型安全：** 编译器强制签名匹配
+- ✅ **自动推断：** 无需手动类型规范
+- ⚠️ **不匹配错误：** `void(int)` 无法绑定到 `GameEvent<string>`
 
 ---
 
-### 03 Custom Type: Complex Data Binding
+### 03 自定义类型：复杂数据绑定
 
-**Demonstrates:** Auto-generated generic classes
+**演示：** 自动生成的泛型类
 
-**RuntimeAPI_CustomTypeEventRaiser.cs:**
+**RuntimeAPI_CustomTypeEventRaiser.cs：**
 ```csharp
 [GameEventDropdown] public GameEvent<DamageInfo> physicalDamageEvent;
 [GameEventDropdown] public GameEvent<DamageInfo> fireDamageEvent;
@@ -208,15 +208,15 @@ public void OnMaterialReceived(Material mat) { /* ... */ }
 public void DealPhysicalDamage()
 {
     DamageInfo info = new DamageInfo(10f, false, DamageType.Physical, hitPoint, "Player01");
-    physicalDamageEvent.Raise(info);  // ← Custom class as argument
+    physicalDamageEvent.Raise(info);  // ← 自定义类作为参数
 }
 ```
 
-**RuntimeAPI_CustomTypeEventReceiver.cs:**
+**RuntimeAPI_CustomTypeEventReceiver.cs：**
 ```csharp
 private void OnEnable()
 {
-    // Bind multiple events to same handler
+    // 将多个事件绑定到同一处理器
     physicalDamageEvent.AddListener(OnDamageReceived);
     fireDamageEvent.AddListener(OnDamageReceived);
     criticalStrikeEvent.AddListener(OnDamageReceived);
@@ -231,49 +231,49 @@ private void OnDisable()
 
 public void OnDamageReceived(DamageInfo info)
 {
-    // Parse custom class fields
+    // 解析自定义类字段
     float damage = info.amount;
     DamageType type = info.type;
     bool isCrit = info.isCritical;
     
-    // Apply logic based on data...
+    // 基于数据应用逻辑...
 }
 ```
 
-**Key Points:**
-- 📦 **Auto-Generated:** `GameEvent<DamageInfo>` class created by plugin
-- 🔗 **Multiple Bindings:** Same method can listen to multiple events
-- ⚡ **Data Access:** Full access to custom class properties
+**要点：**
+- 📦 **自动生成：** 插件创建 `GameEvent<DamageInfo>` 类
+- 🔗 **多重绑定：** 同一方法可以监听多个事件
+- ⚡ **数据访问：** 完全访问自定义类属性
 
 ---
 
-### 04 Custom Sender: Dual-Generic Listeners
+### 04 自定义发送者：双泛型监听器
 
-**Demonstrates:** Accessing event source context
+**演示：** 访问事件源上下文
 
-**RuntimeAPI_CustomSenderTypeEventRaiser.cs:**
+**RuntimeAPI_CustomSenderTypeEventRaiser.cs：**
 ```csharp
-// Physical sender: GameObject
+// 物理发送者：GameObject
 [GameEventDropdown] public GameEvent<GameObject, DamageInfo> turretEvent;
 
-// Logical sender: Custom class
+// 逻辑发送者：自定义类
 [GameEventDropdown] public GameEvent<PlayerStats, DamageInfo> systemEvent;
 
 public void RaiseTurretDamage()
 {
     DamageInfo info = new DamageInfo(15f, false, DamageType.Physical, hitPoint, "Turret");
-    turretEvent.Raise(this.gameObject, info);  // ← Pass sender as first arg
+    turretEvent.Raise(this.gameObject, info);  // ← 将发送者作为第一个参数传递
 }
 
 public void RaiseSystemDamage()
 {
     PlayerStats admin = new PlayerStats("DragonSlayer_99", 99, 1);
     DamageInfo info = new DamageInfo(50f, true, DamageType.Void, hitPoint, "Admin");
-    systemEvent.Raise(admin, info);  // ← Custom class as sender
+    systemEvent.Raise(admin, info);  // ← 自定义类作为发送者
 }
 ```
 
-**RuntimeAPI_CustomSenderTypeEventReceiver.cs:**
+**RuntimeAPI_CustomSenderTypeEventReceiver.cs：**
 ```csharp
 private void OnEnable()
 {
@@ -287,54 +287,54 @@ private void OnDisable()
     systemEvent.RemoveListener(OnSystemAttackReceived);
 }
 
-// Signature: void(GameObject, DamageInfo)
+// 签名：void(GameObject, DamageInfo)
 public void OnTurretAttackReceived(GameObject sender, DamageInfo args)
 {
-    Vector3 attackerPos = sender.transform.position;  // ← Access sender GameObject
-    // React to physical attacker...
+    Vector3 attackerPos = sender.transform.position;  // ← 访问发送者GameObject
+    // 响应物理攻击者...
 }
 
-// Signature: void(PlayerStats, DamageInfo)
+// 签名：void(PlayerStats, DamageInfo)
 public void OnSystemAttackReceived(PlayerStats sender, DamageInfo args)
 {
-    string attackerName = sender.playerName;  // ← Access sender data
+    string attackerName = sender.playerName;  // ← 访问发送者数据
     int factionId = sender.factionId;
-    // React to logical attacker...
+    // 响应逻辑攻击者...
 }
 ```
 
-**Key Points:**
-- 🎯 **Context Awareness:** Listeners know WHO triggered the event
-- 🔀 **Flexible Senders:** GameObject OR custom class
-- ⚡ **Signature Match:** Method params MUST match event generics
+**要点：**
+- 🎯 **上下文感知：** 监听器知道谁触发了事件
+- 🔀 **灵活的发送者：** GameObject或自定义类
+- ⚡ **签名匹配：** 方法参数必须匹配事件泛型
 
 ---
 
-### 05 Priority: Execution Order Control
+### 05 优先级：执行顺序控制
 
-**Visual → Code Translation:**
-- ❌ Inspector: Drag to reorder listeners in Behavior window
-- ✅ Code: Specify `priority` parameter (higher = earlier)
+**可视化 → 代码转换：**
+- ❌ 检查器：在行为窗口中拖动重新排序监听器
+- ✅ 代码：指定 `priority` 参数（越高 = 越早）
 
-**RuntimeAPI_PriorityEventReceiver.cs:**
+**RuntimeAPI_PriorityEventReceiver.cs：**
 ```csharp
 [GameEventDropdown] public GameEvent<GameObject, DamageInfo> orderedHitEvent;
 [GameEventDropdown] public GameEvent<GameObject, DamageInfo> chaoticHitEvent;
 
 private void OnEnable()
 {
-    // ✅ ORDERED: High priority executes FIRST
-    orderedHitEvent.AddPriorityListener(ActivateBuff, priority: 100);  // Runs 1st
-    orderedHitEvent.AddPriorityListener(ResolveHit, priority: 50);     // Runs 2nd
+    // ✅ 有序：高优先级首先执行
+    orderedHitEvent.AddPriorityListener(ActivateBuff, priority: 100);  // 第1个运行
+    orderedHitEvent.AddPriorityListener(ResolveHit, priority: 50);     // 第2个运行
     
-    // ❌ CHAOTIC: Wrong order intentionally
-    chaoticHitEvent.AddPriorityListener(ResolveHit, priority: 80);     // Runs 1st (too early!)
-    chaoticHitEvent.AddPriorityListener(ActivateBuff, priority: 40);   // Runs 2nd (too late!)
+    // ❌ 混乱：故意错误的顺序
+    chaoticHitEvent.AddPriorityListener(ResolveHit, priority: 80);     // 第1个运行（太早！）
+    chaoticHitEvent.AddPriorityListener(ActivateBuff, priority: 40);   // 第2个运行（太晚！）
 }
 
 private void OnDisable()
 {
-    // MUST remove priority listeners specifically
+    // 必须专门移除优先级监听器
     orderedHitEvent.RemovePriorityListener(ActivateBuff);
     orderedHitEvent.RemovePriorityListener(ResolveHit);
     
@@ -344,37 +344,37 @@ private void OnDisable()
 
 public void ActivateBuff(GameObject sender, DamageInfo args)
 {
-    _isBuffActive = true;  // ← Must run BEFORE ResolveHit
+    _isBuffActive = true;  // ← 必须在ResolveHit之前运行
 }
 
 public void ResolveHit(GameObject sender, DamageInfo args)
 {
-    float damage = _isBuffActive ? args.amount * 5f : args.amount;  // ← Checks buff state
+    float damage = _isBuffActive ? args.amount * 5f : args.amount;  // ← 检查增益状态
 }
 ```
 
-**Key Points:**
-- 🔢 **Priority Values:** Higher numbers = earlier execution
-- ⚠️ **Order Matters:** `ActivateBuff(100) → ResolveHit(50)` = CRIT HIT
-- ❌ **Wrong Order:** `ResolveHit(80) → ActivateBuff(40)` = Normal hit
-- 🧹 **Cleanup:** Use `RemovePriorityListener` (not `RemoveListener`)
+**要点：**
+- 🔢 **优先级值：** 数字越大 = 执行越早
+- ⚠️ **顺序重要：** `ActivateBuff(100) → ResolveHit(50)` = 暴击
+- ❌ **错误顺序：** `ResolveHit(80) → ActivateBuff(40)` = 普通攻击
+- 🧹 **清理：** 使用 `RemovePriorityListener`（而非 `RemoveListener`）
 
 ---
 
-### 06 Conditional: Predicate-Based Filtering
+### 06 条件：基于谓词的过滤
 
-**Visual → Code Translation:**
-- ❌ Inspector: Visual Condition Tree in Behavior window
-- ✅ Code: Predicate function passed to `AddConditionalListener`
+**可视化 → 代码转换：**
+- ❌ 检查器：行为窗口中的可视化条件树
+- ✅ 代码：将谓词函数传递给 `AddConditionalListener`
 
-**RuntimeAPI_ConditionalEventReceiver.cs:**
+**RuntimeAPI_ConditionalEventReceiver.cs：**
 ```csharp
 [GameEventDropdown] public GameEvent<AccessCard> requestAccessEvent;
 
 private void OnEnable()
 {
-    // Register with condition function
-    // OpenVault ONLY called if CanOpen returns true
+    // 使用条件函数注册
+    // 仅当CanOpen返回true时调用OpenVault
     requestAccessEvent.AddConditionalListener(OpenVault, CanOpen);
 }
 
@@ -383,8 +383,8 @@ private void OnDisable()
     requestAccessEvent.RemoveConditionalListener(OpenVault);
 }
 
-// ✅ CONDITION FUNCTION (Predicate)
-// Replaces visual Condition Tree
+// ✅ 条件函数（谓词）
+// 替换可视化条件树
 public bool CanOpen(AccessCard card)
 {
     return securityGrid.IsPowerOn && (
@@ -394,39 +394,39 @@ public bool CanOpen(AccessCard card)
     );
 }
 
-// ✅ ACTION (Only executes if condition passed)
+// ✅ 动作（仅在条件通过时执行）
 public void OpenVault(AccessCard card)
 {
-    // Assumes all conditions met
+    // 假定所有条件满足
     Debug.Log($"ACCESS GRANTED to {card.holderName}");
     StartCoroutine(OpenDoorSequence());
 }
 ```
 
-**Key Points:**
-- ✅ **Predicate Function:** Returns `bool`, takes event args
-- 🔒 **Gate Keeper:** Action ONLY runs if predicate returns `true`
-- 🧹 **Cleanup:** Use `RemoveConditionalListener` (not `RemoveListener`)
-- ⚡ **Evaluation:** Predicate runs BEFORE action method
+**要点：**
+- ✅ **谓词函数：** 返回 `bool`，接受事件参数
+- 🔒 **守门员：** 仅在谓词返回 `true` 时运行动作
+- 🧹 **清理：** 使用 `RemoveConditionalListener`（而非 `RemoveListener`）
+- ⚡ **评估：** 谓词在动作方法之前运行
 
 ---
 
-### 07 Delayed: Scheduling & Cancellation
+### 07 延迟：调度和取消
 
-**Visual → Code Translation:**
-- ❌ Behavior: "Action Delay = 5.0s" in Inspector
-- ✅ Code: `event.RaiseDelayed(5f)` returns `ScheduleHandle`
+**可视化 → 代码转换：**
+- ❌ 行为：检查器中"动作延迟 = 5.0秒"
+- ✅ 代码：`event.RaiseDelayed(5f)` 返回 `ScheduleHandle`
 
-**RuntimeAPI_DelayedEventRaiser.cs:**
+**RuntimeAPI_DelayedEventRaiser.cs：**
 ```csharp
 [GameEventDropdown] public GameEvent explodeEvent;
 
-private ScheduleHandle _handle;  // ← Track the scheduled task
+private ScheduleHandle _handle;  // ← 跟踪已调度的任务
 
 public void ArmBomb()
 {
-    // Schedule event 5 seconds later
-    _handle = explodeEvent.RaiseDelayed(5f);  // ← Returns handle
+    // 5秒后调度事件
+    _handle = explodeEvent.RaiseDelayed(5f);  // ← 返回句柄
     
     Debug.Log("Bomb armed! 5 seconds to defuse...");
 }
@@ -438,8 +438,8 @@ private void ProcessCut(string color)
 {
     if (color == _safeWireColor)
     {
-        // Cancel the scheduled explosion
-        explodeEvent.CancelDelayed(_handle);  // ← Use handle to cancel
+        // 取消已调度的爆炸
+        explodeEvent.CancelDelayed(_handle);  // ← 使用句柄取消
         Debug.Log("DEFUSED! Event cancelled.");
     }
     else
@@ -449,21 +449,21 @@ private void ProcessCut(string color)
 }
 ```
 
-**Key Points:**
-- ⏱️ **Scheduling:** `RaiseDelayed(seconds)` queues event
-- 📍 **Handle:** Store return value to cancel later
-- 🛑 **Cancellation:** `CancelDelayed(handle)` removes from queue
-- ⚠️ **Timing:** Event executes AFTER delay if not cancelled
+**要点：**
+- ⏱️ **调度：** `RaiseDelayed(seconds)` 将事件加入队列
+- 📍 **句柄：** 存储返回值以便稍后取消
+- 🛑 **取消：** `CancelDelayed(handle)` 从队列中移除
+- ⚠️ **时序：** 如果未取消，事件在延迟后执行
 
 ---
 
-### 08 Repeating: Loop Management & Callbacks
+### 08 重复：循环管理和回调
 
-**Visual → Code Translation:**
-- ❌ Behavior: "Repeat Interval = 1.0s, Repeat Count = 5" in Inspector
-- ✅ Code: `event.RaiseRepeating(interval, count)` with callbacks
+**可视化 → 代码转换：**
+- ❌ 行为：检查器中"重复间隔 = 1.0秒，重复次数 = 5"
+- ✅ 代码：带回调的 `event.RaiseRepeating(interval, count)`
 
-**RuntimeAPI_RepeatingEventRaiser.cs:**
+**RuntimeAPI_RepeatingEventRaiser.cs：**
 ```csharp
 [GameEventDropdown] public GameEvent finitePulseEvent;
 
@@ -471,23 +471,23 @@ private ScheduleHandle _handle;
 
 public void ActivateBeacon()
 {
-    // Start loop: 1s interval, 5 times
+    // 启动循环：1秒间隔，5次
     _handle = finitePulseEvent.RaiseRepeating(interval: 1.0f, count: 5);
     
-    // ✅ HOOK: Triggered every iteration
+    // ✅ 钩子：每次迭代触发
     _handle.OnStep += (currentCount) => 
     {
         Debug.Log($"Pulse #{currentCount} emitted");
     };
     
-    // ✅ HOOK: Triggered when loop finishes naturally
+    // ✅ 钩子：循环自然完成时触发
     _handle.OnCompleted += () => 
     {
         Debug.Log("Beacon sequence completed");
         UpdateUI("IDLE");
     };
     
-    // ✅ HOOK: Triggered when cancelled manually
+    // ✅ 钩子：手动取消时触发
     _handle.OnCancelled += () => 
     {
         Debug.Log("Beacon interrupted");
@@ -499,47 +499,47 @@ public void StopSignal()
 {
     if (_handle != null)
     {
-        finitePulseEvent.CancelRepeating(_handle);  // ← Stops loop
+        finitePulseEvent.CancelRepeating(_handle);  // ← 停止循环
     }
 }
 ```
 
-**Key Points:**
-- 🔁 **Finite Loop:** `RaiseRepeating(1.0f, 5)` = 5 pulses at 1s intervals
-- ∞ **Infinite Loop:** `RaiseRepeating(1.0f, -1)` = endless until cancelled
-- 📡 **Callbacks:** `OnStep`, `OnCompleted`, `OnCancelled` events
-- 🛑 **Manual Stop:** `CancelRepeating(handle)` for infinite loops
+**要点：**
+- 🔁 **有限循环：** `RaiseRepeating(1.0f, 5)` = 1秒间隔5次脉冲
+- ∞ **无限循环：** `RaiseRepeating(1.0f, -1)` = 无限直到取消
+- 📡 **回调：** `OnStep`、`OnCompleted`、`OnCancelled` 事件
+- 🛑 **手动停止：** 无限循环使用 `CancelRepeating(handle)`
 
 ---
 
-### 09 Persistent: Cross-Scene Listener Survival
+### 09 持久化：跨场景监听器存活
 
-**Visual → Code Translation:**
-- ❌ Inspector: Check "Persistent Event" in Behavior window
-- ✅ Code: `AddPersistentListener` in `Awake` + `DontDestroyOnLoad`
+**可视化 → 代码转换：**
+- ❌ 检查器：在行为窗口中勾选"持久化事件"
+- ✅ 代码：`Awake` 中的 `AddPersistentListener` + `DontDestroyOnLoad`
 
-**RuntimeAPI_PersistentEventReceiver.cs:**
+**RuntimeAPI_PersistentEventReceiver.cs：**
 ```csharp
-[GameEventDropdown] public GameEvent fireAEvent;  // Persistent
-[GameEventDropdown] public GameEvent fireBEvent;  // Standard
+[GameEventDropdown] public GameEvent fireAEvent;  // 持久化
+[GameEventDropdown] public GameEvent fireBEvent;  // 标准
 
 private void Awake()
 {
-    DontDestroyOnLoad(gameObject);  // ← Survive scene loads
+    DontDestroyOnLoad(gameObject);  // ← 场景加载中存活
     
-    // ✅ PERSISTENT LISTENER (Survives scene reload)
+    // ✅ 持久化监听器（场景重新加载中存活）
     fireAEvent.AddPersistentListener(OnFireCommandA);
 }
 
 private void OnDestroy()
 {
-    // MUST remove persistent listeners manually
+    // 必须手动移除持久化监听器
     fireAEvent.RemovePersistentListener(OnFireCommandA);
 }
 
 private void OnEnable()
 {
-    // ❌ STANDARD LISTENER (Dies with scene)
+    // ❌ 标准监听器（随场景消亡）
     fireBEvent.AddListener(OnFireCommandB);
 }
 
@@ -559,27 +559,27 @@ public void OnFireCommandB()
 }
 ```
 
-**Key Points:**
-- 🧬 **Singleton Pattern:** `DontDestroyOnLoad` + persistent listener
-- ✅ **Survives Reload:** `AddPersistentListener` binds to global registry
-- ❌ **Standard Dies:** `AddListener` bindings destroyed with scene
-- 🧹 **Cleanup:** Use `OnDestroy` for persistent, `OnDisable` for standard
+**要点：**
+- 🧬 **单例模式：** `DontDestroyOnLoad` + 持久化监听器
+- ✅ **在重新加载中存活：** `AddPersistentListener` 绑定到全局注册表
+- ❌ **标准死亡：** `AddListener` 绑定随场景销毁
+- 🧹 **清理：** 持久化使用 `OnDestroy`，标准使用 `OnDisable`
 
 ---
 
-### 10 Trigger Event: Building Parallel Graphs in Code
+### 10 触发器事件：在代码中构建并行图表
 
-**Visual → Code Translation:**
-- ❌ Flow Graph: Visual nodes and connections
-- ✅ Code: `AddTriggerEvent(target, ...)` in `OnEnable`
+**可视化 → 代码转换：**
+- ❌ 流程图：可视化节点和连接
+- ✅ 代码：`OnEnable` 中的 `AddTriggerEvent(target, ...)`
 
-**RuntimeAPI_TriggerEventRaiser.cs:**
+**RuntimeAPI_TriggerEventRaiser.cs：**
 ```csharp
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onCommand;      // Root
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onActiveBuff;   // Branch A
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onTurretFire;   // Branch B
-[GameEventDropdown] public GameEvent<DamageInfo> onHoloData;                 // Branch C (type conversion)
-[GameEventDropdown] public GameEvent onGlobalAlarm;                          // Branch D (void)
+[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onCommand;      // 根
+[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onActiveBuff;   // 分支A
+[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onTurretFire;   // 分支B
+[GameEventDropdown] public GameEvent<DamageInfo> onHoloData;                 // 分支C（类型转换）
+[GameEventDropdown] public GameEvent onGlobalAlarm;                          // 分支D（void）
 
 private TriggerHandle _buffAHandle;
 private TriggerHandle _fireAHandle;
@@ -588,45 +588,45 @@ private TriggerHandle _alarmHandle;
 
 private void OnEnable()
 {
-    // ✅ BUILD PARALLEL GRAPH IN CODE
+    // ✅ 在代码中构建并行图表
     
-    // Branch A: Buff (Priority 100, Conditional)
+    // 分支A：增益（优先级100，条件）
     _buffAHandle = onCommand.AddTriggerEvent(
         targetEvent: onActiveBuff,
         delay: 0f,
-        condition: (sender, args) => sender == turretA,  // ← Only Turret A
+        condition: (sender, args) => sender == turretA,  // ← 仅炮塔A
         passArgument: true,
-        priority: 100  // ← High priority
+        priority: 100  // ← 高优先级
     );
     
-    // Branch B: Fire (Priority 50, Conditional)
+    // 分支B：开火（优先级50，条件）
     _fireAHandle = onCommand.AddTriggerEvent(
         targetEvent: onTurretFire,
         delay: 0f,
         condition: (sender, args) => sender == turretA,
         passArgument: true,
-        priority: 50  // ← Lower priority (runs after buff)
+        priority: 50  // ← 较低优先级（在增益后运行）
     );
     
-    // Branch C: Holo Data (Type conversion, Delayed)
+    // 分支C：全息数据（类型转换，延迟）
     _holoHandle = onCommand.AddTriggerEvent(
-        targetEvent: onHoloData,  // ← GameEvent<DamageInfo> (no sender)
-        delay: 1f,  // ← 1 second delay
+        targetEvent: onHoloData,  // ← GameEvent<DamageInfo>（无发送者）
+        delay: 1f,  // ← 1秒延迟
         passArgument: true
     );
     
-    // Branch D: Global Alarm (Void conversion)
+    // 分支D：全局警报（Void转换）
     _alarmHandle = onCommand.AddTriggerEvent(
-        targetEvent: onGlobalAlarm  // ← GameEvent (void, no args)
+        targetEvent: onGlobalAlarm  // ← GameEvent（void，无参数）
     );
     
-    // ✅ HOOK: Callback when trigger fires
+    // ✅ 钩子：触发器触发时的回调
     _buffAHandle.OnTriggered += () => Debug.Log("Buff triggered via code graph");
 }
 
 private void OnDisable()
 {
-    // ✅ CLEANUP: MANDATORY for dynamic triggers
+    // ✅ 清理：动态触发器强制要求
     onCommand.RemoveTriggerEvent(_buffAHandle);
     onCommand.RemoveTriggerEvent(_fireAHandle);
     onCommand.RemoveTriggerEvent(_holoHandle);
@@ -634,45 +634,45 @@ private void OnDisable()
 }
 ```
 
-**Graph Visualization (Code-Defined):**
+**图表可视化（代码定义）：**
 ```
-📡 Root: onCommand.Raise(sender, info)
+📡 根：onCommand.Raise(sender, info)
 │
-├─ 🔱 [ Branch: Unit A ] ➔ 🛡️ Guard: `Sender == Turret_A`
-│  ├─ 💎 [Prio: 100] ➔ 🛡️ onActiveBuff()      ✅ High-Priority Sync
-│  └─ ⚡ [Prio: 50 ] ➔ 🔥 onTurretFire()      ✅ Sequential Action
+├─ 🔱 [ 分支：单元A ] ➔ 🛡️ 守卫：`Sender == Turret_A`
+│  ├─ 💎 [优先级：100] ➔ 🛡️ onActiveBuff()      ✅ 高优先级同步
+│  └─ ⚡ [优先级：50 ] ➔ 🔥 onTurretFire()      ✅ 顺序动作
 │
-├─ 🔱 [ Branch: Analytics ] ➔ 🔢 Signature: `<DamageInfo>`
-│  └─ ⏱️ [ Delay: 1.0s ] ➔ 📽️ onHoloData()    ✅ Delayed Data Relay
+├─ 🔱 [ 分支：分析 ] ➔ 🔢 签名：`<DamageInfo>`
+│  └─ ⏱️ [ 延迟：1.0秒 ] ➔ 📽️ onHoloData()    ✅ 延迟数据中继
 │
-└─ 🔱 [ Branch: Global ] ➔ 🔘 Signature: `<void>`
-   └─ 🚀 [ Instant ] ➔ 🚨 onGlobalAlarm()     ✅ Immediate Signal
+└─ 🔱 [ 分支：全局 ] ➔ 🔘 签名：`<void>`
+   └─ 🚀 [ 即时 ] ➔ 🚨 onGlobalAlarm()     ✅ 立即信号
 ```
 
-**Key Points:**
-- 🌳 **Parallel Execution:** All branches evaluate simultaneously
-- 🔢 **Priority:** Controls execution order within passing branches
-- ✅ **Conditions:** Predicate functions filter by sender/args
-- 🔄 **Type Conversion:** Automatic argument adaptation
-- 📡 **Callbacks:** `OnTriggered` event per handle
-- 🧹 **Cleanup:** `RemoveTriggerEvent(handle)` REQUIRED
+**要点：**
+- 🌳 **并行执行：** 所有分支同时评估
+- 🔢 **优先级：** 控制通过分支内的执行顺序
+- ✅ **条件：** 谓词函数按发送者/参数过滤
+- 🔄 **类型转换：** 自动参数适配
+- 📡 **回调：** 每个句柄的 `OnTriggered` 事件
+- 🧹 **清理：** 需要 `RemoveTriggerEvent(handle)`
 
 ---
 
-### 11 Chain Event: Building Sequential Pipelines in Code
+### 11 链式事件：在代码中构建顺序管道
 
-**Visual → Code Translation:**
-- ❌ Flow Graph: Linear node sequence
-- ✅ Code: `AddChainEvent(target, ...)` in `OnEnable`
+**可视化 → 代码转换：**
+- ❌ 流程图：线性节点序列
+- ✅ 代码：`OnEnable` 中的 `AddChainEvent(target, ...)`
 
-**RuntimeAPI_ChainEventRaiser.cs:**
+**RuntimeAPI_ChainEventRaiser.cs：**
 ```csharp
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnStartSequenceEvent;  // Root
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnSystemCheckEvent;    // Step 1
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnChargeEvent;         // Step 2
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnFireEvent;           // Step 3
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnCoolDownEvent;       // Step 4
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnArchiveEvent;        // Step 5
+[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnStartSequenceEvent;  // 根
+[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnSystemCheckEvent;    // 步骤1
+[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnChargeEvent;         // 步骤2
+[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnFireEvent;           // 步骤3
+[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnCoolDownEvent;       // 步骤4
+[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnArchiveEvent;        // 步骤5
 
 private ChainHandle _checkHandle;
 private ChainHandle _chargeHandle;
@@ -682,159 +682,159 @@ private ChainHandle _archiveHandle;
 
 private void OnEnable()
 {
-    // ✅ BUILD SEQUENTIAL CHAIN IN CODE
+    // ✅ 在代码中构建顺序链
     
-    // Step 1: System Check (Conditional gate)
+    // 步骤1：系统检查（条件门）
     _checkHandle = OnStartSequenceEvent.AddChainEvent(
         targetEvent: OnSystemCheckEvent,
         delay: 0f,
         duration: 0f,
-        condition: (sender, args) => chainEventReceiver.IsSafetyCheckPassed,  // ← Gate
+        condition: (sender, args) => chainEventReceiver.IsSafetyCheckPassed,  // ← 门
         passArgument: true,
         waitForCompletion: false
     );
     
-    // Step 2: Charge (1 second duration)
+    // 步骤2：充能（1秒持续时间）
     _chargeHandle = OnStartSequenceEvent.AddChainEvent(
         targetEvent: OnChargeEvent,
         delay: 0f,
-        duration: 1f,  // ← Chain pauses here for 1s
+        duration: 1f,  // ← 链在此暂停1秒
         passArgument: true
     );
     
-    // Step 3: Fire (Instant)
+    // 步骤3：开火（即时）
     _fireHandle = OnStartSequenceEvent.AddChainEvent(
         targetEvent: OnFireEvent,
         passArgument: true
     );
     
-    // Step 4: Cool Down (0.5s delay + 1s duration + wait for completion)
+    // 步骤4：冷却（0.5秒延迟 + 1秒持续时间 + 等待完成）
     _cooldownHandle = OnStartSequenceEvent.AddChainEvent(
         targetEvent: OnCoolDownEvent,
-        delay: 0.5f,  // ← Pre-delay
-        duration: 1f,  // ← Duration after action
+        delay: 0.5f,  // ← 前置延迟
+        duration: 1f,  // ← 动作后持续时间
         passArgument: true,
-        waitForCompletion: true  // ← Waits for receiver coroutines
+        waitForCompletion: true  // ← 等待接收器协程
     );
     
-    // Step 5: Archive (Arguments blocked)
+    // 步骤5：归档（参数被阻止）
     _archiveHandle = OnStartSequenceEvent.AddChainEvent(
         targetEvent: OnArchiveEvent,
-        passArgument: false  // ← Downstream receives null/default
+        passArgument: false  // ← 下游接收null/默认值
     );
 }
 
 private void OnDisable()
 {
-    // ✅ CLEANUP: MANDATORY for dynamic chains
+    // ✅ 清理：动态链强制要求
     OnStartSequenceEvent.RemoveChainEvent(_checkHandle);
     OnStartSequenceEvent.RemoveChainEvent(_chargeHandle);
     OnStartSequenceEvent.RemoveChainEvent(_fireHandle);
     OnStartSequenceEvent.RemoveChainEvent(_cooldownHandle);
     OnStartSequenceEvent.RemoveChainEvent(_archiveHandle);
     
-    // Alternative: OnStartSequenceEvent.RemoveAllChainEvents();
+    // 替代方案：OnStartSequenceEvent.RemoveAllChainEvents();
 }
 ```
 
-**Pipeline Visualization (Code-Defined):**
+**管道可视化（代码定义）：**
 ```
-🚀 [ ROOT ] OnStartSequenceEvent
+🚀 [ 根 ] OnStartSequenceEvent
 │
-├─ 🛡️ [ GUARD ] ➔ Safety Check
-│  └─► ⚙️ OnSystemCheckEvent             ✅ Condition Passed
+├─ 🛡️ [ 守卫 ] ➔ 安全检查
+│  └─► ⚙️ OnSystemCheckEvent             ✅ 条件通过
 │
-├─ ⏱️ [ FLOOR ] ➔ Duration: 1.0s
-│  └─► ⚡ OnChargeEvent                  ✅ Minimum Pacing Met
+├─ ⏱️ [ 地板 ] ➔ 持续时间：1.0秒
+│  └─► ⚡ OnChargeEvent                  ✅ 最小节奏满足
 │
-├─ 🚀 [ INSTANT ] ➔ Immediate Trigger
-│  └─► 🔥 OnFireEvent                    ✅ Executed
+├─ 🚀 [ 即时 ] ➔ 立即触发
+│  └─► 🔥 OnFireEvent                    ✅ 已执行
 │
-├─ ⌛ [ ASYNC ] ➔ Delay: 0.5s | Dur: 1.0s | Wait: ON
-│  └─► ❄️ OnCoolDownEvent                ✅ Async Recovery Done
+├─ ⌛ [ 异步 ] ➔ 延迟：0.5秒 | 持续：1.0秒 | 等待：开
+│  └─► ❄️ OnCoolDownEvent                ✅ 异步恢复完成
 │
-└─ 🧹 [ FILTER ] ➔ Block Arguments
-   └─► 💾 OnArchiveEvent                 ✅ Data Cleaned & Saved
+└─ 🧹 [ 过滤 ] ➔ 阻止参数
+   └─► 💾 OnArchiveEvent                 ✅ 数据已清理并保存
 ```
 
-**Key Points:**
-- 🔗 **Sequential Execution:** Steps run one-by-one, not parallel
-- ✅ **Conditional Gate:** Failed condition terminates entire chain
-- ⏱️ **Duration:** Chain pauses for specified time
-- 🕐 **Wait For Completion:** Blocks until receiver coroutines finish
-- 🔒 **Argument Blocking:** `passArgument: false` sends default values
-- 🧹 **Cleanup:** `RemoveChainEvent(handle)` or `RemoveAllChainEvents()`
+**要点：**
+- 🔗 **顺序执行：** 步骤一个接一个运行，而非并行
+- ✅ **条件门：** 失败的条件终止整个链
+- ⏱️ **持续时间：** 链暂停指定时间
+- 🕐 **等待完成：** 阻塞直到接收器协程完成
+- 🔒 **参数阻止：** `passArgument: false` 发送默认值
+- 🧹 **清理：** `RemoveChainEvent(handle)` 或 `RemoveAllChainEvents()`
 
 ---
 
-## 🔑 API Reference Summary
+## 🔑 API参考
 
-### Listener Registration
+### 监听器注册
 
-| Method                                      | Use Case                  | Cleanup Method                      |
-| ------------------------------------------- | ------------------------- | ----------------------------------- |
-| `AddListener(method)`                       | Standard binding          | `RemoveListener(method)`            |
-| `AddPriorityListener(method, priority)`     | Execution order control   | `RemovePriorityListener(method)`    |
-| `AddConditionalListener(method, predicate)` | Predicate-based filtering | `RemoveConditionalListener(method)` |
-| `AddPersistentListener(method)`             | Cross-scene survival      | `RemovePersistentListener(method)`  |
+| 方法                                        | 用例         | 清理方法                            |
+| ------------------------------------------- | ------------ | ----------------------------------- |
+| `AddListener(method)`                       | 标准绑定     | `RemoveListener(method)`            |
+| `AddPriorityListener(method, priority)`     | 执行顺序控制 | `RemovePriorityListener(method)`    |
+| `AddConditionalListener(method, predicate)` | 基于谓词过滤 | `RemoveConditionalListener(method)` |
+| `AddPersistentListener(method)`             | 跨场景存活   | `RemovePersistentListener(method)`  |
 
-### Event Raising
+### 事件触发
 
-| Method                            | Use Case             | Returns          |
-| --------------------------------- | -------------------- | ---------------- |
-| `Raise()`                         | Immediate execution  | `void`           |
-| `Raise(arg)`                      | With single argument | `void`           |
-| `Raise(sender, arg)`              | With sender context  | `void`           |
-| `RaiseDelayed(seconds)`           | Scheduled execution  | `ScheduleHandle` |
-| `RaiseRepeating(interval, count)` | Loop execution       | `ScheduleHandle` |
+| 方法                              | 用例       | 返回             |
+| --------------------------------- | ---------- | ---------------- |
+| `Raise()`                         | 立即执行   | `void`           |
+| `Raise(arg)`                      | 带单个参数 | `void`           |
+| `Raise(sender, arg)`              | 带发送者上下文 | `void`           |
+| `RaiseDelayed(seconds)`           | 计划执行   | `ScheduleHandle` |
+| `RaiseRepeating(interval, count)` | 循环执行   | `ScheduleHandle` |
 
-### Schedule Management
+### 调度管理
 
-| Method                    | Use Case                   |
-| ------------------------- | -------------------------- |
-| `CancelDelayed(handle)`   | Stop pending delayed event |
-| `CancelRepeating(handle)` | Stop active loop           |
-| `handle.OnStep`           | Loop iteration callback    |
-| `handle.OnCompleted`      | Loop completion callback   |
-| `handle.OnCancelled`      | Cancellation callback      |
+| 方法                      | 用例               |
+| ------------------------- | ------------------ |
+| `CancelDelayed(handle)`   | 停止待执行的延迟事件 |
+| `CancelRepeating(handle)` | 停止活动循环       |
+| `handle.OnStep`           | 循环迭代回调       |
+| `handle.OnCompleted`      | 循环完成回调       |
+| `handle.OnCancelled`      | 取消回调           |
 
-### Flow Graph Construction
+### 流程图构建
 
-| Method                         | Use Case        | Returns         |
-| ------------------------------ | --------------- | --------------- |
-| `AddTriggerEvent(target, ...)` | Parallel branch | `TriggerHandle` |
-| `RemoveTriggerEvent(handle)`   | Remove branch   | `void`          |
-| `AddChainEvent(target, ...)`   | Sequential step | `ChainHandle`   |
-| `RemoveChainEvent(handle)`     | Remove step     | `void`          |
-| `RemoveAllChainEvents()`       | Clear all steps | `void`          |
+| 方法                           | 用例     | 返回            |
+| ------------------------------ | -------- | --------------- |
+| `AddTriggerEvent(target, ...)` | 并行分支 | `TriggerHandle` |
+| `RemoveTriggerEvent(handle)`   | 移除分支 | `void`          |
+| `AddChainEvent(target, ...)`   | 顺序步骤 | `ChainHandle`   |
+| `RemoveChainEvent(handle)`     | 移除步骤 | `void`          |
+| `RemoveAllChainEvents()`       | 清除所有步骤 | `void`          |
 
 ---
 
-## ⚠️ Critical Best Practices
+## ⚠️ 关键最佳实践
 
-### ✅ DO
+### ✅ 应该做
 ```csharp
 private void OnEnable()
 {
-    myEvent.AddListener(OnReceived);  // ← Register
+    myEvent.AddListener(OnReceived);  // ← 注册
 }
 
 private void OnDisable()
 {
-    myEvent.RemoveListener(OnReceived);  // ← ALWAYS cleanup
+    myEvent.RemoveListener(OnReceived);  // ← 总是清理
 }
 ```
 
-### ❌ DON'T
+### ❌ 不应该做
 ```csharp
 private void Start()
 {
-    myEvent.AddListener(OnReceived);  // ← Registered in Start...
+    myEvent.AddListener(OnReceived);  // ← 在Start中注册...
 }
-// ❌ NO OnDisable cleanup → MEMORY LEAK
+// ❌ 无OnDisable清理 → 内存泄漏
 ```
 
-### Handle Management
+### 句柄管理
 ```csharp
 private ScheduleHandle _handle;
 
@@ -845,50 +845,50 @@ public void StartLoop()
 
 public void StopLoop()
 {
-    if (_handle != null) myEvent.CancelRepeating(_handle);  // ← Use stored handle
+    if (_handle != null) myEvent.CancelRepeating(_handle);  // ← 使用存储的句柄
 }
 ```
 
-### Lifecycle Patterns
+### 生命周期模式
 
-| Lifecycle Method | Use For                                    |
-| ---------------- | ------------------------------------------ |
-| `Awake`          | Persistent listeners + `DontDestroyOnLoad` |
-| `OnEnable`       | Standard listeners, triggers, chains       |
-| `OnDisable`      | Remove standard listeners                  |
-| `OnDestroy`      | Remove persistent listeners                |
-
----
-
-## 🎯 When to Choose Code vs Visual
-
-### Choose Visual Workflow When:
-- ✅ Designers need direct control
-- ✅ Rapid iteration is priority
-- ✅ Logic is relatively static
-- ✅ Visual debugging is beneficial
-- ✅ Team collaboration across disciplines
-
-### Choose Code Workflow When:
-- ✅ Logic is highly dynamic (runtime graph building)
-- ✅ Conditions require complex C# code
-- ✅ Integration with existing code systems
-- ✅ Advanced scheduling patterns
-- ✅ Programmatic listener management
-- ✅ Version control of logic (code diffs clearer than .asset diffs)
-
-### Hybrid Approach:
-
-- 🎨 **Visual:** Event definitions, simple bindings
-- 💻 **Code:** Complex conditions, dynamic graphs, runtime scheduling
-- **Example:** Define events visually, but build Trigger/Chain graphs in code for procedural systems
+| 生命周期方法 | 用于                             |
+| ------------ | -------------------------------- |
+| `Awake`      | 持久化监听器 + `DontDestroyOnLoad` |
+| `OnEnable`   | 标准监听器、触发器、链           |
+| `OnDisable`  | 移除标准监听器                   |
+| `OnDestroy`  | 移除持久化监听器                 |
 
 ---
 
-## 📚 Related Documentation
+## 🎯 何时选择代码与可视化
 
-- **[Raising and Scheduling](../scripting/raising-and-scheduling.md)** - Complete scheduling API guide
-- **[Listening Strategies](../scripting/listening-strategies.md)** - Listener patterns and best practices
-- **[Programmatic Flow](../scripting/programmatic-flow.md)** - Building Trigger/Chain graphs via code
-- **[Best Practices](../scripting/best-practices.md)** - Code patterns and anti-patterns
-- **[API Reference](../scripting/api-reference.md)** - Complete method signatures
+### 选择可视化工作流当：
+- ✅ 设计师需要直接控制
+- ✅ 快速迭代是优先事项
+- ✅ 逻辑相对静态
+- ✅ 可视化调试有益
+- ✅ 跨学科团队协作
+
+### 选择代码工作流当：
+- ✅ 逻辑高度动态（运行时图表构建）
+- ✅ 条件需要复杂的C#代码
+- ✅ 与现有代码系统集成
+- ✅ 高级调度模式
+- ✅ 编程监听器管理
+- ✅ 逻辑的版本控制（代码差异比.asset差异更清晰）
+
+### 混合方法：
+
+- 🎨 **可视化：** 事件定义、简单绑定
+- 💻 **代码：** 复杂条件、动态图表、运行时调度
+- **示例：** 可视化定义事件，但在代码中为程序化系统构建触发器/链式图表
+
+---
+
+## 📚 相关文档
+
+- **[触发与调度](../scripting/raising-and-scheduling.md)** - 完整调度API指南
+- **[监听策略](../scripting/listening-strategies.md)** - 监听器模式和最佳实践
+- **[编程流程](../scripting/programmatic-flow.md)** - 通过代码构建触发器/链式图表
+- **[最佳实践](../scripting/best-practices.md)** - 代码模式和反模式
+- **[API参考](../scripting/api-reference.md)** - 完整方法签名

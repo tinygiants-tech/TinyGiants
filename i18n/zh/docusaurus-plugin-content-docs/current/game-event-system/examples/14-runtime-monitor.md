@@ -1,688 +1,687 @@
 ﻿---
-sidebar_label: '14 Runtime Monitor'
+sidebar_label: '14 运行时监视器'
 sidebar_position: 15
 ---
 
 import VideoGif from '@site/src/components/Video/VideoGif';
 
-# 14 Runtime Monitor: Production Observability
+# 14 运行时监视器：生产环境可观察性
 
 <!-- <VideoGif src="/video/game-event-system/14-runtime-monitor.mp4" /> -->
 
-## 📋 Overview
+## 📋 概述
 
-In production, events fire thousands of times per second. `Debug.Log()` creates garbage, floods the console, and provides no structured insight into system health. You need **enterprise-grade observability**—real-time performance profiling, listener tracking, frequency analysis, and integrity warnings.
+在生产环境中，事件每秒触发数千次。`Debug.Log()` 会产生垃圾，淹没控制台，并且无法提供对系统健康状况的结构化洞察。您需要**企业级可观察性**——实时性能分析、监听器跟踪、频率分析和完整性警告。
 
-The **Game Event Monitor** is a specialized debugging window that answers critical questions:
-- *"Which event is causing that frame drop?"*
-- *"Is this event firing too often?"*
-- *"Who is actually listening to this event right now?"*
-- *"Why did my chain sequence break?"*
+**游戏事件监视器**是一个专门的调试窗口，用于回答关键问题：
+- *"哪个事件导致了那次帧率下降？"*
+- *"这个事件是否触发得太频繁？"*
+- *"现在谁在实际监听这个事件？"*
+- *"为什么我的链式序列中断了？"*
 
-This demo simulates a **high-load stress test facility** with four specialized test units, each designed to populate specific Monitor tabs with diagnostic data.
+此示例模拟了一个**高负载压力测试设施**，包含四个专门的测试单元，每个单元旨在用诊断数据填充特定的监视器选项卡。
 
-:::tip 💡 What You'll Learn
-- How to open and navigate the Runtime Monitor window
-- Reading performance metrics (avg/min/max execution time)
-- Analyzing event frequency and detecting spam
-- Inspecting listener counts (Inspector vs API bindings)
-- Visualizing programmatic Flow Graphs
-- Detecting integrity issues (ghost events, broken chains)
-- Interpreting warnings and health indicators
+:::tip 💡 您将学到
+- 如何打开和导航运行时监视器窗口
+- 读取性能指标（平均/最小/最大执行时间）
+- 分析事件频率并检测垃圾信息
+- 检查监听器数量（检查器与API绑定）
+- 可视化编程流程图
+- 检测完整性问题（幽灵事件、断裂链）
+- 解释警告和健康指标
 
 :::
 
 ---
 
-## 🎬 Demo Scene
+## 🎬 示例场景
 ```
 Assets/TinyGiants/GameEventSystem/Demo/14_RuntimeMonitor/14_RuntimeMonitor.unity
 ```
 
-### Scene Composition
+### 场景构成
 
-**Visual Elements:**
-- 🎯 **Test Console** - Information panel describing 4 test units
-- 🧊 **Simple Geometry** - Plane and Cube (minimal scene)
+**视觉元素：**
+- 🎯 **Test Console** - 描述4个测试单元的信息面板
+- 🧊 **Simple Geometry** - 平面和立方体（最小场景）
 
-**UI Layer (Canvas):**
-- 🎮 **Four Control Buttons** - Bottom of screen
-  - "Toggle Spammer (Unit A)" → Starts/stops high-frequency spam
-  - "Trigger Heavy Load (Unit B)" → Fires expensive operation
-  - "Fire Chain Reaction (Unit C)" → Executes programmatic chain
-  - "Fire Ghost Event (Unit D)" → Raises event with no listeners
+**UI层（Canvas）：**
+- 🎮 **四个控制按钮** - 屏幕底部
+  - "Toggle Spammer (Unit A)" → 启动/停止高频垃圾信息
+  - "Trigger Heavy Load (Unit B)" → 触发昂贵操作
+  - "Fire Chain Reaction (Unit C)" → 执行编程链
+  - "Fire Ghost Event (Unit D)" → 触发无监听器的事件
 
-**Game Logic Layer:**
-- 📤 **RuntimeMonitorRaiser** - Test orchestrator
-- 📥 **RuntimeMonitorReceiver** - Test responder with instrumented listeners
-
----
-
-## 🧪 The 4 Test Units
-
-Each unit is designed to stress-test a specific Monitor subsystem:
-
-### Unit A: The Spammer (Frequency Test)
-
-**Purpose:** Generate high-frequency event spam to test Statistics tab
-
-**Configuration:**
-- **Events:** `OnSpammer` (void), `OnSpammerPersistent` (void)
-- **Behavior:** Fires **>60 times/second** in `Update()` while active
-- **Monitor Goal:** Detect high-frequency warnings
-
-**Expected Results:**
-- 📈 **Statistics Tab:** Shows >60 fires/sec (RED warning)
-- ⚠️ **Warnings Tab:** Flags `[High Frequency]` issue
+**游戏逻辑层：**
+- 📤 **RuntimeMonitorRaiser** - 测试协调器
+- 📥 **RuntimeMonitorReceiver** - 带检测监听器的测试响应器
 
 ---
 
-### Unit B: The Heavy Lifter (Performance Test)
+## 🧪 4个测试单元
 
-**Purpose:** Simulate expensive computation to test Performance tab
+每个单元旨在对特定监视器子系统进行压力测试：
 
-**Configuration:**
-- **Events:** `OnHeavyLoad`, `OnHeavyLoadCondition` (GameObject, DamageInfo)
-- **Behavior:** Listener calls `Thread.Sleep(6)` to simulate 6ms+ lag
-- **Monitor Goal:** Trigger performance warnings
+### 单元A：垃圾信息生成器（频率测试）
 
-**Expected Results:**
-- ⚡ **Performance Tab:** Execution time shows 6-12ms (YELLOW/RED)
-- 📊 **Dashboard:** Performance bar turns yellow/red
+**目的：** 生成高频事件垃圾信息以测试统计选项卡
 
-**Code Mechanism:**
+**配置：**
+- **事件：** `OnSpammer`（void）、`OnSpammerPersistent`（void）
+- **行为：** 激活时在 `Update()` 中每秒触发**>60次**
+- **监视器目标：** 检测高频警告
+
+**预期结果：**
+- 📈 **统计选项卡：** 显示 >60 次/秒（红色警告）
+- ⚠️ **警告选项卡：** 标记 `[高频]` 问题
+
+---
+
+### 单元B：重负载（性能测试）
+
+**目的：** 模拟昂贵的计算以测试性能选项卡
+
+**配置：**
+- **事件：** `OnHeavyLoad`、`OnHeavyLoadCondition`（GameObject、DamageInfo）
+- **行为：** 监听器调用 `Thread.Sleep(6)` 模拟6毫秒以上延迟
+- **监视器目标：** 触发性能警告
+
+**预期结果：**
+- ⚡ **性能选项卡：** 执行时间显示6-12毫秒（黄色/红色）
+- 📊 **仪表板：** 性能条变为黄色/红色
+
+**代码机制：**
 ```csharp
 public void OnHeavyExecution(GameObject sender, DamageInfo info)
 {
-    // Simulate heavy computation (BAD in production, perfect for testing!)
-    Thread.Sleep(6);  // ← Forces 6ms execution time
+    // 模拟繁重计算（在生产中不好，但非常适合测试！）
+    Thread.Sleep(6);  // ← 强制6毫秒执行时间
 }
 ```
 
 ---
 
-### Unit C: The Chain Reactor (Automation Test)
+### 单元C：链式反应器（自动化测试）
 
-**Purpose:** Demonstrate programmatic Flow Graph visualization
+**目的：** 演示编程流程图可视化
 
-**Configuration:**
-- **Events:** `OnChainStart` → `OnChainProcess` → `OnChainFinish` → `OnTriggerComplete`
-- **Behavior:** Code-built sequential pipeline with delays and conditions
-- **Monitor Goal:** Visualize dynamic automation in Automation tab
+**配置：**
+- **事件：** `OnChainStart` → `OnChainProcess` → `OnChainFinish` → `OnTriggerComplete`
+- **行为：** 代码构建的带延迟和条件的顺序管道
+- **监视器目标：** 在自动化选项卡中可视化动态自动化
 
-**Graph Structure:**
+**图表结构：**
 ```
-🚀 [ START ] OnChainStart (DamageInfo)
-│   ➔ Payload: { amount: 75.0, type: Physical, ... }
+🚀 [ 开始 ] OnChainStart (DamageInfo)
+│   ➔ 载荷：{ amount: 75.0, type: Physical, ... }
 │
-├─ ⏱️ [ STEP 1 ] ➔ Delay: 0.5s
-│  └─► ⚙️ OnChainProcess (DamageInfo)      ✅ Data Relayed
+├─ ⏱️ [ 步骤1 ] ➔ 延迟：0.5秒
+│  └─► ⚙️ OnChainProcess (DamageInfo)      ✅ 数据中继
 │
-├─ ⚖️ [ STEP 2 ] ➔ Delay: 0.2s | Guard: `amount > 50`
-│  └─► 🎯 OnChainFinish (DamageInfo)       ✅ Logic Passed (75 > 50)
+├─ ⚖️ [ 步骤2 ] ➔ 延迟：0.2秒 | 守卫：`amount > 50`
+│  └─► 🎯 OnChainFinish (DamageInfo)       ✅ 逻辑通过（75 > 50）
 │
-└─ 🧹 [ STEP 3 ] ➔ Trigger Mode | Block Args
-   └─► 🏁 OnTriggerComplete (void)        ✅ Signal Purified
+└─ 🧹 [ 步骤3 ] ➔ 触发器模式 | 阻止参数
+   └─► 🏁 OnTriggerComplete (void)        ✅ 信号净化
 │
-📊 Result: Pipeline Completed | 🛡️ Data Safety: Argument Blocked at Exit
+📊 结果：管道完成 | 🛡️ 数据安全：在退出时阻止参数
 ```
 
-**Expected Results:**
-- 🔗 **Automation Tab:** Shows hierarchical tree with timing/condition badges
-- 📝 **Recent Events Tab:** Sequential firing pattern visible
+**预期结果：**
+- 🔗 **自动化选项卡：** 显示带时序/条件徽章的层次树
+- 📝 **最近事件选项卡：** 可见的顺序触发模式
 
 ---
 
-### Unit D: The Ghost (Integrity Test)
+### 单元D：幽灵（完整性测试）
 
-**Purpose:** Detect events fired with no listeners
+**目的：** 检测在没有监听器的情况下触发的事件
 
-**Configuration:**
-- **Event:** `OnGhost` (void)
-- **Behavior:** Raises event with **zero listeners** bound
-- **Monitor Goal:** Trigger integrity warning
+**配置：**
+- **事件：** `OnGhost`（void）
+- **行为：** 触发绑定了**零监听器**的事件
+- **监视器目标：** 触发完整性警告
 
-**Expected Results:**
-- ⚠️ **Warnings Tab:** Shows `[No Listeners]` warning
-- 📊 **Dashboard:** Warning count increases
-
----
-
-## 🎮 How to Test (Step-by-Step)
-
-### Phase 1: Preparation
-
-**Step 1: Open Monitor Window**
-- **Menu**
-
-  The utility is located within the **[Game Event System](../visual-workflow/game-event-system)**, you can access through the following method:
-
-  **From the System Dashboard:**
-
-  ```tex
-  Game Event System Window → Click "Game Event Monitor"
-  ```
-
-- **Window appears** 
-
-  dockable like any Unity Editor window
-
-**Step 2: Enter Play Mode**
-- Click Unity's Play button
-- Monitor remains visible during play
+**预期结果：**
+- ⚠️ **警告选项卡：** 显示 `[无监听器]` 警告
+- 📊 **仪表板：** 警告计数增加
 
 ---
 
-### Phase 2: Generate Test Data
+## 🎮 如何测试（分步指南）
 
-**Step 3: Activate Unit A (Spammer)**
-- Click **"Toggle Spammer (Unit A)"** button
-- **Observe:** Button stays active (toggled ON)
-- **Effect:** `OnSpammer` fires >60 times/second
+### 阶段1：准备
 
-**Step 4: Activate Unit B (Heavy Load)**
-- Click **"Trigger Heavy Load (Unit B)"** button **3-5 times**
-- **Effect:** Each click triggers one expensive operation (6ms lag)
+**步骤1：打开监视器窗口**
+- **菜单**
 
-**Step 5: Activate Unit C (Chain Reaction)**
-- Click **"Fire Chain Reaction (Unit C)"** button **once**
-- **Effect:** Initiates 4-step sequential pipeline
+  该工具位于**[游戏事件系统](../visual-workflow/game-event-system)**中，您可以通过以下方法访问：
 
-**Step 6: Activate Unit D (Ghost Event)**
-- Click **"Fire Ghost Event (Unit D)"** button **once**
-- **Effect:** Raises event with no listeners (integrity violation)
-
-:::tip ⏱️ Wait Time
-
-After triggering all units, wait **5-10 seconds** to accumulate data before analyzing Monitor tabs.
-
-:::
-
----
-
-## 📊 Monitor Window Analysis
-
-### Tab 1: 🏠 Dashboard (System Health Overview)
-
-The landing page—aggregates metrics from all subsystems into a single health report.
-
-![Monitor Dashboard](/img/game-event-system/examples/14-runtime-monitor/demo-14-dashboard.png)
-
-**Metric Cards (Top Row):**
-
-| Card             | Meaning                                 | Expected Value    |
-| ---------------- | --------------------------------------- | ----------------- |
-| **Total Events** | Loaded event count                      | 9                 |
-| **Total Logs**   | Cumulative fires since play start       | 500+ (climbing)   |
-| **Monitored**    | Events with active performance tracking | 4-6               |
-| **Warnings**     | Current active issues                   | 2+ (Spam + Ghost) |
-
-**Active Databases Section:**
-- Lists all loaded database assets
-- **PRIMARY** badge shows main database
-- Click database name to filter views
-
-**Performance Overview (Traffic Light Bar):**
-- 🟢 **Green:** All events &lt;1ms (healthy)
-- 🟡 **Yellow:** Some events 1-5ms (caution)
-- 🔴 **Red:** Events >5ms detected (critical)
-- Shows percentage distribution
-
-**Recent Activity (Mini-Log):**
-- Last 15 event firings
-- Format: `[Frame] EventName (args)`
-- Click to jump to Details tab
-
-**Quick Warnings (Top 3):**
-- Most critical alerts surfaced
-- Severity icons: 🔵 Info, 🟡 Warning, 🔴 Critical
-- Click to jump to Warnings tab
-
-:::note 🎯 Dashboard Purpose
-
-Single-glance system health check—like a car's instrument panel. If this shows red/yellow, drill into specific tabs for diagnosis.
-
-:::
-
----
-
-### Tab 2: ⚡ Performance (Execution Profiling)
-
-**Focus:** Detect performance bottlenecks by execution time
-
-![Monitor Performance](/img/game-event-system/examples/14-runtime-monitor/demo-14-performance.png)
-
-**Columns:**
-
-| Column         | Meaning                     | Healthy Range     |
-| -------------- | --------------------------- | ----------------- |
-| **Event Name** | Event identifier            | -                 |
-| **Avg Time**   | Average execution ms        | &lt;1ms 🟢         |
-| **Min Time**   | Fastest execution           | -                 |
-| **Max Time**   | Slowest execution           | &lt;5ms 🟡, >5ms 🔴 |
-| **Listeners**  | Avg listener count per fire | -                 |
-| **GC Alloc**   | Garbage generated per fire  | 0 KB ideal        |
-
-**Color Coding:**
-- 🟢 **Green:** 0-1ms (excellent)
-- 🟡 **Yellow:** 1-5ms (monitor)
-- 🔴 **Red:** >5ms (investigate)
-
-**Test Results (Unit B):**
-1. Locate `OnHeavyLoad` event in table
-2. **Avg Time:** Shows ~6.00ms (🟡 Yellow)
-3. **Max Time:** May show ~12.00ms if clicked multiple times (🔴 Red)
-4. **Cause:** `Thread.Sleep(6)` in listener code
-
-**Usage:**
-- Sort by "Avg Time" to find worst offenders
-- Click event name to see Details tab
-- Compare listener counts—more listeners = higher risk
-
-:::warning ⚠️ Performance Budget
-
-General rule: Keep avg execution time &lt;1ms. Budget total frame time (16ms @ 60fps) across all systems.
-
-:::
-
----
-
-### Tab 3: 📝 Recent Events (Real-Time Event Log)
-
-**Focus:** Chronological stream of all event firings
-
-![Monitor Recent](/img/game-event-system/examples/14-runtime-monitor/demo-14-recent.png)
-
-**Columns:**
-
-| Column        | Meaning                       | Example                                 |
-| ------------- | ----------------------------- | --------------------------------------- |
-| **Frame**     | Unity frame number            | `F:1450`                                |
-| **Time**      | Timestamp since play start    | `12.45s`                                |
-| **Event**     | Event name                    | `OnHeavyLoad`                           |
-| **Arguments** | Payload preview               | `<DamageInfo: 100>`                     |
-| **Caller**    | Method that called `.Raise()` | `RuntimeMonitorRaiser.TriggerHeavyLoad` |
-
-**Features:**
-- 🔍 **Search:** Filter by event name
-- 📋 **Stack Trace:** Toggle to see full call stack
-- 🔗 **Details Link:** Click event to see deep dive
-
-**Test Results (All Units):**
-- **Unit A:** Rapid succession of `OnSpammer` entries (60+/sec)
-- **Unit C:** Sequential pattern: `OnChainStart` → (delay) → `OnChainProcess` → `OnChainFinish` → `OnTriggerComplete`
-- **Unit D:** Single `OnGhost` entry
-
-**Usage:**
-- Verify event firing order (sequential vs parallel)
-- Debug unexpected event triggers
-- Investigate caller methods (who's raising this?)
-
-:::tip 🎯 Pro Tip
-
-Unlike Unity Console, this log is **specialized for events**—no noise from other Debug.Log calls, structured data preview, direct caller info.
-
-:::
-
----
-
-### Tab 4: 📈 Statistics (Frequency Analysis)
-
-**Focus:** Long-term usage patterns and frequency tracking
-
-![Monitor Statistics](/img/game-event-system/examples/14-runtime-monitor/demo-14-statistics.png)
-
-**Columns:**
-
-| Column            | Meaning                      | Healthy Range            |
-| ----------------- | ---------------------------- | ------------------------ |
-| **Event Name**    | Event identifier             | -                        |
-| **Trigger Count** | Total fires since play start | -                        |
-| **Freq/sec**      | Fires per second             | &lt;10 🟢, 10-30 🟡, >30 🔴 |
-| **Avg Interval**  | Time between fires (ms)      | >100ms ideal             |
-| **Last Trigger**  | Time since last fire         | -                        |
-
-**Test Results (Unit A):**
-1. Locate `OnSpammer` event
-2. **Trigger Count:** Rapidly climbing (1000+ after 10sec)
-3. **Freq/sec:** Shows **>60/s** (🔴 Red warning)
-4. **Avg Interval:** Shows **~16ms** (every frame at 60fps)
-
-**Warning Triggers:**
-- 🟡 **Yellow:** 10-30 fires/sec
-- 🔴 **Red:** >30 fires/sec (potential performance issue)
-
-**Usage:**
-- Identify event spam (too frequent)
-- Detect idle events (never firing)
-- Analyze firing patterns over time
-
-:::warning 🚨 Frequency Red Flags
-- **>60/sec:** Likely firing every frame—consider batching
-- **Irregular spikes:** May indicate logic bug
-- **Zero frequency:** Dead code or misconfigured event
-
-:::
-
----
-
-### Tab 5: ⚠️ Warnings (Integrity & Health Alerts)
-
-**Focus:** Filter noise, surface critical issues
-
-![Monitor Warnings](/img/game-event-system/examples/14-runtime-monitor/demo-14-warnings.png)
-
-**Severity Levels:**
-
-| Icon | Level        | Meaning                          |
-| ---- | ------------ | -------------------------------- |
-| 🔵    | **Info**     | Advisory notice (FYI)            |
-| 🟡    | **Warning**  | Non-critical issue (monitor)     |
-| 🔴    | **Critical** | Severe problem (fix immediately) |
-
-**Warning Types:**
-
-| Warning            | Trigger                             | Severity   |
-| ------------------ | ----------------------------------- | ---------- |
-| `[No Listeners]`   | Event raised but no listeners bound | 🔵 Info     |
-| `[High Frequency]` | Fires >30 times/sec                 | 🟡 Warning  |
-| `[Performance]`    | Execution time >5ms                 | 🔴 Critical |
-| `[GC Pressure]`    | Garbage allocation >1KB/fire        | 🟡 Warning  |
-
-**Test Results:**
-- **Unit A:** `OnSpammer - [High Frequency] Firing at 62/sec`
-- **Unit D:** `OnGhost - [No Listeners] Event raised with zero subscribers`
-
-**Usage:**
-- Check after major feature additions
-- Monitor during stress tests
-- Ignore expected warnings (e.g., debug events)
-
-:::note 🎓 Ghost Events
-
-`[No Listeners]` warnings are usually bugs—either:
-
-1. Listener registration failed (check `OnEnable`)
-2. Event asset reference is wrong
-3. Dead code (remove the `.Raise()` call)
-
-:::
-
----
-
-### Tab 6: 👂 Listeners (Subscription Inspector)
-
-**Focus:** Granular breakdown of WHO is listening
-
-![Monitor Listeners](/img/game-event-system/examples/14-runtime-monitor/demo-14-listeners.png)
-
-**Select an event** (e.g., `OnHeavyLoad`) to see detailed breakdown:
-
-**Listener Categories:**
-
-| Category        | Meaning                                   | Icon |
-| --------------- | ----------------------------------------- | ---- |
-| **Basic**       | Standard `AddListener`                    | 📌    |
-| **Priority**    | `AddPriorityListener` with priority value | 🔢    |
-| **Conditional** | `AddConditionalListener` with predicate   | ✅    |
-| **Persistent**  | `AddPersistentListener` (survives scenes) | 🧬    |
-
-**Breakdown Grid:**
+  **从系统仪表板：**
+```tex
+  游戏事件系统窗口 → 点击"游戏事件监视器"
 ```
-📊 Total Active Listeners: 5
+
+- **窗口出现**
+
+  可像任何Unity编辑器窗口一样停靠
+
+**步骤2：进入播放模式**
+- 点击Unity的播放按钮
+- 监视器在播放期间保持可见
+
+---
+
+### 阶段2：生成测试数据
+
+**步骤3：激活单元A（垃圾信息生成器）**
+- 点击**"Toggle Spammer (Unit A)"**按钮
+- **观察：** 按钮保持激活（切换为开）
+- **效果：** `OnSpammer` 每秒触发 >60次
+
+**步骤4：激活单元B（重负载）**
+- 点击**"Trigger Heavy Load (Unit B)"**按钮**3-5次**
+- **效果：** 每次点击触发一次昂贵操作（6毫秒延迟）
+
+**步骤5：激活单元C（链式反应）**
+- 点击**"Fire Chain Reaction (Unit C)"**按钮**一次**
+- **效果：** 启动4步顺序管道
+
+**步骤6：激活单元D（幽灵事件）**
+- 点击**"Fire Ghost Event (Unit D)"**按钮**一次**
+- **效果：** 触发无监听器的事件（完整性违规）
+
+:::tip ⏱️ 等待时间
+
+触发所有单元后，在分析监视器选项卡之前等待**5-10秒**以积累数据。
+
+:::
+
+---
+
+## 📊 监视器窗口分析
+
+### 选项卡1：🏠 仪表板（系统健康概览）
+
+登陆页面——将所有子系统的指标聚合到单个健康报告中。
+
+![监视器仪表板](/img/game-event-system/examples/14-runtime-monitor/demo-14-dashboard.png)
+
+**指标卡（顶行）：**
+
+| 卡片         | 含义                   | 预期值         |
+| ------------ | ---------------------- | -------------- |
+| **总事件数** | 已加载的事件数量       | 9              |
+| **总日志数** | 自播放开始的累积触发数 | 500+（攀升中） |
+| **监控中**   | 具有活动性能跟踪的事件 | 4-6            |
+| **警告**     | 当前活动问题           | 2+（垃圾+幽灵）|
+
+**激活数据库部分：**
+- 列出所有已加载的数据库资产
+- **PRIMARY** 徽章显示主数据库
+- 点击数据库名称过滤视图
+
+**性能概览（交通灯条）：**
+- 🟢 **绿色：** 所有事件 &lt;1毫秒（健康）
+- 🟡 **黄色：** 一些事件1-5毫秒（注意）
+- 🔴 **红色：** 检测到事件 >5毫秒（关键）
+- 显示百分比分布
+
+**最近活动（迷你日志）：**
+- 最后15次事件触发
+- 格式：`[帧] 事件名称（参数）`
+- 点击跳转到详细信息选项卡
+
+**快速警告（前3个）：**
+- 浮现最关键的警报
+- 严重性图标：🔵 信息、🟡 警告、🔴 关键
+- 点击跳转到警告选项卡
+
+:::note 🎯 仪表板目的
+
+单一浏览系统健康检查——就像汽车的仪表盘。如果显示红色/黄色，深入特定选项卡进行诊断。
+
+:::
+
+---
+
+### 选项卡2：⚡ 性能（执行分析）
+
+**重点：** 通过执行时间检测性能瓶颈
+
+![监视器性能](/img/game-event-system/examples/14-runtime-monitor/demo-14-performance.png)
+
+**列：**
+
+| 列           | 含义                 | 健康范围          |
+| ------------ | -------------------- | ----------------- |
+| **事件名称** | 事件标识符           | -                 |
+| **平均时间** | 平均执行毫秒         | &lt;1毫秒 🟢         |
+| **最小时间** | 最快执行             | -                 |
+| **最大时间** | 最慢执行             | &lt;5毫秒 🟡，>5毫秒 🔴 |
+| **监听器**   | 每次触发的平均监听器数 | -                 |
+| **GC分配**   | 每次触发生成的垃圾   | 0 KB理想          |
+
+**颜色编码：**
+- 🟢 **绿色：** 0-1毫秒（优秀）
+- 🟡 **黄色：** 1-5毫秒（监控）
+- 🔴 **红色：** >5毫秒（调查）
+
+**测试结果（单元B）：**
+1. 在表中找到 `OnHeavyLoad` 事件
+2. **平均时间：** 显示 ~6.00毫秒（🟡 黄色）
+3. **最大时间：** 如果多次点击可能显示 ~12.00毫秒（🔴 红色）
+4. **原因：** 监听器代码中的 `Thread.Sleep(6)`
+
+**用法：**
+- 按"平均时间"排序以找到最严重的问题
+- 点击事件名称查看详细信息选项卡
+- 比较监听器数量——更多监听器 = 更高风险
+
+:::warning ⚠️ 性能预算
+
+一般规则：保持平均执行时间 &lt;1毫秒。在所有系统中分配总帧时间（60fps下16毫秒）。
+
+:::
+
+---
+
+### 选项卡3：📝 最近事件（实时事件日志）
+
+**重点：** 所有事件触发的按时间顺序流
+
+![监视器最近](/img/game-event-system/examples/14-runtime-monitor/demo-14-recent.png)
+
+**列：**
+
+| 列         | 含义                     | 示例                                   |
+| ---------- | ------------------------ | -------------------------------------- |
+| **帧**     | Unity帧号                | `F:1450`                               |
+| **时间**   | 自播放开始的时间戳       | `12.45s`                               |
+| **事件**   | 事件名称                 | `OnHeavyLoad`                          |
+| **参数**   | 载荷预览                 | `<DamageInfo: 100>`                    |
+| **调用者** | 调用 `.Raise()` 的方法   | `RuntimeMonitorRaiser.TriggerHeavyLoad`|
+
+**功能：**
+- 🔍 **搜索：** 按事件名称过滤
+- 📋 **堆栈跟踪：** 切换以查看完整调用堆栈
+- 🔗 **详细信息链接：** 点击事件查看深入分析
+
+**测试结果（所有单元）：**
+- **单元A：** 快速连续的 `OnSpammer` 条目（60+/秒）
+- **单元C：** 顺序模式：`OnChainStart` → （延迟）→ `OnChainProcess` → `OnChainFinish` → `OnTriggerComplete`
+- **单元D：** 单个 `OnGhost` 条目
+
+**用法：**
+- 验证事件触发顺序（顺序与并行）
+- 调试意外事件触发
+- 调查调用者方法（谁在触发这个？）
+
+:::tip 🎯 专业提示
+
+与Unity控制台不同，此日志**专门用于事件**——没有来自其他Debug.Log调用的噪音、结构化数据预览、直接调用者信息。
+
+:::
+
+---
+
+### 选项卡4：📈 统计（频率分析）
+
+**重点：** 长期使用模式和频率跟踪
+
+![监视器统计](/img/game-event-system/examples/14-runtime-monitor/demo-14-statistics.png)
+
+**列：**
+
+| 列           | 含义                 | 健康范围             |
+| ------------ | -------------------- | -------------------- |
+| **事件名称** | 事件标识符           | -                    |
+| **触发次数** | 自播放开始的总触发数 | -                    |
+| **频率/秒**  | 每秒触发次数         | &lt;10 🟢，10-30 🟡，>30 🔴 |
+| **平均间隔** | 触发之间的时间（毫秒）| >100毫秒理想         |
+| **上次触发** | 自上次触发以来的时间 | -                    |
+
+**测试结果（单元A）：**
+1. 找到 `OnSpammer` 事件
+2. **触发次数：** 快速攀升（10秒后1000+）
+3. **频率/秒：** 显示**>60/秒**（🔴 红色警告）
+4. **平均间隔：** 显示**~16毫秒**（60fps时每帧）
+
+**警告触发器：**
+- 🟡 **黄色：** 10-30次触发/秒
+- 🔴 **红色：** >30次触发/秒（潜在性能问题）
+
+**用法：**
+- 识别事件垃圾信息（过于频繁）
+- 检测空闲事件（从未触发）
+- 随时间分析触发模式
+
+:::warning 🚨 频率红色标志
+- **>60/秒：** 可能每帧都在触发——考虑批处理
+- **不规则峰值：** 可能表示逻辑错误
+- **零频率：** 死代码或配置错误的事件
+
+:::
+
+---
+
+### 选项卡5：⚠️ 警告（完整性和健康警报）
+
+**重点：** 过滤噪音，浮现关键问题
+
+![监视器警告](/img/game-event-system/examples/14-runtime-monitor/demo-14-warnings.png)
+
+**严重级别：**
+
+| 图标 | 级别     | 含义                     |
+| ---- | -------- | ------------------------ |
+| 🔵    | **信息** | 建议通知（仅供参考）     |
+| 🟡    | **警告** | 非关键问题（监控）       |
+| 🔴    | **关键** | 严重问题（立即修复）     |
+
+**警告类型：**
+
+| 警告           | 触发器                 | 严重性 |
+| -------------- | ---------------------- | ------ |
+| `[无监听器]`   | 事件被触发但未绑定监听器 | 🔵 信息 |
+| `[高频]`       | 每秒触发 >30次         | 🟡 警告 |
+| `[性能]`       | 执行时间 >5毫秒        | 🔴 关键 |
+| `[GC压力]`     | 每次触发垃圾分配 >1KB  | 🟡 警告 |
+
+**测试结果：**
+- **单元A：** `OnSpammer - [高频] 以62/秒触发`
+- **单元D：** `OnGhost - [无监听器] 事件在零订阅者下触发`
+
+**用法：**
+- 在主要功能添加后检查
+- 在压力测试期间监控
+- 忽略预期警告（例如调试事件）
+
+:::note 🎓 幽灵事件
+
+`[无监听器]` 警告通常是错误——要么：
+
+1. 监听器注册失败（检查 `OnEnable`）
+2. 事件资产引用错误
+3. 死代码（删除 `.Raise()` 调用）
+
+:::
+
+---
+
+### 选项卡6：👂 监听器（订阅检查器）
+
+**重点：** 谁在监听的细粒度分解
+
+![监视器监听器](/img/game-event-system/examples/14-runtime-monitor/demo-14-listeners.png)
+
+**选择一个事件**（例如 `OnHeavyLoad`）查看详细分解：
+
+**监听器类别：**
+
+| 类别         | 含义                                 | 图标 |
+| ------------ | ------------------------------------ | ---- |
+| **基本**     | 标准 `AddListener`                   | 📌    |
+| **优先级**   | 带优先级值的 `AddPriorityListener`   | 🔢    |
+| **条件**     | 带谓词的 `AddConditionalListener`    | ✅    |
+| **持久化**   | `AddPersistentListener`（在场景中存活）| 🧬    |
+
+**分解网格：**
+```
+📊 总活动监听器：5
 │
-├─ 🔗 Basic Listeners (1)
-│  ├─ 📦 Inspector Bindings: 0
-│  └─ 💻 API Bindings: 1
+├─ 🔗 基本监听器（1）
+│  ├─ 📦 检查器绑定：0
+│  └─ 💻 API绑定：1
 │     └─ ⚙️ RuntimeMonitorReceiver.OnHeavyExecution
 │
-├─ ⚖️ Priority Queue (3)
-│  ├─ 🥇 High Priority (100): 1
+├─ ⚖️ 优先级队列（3）
+│  ├─ 🥇 高优先级（100）：1
 │  │  └─ ⚙️ RuntimeMonitorReceiver.OnHeavyPreCheck
-│  ├─ 🥈 Normal Priority (0): 1
+│  ├─ 🥈 普通优先级（0）：1
 │  │  └─ ⚙️ RuntimeMonitorReceiver.OnHeavyExecution
-│  └─ 🥉 Low Priority (-100): 1
+│  └─ 🥉 低优先级（-100）：1
 │     └─ ⚙️ RuntimeMonitorReceiver.OnHeavyPostCheck
 │
-├─ 🛡️ Conditional Guards (1)
-│  └─ 💎 [Prio: 50] RuntimeMonitorReceiver.OnHeavyCriticalWarning
-│     └─ 🔍 Predicate: (sender, info) => info.isCritical
+├─ 🛡️ 条件守卫（1）
+│  └─ 💎 [优先级：50] RuntimeMonitorReceiver.OnHeavyCriticalWarning
+│     └─ 🔍 谓词：(sender, info) => info.isCritical
 │
-└─ 💎 Persistent Registry (0)
-   └─ (No cross-scene listeners active)
+└─ 💎 持久化注册表（0）
+   └─ (无跨场景监听器激活)
 ```
 
-**Test Results (Unit B):**
-- **Total:** 4-5 listeners
-- **Priority Distribution:** High (1), Normal (1), Low (1)
-- **Conditional:** 1 (with predicate preview)
+**测试结果（单元B）：**
+- **总计：** 4-5个监听器
+- **优先级分布：** 高（1）、普通（1）、低（1）
+- **条件：** 1（带谓词预览）
 
-**Usage:**
-- Verify code-based registrations worked
-- Check listener execution order (priority values)
-- Debug missing listeners (expected vs actual count)
-- Audit persistent listeners (memory leak prevention)
+**用法：**
+- 验证基于代码的注册是否有效
+- 检查监听器执行顺序（优先级值）
+- 调试缺失的监听器（预期与实际计数）
+- 审核持久化监听器（防止内存泄漏）
 
-:::tip 🔍 Inspector vs API
-- **Inspector Bindings:** Configured in Behavior window
-- **API Bindings:** Registered via `AddListener` in code
-- Both show up here—validates your hybrid approach
+:::tip 🔍 检查器与API
+- **检查器绑定：** 在行为窗口中配置
+- **API绑定：** 通过代码中的 `AddListener` 注册
+- 两者都显示在这里——验证您的混合方法
 
 :::
 
 ---
 
-### Tab 7: 🔗 Automation (Programmatic Flow Visualization)
+### 选项卡7：🔗 自动化（编程流程可视化）
 
-**Focus:** Visualize code-built Trigger/Chain graphs
+**重点：** 可视化代码构建的触发器/链式图表
 
-![Monitor Automation](/img/game-event-system/examples/14-runtime-monitor/demo-14-automation.png)
+![监视器自动化](/img/game-event-system/examples/14-runtime-monitor/demo-14-automation.png)
 
-**Tree View Structure:**
+**树视图结构：**
 ```
-▼ OnChainStart (Root, <DamageInfo>)
+▼ OnChainStart（根，<DamageInfo>）
   │
-  ├─ 🔗 Chain → OnChainProcess
-  │   ├─ ⏱️ Delay: 0.5s
-  │   ├─ ✅ Pass Argument
-  │   └─ Type: <DamageInfo>
+  ├─ 🔗 链 → OnChainProcess
+  │   ├─ ⏱️ 延迟：0.5秒
+  │   ├─ ✅ 传递参数
+  │   └─ 类型：<DamageInfo>
   │
-  └─ (OnChainProcess expanded)
+  └─ （OnChainProcess已展开）
       │
-      ├─ 🔗 Chain → OnChainFinish
-      │   ├─ ⏱️ Delay: 0.2s
-      │   ├─ 🧩 Condition: info.amount > 50
-      │   ├─ ✅ Pass Argument
-      │   └─ Type: <DamageInfo>
+      ├─ 🔗 链 → OnChainFinish
+      │   ├─ ⏱️ 延迟：0.2秒
+      │   ├─ 🧩 条件：info.amount > 50
+      │   ├─ ✅ 传递参数
+      │   └─ 类型：<DamageInfo>
       │
-      └─ (OnChainFinish expanded)
+      └─ （OnChainFinish已展开）
           │
-          └─ 🕹️ Trigger → OnTriggerComplete
-              ├─ ❌ Block Argument
-              └─ Type: (void)
+          └─ 🕹️ 触发器 → OnTriggerComplete
+              ├─ ❌ 阻止参数
+              └─ 类型：(void)
 ```
 
-**Badge Legend:**
+**徽章图例：**
 
-| Badge    | Meaning                  |
-| -------- | ------------------------ |
-| ⏱️ `0.5s` | Delay configured         |
-| 🧩        | Condition enabled        |
-| ✅        | Argument passing enabled |
-| ❌        | Argument blocked         |
-| 🔗        | Chain node (sequential)  |
-| 🕹️        | Trigger node (parallel)  |
+| 徽章    | 含义             |
+| -------- | ---------------- |
+| ⏱️ `0.5s` | 已配置延迟       |
+| 🧩        | 已启用条件       |
+| ✅        | 已启用参数传递   |
+| ❌        | 参数被阻止       |
+| 🔗        | 链节点（顺序）   |
+| 🕹️        | 触发器节点（并行）|
 
-**Test Results (Unit C):**
-- **Root:** `OnChainStart`
-- **Depth:** 3 levels (Start → Process → Finish → Complete)
-- **Mixed Types:** Chain (sequential) + Trigger (parallel) combined
+**测试结果（单元C）：**
+- **根：** `OnChainStart`
+- **深度：** 3层（Start → Process → Finish → Complete）
+- **混合类型：** 链（顺序）+ 触发器（并行）组合
 
-**Usage:**
-- Verify programmatic graphs built correctly
-- Debug broken chains (missing nodes)
-- Visualize complex automation without opening Flow Graph window
-- Compare code-built vs visual-built graphs
+**用法：**
+- 验证编程图表构建正确
+- 调试断裂链（缺失节点）
+- 无需打开流程图窗口即可可视化复杂自动化
+- 比较代码构建与可视化构建的图表
 
-:::note 🎨 Code vs Visual Graphs
-- **This tab:** Shows **code-built** graphs (`AddChainEvent`, `AddTriggerEvent`)
-- **Flow Graph window:** Shows **visual-built** graphs (created via UI)
-- Both are valid, both are debuggable
+:::note 🎨 代码与可视化图表
+- **此选项卡：** 显示**代码构建**的图表（`AddChainEvent`、`AddTriggerEvent`）
+- **流程图窗口：** 显示**可视化构建**的图表（通过UI创建）
+- 两者都有效，两者都可调试
 
 :::
 
 ---
 
-### Tab 8: 🔍 Event Details (Deep Dive)
+### 选项卡8：🔍 事件详细信息（深入分析）
 
-**Focus:** Single-event analysis and history
+**重点：** 单事件分析和历史
 
-![Monitor Details](/img/game-event-system/examples/14-runtime-monitor/demo-14-details.png)
+![监视器详细信息](/img/game-event-system/examples/14-runtime-monitor/demo-14-details.png)
 
-Click "Details" or "View" from any other tab to drill down.
+从任何其他选项卡点击"详细信息"或"查看"以深入分析。
 
-**Sections:**
+**部分：**
 
-**1. Metadata:**
-- **GUID:** Unique identifier (immutable)
-- **Type:** Full generic signature
-- **Category:** Organizational tag
-- **Database:** Source asset file
+**1. 元数据：**
+- **GUID：** 唯一标识符（不可变）
+- **类型：** 完整泛型签名
+- **类别：** 组织标签
+- **数据库：** 源资产文件
 
-**2. Performance Summary:**
-- **Avg/Min/Max Time:** Same as Performance tab
-- **GC Allocation:** Memory profile
-- **Listener Count:** Current subscribers
+**2. 性能摘要：**
+- **平均/最小/最大时间：** 与性能选项卡相同
+- **GC分配：** 内存配置
+- **监听器数量：** 当前订阅者
 
-**3. Frequency Summary:**
-- **Total Fires:** Since play start
-- **Fires/Sec:** Current rate
-- **Avg Interval:** Between fires
-- **Last Fire:** Time ago
+**3. 频率摘要：**
+- **总触发数：** 自播放开始
+- **触发/秒：** 当前速率
+- **平均间隔：** 触发之间
+- **上次触发：** 之前的时间
 
-**4. Recent Activity (Filtered):**
-- Event-specific log stream
-- Only shows this event's history
-- Full stack traces available
+**4. 最近活动（已过滤）：**
+- 事件特定的日志流
+- 仅显示此事件的历史
+- 可用完整堆栈跟踪
 
-**5. Automation (If Applicable):**
-- Shows this event's place in Flow Graph
-- Upstream/downstream connections
+**5. 自动化（如果适用）：**
+- 显示此事件在流程图中的位置
+- 上游/下游连接
 
-**Usage:**
-- Comprehensive single-event analysis
-- Compare before/after optimization
-- Export data for team review
-
----
-
-## 🏗️ Scene Architecture
-
-### Event Organization
-
-Events organized by test unit in Game Event Editor:
-
-![Game Event Editor](/img/game-event-system/examples/14-runtime-monitor/demo-14-editor.png)
-
-| Category   | Event Name             | Type                                | Purpose                |
-| ---------- | ---------------------- | ----------------------------------- | ---------------------- |
-| **Unit A** | `OnSpammer`            | `GameEvent`                         | High-frequency spam    |
-| **Unit A** | `OnSpammerPersistent`  | `GameEvent`                         | Persistent spam        |
-| **Unit B** | `OnHeavyLoad`          | `GameEvent<GameObject, DamageInfo>` | Performance test       |
-| **Unit B** | `OnHeavyLoadCondition` | `GameEvent<GameObject, DamageInfo>` | Conditional test       |
-| **Unit C** | `OnChainStart`         | `GameEvent<DamageInfo>`             | Root (gold)            |
-| **Unit C** | `OnChainProcess`       | `GameEvent<DamageInfo>`             | Chain step 1           |
-| **Unit C** | `OnChainFinish`        | `GameEvent<DamageInfo>`             | Chain step 2           |
-| **Unit C** | `OnTriggerComplete`    | `GameEvent`                         | Chain step 3 (trigger) |
-| **Unit D** | `OnGhost`              | `GameEvent`                         | Integrity test         |
+**用法：**
+- 全面的单事件分析
+- 比较优化前后
+- 导出数据供团队审查
 
 ---
 
-### Flow Graph Configuration
+## 🏗️ 场景架构
 
-Programmatic chain built in code:
+### 事件组织
 
-![Flow Graph](/img/game-event-system/examples/14-runtime-monitor/demo-14-graph.png)
+游戏事件编辑器中按测试单元组织的事件：
 
-**Graph Structure:**
-- 🔴 **OnChainStart (Root, Red)** - Entry point
-- 🟢 **OnChainProcess (Chain, Green)** - Step 1 (Delay: 0.5s)
-- 🟢 **OnChainFinish (Chain, Green)** - Step 2 (Delay: 0.2s, Condition: amount > 50)
-- 🟡 **OnTriggerComplete (Trigger, Yellow)** - Step 3 (Argument blocked)
+![游戏事件编辑器](/img/game-event-system/examples/14-runtime-monitor/demo-14-editor.png)
 
-**Connection Types:**
-- 🟢 **Green "CHAIN" lines** - Sequential execution
-- 🟡 **Yellow "TRIGGER" line** - Parallel execution
-
----
-
-### Raiser Setup (RuntimeMonitorRaiser)
-
-![RuntimeMonitorRaiser Inspector](/img/game-event-system/examples/14-runtime-monitor/demo-14-raiser.png)
-
-**Unit A: Frequency Test**
-- `On Spam Event`: OnSpammer
-- `On Spam Persistent Event`: OnSpammerPersistent
-
-**Unit B: Performance Test**
-- `On Heavy Load Event`: OnHeavyLoad
-- `On Heavy Load Condition Event`: OnHeavyLoadCondition
-
-**Unit C: Automation Test (Roots)**
-- `On Chain Start`: OnChainStart
-
-**Unit C: Automation Test (Targets)**
-- `On Chain Process`: OnChainProcess
-- `On Chain Finish`: OnChainFinish
-- `On Trigger Complete`: OnTriggerComplete
-
-**Unit D: Integrity Test**
-- `On Ghost Event`: OnGhost
+| 类别       | 事件名称               | 类型                                | 目的           |
+| ---------- | ---------------------- | ----------------------------------- | -------------- |
+| **单元A**  | `OnSpammer`            | `GameEvent`                         | 高频垃圾信息   |
+| **单元A**  | `OnSpammerPersistent`  | `GameEvent`                         | 持久化垃圾信息 |
+| **单元B**  | `OnHeavyLoad`          | `GameEvent<GameObject, DamageInfo>` | 性能测试       |
+| **单元B**  | `OnHeavyLoadCondition` | `GameEvent<GameObject, DamageInfo>` | 条件测试       |
+| **单元C**  | `OnChainStart`         | `GameEvent<DamageInfo>`             | 根（金色）     |
+| **单元C**  | `OnChainProcess`       | `GameEvent<DamageInfo>`             | 链步骤1        |
+| **单元C**  | `OnChainFinish`        | `GameEvent<DamageInfo>`             | 链步骤2        |
+| **单元C**  | `OnTriggerComplete`    | `GameEvent`                         | 链步骤3（触发器）|
+| **单元D**  | `OnGhost`              | `GameEvent`                         | 完整性测试     |
 
 ---
 
-### Receiver Setup (RuntimeMonitorReceiver)
+### 流程图配置
 
-![RuntimeMonitorReceiver Inspector](/img/game-event-system/examples/14-runtime-monitor/demo-14-receiver.png)
+代码中构建的编程链：
 
-**Events (Asset References):**
-- Same events as Raiser
+![流程图](/img/game-event-system/examples/14-runtime-monitor/demo-14-graph.png)
 
-**Chain Events (For Inspector Binding):**
-- `On Chain Process`, `On Chain Finish`, `On Trigger Complete`
-- These have **Inspector-based listeners** (drag & drop in Behavior window)
-- Complements code-based API listeners
+**图表结构：**
+- 🔴 **OnChainStart（根，红色）** - 入口点
+- 🟢 **OnChainProcess（链，绿色）** - 步骤1（延迟：0.5秒）
+- 🟢 **OnChainFinish（链，绿色）** - 步骤2（延迟：0.2秒，条件：amount > 50）
+- 🟡 **OnTriggerComplete（触发器，黄色）** - 步骤3（参数被阻止）
+
+**连接类型：**
+- 🟢 **绿色"CHAIN"线** - 顺序执行
+- 🟡 **黄色"TRIGGER"线** - 并行执行
 
 ---
 
-## 💻 Code Breakdown
+### 触发器设置（RuntimeMonitorRaiser）
 
-### Simulating Performance Issues (Unit B)
+![RuntimeMonitorRaiser检查器](/img/game-event-system/examples/14-runtime-monitor/demo-14-raiser.png)
 
-**RuntimeMonitorReceiver.cs - Heavy Execution:**
+**单元A：频率测试**
+- `On Spam Event`：OnSpammer
+- `On Spam Persistent Event`：OnSpammerPersistent
+
+**单元B：性能测试**
+- `On Heavy Load Event`：OnHeavyLoad
+- `On Heavy Load Condition Event`：OnHeavyLoadCondition
+
+**单元C：自动化测试（根）**
+- `On Chain Start`：OnChainStart
+
+**单元C：自动化测试（目标）**
+- `On Chain Process`：OnChainProcess
+- `On Chain Finish`：OnChainFinish
+- `On Trigger Complete`：OnTriggerComplete
+
+**单元D：完整性测试**
+- `On Ghost Event`：OnGhost
+
+---
+
+### 接收器设置（RuntimeMonitorReceiver）
+
+![RuntimeMonitorReceiver检查器](/img/game-event-system/examples/14-runtime-monitor/demo-14-receiver.png)
+
+**事件（资产引用）：**
+- 与触发器相同的事件
+
+**链事件（用于检查器绑定）：**
+- `On Chain Process`、`On Chain Finish`、`On Trigger Complete`
+- 这些具有**基于检查器的监听器**（在行为窗口中拖放）
+- 补充基于代码的API监听器
+
+---
+
+## 💻 代码详解
+
+### 模拟性能问题（单元B）
+
+**RuntimeMonitorReceiver.cs - 繁重执行：**
 ```csharp
 public void OnHeavyExecution(GameObject sender, DamageInfo info)
 {
-    // ⚠️ INTENTIONAL LAG FOR TESTING
-    // In production, NEVER use Thread.Sleep in game logic!
-    // This forces execution time to >5ms to trigger Monitor warnings
-    Thread.Sleep(6);  // ← Simulates expensive computation
+    // ⚠️ 测试的故意延迟
+    // 在生产中，永远不要在游戏逻辑中使用Thread.Sleep！
+    // 这强制执行时间 >5毫秒以触发监视器警告
+    Thread.Sleep(6);  // ← 模拟昂贵计算
     
     Debug.Log($"[Receiver] Processed heavy data. Latency: 6ms (simulated)");
 }
 ```
 
-**Why this works:**
-- `Thread.Sleep(6)` blocks main thread for 6 milliseconds
-- Monitor's Performance tab tracks execution time per listener
-- 6ms exceeds 5ms threshold → triggers YELLOW warning
-- Click button 2x with `Thread.Sleep(12)` → RED critical warning
+**为什么有效：**
+- `Thread.Sleep(6)` 阻塞主线程6毫秒
+- 监视器的性能选项卡跟踪每个监听器的执行时间
+- 6毫秒超过5毫秒阈值 → 触发黄色警告
+- 用 `Thread.Sleep(12)` 点击按钮2次 → 红色关键警告
 
 ---
 
-### Building Programmatic Automation (Unit C)
+### 构建编程自动化（单元C）
 
-**RuntimeMonitorRaiser.cs - Awake() Graph Construction:**
+**RuntimeMonitorRaiser.cs - Awake()图表构建：**
 ```csharp
 private ChainHandle _chainProcessHandle;
 private ChainHandle _chainFinishHandle;
@@ -690,95 +689,95 @@ private TriggerHandle _triggerCompleteHandle;
 
 private void Awake()
 {
-    // ✅ BUILD CHAIN IN CODE (Not visual graph!)
+    // ✅ 在代码中构建链（不是可视化图表！）
     
-    // Step 1: Start → (Delay 0.5s) → Process
+    // 步骤1：Start → （延迟0.5秒）→ Process
     _chainProcessHandle = onChainStart.AddChainEvent(
         targetEvent: onChainProcess,
-        delay: 0.5f,           // ← Pause for half a second
-        passArgument: true     // ← Forward DamageInfo
+        delay: 0.5f,           // ← 暂停半秒
+        passArgument: true     // ← 转发DamageInfo
     );
     
-    // Step 2: Process → (Condition + Delay 0.2s) → Finish
+    // 步骤2：Process → （条件 + 延迟0.2秒）→ Finish
     _chainFinishHandle = onChainProcess.AddChainEvent(
         targetEvent: onChainFinish,
         delay: 0.2f,
-        condition: (info) => info.amount > 50f,  // ← Only high damage continues
+        condition: (info) => info.amount > 50f,  // ← 仅高伤害继续
         passArgument: true
     );
     
-    // Step 3: Finish → (Trigger, Block Args) → Complete
+    // 步骤3：Finish → （触发器，阻止参数）→ Complete
     _triggerCompleteHandle = onChainFinish.AddTriggerEvent(
         targetEvent: onTriggerComplete,
-        passArgument: false    // ← Block arguments (type conversion void)
+        passArgument: false    // ← 阻止参数（类型转换为void）
     );
 }
 
 private void OnDestroy()
 {
-    // ✅ CLEANUP: MANDATORY for dynamic graphs
+    // ✅ 清理：动态图表强制要求
     onChainStart.RemoveChainEvent(_chainProcessHandle);
     onChainProcess.RemoveChainEvent(_chainFinishHandle);
     onChainFinish.RemoveTriggerEvent(_triggerCompleteHandle);
 }
 ```
 
-**Graph Execution Flow:**
+**图表执行流程：**
 ```
-🖱️ User Interaction: Button Clicked
+🖱️ 用户交互：按钮点击
 │
-🚀 [ INITIATION ] ➔ onChainStart.Raise(DamageInfo)
-│   📦 Payload: { amount: 100, isCritical: true }
+🚀 [ 启动 ] ➔ onChainStart.Raise(DamageInfo)
+│   📦 载荷：{ amount: 100, isCritical: true }
 │
-⏳ [ SCHEDULING ] ➔ System Pauses for 0.5s
+⏳ [ 调度 ] ➔ 系统暂停0.5秒
 │   └─► ⚙️ onChainProcess.Raise(DamageInfo)
 │
-⚖️ [ EVALUATION ] ➔ Gate: `100 > 50` ? 
-│   └─► ✅ Result: YES (Condition Passed)
+⚖️ [ 评估 ] ➔ 门：`100 > 50` ? 
+│   └─► ✅ 结果：是（条件通过）
 │
-⏳ [ SCHEDULING ] ➔ System Pauses for 0.2s
+⏳ [ 调度 ] ➔ 系统暂停0.2秒
 │   └─► 🎯 onChainFinish.Raise(DamageInfo)
 │
-🧪 [ PURIFICATION ] ➔ Parameter Stripping: `DamageInfo` ➔ `void`
+🧪 [ 净化 ] ➔ 参数剥离：`DamageInfo` ➔ `void`
 │   └─► 🏁 onTriggerComplete.Raise()
 │
-📊 Final Outcome: Pipeline Finalized | ⚡ Timing: 0.7s Total Delay
+📊 最终结果：管道完成 | ⚡ 时序：总延迟0.7秒
 ```
 
-**Monitor Visibility:**
-- **Automation Tab:** Shows this exact tree structure
-- **Recent Events Tab:** Shows sequential firing pattern with timing
-- **Performance Tab:** Tracks each step's execution time
+**监视器可见性：**
+- **自动化选项卡：** 显示这个精确的树结构
+- **最近事件选项卡：** 显示带时序的顺序触发模式
+- **性能选项卡：** 跟踪每个步骤的执行时间
 
 ---
 
-### Registering Multi-Priority Listeners (Unit B)
+### 注册多优先级监听器（单元B）
 
-**RuntimeMonitorReceiver.cs - OnEnable():**
+**RuntimeMonitorReceiver.cs - OnEnable()：**
 ```csharp
 private void OnEnable()
 {
-    // ✅ POPULATE LISTENERS TAB WITH VARIETY
+    // ✅ 用多样性填充监听器选项卡
     
-    // Basic listener (no priority)
+    // 基本监听器（无优先级）
     onSpamEvent.AddListener(OnSpamReceived);
     
-    // Priority listeners (execution order)
-    onHeavyLoadEvent.AddPriorityListener(OnHeavyPreCheck, priority: 100);   // Runs 1st
-    onHeavyLoadEvent.AddPriorityListener(OnHeavyExecution, priority: 0);    // Runs 2nd (lag here)
-    onHeavyLoadEvent.AddPriorityListener(OnHeavyPostCheck, priority: -100); // Runs 3rd
+    // 优先级监听器（执行顺序）
+    onHeavyLoadEvent.AddPriorityListener(OnHeavyPreCheck, priority: 100);   // 第1个运行
+    onHeavyLoadEvent.AddPriorityListener(OnHeavyExecution, priority: 0);    // 第2个运行（此处延迟）
+    onHeavyLoadEvent.AddPriorityListener(OnHeavyPostCheck, priority: -100); // 第3个运行
     
-    // Conditional listener with priority
+    // 带优先级的条件监听器
     onHeavyLoadConditionEvent.AddConditionalListener(
         OnHeavyCriticalWarning,
-        predicate: (sender, info) => info.isCritical,  // ← Only if critical
+        predicate: (sender, info) => info.isCritical,  // ← 仅在关键时
         priority: 50
     );
 }
 
 private void OnDisable()
 {
-    // ✅ CLEANUP
+    // ✅ 清理
     onSpamEvent.RemoveListener(OnSpamReceived);
     
     onHeavyLoadEvent.RemovePriorityListener(OnHeavyPreCheck);
@@ -789,183 +788,183 @@ private void OnDisable()
 }
 ```
 
-**Monitor Visibility:**
-- **Listeners Tab:** Shows 4 listeners for `OnHeavyLoad`
-  - Priority breakdown: High (1), Normal (1), Low (1)
-  - Conditional (1) with predicate preview
-- **Performance Tab:** Tracks cumulative execution time (sum of all listeners)
+**监视器可见性：**
+- **监听器选项卡：** 显示 `OnHeavyLoad` 的4个监听器
+  - 优先级分解：高（1）、普通（1）、低（1）
+  - 条件（1）带谓词预览
+- **性能选项卡：** 跟踪累积执行时间（所有监听器的总和）
 
 ---
 
-### Persistent Listener Management (Unit A)
+### 持久化监听器管理（单元A）
 
-**RuntimeMonitorReceiver.cs - Awake/OnDestroy:**
+**RuntimeMonitorReceiver.cs - Awake/OnDestroy：**
 ```csharp
 private void Awake()
 {
-    // ✅ PERSISTENT LISTENER (Survives scene reload)
-    // Registered in Awake, cleaned in OnDestroy
+    // ✅ 持久化监听器（在场景重新加载中存活）
+    // 在Awake中注册，在OnDestroy中清理
     onSpamPersistentEvent.AddPersistentListener(OnSpamPersistentLog, priority: -10);
 }
 
 private void OnDestroy()
 {
-    // ✅ CLEANUP PERSISTENT
+    // ✅ 清理持久化
     onSpamPersistentEvent.RemovePersistentListener(OnSpamPersistentLog);
 }
 
 public void OnSpamPersistentLog()
 {
-    // Empty method—exists only for Monitor to count
-    // Simulates background tracking (e.g., analytics, achievements)
+    // 空方法——仅供监视器计数
+    // 模拟后台跟踪（例如分析、成就）
 }
 ```
 
-**Monitor Visibility:**
-- **Listeners Tab:** Shows "Persistent Listeners: 1" for `OnSpammerPersistent`
-- **Dashboard:** Tracks persistent listener health
+**监视器可见性：**
+- **监听器选项卡：** 显示 `OnSpammerPersistent` 的"持久化监听器：1"
+- **仪表板：** 跟踪持久化监听器健康
 
 ---
 
-## 🎯 Production Debugging Workflow
+## 🎯 生产调试工作流
 
-### Scenario 1: Frame Drops During Combat
+### 场景1：战斗期间帧率下降
 
-**Symptoms:**
-- FPS drops from 60 to 30 during combat
-- No obvious Unity Profiler spikes
+**症状：**
+- FPS从60降至30
+- Unity Profiler无明显峰值
 
-**Debug Steps:**
-1. Open **Performance Tab**
-2. Sort by "Avg Time" (descending)
-3. Look for events with >2ms execution
-4. Click event → **Details Tab** → See caller methods
-5. Optimize heavy listeners or reduce fire frequency
-
----
-
-### Scenario 2: Event Not Firing
-
-**Symptoms:**
-- UI button click does nothing
-- Expected behavior doesn't occur
-
-**Debug Steps:**
-1. Open **Recent Events Tab**
-2. Search for expected event name
-3. **If found:** Event firing but listeners not responding
-   - Go to **Listeners Tab** → Check listener count
-   - Verify method names match
-4. **If not found:** Event not being raised
-   - Check raiser code's `.Raise()` call
-   - Verify event asset reference in Inspector
+**调试步骤：**
+1. 打开**性能选项卡**
+2. 按"平均时间"排序（降序）
+3. 查找执行时间 >2毫秒的事件
+4. 点击事件 → **详细信息选项卡** → 查看调用者方法
+5. 优化繁重的监听器或降低触发频率
 
 ---
 
-### Scenario 3: Memory Leak Suspected
+### 场景2：事件未触发
 
-**Symptoms:**
-- Memory usage grows over time
-- GC spikes increase
+**症状：**
+- UI按钮点击无反应
+- 预期行为未发生
 
-**Debug Steps:**
-1. Open **Performance Tab**
-2. Check "GC Alloc" column
-3. Look for events allocating >0 KB per fire
-4. Click event → **Listeners Tab** → Check for closure allocations
-5. Refactor to avoid per-fire allocations
-
----
-
-### Scenario 4: Ghost Events (Dead Code)
-
-**Symptoms:**
-- Warning tab shows `[No Listeners]`
-
-**Debug Steps:**
-1. Open **Warnings Tab**
-2. Identify ghost events
-3. **Option A:** Event is debug-only → Ignore warning
-4. **Option B:** Listener registration failed
-   - Check `OnEnable` for `AddListener` call
-   - Verify event asset reference matches
-5. **Option C:** Dead code → Remove `.Raise()` call
+**调试步骤：**
+1. 打开**最近事件选项卡**
+2. 搜索预期的事件名称
+3. **如果找到：** 事件触发但监听器未响应
+   - 转到**监听器选项卡** → 检查监听器数量
+   - 验证方法名称匹配
+4. **如果未找到：** 事件未被触发
+   - 检查触发器代码的 `.Raise()` 调用
+   - 验证检查器中的事件资产引用
 
 ---
 
-## 🔑 Monitor Best Practices
+### 场景3：怀疑内存泄漏
 
-### ✅ DO
+**症状：**
+- 内存使用随时间增长
+- GC峰值增加
 
-**During Development:**
-- Keep Monitor open in second display
-- Check after adding new events
-- Verify listener counts match expectations
-- Profile before/after optimizations
-
-**During Stress Testing:**
-- Generate high load (like this demo)
-- Monitor Performance tab for >1ms events
-- Check Warnings tab for integrity issues
-- Export metrics for team review
-
-**In Production Builds:**
-- Enable Monitor in Development Builds
-- Test on target devices (mobile, console)
-- Profile in realistic scenarios
-- Document performance baselines
+**调试步骤：**
+1. 打开**性能选项卡**
+2. 检查"GC分配"列
+3. 查找每次触发分配 >0 KB的事件
+4. 点击事件 → **监听器选项卡** → 检查闭包分配
+5. 重构以避免每次触发分配
 
 ---
 
-### ❌ DON'T
+### 场景4：幽灵事件（死代码）
 
-**Performance Anti-Patterns:**
-- Fire events every frame (>60/sec) without batching
-- Allocate memory in listeners (closures, LINQ)
-- Call expensive operations synchronously
+**症状：**
+- 警告选项卡显示 `[无监听器]`
 
-**Debugging Anti-Patterns:**
-- Ignore yellow warnings ("it's just a warning")
-- Rely solely on `Debug.Log` for event debugging
-- Skip listener cleanup (`OnDisable` missing)
-- Leave test events in production builds
-
----
-
-## 📊 Monitor vs Unity Profiler
-
-| Feature                | Game Event Monitor | Unity Profiler      |
-| ---------------------- | ------------------ | ------------------- |
-| **Focus**              | Event system only  | Entire engine       |
-| **Granularity**        | Per-event metrics  | Per-method calls    |
-| **Listener Tracking**  | ✅ Built-in         | ❌ Manual            |
-| **Frequency Analysis** | ✅ Built-in         | ⚠️ Indirect          |
-| **Flow Visualization** | ✅ Automation tab   | ❌ N/A               |
-| **Warnings**           | ✅ Automatic        | ❌ Manual analysis   |
-| **Learning Curve**     | Easy               | Steep               |
-| **Best For**           | Event debugging    | Overall performance |
-
-**Recommended Workflow:**
-1. **Monitor:** Identify problematic events
-2. **Unity Profiler:** Deep-dive into listener methods
-3. **Monitor:** Verify fixes reduced execution time
+**调试步骤：**
+1. 打开**警告选项卡**
+2. 识别幽灵事件
+3. **选项A：** 事件仅用于调试 → 忽略警告
+4. **选项B：** 监听器注册失败
+   - 检查 `OnEnable` 中的 `AddListener` 调用
+   - 验证事件资产引用匹配
+5. **选项C：** 死代码 → 删除 `.Raise()` 调用
 
 ---
 
-## 🎯 What's Next?
+## 🔑 监视器最佳实践
 
-You've mastered the complete `GameEventSystem` workflow—from basic events to enterprise observability. The Examples section is complete!
+### ✅ 应该做
 
-**Next Steps:**
-- Explore **[Tools & Support](../tools/codegen-and-cleanup.md)** for advanced features
-- Review **[Best Practices](../scripting/best-practices.md)** for production patterns
-- Check **[Community & Support](../tools/community-and-support.md)** for help
+**在开发期间：**
+- 在第二显示器上保持监视器打开
+- 添加新事件后检查
+- 验证监听器数量符合预期
+- 优化前后进行分析
+
+**在压力测试期间：**
+- 生成高负载（如此示例）
+- 监控性能选项卡中 >1毫秒的事件
+- 检查警告选项卡中的完整性问题
+- 导出指标供团队审查
+
+**在生产构建中：**
+- 在开发构建中启用监视器
+- 在目标设备上测试（移动、主机）
+- 在现实场景中进行分析
+- 记录性能基线
 
 ---
 
-## 📚 Related Documentation
+### ❌ 不应该做
 
-- **[Runtime Monitor Tool](../tools/runtime-monitor.md)** - Complete Monitor documentation
-- **[Best Practices](../scripting/best-practices.md)** - Performance optimization patterns
-- **[Programmatic Flow](../scripting/programmatic-flow.md)** - Building graphs in code
-- **[API Reference](../scripting/api-reference.md)** - Complete method signatures
+**性能反模式：**
+- 每帧触发事件（>60/秒）而不批处理
+- 在监听器中分配内存（闭包、LINQ）
+- 同步调用昂贵操作
+
+**调试反模式：**
+- 忽略黄色警告（"只是警告"）
+- 仅依赖 `Debug.Log` 进行事件调试
+- 跳过监听器清理（缺少 `OnDisable`）
+- 在生产构建中留下测试事件
+
+---
+
+## 📊 监视器与Unity Profiler
+
+| 功能             | 游戏事件监视器 | Unity Profiler  |
+| ---------------- | -------------- | --------------- |
+| **重点**         | 仅事件系统     | 整个引擎        |
+| **粒度**         | 每事件指标     | 每方法调用      |
+| **监听器跟踪**   | ✅ 内置         | ❌ 手动          |
+| **频率分析**     | ✅ 内置         | ⚠️ 间接          |
+| **流程可视化**   | ✅ 自动化选项卡 | ❌ 不适用        |
+| **警告**         | ✅ 自动         | ❌ 手动分析      |
+| **学习曲线**     | 简单           | 陡峭            |
+| **最适合**       | 事件调试       | 整体性能        |
+
+**推荐工作流程：**
+1. **监视器：** 识别有问题的事件
+2. **Unity Profiler：** 深入研究监听器方法
+3. **监视器：** 验证修复降低了执行时间
+
+---
+
+## 🎯 下一步
+
+您已经掌握了完整的 `GameEventSystem` 工作流——从基本事件到企业级可观察性。示例部分已完成！
+
+**下一步：**
+- 探索**[工具与支持](../tools/codegen-and-cleanup.md)**了解高级功能
+- 查看**[最佳实践](../scripting/best-practices.md)**了解生产模式
+- 查看**[社区与支持](../tools/community-and-support.md)**获取帮助
+
+---
+
+## 📚 相关文档
+
+- **[运行时监视器工具](../tools/runtime-monitor.md)** - 完整监视器文档
+- **[最佳实践](../scripting/best-practices.md)** - 性能优化模式
+- **[编程流程](../scripting/programmatic-flow.md)** - 在代码中构建图表
+- **[API参考](../scripting/api-reference.md)** - 完整方法签名

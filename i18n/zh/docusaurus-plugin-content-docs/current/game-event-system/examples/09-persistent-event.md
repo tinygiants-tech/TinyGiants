@@ -1,703 +1,703 @@
 ﻿---
-sidebar_label: '09 Persistent Event'
+sidebar_label: '09 持久化事件'
 sidebar_position: 10
 ---
 
 import VideoGif from '@site/src/components/Video/VideoGif';
 
-# 09 Persistent Event: Surviving Scene Loads
+# 09 持久化事件：在场景加载中存活
 
 <!-- <VideoGif src="/video/game-event-system/09-persistent-event.mp4" /> -->
 
-## 📋 Overview
+## 📋 概述
 
-In Unity, when you load a new scene, all GameObjects (and their event listeners) from the previous scene are destroyed. **Persistent Events** solve this problem by storing listener bindings in a global manager that survives scene transitions—essential for global systems like music controllers, inventory managers, or achievement trackers.
+在Unity中，当您加载新场景时，前一个场景中的所有游戏对象（及其事件监听器）都会被销毁。**持久化事件**通过将监听器绑定存储在在场景转换中存活的全局管理器中来解决此问题——对于音乐控制器、库存管理器或成就跟踪器等全局系统至关重要。
 
-:::tip 💡 What You'll Learn
-- The scene transition cleanup problem in Unity
-- How to enable event persistence with a single checkbox
-- The difference between persistent and non-persistent event behavior
-- Architectural patterns for cross-scene event systems
+:::tip 💡 您将学到
+- Unity中的场景转换清理问题
+- 如何通过单个复选框启用事件持久化
+- 持久化和非持久化事件行为的区别
+- 跨场景事件系统的架构模式
 
 :::
 
 ---
 
-## 🎬 Demo Scene
+## 🎬 示例场景
 ```
 Assets/TinyGiants/GameEventSystem/Demo/09_PersistentEvent/09_PersistentEvent_1.unity
 ```
 
-### Scene Composition
+### 场景构成
 
-**Visual Elements:**
-- 🔴 **Turret_A (Left)** - Red turret with grey base
-  - Controlled by **persistent** event `OnTurretA`
-  - Has rotating head mechanism
-  - Will continue working after scene reload
+**视觉元素：**
+- 🔴 **Turret_A（左侧）** - 红色炮塔，灰色底座
+  - 由**持久化**事件 `OnTurretA` 控制
+  - 具有旋转头部机制
+  - 场景重新加载后将继续工作
   
-- 🔵 **Turret_B (Right)** - Blue turret with grey base
-  - Controlled by **non-persistent** event `OnTurretB`
-  - Identical functionality to Turret A
-  - Will stop working after scene reload
+- 🔵 **Turret_B（右侧）** - 蓝色炮塔，灰色底座
+  - 由**非持久化**事件 `OnTurretB` 控制
+  - 与炮塔A功能相同
+  - 场景重新加载后将停止工作
 
-- 🎯 **TargetDummy** - Center capsule target
-  - Both turrets aim and fire at this target
-  - Has Rigidbody for knockback physics
+- 🎯 **TargetDummy** - 中央胶囊目标
+  - 两个炮塔都瞄准并射击此目标
+  - 具有刚体用于击退物理效果
 
-- 📋 **HoloDisplay** - Information panel
-  - Displays explanatory text about the experiment
-  - Shows persistent state information
+- 📋 **HoloDisplay** - 信息面板
+  - 显示关于实验的解释文本
+  - 显示持久化状态信息
 
-**UI Layer (Canvas):**
-- 🎮 **Three Buttons** - Bottom of the screen
-  - "Fire A" (White) → Triggers `PersistentEventRaiser.FireTurretA()`
-  - "Fire B" (White) → Triggers `PersistentEventRaiser.FireTurretB()`
-  - "Load Scene 2" (Green) → Reloads the scene to test persistence
+**UI层（Canvas）：**
+- 🎮 **三个按钮** - 屏幕底部
+  - "Fire A"（白色）→ 触发 `PersistentEventRaiser.FireTurretA()`
+  - "Fire B"（白色）→ 触发 `PersistentEventRaiser.FireTurretB()`
+  - "Load Scene 2"（绿色）→ 重新加载场景以测试持久化
 
-**Game Logic Layer (Demo Scripts):**
-- 📤 **PersistentEventRaiser** - Standard scene-based raiser
-  - Holds references to both events
-  - Destroyed and recreated on scene reload
+**游戏逻辑层（示例脚本）：**
+- 📤 **PersistentEventRaiser** - 标准的基于场景的触发器
+  - 持有对两个事件的引用
+  - 场景重新加载时被销毁并重新创建
   
-- 📥 **PersistentEventReceiver** - **DontDestroyOnLoad** singleton
-  - Survives scene transitions
-  - Holds combat logic for both turrets
-  - Uses **dependency injection** pattern for scene references
+- 📥 **PersistentEventReceiver** - **DontDestroyOnLoad** 单例
+  - 在场景转换中存活
+  - 持有两个炮塔的战斗逻辑
+  - 使用**依赖注入**模式处理场景引用
 
-- 🔧 **Scene Setup** - Dependency injection helper
-  - Runs on scene load
-  - Re-injects new turret references into persistent receiver
-  - Enables persistent receiver to control new scene objects
-
----
-
-## 🎮 How to Interact
-
-### The Persistence Experiment
-
-This demo proves that persistent events maintain their bindings across scene loads while non-persistent events are cleared.
+- 🔧 **Scene Setup** - 依赖注入辅助器
+  - 在场景加载时运行
+  - 将新炮塔引用重新注入持久化接收器
+  - 使持久化接收器能够控制新场景对象
 
 ---
 
-### Step 1: Enter Play Mode
+## 🎮 如何交互
 
-Press the **Play** button in Unity.
+### 持久化实验
 
-**Initial State:**
-- Two turrets (red and blue) idle in the scene
-- HoloDisplay shows explanatory text
-- Console is clear
+此示例证明持久化事件在场景加载中维持其绑定，而非持久化事件会被清除。
 
 ---
 
-### Step 2: Initial Functionality Test
+### 步骤1：进入播放模式
 
-**Click "Fire A":**
-- 🎯 Red turret (left) rotates toward target
-- 🚀 Projectile fires and travels
-- 💥 On impact:
-  - Orange floating text "CRIT! -500"
-  - Large explosion VFX
-  - Camera shake
-  - Target knocked back
-- 📝 Console: `[Raiser] Broadcasting Command: Fire Turret A`
-- 📝 Console: `[Receiver] Received Command A. Engaging...`
+在Unity中按下**播放**按钮。
 
-**Click "Fire B":**
-- 🎯 Blue turret (right) rotates toward target
-- 🚀 Projectile fires
-- 💥 On impact:
-  - White floating text "-200"
-  - Normal explosion VFX
-  - No camera shake (weaker attack)
-  - Target knocked back
-- 📝 Console: `[Raiser] Broadcasting Command: Fire Turret B`
-- 📝 Console: `[Receiver] Received Command B. Engaging...`
-
-**Result:** ✅ Both turrets work perfectly in the initial scene.
+**初始状态：**
+- 场景中两个炮塔（红色和蓝色）处于空闲状态
+- HoloDisplay显示解释文本
+- 控制台清空
 
 ---
 
-### Step 3: The Scene Reload (The Purge)
+### 步骤2：初始功能测试
 
-**Click "Load Scene 2":**
+**点击"Fire A"：**
+- 🎯 红色炮塔（左侧）向目标旋转
+- 🚀 发射抛射物并飞行
+- 💥 撞击时：
+  - 橙色浮动文本"CRIT! -500"
+  - 大型爆炸特效
+  - 相机震动
+  - 目标被击退
+- 📝 控制台：`[Raiser] Broadcasting Command: Fire Turret A`
+- 📝 控制台：`[Receiver] Received Command A. Engaging...`
 
-**What Happens Behind the Scenes:**
-1. 🔄 Unity's `SceneManager.LoadScene()` is called
-2. 💀 **Scene Destruction Phase:**
-   - All scene GameObjects are destroyed:
-     - ❌ Turret_A destroyed
-     - ❌ Turret_B destroyed
-     - ❌ TargetDummy destroyed
-     - ❌ PersistentEventRaiser destroyed
-   - 🗑️ GameEventManager cleans up **non-persistent** event listeners
-     - `OnTurretB` listeners cleared
-     - `OnTurretA` listeners **preserved** (persistent flag)
+**点击"Fire B"：**
+- 🎯 蓝色炮塔（右侧）向目标旋转
+- 🚀 发射抛射物
+- 💥 撞击时：
+  - 白色浮动文本"-200"
+  - 普通爆炸特效
+  - 无相机震动（较弱攻击）
+  - 目标被击退
+- 📝 控制台：`[Raiser] Broadcasting Command: Fire Turret B`
+- 📝 控制台：`[Receiver] Received Command B. Engaging...`
 
-3. 🏗️ **Scene Recreation Phase:**
-   - New Turret_A spawned
-   - New Turret_B spawned
-   - New TargetDummy spawned
-   - New PersistentEventRaiser spawned
-
-4. ✨ **Persistent Objects:**
-   - ✅ `PersistentEventReceiver` **survives** (DontDestroyOnLoad)
-   - ✅ Its method bindings to `OnTurretA` **still active**
-
-5. 🔧 **Dependency Injection:**
-   - `PersistentEventSceneSetup.Start()` runs
-   - Calls `PersistentEventReceiver.UpdateSceneReferences()`
-   - Injects new scene turret references into persistent receiver
-
-**Visual Changes:**
-- Scene briefly goes black during reload
-- Turrets respawn in same positions
-- UI buttons remain functional
+**结果：** ✅ 两个炮塔在初始场景中都完美工作。
 
 ---
 
-### Step 4: Post-Reload Survival Test
+### 步骤3：场景重新加载（清除）
 
-**Click "Fire A" (After Reload):**
+**点击"Load Scene 2"：**
 
-**What Happens:**
-1. 🎯 Red turret rotates and fires (works perfectly!)
-2. 💥 Full combat sequence plays
-3. 📝 Console: `[Receiver] Received Command A. Engaging...`
+**幕后发生的事：**
+1. 🔄 调用Unity的 `SceneManager.LoadScene()`
+2. 💀 **场景销毁阶段：**
+   - 所有场景游戏对象被销毁：
+     - ❌ Turret_A 销毁
+     - ❌ Turret_B 销毁
+     - ❌ TargetDummy 销毁
+     - ❌ PersistentEventRaiser 销毁
+   - 🗑️ GameEventManager清理**非持久化**事件监听器
+     - `OnTurretB` 监听器被清除
+     - `OnTurretA` 监听器**保留**（持久化标志）
 
-**Why It Works:**
+3. 🏗️ **场景重建阶段：**
+   - 新的Turret_A生成
+   - 新的Turret_B生成
+   - 新的TargetDummy生成
+   - 新的PersistentEventRaiser生成
+
+4. ✨ **持久化对象：**
+   - ✅ `PersistentEventReceiver` **存活**（DontDestroyOnLoad）
+   - ✅ 它对 `OnTurretA` 的方法绑定**仍然活跃**
+
+5. 🔧 **依赖注入：**
+   - `PersistentEventSceneSetup.Start()` 运行
+   - 调用 `PersistentEventReceiver.UpdateSceneReferences()`
+   - 将新场景炮塔引用注入持久化接收器
+
+**视觉变化：**
+- 场景在重新加载期间短暂变黑
+- 炮塔在相同位置重生
+- UI按钮保持功能
+
+---
+
+### 步骤4：重新加载后存活测试
+
+**点击"Fire A"（重新加载后）：**
+
+**发生的事情：**
+1. 🎯 红色炮塔旋转并开火（完美工作！）
+2. 💥 完整战斗序列播放
+3. 📝 控制台：`[Receiver] Received Command A. Engaging...`
+
+**为什么有效：**
 ```
-Button → fireAEvent.Raise() 
-       → GameEventManager finds persistent binding
-       → PersistentEventReceiver.OnFireCommandA() executes
-       → Uses newly injected turret reference
-       → Turret fires
+按钮 → fireAEvent.Raise() 
+     → GameEventManager找到持久化绑定
+     → PersistentEventReceiver.OnFireCommandA() 执行
+     → 使用新注入的炮塔引用
+     → 炮塔开火
 ```
 
-**Result:** ✅ **Persistent event survived scene reload!**
+**结果：** ✅ **持久化事件在场景重新加载中存活！**
 
 ---
 
-**Click "Fire B" (After Reload):**
+**点击"Fire B"（重新加载后）：**
 
-**What Happens:**
-1. 🔇 **NOTHING**
-2. 📝 Console: `[Raiser] Broadcasting Command: Fire Turret B`
-3. ❌ No receiver log
-4. Blue turret does not move or fire
+**发生的事情：**
+1. 🔇 **无反应**
+2. 📝 控制台：`[Raiser] Broadcasting Command: Fire Turret B`
+3. ❌ 无接收器日志
+4. 蓝色炮塔不移动也不开火
 
-**Why It Failed:**
+**为什么失败：**
 ```
-🔘 Input: Button Click
+🔘 输入：按钮点击
 │
-🚀 Event: fireBEvent.Raise()
+🚀 事件：fireBEvent.Raise()
 │
-🔍 Registry: [ GameEventManager Lookup ]
+🔍 注册表：[ GameEventManager 查找 ]
 │   
-├─❓ Result: NONE Found
-│  └─ 🗑️ Reason: Bindings cleared during Scene Reload
+├─❓ 结果：未找到
+│  └─ 🗑️ 原因：绑定在场景重新加载时被清除
 │
-🌑 Outcome: Signal Dissipated
-│  └─ 👻 Result: "Lost in the void" (No receivers called)
+🌑 结果：信号消散
+│  └─ 👻 结果："迷失在虚空中"（未调用接收器）
 │
-📊 Status: 0 Actions Executed | ✅ System Safe (No NullRef)
+📊 状态：执行了0个动作 | ✅ 系统安全（无空引用）
 ```
 
-**Result:** ❌ **Non-persistent event binding was destroyed!**
+**结果：** ❌ **非持久化事件绑定被销毁！**
 
-:::danger 🔴 The Dead Event
+:::danger 🔴 死亡事件
 
-`OnTurretB` listener was cleared when the scene unloaded. The event asset still exists, but its connection to `PersistentEventReceiver.OnFireCommandB()` is **permanently broken** (unless you manually re-subscribe via code).
+`OnTurretB` 监听器在场景卸载时被清除。事件资产仍然存在，但它与 `PersistentEventReceiver.OnFireCommandB()` 的连接**永久断开**（除非您通过代码手动重新订阅）。
 
 :::
 
 ---
 
-## 🏗️ Scene Architecture
+## 🏗️ 场景架构
 
-### The Scene Transition Problem
+### 场景转换问题
 
-In standard Unity event systems:
+在标准Unity事件系统中：
 ```
-🖼️ Scene A: Loaded
-   └─ 🔗 Listeners: Subscribed (Local Context)
+🖼️ 场景A：已加载
+   └─ 🔗 监听器：已订阅（本地上下文）
 │
-🚚 [ Loading Scene B... ]
+🚚 [ 加载场景B... ]
 │
-🧹 Cleanup: Memory Purged
-   └─ ❌ Result: ALL listeners cleared from the registry
+🧹 清理：内存清除
+   └─ ❌ 结果：所有监听器从注册表中清除
 │
-🖼️ Scene B: Active
-   └─ 🌑 Status: Event is "Empty" (No receivers)
-```
-
-This breaks global systems that need to persist across scenes.
-
-### The Persistent Event Solution
-```
-🖼️ Scene A: Loaded
-   └─ 🛡️ Listeners: Subscribed (Global Context)
-│
-🚚 [ Loading Scene B... ]
-│
-💎 Preservation: Handover Successful
-   └─ ✅ Result: Bindings stored in the Global Persistent Registry
-│
-🖼️ Scene B: Active
-   └─ 🔥 Status: Event is "Hot" (Listeners remain ready to fire)
+🖼️ 场景B：激活
+   └─ 🌑 状态：事件"空"（无接收器）
 ```
 
-Persistent events behave like `DontDestroyOnLoad` for event logic.
+这会破坏需要跨场景持久化的全局系统。
+
+### 持久化事件解决方案
+```
+🖼️ 场景A：已加载
+   └─ 🛡️ 监听器：已订阅（全局上下文）
+│
+🚚 [ 加载场景B... ]
+│
+💎 保留：交接成功
+   └─ ✅ 结果：绑定存储在全局持久化注册表中
+│
+🖼️ 场景B：激活
+   └─ 🔥 状态：事件"热"（监听器保持就绪）
+```
+
+持久化事件的行为类似于事件逻辑的 `DontDestroyOnLoad`。
 
 ---
 
-### Architectural Pattern: Dependency Injection
+### 架构模式：依赖注入
 
-This demo uses a sophisticated pattern to handle scene references:
+此示例使用复杂的模式来处理场景引用：
 
-**The Challenge:**
-- `PersistentEventReceiver` survives (DontDestroyOnLoad)
-- But turrets are destroyed and recreated each scene load
-- Receiver needs references to new turret instances
+**挑战：**
+- `PersistentEventReceiver` 存活（DontDestroyOnLoad）
+- 但炮塔在每次场景加载时被销毁并重新创建
+- 接收器需要对新炮塔实例的引用
 
-**The Solution:**
-1. **Persistent Receiver** holds combat logic
-2. **Scene Setup Script** runs on each scene load
-3. Setup injects new scene references into persistent receiver
-4. Receiver can now control new turrets
+**解决方案：**
+1. **持久化接收器** 持有战斗逻辑
+2. **场景设置脚本** 在每次场景加载时运行
+3. 设置将新场景引用注入持久化接收器
+4. 接收器现在可以控制新炮塔
 ```
-🛡️ Persistent Layer (The "Survivor")
-┃  └─ 💎 PersistentEventReceiver [Survives Scene Load]
+🛡️ 持久化层（"存活者"）
+┃  └─ 💎 PersistentEventReceiver [场景加载中存活]
 ┃        ▲
-┃        ║ 💉 Dependency Injection (References Re-bound)
+┃        ║ 💉 依赖注入（引用重新绑定）
 ┃        ╚══════════════════════════════════════╗
 ┃                                               ║
-🖼️ Scene Layer (The "Context")                  ║
-┃  └─ ⚙️ PersistentEventSceneSetup [Recreated]  ║
+🖼️ 场景层（"上下文"）                            ║
+┃  └─ ⚙️ PersistentEventSceneSetup [重新创建]   ║
 ┃        │                                      ║
-┃        └── 🔍 Finds & Passes References ➔ ════╝
+┃        └── 🔍 查找并传递引用 ➔ ═══════════════╝
 ┃              │
-┃              ├── 🤖 New Turret_A [Scene Instance]
-┃              └── 🤖 New Turret_B [Scene Instance]
+┃              ├── 🤖 新的Turret_A [场景实例]
+┃              └── 🤖 新的Turret_B [场景实例]
 ```
 
 ---
 
-### Event Definitions
+### 事件定义
 
-![Game Event Editor](/img/game-event-system/examples/09-persistent-event/demo-09-editor.png)
+![游戏事件编辑器](/img/game-event-system/examples/09-persistent-event/demo-09-editor.png)
 
-| Event Name  | Type               | Persistent Flag |
-| ----------- | ------------------ | --------------- |
-| `OnTurretA` | `GameEvent` (void) | ✅ Checked       |
-| `OnTurretB` | `GameEvent` (void) | ❌ Unchecked     |
+| 事件名称    | 类型               | 持久化标志 |
+| ----------- | ------------------ | ---------- |
+| `OnTurretA` | `GameEvent`（void） | ✅ 已选中  |
+| `OnTurretB` | `GameEvent`（void） | ❌ 未选中  |
 
-**Identical Events, Different Fate:**
-Both are void events with the same configuration—except for one checkbox that determines their survival.
-
----
-
-### Behavior Configuration
-
-#### Persistent Event (OnTurretA)
-
-Click the **(void)** icon for `OnTurretA` to open the Behavior Window:
-
-![Persistent Behavior](/img/game-event-system/examples/09-persistent-event/demo-09-behavior-persistent.png)
-
-**Critical Setting:**
-- 💾 **Persistent Event:** ✅ **CHECKED**
-
-**Warning Message:**
-> "Event will behave like DontDestroyOnLoad."
-
-**What This Means:**
-- Listener bindings stored in global persistent manager
-- NOT cleared during scene transitions
-- Survives until explicitly removed or game exit
-- Essential for cross-scene systems
+**相同事件，不同命运：**
+两者都是具有相同配置的void事件——除了一个决定其存活的复选框。
 
 ---
 
-#### Non-Persistent Event (OnTurretB)
+### 行为配置
 
-Same configuration except:
-- 💾 **Persistent Event:** ❌ **UNCHECKED**
+#### 持久化事件（OnTurretA）
 
-**Result:**
-- Standard Unity lifecycle
-- Listeners cleared on scene unload
-- Must re-subscribe if needed in new scene
+点击 `OnTurretA` 的**(void)**图标打开行为窗口：
 
----
+![持久化行为](/img/game-event-system/examples/09-persistent-event/demo-09-behavior-persistent.png)
 
-### Sender Setup (PersistentEventRaiser)
+**关键设置：**
+- 💾 **持久化事件：** ✅ **已选中**
 
-Select the **PersistentEventRaiser** GameObject:
+**警告消息：**
+> "事件将像DontDestroyOnLoad一样行为。"
 
-![PersistentEventRaiser Inspector](/img/game-event-system/examples/09-persistent-event/demo-09-inspector.png)
-
-**Game Events:**
-- `Fire A Event`: `OnTurretA` (Persistent)
-  - Tooltip: "Checked 'Persistent Event' in Editor"
-- `Fire B Event`: `OnTurretB` (Non-Persistent)
-  - Tooltip: "Unchecked 'Persistent Event' in Editor"
-
-**Lifecycle:**
-- ❌ Destroyed on scene reload
-- ✅ Recreated with new scene
-- Holds new event references (assets are persistent ScriptableObjects)
+**这意味着什么：**
+- 监听器绑定存储在全局持久化管理器中
+- 场景转换期间不会被清除
+- 存活直到显式移除或游戏退出
+- 对于跨场景系统至关重要
 
 ---
 
-### Receiver Setup (PersistentEventReceiver)
+#### 非持久化事件（OnTurretB）
 
-Select the **PersistentEventReceiver** GameObject:
+相同配置，除了：
+- 💾 **持久化事件：** ❌ **未选中**
 
-![PersistentEventReceiver Inspector](/img/game-event-system/examples/09-persistent-event/demo-09-receiver.png)
-
-**Combat Resources:**
-- `Projectile Prefab`: Projectile (Turret Projectile)
-- `Fire VFX`: MuzzleFlashVFX (Particle System)
-
-**Feedback:**
-- `Hit Normal VFX`: HitVFX_Normal (Particle System)
-- `Hit Crit VFX`: HitVFX_Crit (Particle System)
-- `Floating Text Prefab`: DamageFloatingText (Text Mesh Pro)
-- `Hit Clip`: ExplosionSFX (Audio Clip)
-
-**Dynamic References (Hidden):**
-These are injected at runtime by Scene Setup:
-- `turretA`, `headA` (Turret A references)
-- `turretB`, `headB` (Turret B references)
-- `targetDummy`, `targetRigidbody` (Target references)
+**结果：**
+- 标准Unity生命周期
+- 场景卸载时监听器被清除
+- 如果在新场景中需要，必须重新订阅
 
 ---
 
-### Scene Setup Configuration
+### 发送器设置（PersistentEventRaiser）
 
-Select the **Scene Setup** GameObject:
+选择**PersistentEventRaiser**游戏对象：
 
-![Scene Setup Inspector](/img/game-event-system/examples/09-persistent-event/demo-09-scenesetup.png)
+![PersistentEventRaiser检查器](/img/game-event-system/examples/09-persistent-event/demo-09-inspector.png)
 
-**Current Scene Objects:**
-- `Turret A`: Turret_A (GameObject)
-- `Head A`: Head (Transform) - rotation pivot
-- `Turret B`: Turret_B (GameObject)
-- `Head B`: Head (Transform)
-- `Target Dummy`: TargetDummy (Transform)
-- `Target Rigidbody`: TargetDummy (Rigidbody)
+**游戏事件：**
+- `Fire A Event`：`OnTurretA`（持久化）
+  - 提示："在编辑器中选中了'持久化事件'"
+- `Fire B Event`：`OnTurretB`（非持久化）
+  - 提示："在编辑器中未选中'持久化事件'"
 
-**Purpose:**
-On `Start()`, this script finds the persistent receiver and injects these references, enabling it to control new scene objects.
+**生命周期：**
+- ❌ 场景重新加载时销毁
+- ✅ 随新场景重新创建
+- 持有新事件引用（资产是持久化的ScriptableObjects）
 
 ---
 
-## 💻 Code Breakdown
+### 接收器设置（PersistentEventReceiver）
 
-### 📤 PersistentEventRaiser.cs (Sender)
+选择**PersistentEventReceiver**游戏对象：
+
+![PersistentEventReceiver检查器](/img/game-event-system/examples/09-persistent-event/demo-09-receiver.png)
+
+**战斗资源：**
+- `Projectile Prefab`：Projectile（炮塔抛射物）
+- `Fire VFX`：MuzzleFlashVFX（粒子系统）
+
+**反馈：**
+- `Hit Normal VFX`：HitVFX_Normal（粒子系统）
+- `Hit Crit VFX`：HitVFX_Crit（粒子系统）
+- `Floating Text Prefab`：DamageFloatingText（Text Mesh Pro）
+- `Hit Clip`：ExplosionSFX（音频剪辑）
+
+**动态引用（隐藏）：**
+这些在运行时由场景设置注入：
+- `turretA`、`headA`（炮塔A引用）
+- `turretB`、`headB`（炮塔B引用）
+- `targetDummy`、`targetRigidbody`（目标引用）
+
+---
+
+### 场景设置配置
+
+选择**Scene Setup**游戏对象：
+
+![场景设置检查器](/img/game-event-system/examples/09-persistent-event/demo-09-scenesetup.png)
+
+**当前场景对象：**
+- `Turret A`：Turret_A（游戏对象）
+- `Head A`：Head（Transform）- 旋转枢轴
+- `Turret B`：Turret_B（游戏对象）
+- `Head B`：Head（Transform）
+- `Target Dummy`：TargetDummy（Transform）
+- `Target Rigidbody`：TargetDummy（Rigidbody）
+
+**目的：**
+在 `Start()` 时，此脚本查找持久化接收器并注入这些引用，使其能够控制新场景对象。
+
+---
+
+## 💻 代码详解
+
+### 📤 PersistentEventRaiser.cs（发送器）
 ```csharp
 using UnityEngine;
 using TinyGiants.GameEventSystem.Runtime;
 
 public class PersistentEventRaiser : MonoBehaviour
 {
-    [Header("Game Events")]
-    [Tooltip("Configuration: Checked 'Persistent Event' in Editor.")]
-    [GameEventDropdown] public GameEvent fireAEvent;
-    
-    [Tooltip("Configuration: Unchecked 'Persistent Event' in Editor.")]
-    [GameEventDropdown] public GameEvent fireBEvent;
+	[Header("Game Events")]
+	[Tooltip("配置：在编辑器中选中了'持久化事件'。")]
+	[GameEventDropdown] public GameEvent fireAEvent;
+	
+	[Tooltip("配置：在编辑器中未选中'持久化事件'。")]
+	[GameEventDropdown] public GameEvent fireBEvent;
 
-    /// <summary>
-    /// UI Button: Commands Turret A to fire.
-    /// 
-    /// Since 'fireAEvent' is Persistent, this binding survives scene loads.
-    /// Even after reloading, the persistent receiver will still respond.
-    /// </summary>
-    public void FireTurretA()
-    {
-        if (fireAEvent == null) return;
-        
-        fireAEvent.Raise();
-        Debug.Log("<color=cyan>[Raiser] Broadcasting Command: Fire Turret A</color>");
-    }
+	/// <summary>
+	/// UI按钮：命令炮塔A开火。
+	/// 
+	/// 由于'fireAEvent'是持久化的，此绑定在场景加载中存活。
+	/// 即使重新加载后，持久化接收器仍将响应。
+	/// </summary>
+	public void FireTurretA()
+	{
+		if (fireAEvent == null) return;
+		
+		fireAEvent.Raise();
+		Debug.Log("<color=cyan>[Raiser] Broadcasting Command: Fire Turret A</color>");
+	}
 
-    /// <summary>
-    /// UI Button: Commands Turret B to fire.
-    /// 
-    /// Since 'fireBEvent' is NOT Persistent, this binding BREAKS after scene load.
-    /// The event is raised, but no one is listening anymore.
-    /// </summary>
-    public void FireTurretB()
-    {
-        if (fireBEvent == null) return;
-        
-        fireBEvent.Raise();
-        Debug.Log("<color=orange>[Raiser] Broadcasting Command: Fire Turret B</color>");
-    }
+	/// <summary>
+	/// UI按钮：命令炮塔B开火。
+	/// 
+	/// 由于'fireBEvent'不是持久化的，此绑定在场景加载后中断。
+	/// 事件被触发，但没有人再监听。
+	/// </summary>
+	public void FireTurretB()
+	{
+		if (fireBEvent == null) return;
+		
+		fireBEvent.Raise();
+		Debug.Log("<color=orange>[Raiser] Broadcasting Command: Fire Turret B</color>");
+	}
 }
 ```
 
-**Key Points:**
-- 🎯 **Standard Component** - Not persistent, recreated each scene
-- 📡 **Event References** - ScriptableObject assets (persistent)
-- 🔇 **No Lifecycle Awareness** - Doesn't know if listeners survived
+**要点：**
+- 🎯 **标准组件** - 非持久化，每个场景重新创建
+- 📡 **事件引用** - ScriptableObject资产（持久化）
+- 🔇 **无生命周期意识** - 不知道监听器是否存活
 
 ---
 
-### 📥 PersistentEventReceiver.cs (Listener - Singleton)
+### 📥 PersistentEventReceiver.cs（监听器 - 单例）
 ```csharp
 using UnityEngine;
 using System.Collections;
 
 public class PersistentEventReceiver : MonoBehaviour
 {
-    [Header("Combat Resources")]
-    [SerializeField] private TurretProjectile projectilePrefab;
-    [SerializeField] private ParticleSystem fireVFX;
-    // ... other resources ...
+	[Header("Combat Resources")]
+	[SerializeField] private TurretProjectile projectilePrefab;
+	[SerializeField] private ParticleSystem fireVFX;
+	// ... 其他资源 ...
 
-    // Runtime-injected scene references
-    [HideInInspector] public GameObject turretA;
-    [HideInInspector] public Transform headA;
-    [HideInInspector] public GameObject turretB;
-    [HideInInspector] public Transform headB;
-    [HideInInspector] public Transform targetDummy;
-    [HideInInspector] public Rigidbody targetRigidbody;
+	// 运行时注入的场景引用
+	[HideInInspector] public GameObject turretA;
+	[HideInInspector] public Transform headA;
+	[HideInInspector] public GameObject turretB;
+	[HideInInspector] public Transform headB;
+	[HideInInspector] public Transform targetDummy;
+	[HideInInspector] public Rigidbody targetRigidbody;
 
-    private bool _isFiringA;
-    private bool _isFiringB;
+	private bool _isFiringA;
+	private bool _isFiringB;
 
-    // Singleton pattern for persistence
-    private static PersistentEventReceiver _instance;
-    public static PersistentEventReceiver Instance => _instance;
+	// 持久化的单例模式
+	private static PersistentEventReceiver _instance;
+	public static PersistentEventReceiver Instance => _instance;
 
-    private void Awake()
-    {
-        // CRITICAL: DontDestroyOnLoad makes this survive scene transitions
-        if (_instance == null)
-        {
-            _instance = this;
-            DontDestroyOnLoad(gameObject);
-            Debug.Log("[PersistentReceiver] Initialized with DontDestroyOnLoad.");
-        }
-        else if (_instance != this)
-        {
-            // Prevent duplicates if scene reloaded
-            Destroy(gameObject);
-        }
-    }
+	private void Awake()
+	{
+		// 关键：DontDestroyOnLoad使其在场景转换中存活
+		if (_instance == null)
+		{
+			_instance = this;
+			DontDestroyOnLoad(gameObject);
+			Debug.Log("[PersistentReceiver] Initialized with DontDestroyOnLoad.");
+		}
+		else if (_instance != this)
+		{
+			// 如果场景重新加载，防止重复
+			Destroy(gameObject);
+		}
+	}
 
-    private void Update()
-    {
-        // Control turrets using injected references
-        HandleTurretRotation(turretA, headA, ref _isFiringA);
-        HandleTurretRotation(turretB, headB, ref _isFiringB);
-    }
+	private void Update()
+	{
+		// 使用注入的引用控制炮塔
+		HandleTurretRotation(turretA, headA, ref _isFiringA);
+		HandleTurretRotation(turretB, headB, ref _isFiringB);
+	}
 
-    /// <summary>
-    /// [Event Callback - Persistent Binding]
-    /// Bound to 'OnTurretA' with Persistent Event flag checked.
-    /// 
-    /// This method binding SURVIVES scene reload.
-    /// After reload, this will still be called when fireAEvent.Raise() executes.
-    /// </summary>
-    public void OnFireCommandA()
-    {
-        Debug.Log("<color=cyan>[Receiver] Received Command A. Engaging...</color>");
-        _isFiringA = true;
-    }
+	/// <summary>
+	/// [事件回调 - 持久化绑定]
+	/// 绑定到选中持久化事件标志的'OnTurretA'。
+	/// 
+	/// 此方法绑定在场景重新加载中存活。
+	/// 重新加载后，当fireAEvent.Raise()执行时仍会调用此方法。
+	/// </summary>
+	public void OnFireCommandA()
+	{
+		Debug.Log("<color=cyan>[Receiver] Received Command A. Engaging...</color>");
+		_isFiringA = true;
+	}
 
-    /// <summary>
-    /// [Event Callback - Non-Persistent Binding]
-    /// Bound to 'OnTurretB' with Persistent Event flag UNCHECKED.
-    /// 
-    /// This method binding is CLEARED on scene reload.
-    /// After reload, this will NEVER be called again (binding is lost).
-    /// </summary>
-    public void OnFireCommandB()
-    {
-        Debug.Log("<color=orange>[Receiver] Received Command B. Engaging...</color>");
-        _isFiringB = true;
-    }
-    
-    /// <summary>
-    /// Called by PersistentEventSceneSetup on each scene load.
-    /// Injects new scene object references into persistent receiver.
-    /// </summary>
-    public void UpdateSceneReferences(
-        GameObject tA, Transform hA, 
-        GameObject tB, Transform hB, 
-        Transform target, Rigidbody rb)
-    {
-        this.turretA = tA;
-        this.headA = hA;
-        this.turretB = tB;
-        this.headB = hB;
-        this.targetDummy = target;
-        this.targetRigidbody = rb;
-        
-        Debug.Log("[PersistentReceiver] Scene references updated.");
-    }
+	/// <summary>
+	/// [事件回调 - 非持久化绑定]
+	/// 绑定到未选中持久化事件标志的'OnTurretB'。
+	/// 
+	/// 此方法绑定在场景重新加载时被清除。
+	/// 重新加载后，此方法将永远不会再被调用（绑定丢失）。
+	/// </summary>
+	public void OnFireCommandB()
+	{
+		Debug.Log("<color=orange>[Receiver] Received Command B. Engaging...</color>");
+		_isFiringB = true;
+	}
+	
+	/// <summary>
+	/// 在每次场景加载时由PersistentEventSceneSetup调用。
+	/// 将新场景对象引用注入持久化接收器。
+	/// </summary>
+	public void UpdateSceneReferences(
+		GameObject tA, Transform hA, 
+		GameObject tB, Transform hB, 
+		Transform target, Rigidbody rb)
+	{
+		this.turretA = tA;
+		this.headA = hA;
+		this.turretB = tB;
+		this.headB = hB;
+		this.targetDummy = target;
+		this.targetRigidbody = rb;
+		
+		Debug.Log("[PersistentReceiver] Scene references updated.");
+	}
 
-    private void HandleTurretRotation(GameObject turret, Transform head, ref bool isFiring)
-    {
-        if (head == null || targetDummy == null) return;
+	private void HandleTurretRotation(GameObject turret, Transform head, ref bool isFiring)
+	{
+		if (head == null || targetDummy == null) return;
 
-        // Idle sway or active targeting
-        Quaternion targetRot;
-        float speed = isFiring ? 10f : 2f;
+		// 空闲摆动或主动瞄准
+		Quaternion targetRot;
+		float speed = isFiring ? 10f : 2f;
 
-        if (isFiring)
-        {
-            // Aim at target
-            Vector3 dir = targetDummy.position - head.position;
-            dir.y = 0;
-            if (dir != Vector3.zero) 
-                targetRot = Quaternion.LookRotation(dir);
-            else 
-                targetRot = head.rotation;
-        }
-        else
-        {
-            // Idle patrol sweep
-            float angle = Mathf.Sin(Time.time * 0.5f) * 30f;
-            targetRot = Quaternion.Euler(0, 180 + angle, 0);
-        }
+		if (isFiring)
+		{
+			// 瞄准目标
+			Vector3 dir = targetDummy.position - head.position;
+			dir.y = 0;
+			if (dir != Vector3.zero) 
+				targetRot = Quaternion.LookRotation(dir);
+			else 
+				targetRot = head.rotation;
+		}
+		else
+		{
+			// 空闲巡逻扫描
+			float angle = Mathf.Sin(Time.time * 0.5f) * 30f;
+			targetRot = Quaternion.Euler(0, 180 + angle, 0);
+		}
 
-        head.rotation = Quaternion.Slerp(head.rotation, targetRot, speed * Time.deltaTime);
+		head.rotation = Quaternion.Slerp(head.rotation, targetRot, speed * Time.deltaTime);
 
-        // Fire when aimed
-        if (isFiring && Quaternion.Angle(head.rotation, targetRot) < 5f)
-        {
-            PerformFireSequence(turret);
-            isFiring = false;
-        }
-    }
+		// 瞄准时开火
+		if (isFiring && Quaternion.Angle(head.rotation, targetRot) < 5f)
+		{
+			PerformFireSequence(turret);
+			isFiring = false;
+		}
+	}
 
-    private void PerformFireSequence(GameObject turret)
-    {
-        // Spawn muzzle flash, launch projectile, etc.
-        // ... (combat logic) ...
-    }
+	private void PerformFireSequence(GameObject turret)
+	{
+		// 生成枪口闪光、发射抛射物等
+		// ...（战斗逻辑）...
+	}
 }
 ```
 
-**Key Points:**
-- 🎯 **DontDestroyOnLoad** - Survives scene transitions
-- 🔀 **Singleton Pattern** - Only one instance exists globally
-- 📍 **Dependency Injection** - Scene references injected at runtime
-- 🎭 **Dual Binding** - Persistent (A) and non-persistent (B) methods
+**要点：**
+- 🎯 **DontDestroyOnLoad** - 在场景转换中存活
+- 🔀 **单例模式** - 全局仅存在一个实例
+- 📍 **依赖注入** - 场景引用在运行时注入
+- 🎭 **双重绑定** - 持久化（A）和非持久化（B）方法
 
 ---
 
-### 🔧 PersistentEventSceneSetup.cs (Dependency Injector)
+### 🔧 PersistentEventSceneSetup.cs（依赖注入器）
 ```csharp
 using UnityEngine;
 
 public class PersistentEventSceneSetup : MonoBehaviour
 {
-    [Header("Current Scene Objects")]
-    public GameObject turretA;
-    public Transform headA;
-    public GameObject turretB;
-    public Transform headB;
-    public Transform targetDummy;
-    public Rigidbody targetRigidbody;
+	[Header("Current Scene Objects")]
+	public GameObject turretA;
+	public Transform headA;
+	public GameObject turretB;
+	public Transform headB;
+	public Transform targetDummy;
+	public Rigidbody targetRigidbody;
 
-    private void Start()
-    {
-        // Find the persistent receiver (lives in DontDestroyOnLoad scene)
-        var receiver = PersistentEventReceiver.Instance;
-        
-        if (receiver != null)
-        {
-            // Inject this scene's object references
-            receiver.UpdateSceneReferences(
-                turretA, headA, 
-                turretB, headB, 
-                targetDummy, targetRigidbody
-            );
-            
-            Debug.Log("[SceneSetup] Successfully injected scene references " +
-                     "into persistent receiver.");
-        }
-        else
-        {
-            Debug.LogWarning("[SceneSetup] PersistentEventReceiver not found! " +
-                            "Is the demo started correctly?");
-        }
-    }
+	private void Start()
+	{
+		// 查找持久化接收器（存在于DontDestroyOnLoad场景中）
+		var receiver = PersistentEventReceiver.Instance;
+		
+		if (receiver != null)
+		{
+			// 注入此场景的对象引用
+			receiver.UpdateSceneReferences(
+				turretA, headA, 
+				turretB, headB, 
+				targetDummy, targetRigidbody
+			);
+			
+			Debug.Log("[SceneSetup] Successfully injected scene references " +
+					 "into persistent receiver.");
+		}
+		else
+		{
+			Debug.LogWarning("[SceneSetup] PersistentEventReceiver not found! " +
+							"Is the demo started correctly?");
+		}
+	}
 }
 ```
 
-**Key Points:**
-- 🔧 **Runs on Scene Load** - `Start()` executes when scene initializes
-- 🔍 **Finds Singleton** - Accesses persistent receiver via static instance
-- 💉 **Injects References** - Passes new scene objects to persistent logic
-- 🏗️ **Enables Cross-Scene Control** - Bridges persistent logic with transient objects
+**要点：**
+- 🔧 **场景加载时运行** - 场景初始化时执行 `Start()`
+- 🔍 **查找单例** - 通过静态实例访问持久化接收器
+- 💉 **注入引用** - 将新场景对象传递给持久化逻辑
+- 🏗️ **启用跨场景控制** - 连接持久化逻辑与临时对象
 
 ---
 
-## 🔑 Key Takeaways
+## 🔑 核心要点
 
-| Concept                    | Implementation                                               |
-| -------------------------- | ------------------------------------------------------------ |
-| 💾 **Persistent Event**     | Checkbox in Behavior Window preserves bindings across scenes |
-| 🗑️ **Cleanup Behavior**     | Non-persistent events cleared on scene unload                |
-| 🔄 **DontDestroyOnLoad**    | Receiver must survive for persistent events to work          |
-| 💉 **Dependency Injection** | Pattern for connecting persistent logic with scene objects   |
-| 🎯 **Single Checkbox**      | One setting determines cross-scene survival                  |
+| 概念                  | 实现                                     |
+| --------------------- | ---------------------------------------- |
+| 💾 **持久化事件**      | 行为窗口中的复选框在场景间保留绑定       |
+| 🗑️ **清理行为**       | 非持久化事件在场景卸载时被清除           |
+| 🔄 **DontDestroyOnLoad** | 接收器必须存活才能使持久化事件工作    |
+| 💉 **依赖注入**        | 连接持久化逻辑与场景对象的模式           |
+| 🎯 **单个复选框**      | 一个设置决定跨场景存活                   |
 
-:::note 🎓 Design Insight
+:::note 🎓 设计洞察
 
-Persistent events are perfect for:
+持久化事件非常适合：
 
-- **Music systems** - Background music controller that spans multiple levels
-- **Inventory managers** - Player inventory persists across scene transitions
-- **Achievement trackers** - Global achievement listeners that monitor all scenes
-- **Analytics systems** - Event logging that never gets interrupted
-- **UI systems** - Persistent HUD controllers for health, score, etc.
+- **音乐系统** - 跨越多个关卡的背景音乐控制器
+- **库存管理器** - 玩家库存在场景转换中持久化
+- **成就跟踪器** - 监控所有场景的全局成就监听器
+- **分析系统** - 永不中断的事件日志
+- **UI系统** - 用于生命值、分数等的持久化HUD控制器
 
-**Architecture Pattern:**
+**架构模式：**
 ```
-[Persistent Layer - DontDestroyOnLoad]
-- Global managers
-- Event receivers
-- Cross-scene logic
+[持久化层 - DontDestroyOnLoad]
+- 全局管理器
+- 事件接收器
+- 跨场景逻辑
 
-[Scene Layer - Recreated]
-- Level-specific objects
-- Scene setup scripts (dependency injection)
-- UI buttons and raisers
+[场景层 - 重新创建]
+- 关卡特定对象
+- 场景设置脚本（依赖注入）
+- UI按钮和触发器
 ```
 
-This separation enables clean cross-scene architecture without manual re-subscription.
+这种分离实现了干净的跨场景架构，无需手动重新订阅。
 
 :::
 
-:::warning ⚠️ Important Considerations
+:::warning ⚠️ 重要注意事项
 
-1. **Receiver Must Be Persistent:** Checking "Persistent Event" only preserves the binding. The receiver GameObject must use `DontDestroyOnLoad` to survive.
-2. **Scene References Break:** Even though bindings persist, references to destroyed scene objects become null. Use dependency injection to update them.
-3. **Memory Management:** Persistent events stay active until game exit. Be mindful of accumulating bindings in long-running games.
-4. **Initial Scene Requirement:** The persistent receiver must be present in the first loaded scene. If Scene B loads first without the receiver, persistent events won't work.
+1. **接收器必须是持久化的：** 选中"持久化事件"只保留绑定。接收器游戏对象必须使用 `DontDestroyOnLoad` 来存活。
+2. **场景引用中断：** 即使绑定持久化，对已销毁场景对象的引用也会变为null。使用依赖注入来更新它们。
+3. **内存管理：** 持久化事件在游戏退出前保持活跃。在长时间运行的游戏中要注意累积的绑定。
+4. **初始场景要求：** 持久化接收器必须存在于首个加载的场景中。如果没有接收器的场景B首先加载，持久化事件将无法工作。
 
 :::
 
 ---
 
-## 🎯 What's Next?
+## 🎯 下一步
 
-You've mastered persistent events for cross-scene systems. Now let's explore **trigger events** for collision-based interactions.
+您已经掌握了用于跨场景系统的持久化事件。现在让我们探索用于基于碰撞交互的**触发器事件**。
 
-**Next Chapter**: Learn about collision triggers in **[10 Trigger Event](./10-trigger-event.md)**
+**下一章**：在**[10 触发器事件](./10-trigger-event.md)**中学习碰撞触发器
 
 ---
 
-## 📚 Related Documentation
+## 📚 相关文档
 
-- **[Game Event Behavior](../visual-workflow/game-event-behavior.md)** - Complete guide to persistence configuration
-- **[Best Practices](../scripting/best-practices.md)** - Patterns for cross-scene event architecture
+- **[游戏事件行为](../visual-workflow/game-event-behavior.md)** - 持久化配置完整指南
+- **[最佳实践](../scripting/best-practices.md)** - 跨场景事件架构的模式

@@ -1,398 +1,398 @@
 ﻿---
-sidebar_label: '11 Chain Event'
+sidebar_label: '11 链式事件'
 sidebar_position: 12
 ---
 
 import VideoGif from '@site/src/components/Video/VideoGif';
 
-# 11 Chain Event: Sequential Execution Pipeline
+# 11 链式事件：顺序执行管道
 
 <!-- <VideoGif src="/video/game-event-system/11-chain-event.mp4" /> -->
 
-## 📋 Overview
+## 📋 概述
 
-While Trigger Events execute in **parallel** with conditional filtering, Chain Events execute in **strict sequential order**—one step at a time, like a production pipeline. If any node in the chain fails its condition, delays, or encounters an error, the entire sequence pauses or terminates. This is perfect for cutscenes, weapon launch sequences, tutorial steps, or any workflow where order matters.
+虽然触发器事件以**并行**方式通过条件过滤执行，但链式事件以**严格顺序**执行——一次一步，就像生产流水线。如果链中的任何节点条件失败、延迟或遇到错误，整个序列会暂停或终止。这非常适合过场动画、武器发射序列、教程步骤或任何顺序重要的工作流。
 
-:::tip 💡 What You'll Learn
-- The difference between Chain (sequential) and Trigger (parallel) execution
-- How to use condition nodes as validation gates
-- Delay nodes for timed pauses in sequences
-- Wait-for-completion for asynchronous operations
-- Early termination patterns when conditions fail
+:::tip 💡 您将学到
+- 链式（顺序）和触发器（并行）执行的区别
+- 如何使用条件节点作为验证门
+- 序列中定时暂停的延迟节点
+- 异步操作的等待完成
+- 条件失败时的早期终止模式
 
 :::
 
 ---
 
-## 🎬 Demo Scene
+## 🎬 示例场景
 ```
 Assets/TinyGiants/GameEventSystem/Demo/11_ChainEvent/11_ChainEvent.unity
 ```
 
-### Scene Composition
+### 场景构成
 
-**Visual Elements:**
-- 🔴 **Turret_A (Left)** - Red launcher
-- 🔵 **Turret_B (Right)** - Blue launcher
-- 🎯 **TargetDummy** - Center capsule target
-- 📺 **HoloDisplay** - Status display panel
-  - Shows "SAFELOCK READY" when safety is off
-  - Shows "SAFELOCK ACTIVED" when safety is on
+**视觉元素：**
+- 🔴 **Turret_A（左侧）** - 红色发射器
+- 🔵 **Turret_B（右侧）** - 蓝色发射器
+- 🎯 **TargetDummy** - 中央胶囊目标
+- 📺 **HoloDisplay** - 状态显示面板
+  - 安全锁关闭时显示"SAFELOCK READY"
+  - 安全锁开启时显示"SAFELOCK ACTIVED"
 
-**UI Layer (Canvas):**
-- 🎮 **Three Buttons** - Bottom of the screen
-  - "Launch A" → Triggers `ChainEventRaiser.RequestLaunchA()`
-  - "Launch B" → Triggers `ChainEventRaiser.RequestLaunchB()`
-  - "Toggle SafeLock" (Orange) → Triggers `ChainEventReceiver.ToggleSafetyLock()`
+**UI层（Canvas）：**
+- 🎮 **三个按钮** - 屏幕底部
+  - "Launch A" → 触发 `ChainEventRaiser.RequestLaunchA()`
+  - "Launch B" → 触发 `ChainEventRaiser.RequestLaunchB()`
+  - "Toggle SafeLock"（橙色）→ 触发 `ChainEventReceiver.ToggleSafetyLock()`
 
-**Game Logic Layer:**
-- 📤 **ChainEventRaiser** - Sequence initiator
-  - Only references **ONE** entry point: `0_StartSequence`
-  - No knowledge of downstream pipeline steps
+**游戏逻辑层：**
+- 📤 **ChainEventRaiser** - 序列启动器
+  - 仅引用**一个**入口点：`0_StartSequence`
+  - 不知道下游管道步骤
   
-- 📥 **ChainEventReceiver** - Step executor
-  - Contains 5 methods for each pipeline stage
-  - Exposes `IsSafetyCheckPassed` property for condition validation
-  - Contains `isSafetyLockDisengaged` flag (toggle-able)
+- 📥 **ChainEventReceiver** - 步骤执行器
+  - 包含每个管道阶段的5个方法
+  - 暴露 `IsSafetyCheckPassed` 属性用于条件验证
+  - 包含 `isSafetyLockDisengaged` 标志（可切换）
 
 ---
 
-## 🎮 How to Interact
+## 🎮 如何交互
 
-### The 5-Step Launch Protocol
+### 5步发射协议
 
-One root event (`0_StartSequence`) triggers a sequential pipeline with validation, delays, and async waiting.
-
----
-
-### Step 1: Enter Play Mode
-
-Press the **Play** button in Unity.
-
-**Initial State:**
-- Safety lock: **DISENGAGED** (default)
-- HoloDisplay: "SAFELOCK READY"
-- Both turrets idle
+一个根事件（`0_StartSequence`）触发一个带有验证、延迟和异步等待的顺序管道。
 
 ---
 
-### Step 2: Test Successful Launch (Safety Off)
+### 步骤1：进入播放模式
 
-**Current State Check:**
-- Ensure HoloDisplay shows "SAFELOCK READY"
-- If not, click "Toggle SafeLock" to turn safety **OFF**
+在Unity中按下**播放**按钮。
 
-**Click "Launch A":**
+**初始状态：**
+- 安全锁：**解除**（默认）
+- HoloDisplay："SAFELOCK READY"
+- 两个炮塔空闲
 
-**Sequential Execution:**
+---
 
-**[Step 1: System Check]** - Immediate
-- 🔍 Condition Node evaluates `ChainEventReceiver.IsSafetyCheckPassed` property
-- Property checks `isSafetyLockDisengaged` flag
-- Result: **TRUE** ✅
-- Console: `[Chain Step 1] Turret_A Checking...`
-- **Chain proceeds to Step 2**
+### 步骤2：测试成功发射（安全锁关闭）
 
-**[Step 2: Charge]** - 1.0s Delay
-- ⏱️ Delay Node pauses execution for **1.0 second**
-- VFX: Charging particle effect spawns at turret
-- Console: `[Chain Step 2] Turret_A Charging...`
-- Graph waits exactly 1.0s before continuing
-- **After delay, chain proceeds to Step 3**
+**当前状态检查：**
+- 确保HoloDisplay显示"SAFELOCK READY"
+- 如果不是，点击"Toggle SafeLock"将安全锁**关闭**
 
-**[Step 3: Fire]** - Immediate
-- 🚀 Projectile instantiated and launched toward target
-- Muzzle flash VFX at turret
-- Console: `[Chain Step 3] Turret_A FIRED payload: 500`
-- Projectile travels to target
-- **Chain immediately proceeds to Step 4**
+**点击"Launch A"：**
 
-**[Step 4: Cool Down]** - Wait For Completion
-- 💨 Steam VFX particle system spawns
-- 🕐 **Wait Node** - Graph pauses until VFX completes (2.0s)
-- Console: `[Chain Step 4] Turret_A Cooldowning.`
-- Unlike delay (fixed time), this waits for actual VFX completion
-- **After steam finishes, chain proceeds to Step 5**
+**顺序执行：**
 
-**[Step 5: Archive]** - Immediate (Arguments Blocked)
-- 📝 Final logging step
-- **PassArgument = FALSE** in graph → receives default/null values
-- Console: `[Chain Step 5] Archived. Data Status: CLEAN`
-- Turret unlocked for next use
-- **Chain completes successfully ✅**
+**[步骤1：系统检查]** - 立即
+- 🔍 条件节点评估 `ChainEventReceiver.IsSafetyCheckPassed` 属性
+- 属性检查 `isSafetyLockDisengaged` 标志
+- 结果：**TRUE** ✅
+- 控制台：`[Chain Step 1] Turret_A Checking...`
+- **链继续到步骤2**
 
-**Timeline:**
+**[步骤2：充能]** - 1.0秒延迟
+- ⏱️ 延迟节点暂停执行**1.0秒**
+- 特效：炮塔处生成充能粒子效果
+- 控制台：`[Chain Step 2] Turret_A Charging...`
+- 图表精确等待1.0秒后继续
+- **延迟后，链继续到步骤3**
+
+**[步骤3：开火]** - 立即
+- 🚀 实例化抛射物并向目标发射
+- 炮塔处枪口闪光特效
+- 控制台：`[Chain Step 3] Turret_A FIRED payload: 500`
+- 抛射物飞向目标
+- **链立即继续到步骤4**
+
+**[步骤4：冷却]** - 等待完成
+- 💨 生成蒸汽特效粒子系统
+- 🕐 **等待节点** - 图表暂停直到特效完成（2.0秒）
+- 控制台：`[Chain Step 4] Turret_A Cooldowning.`
+- 与延迟（固定时间）不同，这等待实际特效完成
+- **蒸汽结束后，链继续到步骤5**
+
+**[步骤5：归档]** - 立即（参数被阻止）
+- 📝 最终日志步骤
+- 图表中**PassArgument = FALSE** → 接收默认/null值
+- 控制台：`[Chain Step 5] Archived. Data Status: CLEAN`
+- 炮塔解锁以供下次使用
+- **链成功完成 ✅**
+
+**时间线：**
 ```
-0.0s  → Step 1: System Check (instant)
-0.0s  → Step 2: Charge starts
-1.0s  → Step 3: Fire (after charge delay)
-1.0s  → Step 4: CoolDown starts
-3.0s  → Step 5: Archive (after steam VFX ~2s)
-3.0s  → Sequence complete
+0.0秒 → 步骤1：系统检查（瞬间）
+0.0秒 → 步骤2：充能开始
+1.0秒 → 步骤3：开火（充能延迟后）
+1.0秒 → 步骤4：冷却开始
+3.0秒 → 步骤5：归档（蒸汽特效约2秒后）
+3.0秒 → 序列完成
 ```
 
-**Result:** ✅ Full 5-step launch sequence executed successfully.
+**结果：** ✅ 完整的5步发射序列成功执行。
 
 ---
 
-### Step 3: Test Failed Launch (Safety On)
+### 步骤3：测试失败发射（安全锁开启）
 
-**Click "Toggle SafeLock":**
-- Safety flag changes: `isSafetyLockDisengaged = false`
-- HoloDisplay updates: "SAFELOCK ACTIVED"
-- UI button color changes to orange (visual warning)
-- Console: `[Chain Settings] Safety Lock Disengaged: False`
+**点击"Toggle SafeLock"：**
+- 安全标志更改：`isSafetyLockDisengaged = false`
+- HoloDisplay更新："SAFELOCK ACTIVED"
+- UI按钮颜色变为橙色（视觉警告）
+- 控制台：`[Chain Settings] Safety Lock Disengaged: False`
 
-**Click "Launch B":**
+**点击"Launch B"：**
 
-**Sequential Execution:**
+**顺序执行：**
 
-**[Step 1: System Check]** - **FAILS** ❌
-- 🔍 Condition Node evaluates `ChainEventReceiver.IsSafetyCheckPassed`
-- Property checks `isSafetyLockDisengaged` → finds **FALSE**
-- Property executes failure feedback:
-  - 🚨 Red alarm vignette flashes 3 times
-  - Alarm sound plays
-  - Console: `[Chain Blocked] Safety Check Failed. Sequence stopped immediately.`
-- Condition returns **FALSE**
-- **🛑 CHAIN TERMINATES HERE**
+**[步骤1：系统检查]** - **失败** ❌
+- 🔍 条件节点评估 `ChainEventReceiver.IsSafetyCheckPassed`
+- 属性检查 `isSafetyLockDisengaged` → 发现**FALSE**
+- 属性执行失败反馈：
+  - 🚨 红色警报叠加层闪烁3次
+  - 播放警报声音
+  - 控制台：`[Chain Blocked] Safety Check Failed. Sequence stopped immediately.`
+- 条件返回**FALSE**
+- **🛑 链在此终止**
 
-**[Steps 2-5]** - **NEVER EXECUTE**
-- ❌ No charging VFX
-- ❌ No projectile fired
-- ❌ No steam cooldown
-- ❌ No archive log
+**[步骤2-5]** - **永不执行**
+- ❌ 无充能特效
+- ❌ 无抛射物发射
+- ❌ 无蒸汽冷却
+- ❌ 无归档日志
 
-**Result:** ❌ Launch aborted at gate. Steps 2-5 never ran.
+**结果：** ❌ 发射在门处中止。步骤2-5从未运行。
 
-:::danger 🔴 Critical Chain Behavior
+:::danger 🔴 关键链式行为
 
-When a Chain node's condition fails:
+当链节点的条件失败时：
 
-1. **Immediate Termination** - Execution stops at that node
-2. **No Downstream Execution** - Subsequent nodes never run
-3. **No Partial Completion** - All-or-nothing behavior
-4. **Early Cleanup** - Resources unlocked immediately
+1. **立即终止** - 执行在该节点停止
+2. **无下游执行** - 后续节点永不运行
+3. **无部分完成** - 全有或全无的行为
+4. **早期清理** - 资源立即解锁
 
-This is fundamentally different from Trigger Events, where failed conditions just skip individual branches while others continue.
+这与触发器事件根本不同，触发器事件中失败的条件只是跳过个别分支，而其他分支继续。
 
 :::
 
 ---
 
-## 🏗️ Scene Architecture
+## 🏗️ 场景架构
 
-### Chain vs Trigger: The Fundamental Difference
+### 链式与触发器：根本区别
 
-**Trigger Event (Parallel):**
+**触发器事件（并行）：**
 ```
-⚡ Root Event: OnInteraction
+⚡ 根事件：OnInteraction
 │
-├─ 🔱 Branch A: [ 🛡️ Guard: `HasKey == true` ]
-│  └─ 🚀 Action: OpenDoor() ➔ ✅ Condition Passed: Executing...
+├─ 🔱 分支A：[ 🛡️ 守卫：`HasKey == true` ]
+│  └─ 🚀 动作：OpenDoor() ➔ ✅ 条件通过：执行中...
 │
-├─ 🔱 Branch B: [ 🛡️ Guard: `PlayerLevel >= 10` ]
-│  └─ 🚀 Action: GrantBonusXP() ➔ ❌ Condition Failed: Branch Skipped
+├─ 🔱 分支B：[ 🛡️ 守卫：`PlayerLevel >= 10` ]
+│  └─ 🚀 动作：GrantBonusXP() ➔ ❌ 条件失败：分支跳过
 │
-└─ 🔱 Branch C: [ 🛡️ Guard: `Always True` ]
-   └─ 🚀 Action: PlaySound("Click") ➔ ✅ Condition Passed: Executing...
+└─ 🔱 分支C：[ 🛡️ 守卫：`Always True` ]
+   └─ 🚀 动作：PlaySound("Click") ➔ ✅ 条件通过：执行中...
 │
-📊 Summary: 2 Paths Executed | 1 Path Skipped | ⚡ Timing: Concurrent
-```
-
-**Chain Event (Sequential):**
-```
-🏆 Initiation: Root Event
-│
-├─ 1️⃣ [ Step 1 ] ➔ 🛡️ Guard: `Condition A`
-│  └─ ⏳ Status: WAIT for completion... ✅ Success
-│
-├─ 2️⃣ [ Step 2 ] ➔ 🛡️ Guard: `Condition B`
-│  └─ ⏳ Status: WAIT for completion... ✅ Success
-│
-├─ 3️⃣ [ Step 3 ] ➔ 🛡️ Guard: `Condition C`
-│  └─ ⏳ Status: WAIT for completion... ❌ FAILED!
-│
-└─ 🛑 [ TERMINATED ] ➔ Logic Chain Halts
-   └─ ⏭️ Step 4: [ SKIPPED ]
-│
-📊 Final Result: Aborted at Step 3 | ⏳ Mode: Strict Blocking
+📊 摘要：2条路径执行 | 1条路径跳过 | ⚡ 时序：并发
 ```
 
-**When to Use Each:**
+**链式事件（顺序）：**
+```
+🏆 启动：根事件
+│
+├─ 1️⃣ [ 步骤1 ] ➔ 🛡️ 守卫：`条件A`
+│  └─ ⏳ 状态：等待完成... ✅ 成功
+│
+├─ 2️⃣ [ 步骤2 ] ➔ 🛡️ 守卫：`条件B`
+│  └─ ⏳ 状态：等待完成... ✅ 成功
+│
+├─ 3️⃣ [ 步骤3 ] ➔ 🛡️ 守卫：`条件C`
+│  └─ ⏳ 状态：等待完成... ❌ 失败！
+│
+└─ 🛑 [ 终止 ] ➔ 逻辑链停止
+   └─ ⏭️ 步骤4：[ 跳过 ]
+│
+📊 最终结果：在步骤3中止 | ⏳ 模式：严格阻塞
+```
 
-| Pattern           | Use Chain                          | Use Trigger          |
-| ----------------- | ---------------------------------- | -------------------- |
-| **Cutscene**      | ✅ Sequential shots                 | ❌ Steps out of order |
-| **Combat System** | ❌ Rigid order not needed           | ✅ Parallel systems   |
-| **Tutorial**      | ✅ Must finish step 1 before step 2 | ❌ Steps can overlap  |
-| **Weapon Charge** | ✅ Charge → Fire → Cooldown         | ❌ Order matters      |
-| **Achievement**   | ❌ Independent checks               | ✅ Multiple triggers  |
+**何时使用每种：**
+
+| 模式         | 使用链式                     | 使用触发器       |
+| ------------ | ---------------------------- | ---------------- |
+| **过场动画** | ✅ 顺序镜头                   | ❌ 步骤无序       |
+| **战斗系统** | ❌ 不需要严格顺序             | ✅ 并行系统       |
+| **教程**     | ✅ 必须先完成步骤1再进行步骤2 | ❌ 步骤可重叠     |
+| **武器充能** | ✅ 充能 → 开火 → 冷却         | ❌ 顺序重要       |
+| **成就**     | ❌ 独立检查                   | ✅ 多个触发器     |
 
 ---
 
-### Event Definitions
+### 事件定义
 
-![Game Event Editor](/img/game-event-system/examples/11-chain-event/demo-11-editor.png)
+![游戏事件编辑器](/img/game-event-system/examples/11-chain-event/demo-11-editor.png)
 
-| Event Name        | Type                                | Role              | Step  |
-| ----------------- | ----------------------------------- | ----------------- | ----- |
-| `0_StartSequence` | `GameEvent<GameObject, DamageInfo>` | **Root** (Gold)   | Entry |
-| `1_SystemCheck`   | `GameEvent<GameObject, DamageInfo>` | **Chain** (Green) | 1     |
-| `2_Charge`        | `GameEvent<GameObject, DamageInfo>` | **Chain** (Green) | 2     |
-| `3_Fire`          | `GameEvent<GameObject, DamageInfo>` | **Chain** (Green) | 3     |
-| `4_CoolDown`      | `GameEvent<GameObject, DamageInfo>` | **Chain** (Green) | 4     |
-| `5_Archive`       | `GameEvent<GameObject, DamageInfo>` | **Chain** (Green) | 5     |
+| 事件名称          | 类型                                | 角色           | 步骤 |
+| ----------------- | ----------------------------------- | -------------- | ---- |
+| `0_StartSequence` | `GameEvent<GameObject, DamageInfo>` | **根**（金色） | 入口 |
+| `1_SystemCheck`   | `GameEvent<GameObject, DamageInfo>` | **链**（绿色） | 1    |
+| `2_Charge`        | `GameEvent<GameObject, DamageInfo>` | **链**（绿色） | 2    |
+| `3_Fire`          | `GameEvent<GameObject, DamageInfo>` | **链**（绿色） | 3    |
+| `4_CoolDown`      | `GameEvent<GameObject, DamageInfo>` | **链**（绿色） | 4    |
+| `5_Archive`       | `GameEvent<GameObject, DamageInfo>` | **链**（绿色） | 5    |
 
-**Key Insight:**
-- **Root** raises the chain
-- **Chain nodes** auto-trigger sequentially
-- Code only calls `.Raise()` on root—graph handles rest
+**关键洞察：**
+- **根**触发链
+- **链节点**自动顺序触发
+- 代码仅在根上调用 `.Raise()` ——图表处理其余部分
 
 ---
 
-### Flow Graph Configuration
+### 流程图配置
 
-Click **"Flow Graph"** button to visualize the sequential pipeline:
+点击**"Flow Graph"**按钮可视化顺序管道：
 
-![Flow Graph Overview](/img/game-event-system/examples/11-chain-event/demo-11-graph.png)
+![流程图概览](/img/game-event-system/examples/11-chain-event/demo-11-graph.png)
 
-**Graph Structure (Left to Right):**
+**图表结构（从左到右）：**
 
-**Node 1: 0_StartSequence (Root, Red)**
-- Entry point raised by code
-- Type: `GameEvent<GameObject, DamageInfo>`
-- Connects to first chain node
+**节点1：0_StartSequence（根，红色）**
+- 由代码触发的入口点
+- 类型：`GameEvent<GameObject, DamageInfo>`
+- 连接到第一个链节点
 
-**Node 2: 1_SystemCheck (Chain, Green)**
-- ✅ **Condition Node** - Gate keeper
-- **Condition:** `ChainEventReceiver.IsSafetyCheckPassed == true`
-  - Evaluates scene object property at runtime
-  - If false → **chain breaks immediately**
-- **Action:** `ChainEventReceiver.OnSystemCheck(sender, args)`
-- Green checkmark icon indicates condition enabled
-- PassArgument: ✓ Pass (full data forwarded)
+**节点2：1_SystemCheck（链，绿色）**
+- ✅ **条件节点** - 守门员
+- **条件：** `ChainEventReceiver.IsSafetyCheckPassed == true`
+  - 在运行时评估场景对象属性
+  - 如果为false → **链立即中断**
+- **动作：** `ChainEventReceiver.OnSystemCheck(sender, args)`
+- 绿色勾选图标表示条件已启用
+- PassArgument：✓ 传递（完整数据转发）
 
-**Node 3: 2_Charge (Chain, Green)**
-- ⏱️ **Delay Node** - Timed pause
-- **Delay:** `1.0` seconds (shown as ⏱️ 1s icon)
-- **Action:** `ChainEventReceiver.OnStartCharging(sender, args)`
-- Graph freezes here for exactly 1 second
-- PassArgument: ✓ Pass
+**节点3：2_Charge（链，绿色）**
+- ⏱️ **延迟节点** - 定时暂停
+- **延迟：** `1.0`秒（显示为 ⏱️ 1秒图标）
+- **动作：** `ChainEventReceiver.OnStartCharging(sender, args)`
+- 图表在此精确冻结1秒
+- PassArgument：✓ 传递
 
-**Node 4: 3_Fire (Chain, Green)**
-- 🎯 **Action Node** - Standard execution
-- **Action:** `ChainEventReceiver.OnFireWeapon(sender, args)`
-- No delay, no condition
-- Executes immediately after previous step
-- PassArgument: ✓ Pass
+**节点4：3_Fire（链，绿色）**
+- 🎯 **动作节点** - 标准执行
+- **动作：** `ChainEventReceiver.OnFireWeapon(sender, args)`
+- 无延迟，无条件
+- 在前一步骤后立即执行
+- PassArgument：✓ 传递
 
-**Node 5: 4_CoolDown (Chain, Green)**
-- 🕐 **Wait Node** - Async completion
-- **Delay:** `0.5s` (minimum wait)
-- **WaitForCompletion:** ✓ Checked (shown as ⏱️ 1s icon)
-  - Graph waits for receiver coroutine to finish
-  - Not a fixed timer—waits for actual completion signal
-- **Action:** `ChainEventReceiver.OnCoolDown(sender, args)`
-- PassArgument: ✓ Pass
+**节点5：4_CoolDown（链，绿色）**
+- 🕐 **等待节点** - 异步完成
+- **延迟：** `0.5秒`（最小等待）
+- **WaitForCompletion：** ✓ 选中（显示为 ⏱️ 1秒图标）
+  - 图表等待接收器协程完成
+  - 不是固定计时器——等待实际完成信号
+- **动作：** `ChainEventReceiver.OnCoolDown(sender, args)`
+- PassArgument：✓ 传递
 
-**Node 6: 5_Archive (Chain, Green)**
-- 🔒 **Filter Node** - Data sanitization
-- **Action:** `ChainEventReceiver.OnSequenceArchived(sender, args)`
-- **PassArgument:** 🔴 Static (argument blocked)
-  - Even though previous nodes passed full data
-  - This node receives default/null values
-  - Demonstrates data firewall at end of chain
-- Final step—no downstream nodes
+**节点6：5_Archive（链，绿色）**
+- 🔒 **过滤节点** - 数据清理
+- **动作：** `ChainEventReceiver.OnSequenceArchived(sender, args)`
+- **PassArgument：** 🔴 静态（参数被阻止）
+  - 即使前面的节点传递了完整数据
+  - 此节点接收默认/null值
+  - 演示链末端的数据防火墙
+- 最后一步——无下游节点
 
-**Connection Lines:**
-- 🟢 **Green "CHAIN" lines** - Sequential flow
-  - Each output port connects to next input port
-  - Linear topology—no branching
-  - Execution follows line left-to-right
+**连接线：**
+- 🟢 **绿色"CHAIN"线** - 顺序流
+  - 每个输出端口连接到下一个输入端口
+  - 线性拓扑——无分支
+  - 执行遵循从左到右的线
 
-**Legend:**
-- 🔴 **Root Node** - Entry point (raised by code)
-- 🟢 **Chain Node** - Auto-triggered in sequence
-- ✅ **Checkmark Icon** - Condition enabled
-- ⏱️ **Clock Icon** - Delay or wait configured
-- 🔒 **Static Icon** - Arguments blocked
+**图例：**
+- 🔴 **根节点** - 入口点（由代码触发）
+- 🟢 **链节点** - 按顺序自动触发
+- ✅ **勾选图标** - 条件已启用
+- ⏱️ **时钟图标** - 配置了延迟或等待
+- 🔒 **静态图标** - 参数被阻止
 
-:::tip 🎨 Visual Pipeline Benefits
+:::tip 🎨 可视化管道优势
 
-The Chain Graph provides instant understanding of:
+链式图表提供即时理解：
 
-- **Sequential Order** - Left-to-right flow shows exact execution order
-- **Validation Gates** - Condition nodes act as checkpoints
-- **Timing Control** - Delay/wait icons show pause points
-- **Data Flow** - PassArgument toggles show where data is filtered
-- **Failure Points** - Condition nodes show where chain can break
+- **顺序顺序** - 从左到右的流程显示精确执行顺序
+- **验证门** - 条件节点充当检查点
+- **时序控制** - 延迟/等待图标显示暂停点
+- **数据流** - PassArgument切换显示数据过滤位置
+- **失败点** - 条件节点显示链可能中断的位置
 
-This is infinitely cleaner than reading a coroutine with nested `yield return` statements!
+这比阅读带有嵌套 `yield return` 语句的协程要清晰得多！
 
 :::
 
 ---
 
-### Sender Setup (ChainEventRaiser)
+### 发送器设置（ChainEventRaiser）
 
-Select the **ChainEventRaiser** GameObject:
+选择**ChainEventRaiser**游戏对象：
 
-![ChainEventRaiser Inspector](/img/game-event-system/examples/11-chain-event/demo-11-inspector.png)
+![ChainEventRaiser检查器](/img/game-event-system/examples/11-chain-event/demo-11-inspector.png)
 
-**Chain Entry Point:**
-- `Sequence Start Event`: `0_StartSequence`
-  - Tooltip: "The Start Node of the Chain Graph"
-  - Only references the root—downstream is handled by graph
+**链入口点：**
+- `Sequence Start Event`：`0_StartSequence`
+  - 提示："链图的启动节点"
+  - 仅引用根——下游由图表处理
 
-**Turrets:**
-- **Turret A:** Turret_A (GameObject), Head A (Transform)
-- **Turret B:** Turret_B (GameObject), Head B (Transform)
+**炮塔：**
+- **炮塔A：** Turret_A（游戏对象），Head A（Transform）
+- **炮塔B：** Turret_B（游戏对象），Head B（Transform）
 
-**Targeting:**
-- `Hit Target`: TargetDummy (Transform)
+**目标：**
+- `Hit Target`：TargetDummy（Transform）
 
-**Critical Observation:**
-Like Trigger demos, sender only knows about **ONE** event. The 5-step pipeline is completely abstracted into the graph.
-
----
-
-### Receiver Setup (ChainEventReceiver)
-
-Select the **ChainEventReceiver** GameObject:
-
-![ChainEventReceiver Inspector](/img/game-event-system/examples/11-chain-event/demo-11-receiver.png)
-
-**Scene References:**
-- `Chain Event Raiser`: ChainEventRaiser (for unlock callbacks)
-- `Holo Text`: LogText (TextMeshPro) - displays lock status
-
-**Target References:**
-- `Target Dummy`, `Target Rigidbody`
-
-**VFX & Projectiles:**
-- `Projectile Prefab`: Projectile (TurretProjectile)
-- `Charge VFX`: TurretBuffAura (Particle System) - step 2
-- `Fire VFX`: MuzzleFlashVFX (Particle System) - step 3
-- `Steam VFX`: SteamVFX (Particle System) - step 4
-- `Hit Normal/Crit VFX`, `Floating Text Prefab`
-
-**Audio:**
-- `Hit Clip`, `UI Clip`, `Alarm Clip`
-
-**Screen:**
-- `Screen Group`: AlarmVignette (CanvasGroup) - red flash on failure
-
-**Simulation Settings:**
-- ✅ `Is Safety Lock Disengaged`: TRUE (default)
-  - Controls whether Step 1 condition passes
-  - Toggle-able via "Toggle SafeLock" button
+**关键观察：**
+与触发器示例一样，发送器仅知道**一个**事件。5步管道完全抽象到图表中。
 
 ---
 
-## 💻 Code Breakdown
+### 接收器设置（ChainEventReceiver）
 
-### 📤 ChainEventRaiser.cs (Sender)
+选择**ChainEventReceiver**游戏对象：
+
+![ChainEventReceiver检查器](/img/game-event-system/examples/11-chain-event/demo-11-receiver.png)
+
+**场景引用：**
+- `Chain Event Raiser`：ChainEventRaiser（用于解锁回调）
+- `Holo Text`：LogText（TextMeshPro）- 显示锁定状态
+
+**目标引用：**
+- `Target Dummy`、`Target Rigidbody`
+
+**特效和抛射物：**
+- `Projectile Prefab`：Projectile（TurretProjectile）
+- `Charge VFX`：TurretBuffAura（粒子系统）- 步骤2
+- `Fire VFX`：MuzzleFlashVFX（粒子系统）- 步骤3
+- `Steam VFX`：SteamVFX（粒子系统）- 步骤4
+- `Hit Normal/Crit VFX`、`Floating Text Prefab`
+
+**音频：**
+- `Hit Clip`、`UI Clip`、`Alarm Clip`
+
+**屏幕：**
+- `Screen Group`：AlarmVignette（CanvasGroup）- 失败时红色闪烁
+
+**模拟设置：**
+- ✅ `Is Safety Lock Disengaged`：TRUE（默认）
+  - 控制步骤1条件是否通过
+  - 可通过"Toggle SafeLock"按钮切换
+
+---
+
+## 💻 代码详解
+
+### 📤 ChainEventRaiser.cs（发送器）
 ```csharp
 using UnityEngine;
 using TinyGiants.GameEventSystem.Runtime;
@@ -400,23 +400,23 @@ using TinyGiants.GameEventSystem.Runtime;
 public class ChainEventRaiser : MonoBehaviour
 {
     [Header("Chain Entry Point")]
-    [Tooltip("The Start Node of the Chain Graph.")]
+    [Tooltip("链图的启动节点。")]
     [GameEventDropdown]
     public GameEvent<GameObject, DamageInfo> sequenceStartEvent;
 
     [Header("Turrets")] 
     public GameObject turretA;
     public GameObject turretB;
-    // ... head transforms ...
+    // ... 头部变换 ...
 
     private bool _isBusyA;
     private bool _isBusyB;
 
     /// <summary>
-    /// UI Button A: Request Launch for Turret A.
+    /// UI按钮A：请求炮塔A发射。
     /// 
-    /// CRITICAL: Only raises the ROOT event.
-    /// The Chain Graph orchestrates all 5 downstream steps automatically.
+    /// 关键：仅触发根事件。
+    /// 链图自动编排所有5个下游步骤。
     /// </summary>
     public void RequestLaunchA()
     {
@@ -425,23 +425,23 @@ public class ChainEventRaiser : MonoBehaviour
         Debug.Log("<color=cyan>[Raiser] Requesting Launch Protocol A...</color>");
         _isBusyA = true;
 
-        // Build the data payload
+        // 构建数据载荷
         DamageInfo info = new DamageInfo(500f, true, DamageType.Physical, 
                                         hitTarget.position, "Commander");
         
-        // THE MAGIC: Single .Raise() starts entire 5-step chain
-        // Graph automatically executes:
-        // 1. System Check (with condition)
-        // 2. Charge (with 1s delay)
-        // 3. Fire (immediate)
-        // 4. Cool Down (with wait-for-completion)
-        // 5. Archive (with blocked arguments)
+        // 魔法时刻：单次 .Raise() 启动整个5步链
+        // 图表自动执行：
+        // 1. 系统检查（带条件）
+        // 2. 充能（带1秒延迟）
+        // 3. 开火（立即）
+        // 4. 冷却（带等待完成）
+        // 5. 归档（带阻止参数）
         sequenceStartEvent.Raise(turretA, info);
     }
 
     /// <summary>
-    /// UI Button B: Request Launch for Turret B.
-    /// Same logic, different turret.
+    /// UI按钮B：请求炮塔B发射。
+    /// 相同逻辑，不同炮塔。
     /// </summary>
     public void RequestLaunchB()
     {
@@ -455,21 +455,21 @@ public class ChainEventRaiser : MonoBehaviour
         sequenceStartEvent.Raise(turretB, info);
     }
 
-    // Unlock methods called by receiver when sequence completes or fails
+    // 序列完成或失败时由接收器调用的解锁方法
     public void UnlockTurretA() => _isBusyA = false;
     public void UnlockTurretB() => _isBusyB = false;
 }
 ```
 
-**Key Points:**
-- 🎯 **Single Event Reference** - Only knows root event
-- 📡 **Zero Pipeline Knowledge** - No idea about 5 steps
-- 🔓 **Unlock Callbacks** - Receiver signals completion/failure
-- 🎬 **Maximum Decoupling** - All sequence logic in graph
+**要点：**
+- 🎯 **单一事件引用** - 仅知道根事件
+- 📡 **零管道知识** - 不知道5个步骤
+- 🔓 **解锁回调** - 接收器发出完成/失败信号
+- 🎬 **最大解耦** - 所有序列逻辑在图表中
 
 ---
 
-### 📥 ChainEventReceiver.cs (Listener)
+### 📥 ChainEventReceiver.cs（监听器）
 ```csharp
 using UnityEngine;
 using System.Collections;
@@ -477,16 +477,16 @@ using System.Collections;
 public class ChainEventReceiver : MonoBehaviour
 {
     [Header("Simulation Settings")]
-    [Tooltip("If TRUE, passes check. If FALSE, chain breaks at Step 1.")]
+    [Tooltip("如果为TRUE，通过检查。如果为FALSE，链在步骤1中断。")]
     public bool isSafetyLockDisengaged = true;
 
     /// <summary>
-    /// Property accessed by '1_SystemCheck' Node Condition.
+    /// 由'1_SystemCheck'节点条件访问的属性。
     /// 
-    /// Graph configuration: Scene Object → Property → IsSafetyCheckPassed
+    /// 图表配置：场景对象 → 属性 → IsSafetyCheckPassed
     /// 
-    /// CRITICAL: This is evaluated BEFORE the node action executes.
-    /// If this returns false, the chain terminates immediately.
+    /// 关键：这在节点动作执行之前评估。
+    /// 如果返回false，链立即终止。
     /// </summary>
     public bool IsSafetyCheckPassed
     {
@@ -496,14 +496,14 @@ public class ChainEventReceiver : MonoBehaviour
 
             if (!isSafetyLockDisengaged)
             {
-                // FAIL PATH: Safety lock is engaged
+                // 失败路径：安全锁已启用
                 result = false;
                 
                 Debug.LogWarning(
                     "<color=red>[Chain Blocked] Safety Check Failed. " +
                     "Sequence stopped immediately.</color>");
                 
-                // Visual feedback for failure
+                // 失败的视觉反馈
                 StopCoroutine(nameof(ScreenRoutine));
                 if (screenGroup) StartCoroutine(ScreenRoutine());
             }
@@ -513,7 +513,7 @@ public class ChainEventReceiver : MonoBehaviour
     }
 
     /// <summary>
-    /// Toggles the safety lock status. Bind this to UI Button.
+    /// 切换安全锁状态。将此绑定到UI按钮。
     /// </summary>
     public void ToggleSafetyLock()
     {
@@ -521,7 +521,7 @@ public class ChainEventReceiver : MonoBehaviour
         
         isSafetyLockDisengaged = !isSafetyLockDisengaged;
         
-        // Update UI
+        // 更新UI
         string text = isSafetyLockDisengaged ? "SAFELOCK READY" : "SAFELOCK ACTIVED";
         if (holoText) holoText.text = text;
 
@@ -529,21 +529,21 @@ public class ChainEventReceiver : MonoBehaviour
     }
 
     /// <summary>
-    /// [Chain Step 1] System Check
-    /// Bound to '1_SystemCheck' chain node.
+    /// [链步骤1] 系统检查
+    /// 绑定到'1_SystemCheck'链节点。
     /// 
-    /// Note: This action runs AFTER the condition passed.
-    /// If condition failed, this method never executes.
+    /// 注意：此动作在条件通过后运行。
+    /// 如果条件失败，此方法永不执行。
     /// </summary>
     public void OnSystemCheck(GameObject sender, DamageInfo args)
     {
         bool isA = sender != null && sender.name.Contains("Turret_A");
         
-        // If we reach here, condition passed
-        // But we still handle potential edge cases
+        // 如果到达这里，条件通过
+        // 但我们仍处理潜在的边缘情况
         if (!IsSafetyCheckPassed)
         {
-            // Unlock turret since sequence failed
+            // 由于序列失败解锁炮塔
             if (isA) chainEventRaiser.UnlockTurretA();
             else chainEventRaiser.UnlockTurretB();
         }
@@ -552,11 +552,11 @@ public class ChainEventReceiver : MonoBehaviour
     }
 
     /// <summary>
-    /// [Chain Step 2] Charge
-    /// Bound to '2_Charge' chain node with 1.0s delay.
+    /// [链步骤2] 充能
+    /// 绑定到带有1.0秒延迟的'2_Charge'链节点。
     /// 
-    /// The graph pauses for 1 second BEFORE calling this method.
-    /// When this executes, 1.0s has already elapsed.
+    /// 图表在调用此方法之前暂停1秒。
+    /// 当此执行时，1.0秒已经过去。
     /// </summary>
     public void OnStartCharging(GameObject sender, DamageInfo args)
     {
@@ -573,15 +573,15 @@ public class ChainEventReceiver : MonoBehaviour
     }
 
     /// <summary>
-    /// [Chain Step 3] Fire
-    /// Bound to '3_Fire' chain node.
+    /// [链步骤3] 开火
+    /// 绑定到'3_Fire'链节点。
     /// 
-    /// Spawns projectile and launches toward target.
-    /// This executes immediately after Step 2 completes.
+    /// 生成抛射物并向目标发射。
+    /// 在步骤2完成后立即执行。
     /// </summary>
     public void OnFireWeapon(GameObject sender, DamageInfo args)
     {
-        // Spawn muzzle flash
+        // 生成枪口闪光
         if (fireVFX)
         {
             Vector3 spawnPos = sender.transform.position + 
@@ -591,7 +591,7 @@ public class ChainEventReceiver : MonoBehaviour
             Destroy(vfx.gameObject, 2.0f);
         }
 
-        // Launch projectile
+        // 发射抛射物
         if (projectilePrefab != null)
         {
             var muzzlePos = sender.transform.Find("Head/Barrel/MuzzlePoint");
@@ -600,16 +600,16 @@ public class ChainEventReceiver : MonoBehaviour
 
             shell.Initialize(args.hitPoint, 20f, () =>
             {
-                // Impact callback
+                // 撞击回调
                 if (hitClip) _audioSource.PlayOneShot(hitClip);
                 
-                // Spawn hit VFX, floating text, apply physics...
+                // 生成撞击特效、浮动文本、应用物理...
                 ParticleSystem vfxToPlay = args.isCritical ? hitCritVFX : hitNormalVFX;
                 
                 if (args.isCritical)
                     StartCoroutine(ShakeCameraRoutine(0.2f, 0.4f));
                 
-                // ... (VFX, physics, text logic) ...
+                // ...（特效、物理、文本逻辑）...
             });
         }
 
@@ -617,11 +617,11 @@ public class ChainEventReceiver : MonoBehaviour
     }
 
     /// <summary>
-    /// [Chain Step 4] Cool Down
-    /// Bound to '4_CoolDown' chain node with WaitForCompletion.
+    /// [链步骤4] 冷却
+    /// 绑定到带有WaitForCompletion的'4_CoolDown'链节点。
     /// 
-    /// The graph waits for this coroutine to finish before proceeding to Step 5.
-    /// Unlike delay (fixed time), this waits for actual task completion.
+    /// 图表等待此协程完成后再进入步骤5。
+    /// 与延迟（固定时间）不同，这等待实际任务完成。
     /// </summary>
     public void OnCoolDown(GameObject sender, DamageInfo args)
     {
@@ -637,23 +637,23 @@ public class ChainEventReceiver : MonoBehaviour
     }
 
     /// <summary>
-    /// [Chain Step 5] Archive
-    /// Bound to '5_Archive' chain node with PassArgument = FALSE.
+    /// [链步骤5] 归档
+    /// 绑定到PassArgument = FALSE的'5_Archive'链节点。
     /// 
-    /// CRITICAL: Even though previous steps passed full DamageInfo,
-    /// this node receives DEFAULT/NULL values due to graph configuration.
+    /// 关键：即使前面的步骤传递了完整的DamageInfo，
+    /// 此节点由于图表配置接收默认/NULL值。
     /// 
-    /// Demonstrates data firewall—can sanitize sensitive data at end of chain.
+    /// 演示数据防火墙——可以在链末端清理敏感数据。
     /// </summary>
     public void OnSequenceArchived(GameObject sender, DamageInfo args)
     {
         bool isA = sender != null && sender.name.Contains("Turret_A");
 
-        // Unlock turret for next use
+        // 解锁炮塔以供下次使用
         if (isA) chainEventRaiser.UnlockTurretA();
         else chainEventRaiser.UnlockTurretB();
 
-        // Check if data was successfully blocked
+        // 检查数据是否成功阻止
         bool isClean = (args == null || args.amount == 0);
         string logMsg = isClean ? "<color=cyan>CLEAN</color>" : "<color=red>LEAKED</color>";
 
@@ -662,7 +662,7 @@ public class ChainEventReceiver : MonoBehaviour
 
     private IEnumerator ScreenRoutine()
     {
-        // Red alarm vignette flash animation
+        // 红色警报叠加层闪烁动画
         int flashes = 3;
         float flashDuration = 0.5f;
 
@@ -670,7 +670,7 @@ public class ChainEventReceiver : MonoBehaviour
         {
             if (alarmClip) _audioSource.PlayOneShot(alarmClip);
             
-            // Sine wave alpha animation
+            // 正弦波alpha动画
             float t = 0f;
             while (t < flashDuration)
             {
@@ -687,40 +687,40 @@ public class ChainEventReceiver : MonoBehaviour
 }
 ```
 
-**Key Points:**
-- 🎯 **5 Independent Methods** - Each handles one pipeline stage
-- ✅ **Property for Condition** - `IsSafetyCheckPassed` evaluated by graph
-- ⏱️ **Timing Agnostic** - Methods don't know about delays
-- 🔒 **Data Firewall** - Step 5 receives sanitized data
-- 🎬 **Completion Callbacks** - Unlocks turrets on success/failure
+**要点：**
+- 🎯 **5个独立方法** - 每个处理一个管道阶段
+- ✅ **条件属性** - `IsSafetyCheckPassed` 由图表评估
+- ⏱️ **时序无关** - 方法不知道延迟
+- 🔒 **数据防火墙** - 步骤5接收清理的数据
+- 🎬 **完成回调** - 成功/失败时解锁炮塔
 
 ---
 
-## 🔑 Key Takeaways
+## 🔑 核心要点
 
-| Concept                    | Implementation                            |
-| -------------------------- | ----------------------------------------- |
-| 🔗 **Sequential Execution** | Nodes execute one-by-one in strict order  |
-| ✅ **Validation Gates**     | Condition nodes terminate chain if failed |
-| ⏱️ **Delay Nodes**          | Fixed-time pauses between steps           |
-| 🕐 **Wait Nodes**           | Async completion waiting (not fixed time) |
-| 🔒 **Data Filtering**       | PassArgument controls data flow per node  |
-| 🛑 **Early Termination**    | Failed condition stops entire chain       |
-| 🎯 **All-or-Nothing**       | Chain completes fully or terminates early |
+| 概念                | 实现                             |
+| ------------------- | -------------------------------- |
+| 🔗 **顺序执行**      | 节点按严格顺序一个接一个执行     |
+| ✅ **验证门**        | 条件节点在失败时终止链           |
+| ⏱️ **延迟节点**      | 步骤之间的固定时间暂停           |
+| 🕐 **等待节点**      | 异步完成等待（非固定时间）       |
+| 🔒 **数据过滤**      | PassArgument按节点控制数据流     |
+| 🛑 **早期终止**      | 失败的条件停止整个链             |
+| 🎯 **全有或全无**    | 链完全完成或提前终止             |
 
-:::note 🎓 Design Insight
+:::note 🎓 设计洞察
 
-Chain Events are perfect for:
+链式事件非常适合：
 
-- **Cutscenes** - Shot 1 → Shot 2 → Shot 3 in exact order
-- **Weapon Sequences** - Charge → Fire → Cooldown → Reload
-- **Tutorial Steps** - Must complete step N before step N+1
-- **Crafting Recipes** - Sequential ingredient addition
-- **Boss Phases** - Phase transitions with validation
-- **Spell Casting** - Channeling → Cast → Effect → Recovery
+- **过场动画** - 镜头1 → 镜头2 → 镜头3精确顺序
+- **武器序列** - 充能 → 开火 → 冷却 → 重新加载
+- **教程步骤** - 必须在步骤N+1之前完成步骤N
+- **制作配方** - 顺序添加成分
+- **Boss阶段** - 带验证的阶段转换
+- **施法** - 引导 → 施放 → 效果 → 恢复
 
-**Chain vs Coroutine:**
-Instead of writing:
+**链式 vs 协程：**
+无需编写：
 ```csharp
 IEnumerator LaunchSequence()
 {
@@ -733,39 +733,39 @@ IEnumerator LaunchSequence()
 }
 ```
 
-Use a Chain Graph where:
-- Timing is **visible** and **editable** by designers
-- Conditions are **visual checkpoints**, not hidden `if` statements
-- Async waits are **configurable**, not hardcoded
-- Entire pipeline is **debuggable** via graph visualization
+使用链式图表，其中：
+- 时序是**可见的**和设计师可**编辑的**
+- 条件是**可视检查点**，而非隐藏的 `if` 语句
+- 异步等待是**可配置的**，而非硬编码
+- 整个管道可通过图表可视化进行**调试**
 
 :::
 
-:::warning ⚠️ Chain Gotchas
+:::warning ⚠️ 链式陷阱
 
-1. **Blocking Behavior:** If Step 3 has a bug and never completes, Steps 4-5 never run
-2. **Condition Timing:** Conditions evaluate BEFORE node action—can't use action's side effects
-3. **No Parallel Branches:** Can't execute Step 2A and Step 2B simultaneously (use Trigger for that)
-4. **Delay Stacking:** Multiple delays add up—3 nodes with 1s each = 3s total wait
-5. **Early Exit Cleanup:** Always unlock resources in condition failure paths
+1. **阻塞行为：** 如果步骤3有bug且永不完成，步骤4-5永不运行
+2. **条件时序：** 条件在节点动作之前评估——不能使用动作的副作用
+3. **无并行分支：** 无法同时执行步骤2A和步骤2B（使用触发器）
+4. **延迟叠加：** 多个延迟累加——3个节点各1秒 = 总共3秒等待
+5. **早期退出清理：** 始终在条件失败路径中解锁资源
 
 :::
 
 ---
 
-## 🎯 What's Next?
+## 🎯 下一步
 
-You've mastered sequential chain execution. The examples series continues with more advanced patterns.
+您已经掌握了顺序链式执行。示例系列继续探索更高级的模式。
 
-**Next Chapter**: Continue exploring advanced demos in **[12 Multi Database](./12-multi-database.md)**
+**下一章**：继续探索**[12 多数据库](./12-multi-database.md)**中的高级示例
 
 ---
 
-## 📚 Related Documentation
+## 📚 相关文档
 
-- **[Flow Graph Editor](../flow-graph/game-event-node-editor.md)** - Edit Node Flow Graph 
-- **[Node & Connector](../flow-graph/game-event-node-connector.md)** - Understand the visual language of the graph
-- **[Node Behavior](../flow-graph/game-event-node-behavior.md)** - Node configuration and conditions
-- **[Advanced Logic Patterns](../flow-graph/advanced-logic-patterns.md)** - How the system executes Triggers versus Chains
-- **[Programmatic Flow](../scripting/programmatic-flow.md)** - How to Implement Process Control via FlowGraph API
-- **[Best Practices](../scripting/best-practices.md)** - Architectural patterns for complex systems
+- **[流程图编辑器](../flow-graph/game-event-node-editor.md)** - 编辑节点流程图
+- **[节点与连接器](../flow-graph/game-event-node-connector.md)** - 理解图表的可视化语言
+- **[节点行为](../flow-graph/game-event-node-behavior.md)** - 节点配置和条件
+- **[高级逻辑模式](../flow-graph/advanced-logic-patterns.md)** - 系统如何执行触发器与链式
+- **[编程流程](../scripting/programmatic-flow.md)** - 如何通过FlowGraph API实现流程控制
+- **[最佳实践](../scripting/best-practices.md)** - 复杂系统的架构模式

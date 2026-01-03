@@ -1,403 +1,403 @@
 ﻿---
-sidebar_label: '08 Repeating Event'
+sidebar_label: '08 重复事件'
 sidebar_position: 9
 ---
 
 import VideoGif from '@site/src/components/Video/VideoGif';
 
-# 08 Repeating Event: Automated Loops
+# 08 重复事件：自动化循环
 
 <!-- <VideoGif src="/video/game-event-system/08-repeating-event.mp4" /> -->
 
-## 📋 Overview
+## 📋 概述
 
-Normally, creating a repeating pulse (like radar scans or poison damage) requires writing timer loops with `InvokeRepeating` or coroutines in C#. The GameEvent System moves this logic into the **Event Asset** itself—no code loops needed. Configure once in the Editor, then `Raise()` automatically handles the repetition.
+通常，创建重复脉冲（如雷达扫描或毒性伤害）需要在C#中使用 `InvokeRepeating` 或协程编写计时器循环。游戏事件系统将这个逻辑移到了**事件资产**本身——无需代码循环。在编辑器中配置一次，然后 `Raise()` 自动处理重复。
 
-:::tip 💡 What You'll Learn
-- How to configure repeat intervals and counts in the Behavior Window
-- The difference between finite loops (N times) and infinite loops (forever)
-- How to cancel infinite loops with `.Cancel()`
-- When to use repeating events vs manual triggers
+:::tip 💡 您将学到
+- 如何在行为窗口中配置重复间隔和次数
+- 有限循环（N次）和无限循环（永久）的区别
+- 如何使用 `.Cancel()` 取消无限循环
+- 何时使用重复事件而非手动触发
 
 :::
 
 ---
 
-## 🎬 Demo Scene
+## 🎬 示例场景
 ```
 Assets/TinyGiants/GameEventSystem/Demo/08_RepeatingEvent/08_RepeatingEvent.unity
 ```
 
-### Scene Composition
+### 场景构成
 
-**Visual Elements:**
-- 📡 **SonarBeacon** - Central tower beacon
-  - Black cylindrical tower with grey base
-  - **RotatingCore** - Spinning element at the top (rotation speed indicates active mode)
-  - Emits expanding cyan shockwave rings when pulsing
+**视觉元素：**
+- 📡 **SonarBeacon** - 中央塔式信标
+  - 黑色圆柱形塔身，灰色底座
+  - **RotatingCore** - 顶部旋转元素（旋转速度指示激活模式）
+  - 脉冲时发射扩张的青色冲击波环
   
-- 🎯 **ScanTargets** - Four floating green cubes scattered around the beacon
-  - Display "?" text by default
-  - Change to red material and show "DETECTED" when hit by shockwave
-  - Reset to green after brief highlight
+- 🎯 **ScanTargets** - 四个分散在信标周围的绿色悬浮立方体
+  - 默认显示"?"文本
+  - 被冲击波击中时变为红色材质并显示"DETECTED"
+  - 短暂高亮后重置为绿色
 
-- 🔵 **Cyan Ring** - Large circular boundary line
-  - Indicates maximum scan range (40 units radius)
-  - Visual guide for pulse expansion area
+- 🔵 **Cyan Ring** - 大型圆形边界线
+  - 指示最大扫描范围（40单位半径）
+  - 脉冲扩展区域的视觉指引
 
-**UI Layer (Canvas):**
-- 🎮 **Three Buttons** - Bottom of the screen
-  - "Activate Beacon" (White) → Triggers `RepeatingEventRaiser.ActivateBeacon()`
-  - "Toggle Mode (Finite[5])" → Triggers `RepeatingEventRaiser.ToggleMode()`
-    - Switches between Finite and Infinite modes
-    - Text updates to show current mode
-  - "StopSignal" (White) → Triggers `RepeatingEventRaiser.StopSignal()`
+**UI层（Canvas）：**
+- 🎮 **三个按钮** - 屏幕底部
+  - "Activate Beacon"（白色）→ 触发 `RepeatingEventRaiser.ActivateBeacon()`
+  - "Toggle Mode (Finite[5])" → 触发 `RepeatingEventRaiser.ToggleMode()`
+    - 在有限和无限模式之间切换
+    - 文本更新显示当前模式
+  - "StopSignal"（白色）→ 触发 `RepeatingEventRaiser.StopSignal()`
 
-**Game Logic Layer (Demo Scripts):**
-- 📤 **RepeatingEventRaiser** - GameObject with the raiser script
-  - Manages two events: `onFinitePulseEvent` and `onInfinitePulseEvent`
-  - Switches between modes and controls beacon rotation speed
-  - Calls `.Raise()` once—system handles repetition automatically
+**游戏逻辑层（示例脚本）：**
+- 📤 **RepeatingEventRaiser** - 带有触发器脚本的游戏对象
+  - 管理两个事件：`onFinitePulseEvent` 和 `onInfinitePulseEvent`
+  - 在模式之间切换并控制信标旋转速度
+  - 仅调用一次 `.Raise()` ——系统自动处理重复
 
-- 📥 **RepeatingEventReceiver** - GameObject with the receiver script
-  - Listens to pulse events
-  - Spawns shockwave VFX and sonar audio
-  - Runs physics-based scan routine to detect targets
+- 📥 **RepeatingEventReceiver** - 带有接收器脚本的游戏对象
+  - 监听脉冲事件
+  - 生成冲击波特效和声呐音频
+  - 运行基于物理的扫描例程来检测目标
 
-**Audio-Visual Feedback:**
-- 💫 **ShockwaveVFX** - Expanding cyan particle ring
-- 🔊 **Sonar Ping** - Audio pulse on each scan
-- 🎵 **Toggle/Stop Sounds** - UI feedback
-
----
-
-## 🎮 How to Interact
-
-### The Two Loop Modes
-
-This demo showcases two distinct looping patterns:
-
-**Finite Mode (5 Pulses):**
-- Interval: 1.5 seconds
-- Count: 5 repetitions
-- **Behavior:** Fires 5 times automatically, then stops
-
-**Infinite Mode (Continuous):**
-- Interval: 1.0 second
-- Count: -1 (Infinite Loop)
-- **Behavior:** Fires forever until manually canceled
+**音视频反馈：**
+- 💫 **ShockwaveVFX** - 扩张的青色粒子环
+- 🔊 **Sonar Ping** - 每次扫描的音频脉冲
+- 🎵 **Toggle/Stop Sounds** - UI反馈音效
 
 ---
 
-### Step 1: Enter Play Mode
+## 🎮 如何交互
 
-Press the **Play** button in Unity. The beacon's core rotates slowly (idle state).
+### 两种循环模式
 
-**UI State:**
-- Mode button shows: "Toggle Mode (Finite[5])"
-- Beacon rotation: ~20°/sec (idle speed)
+本示例展示了两种不同的循环模式：
+
+**有限模式（5次脉冲）：**
+- 间隔：1.5秒
+- 次数：5次重复
+- **行为：** 自动触发5次，然后停止
+
+**无限模式（连续）：**
+- 间隔：1.0秒
+- 次数：-1（无限循环）
+- **行为：** 永久触发直到手动取消
 
 ---
 
-### Step 2: Test Finite Loop Mode
+### 步骤1：进入播放模式
 
-**Current Mode Check:**
-Ensure the button displays **"Toggle Mode (Finite[5])"** (default mode).
+在Unity中按下**播放**按钮。信标的核心缓慢旋转（空闲状态）。
 
-**Click "Activate Beacon":**
+**UI状态：**
+- 模式按钮显示："Toggle Mode (Finite[5])"
+- 信标旋转：约20°/秒（空闲速度）
 
-**What Happens:**
-1. 🎯 Beacon core rotation **speeds up** to 150°/sec
-2. 📡 **First pulse** fires immediately
-   - Cyan shockwave ring spawns and expands outward
-   - Sonar ping sound plays
-   - Green cubes turn red briefly when ring reaches them
-   - Console: `[Raiser] Beacon Activated. Mode: Finite (5x)`
-   - Console: `[Receiver] Pulse #1 emitted.`
+---
 
-3. ⏱️ **1.5 seconds later** - Second pulse
-   - Console: `[Receiver] Pulse #2 emitted.`
-   - Another shockwave expands
-   - Targets flash red again
+### 步骤2：测试有限循环模式
 
-4. ⏱️ **Pulses 3, 4, 5** continue at 1.5s intervals
-   - Console counts up to `[Receiver] Pulse #5 emitted.`
+**当前模式检查：**
+确保按钮显示**"Toggle Mode (Finite[5])"**（默认模式）。
 
-5. ✅ **After 5th pulse** - Auto-stop
-   - Beacon core rotation **slows down** to 20°/sec (idle)
-   - No more pulses fire
-   - System automatically stopped—no manual intervention
+**点击"Activate Beacon"：**
 
-**Timeline:**
+**发生的事情：**
+1. 🎯 信标核心旋转**加速**至150°/秒
+2. 📡 **第一次脉冲**立即触发
+   - 青色冲击波环生成并向外扩张
+   - 播放声呐脉冲声音
+   - 环到达时绿色立方体短暂变红
+   - 控制台：`[Raiser] Beacon Activated. Mode: Finite (5x)`
+   - 控制台：`[Receiver] Pulse #1 emitted.`
+
+3. ⏱️ **1.5秒后** - 第二次脉冲
+   - 控制台：`[Receiver] Pulse #2 emitted.`
+   - 另一个冲击波扩张
+   - 目标再次闪红
+
+4. ⏱️ **脉冲3、4、5**以1.5秒间隔继续
+   - 控制台计数至 `[Receiver] Pulse #5 emitted.`
+
+5. ✅ **第5次脉冲后** - 自动停止
+   - 信标核心旋转**减速**至20°/秒（空闲）
+   - 不再触发脉冲
+   - 系统自动停止——无需手动干预
+
+**时间线：**
 ```
-🖼️ T+0.0s | Initial
-⚡ Pulse #1 (First Trigger)
+🖼️ T+0.0s | 初始
+⚡ 脉冲 #1（首次触发）
 │
-┆  (Δ 1.5s Loop)
+┆  (Δ 1.5s 循环)
 ▼
-🖼️ T+1.5s | Repeat 1
-⚡ Pulse #2
+🖼️ T+1.5s | 重复 1
+⚡ 脉冲 #2
 │
-┆  (Δ 1.5s Loop)
+┆  (Δ 1.5s 循环)
 ▼
-🖼️ T+3.0s | Repeat 2
-⚡ Pulse #3
+🖼️ T+3.0s | 重复 2
+⚡ 脉冲 #3
 │
-┆  (Δ 1.5s Loop)
+┆  (Δ 1.5s 循环)
 ▼
-🖼️ T+4.5s | Repeat 3
-⚡ Pulse #4
+🖼️ T+4.5s | 重复 3
+⚡ 脉冲 #4
 │
-┆  (Δ 1.5s Loop)
+┆  (Δ 1.5s 循环)
 ▼
-🖼️ T+6.0s | Repeat 4
-⚡ Pulse #5 (Final)
+🖼️ T+6.0s | 重复 4
+⚡ 脉冲 #5（最终）
 │
-┆  (Δ 1.5s Gap)
+┆  (Δ 1.5s 间隔)
 ▼
-🛑 T+7.5s | Lifecycle End
-🏁 [ Auto-stopped: No Pulse #6 ]
+🛑 T+7.5s | 生命周期结束
+🏁 [ 自动停止：无脉冲 #6 ]
 ```
 
-**Result:** ✅ Event repeated exactly 5 times, then terminated automatically.
+**结果：** ✅ 事件精确重复5次，然后自动终止。
 
 ---
 
-### Step 3: Test Infinite Loop Mode
+### 步骤3：测试无限循环模式
 
-**Click "Toggle Mode":**
-- Button text changes to: "Toggle Mode (Infinite)"
-- Toggle sound plays
-- If beacon was active, it stops first
-- Console: Mode switched
+**点击"Toggle Mode"：**
+- 按钮文本变为："Toggle Mode (Infinite)"
+- 播放切换声音
+- 如果信标处于激活状态，先停止
+- 控制台：模式已切换
 
-**Click "Activate Beacon":**
+**点击"Activate Beacon"：**
 
-**What Happens:**
-1. 🎯 Beacon core rotation **speeds up** to 300°/sec (faster than finite mode!)
-2. 📡 **Continuous pulses** begin
-   - First pulse fires immediately
-   - Console: `[Raiser] Beacon Activated. Mode: Infinite`
-   - Console: `[Receiver] Pulse #1 emitted.`
+**发生的事情：**
+1. 🎯 信标核心旋转**加速**至300°/秒（比有限模式更快！）
+2. 📡 **连续脉冲**开始
+   - 第一次脉冲立即触发
+   - 控制台：`[Raiser] Beacon Activated. Mode: Infinite`
+   - 控制台：`[Receiver] Pulse #1 emitted.`
 
-3. ⏱️ **Every 1.0 second** - New pulse
-   - Faster interval than finite mode (1.0s vs 1.5s)
-   - Pulses keep coming: #2, #3, #4, #5...
-   - Counter increments indefinitely
+3. ⏱️ **每1.0秒** - 新脉冲
+   - 比有限模式间隔更快（1.0秒 vs 1.5秒）
+   - 脉冲持续到来：#2、#3、#4、#5...
+   - 计数器无限递增
 
-4. ⚠️ **Never stops automatically**
-   - Pulse #10, #20, #100...
-   - Will continue until manually canceled
-   - Beacon spins rapidly throughout
+4. ⚠️ **永不自动停止**
+   - 脉冲 #10、#20、#100...
+   - 将持续直到手动取消
+   - 信标在整个过程中快速旋转
 
-**Observation Period:**
-Let it run for ~10 seconds to see it won't auto-stop. Console shows pulse counts increasing without limit.
+**观察期：**
+让它运行约10秒以观察它不会自动停止。控制台显示脉冲计数无限增加。
 
 ---
 
-### Step 4: Manual Cancellation
+### 步骤4：手动取消
 
-**While Infinite Mode is Running:**
+**在无限模式运行时：**
 
-**Click "StopSignal":**
+**点击"StopSignal"：**
 
-**What Happens:**
-1. 🛑 Pulses **cease immediately**
-   - Current pulse finishes, but no new pulse is scheduled
-   - Beacon core rotation **slows to idle** (20°/sec)
-   - Console: `[Raiser] Signal Interrupted manually.`
+**发生的事情：**
+1. 🛑 脉冲**立即停止**
+   - 当前脉冲完成，但不再安排新脉冲
+   - 信标核心旋转**减速至空闲**（20°/秒）
+   - 控制台：`[Raiser] Signal Interrupted manually.`
 
-2. 🔄 System state resets
-   - Pulse counter resets to 0
-   - Power down sound plays
-   - Beacon returns to standby mode
+2. 🔄 系统状态重置
+   - 脉冲计数器重置为0
+   - 播放断电声音
+   - 信标返回待机模式
 
-**Result:** ✅ Infinite loop successfully canceled via `.Cancel()` API.
+**结果：** ✅ 通过 `.Cancel()` API成功取消无限循环。
 
-:::note 🔑 Key Difference
-- **Finite Mode:** Stops automatically after N repetitions
-- **Infinite Mode:** Requires manual `.Cancel()` to stop
+:::note 🔑 关键区别
+- **有限模式：** N次重复后自动停止
+- **无限模式：** 需要手动 `.Cancel()` 来停止
 
 :::
 
 ---
 
-## 🏗️ Scene Architecture
+## 🏗️ 场景架构
 
-### The Repeating Event System
+### 重复事件系统
 
-Unlike delayed events (wait once, execute once), repeating events use a **timer loop**:
+与延迟事件（等待一次，执行一次）不同，重复事件使用**计时器循环**：
 ```
-🚀 Initiation: Raise()
+🚀 启动：Raise()
 │
-▼ ❮─── Loop Cycle ───┐
-⚡ [ Execute Action ]  │
-│                    │
-⏳ [ Wait Interval ]  │ (Δ Delta Time)
-│                    │
-🔄 [ Repeat Check ] ──┘ (If Remaining > 0)
+▼ ❮─── 循环周期 ───┐
+⚡ [ 执行动作 ]     │
+│                  │
+⏳ [ 等待间隔 ]     │ (Δ 增量时间)
+│                  │
+🔄 [ 重复检查 ] ────┘ (如果剩余 > 0)
 │
-🛑 [ Stop Condition ] ➔ 🏁 Lifecycle Finalized
+🛑 [ 停止条件 ] ➔ 🏁 生命周期结束
 ```
 
-**Stop Conditions:**
-1. **Repeat Count Reached:** Finite mode auto-stops after N executions
-2. **Manual Cancel:** `.Cancel()` terminates infinite loops immediately
-3. **Scene Unload:** All pending events are cleaned up
+**停止条件：**
+1. **达到重复次数：** 有限模式在N次执行后自动停止
+2. **手动取消：** `.Cancel()` 立即终止无限循环
+3. **场景卸载：** 所有待执行事件被清理
 
-**Internal Scheduling:**
-- GameEventManager maintains a scheduler queue
-- Each repeating event has an internal timer
-- Timer resets after each execution to maintain precise intervals
+**内部调度：**
+- GameEventManager维护一个调度器队列
+- 每个重复事件都有一个内部计时器
+- 每次执行后计时器重置以保持精确间隔
 
 ---
 
-### Event Definitions
+### 事件定义
 
-![Game Event Editor](/img/game-event-system/examples/08-repeating-event/demo-08-editor.png)
+![游戏事件编辑器](/img/game-event-system/examples/08-repeating-event/demo-08-editor.png)
 
-| Event Name             | Type               | Repeat Interval | Repeat Count  |
-| ---------------------- | ------------------ | --------------- | ------------- |
-| `onFinitePulseEvent`   | `GameEvent` (void) | 1.5 seconds     | 5             |
-| `onInfinitePulseEvent` | `GameEvent` (void) | 1.0 second      | -1 (Infinite) |
+| 事件名称               | 类型               | 重复间隔 | 重复次数      |
+| ---------------------- | ------------------ | -------- | ------------- |
+| `onFinitePulseEvent`   | `GameEvent`（void） | 1.5秒    | 5             |
+| `onInfinitePulseEvent` | `GameEvent`（void） | 1.0秒    | -1（无限）    |
 
-**Same Receiver Method:**
-Both events are bound to `RepeatingEventReceiver.OnPulseReceived()`. The receiver doesn't know or care which event triggered it—it just responds to each pulse.
-
----
-
-### Behavior Configuration Comparison
-
-#### Finite Loop Configuration
-
-Click the **(void)** icon for `onFinitePulseEvent` to open the Behavior Window:
-
-![Finite Behavior](/img/game-event-system/examples/08-repeating-event/demo-08-behavior-finite.png)
-
-**Schedule Configuration:**
-- ⏱️ **Action Delay:** `0` (no initial delay)
-- 🔄 **Repeat Interval:** `1.5` seconds
-  - Time between each pulse execution
-- 🔢 **Repeat Count:** `5`
-  - Total number of pulses
-  - Stops automatically after 5th execution
-
-**Behavior:**
-```
-🖼️ T+0.0s | Initial Raise
-🚀 Raise() ➔ ⚡ Execute #1
-│
-┆  (Δ 1.5s Interval)
-▼
-🖼️ T+1.5s | Repeat 1/4
-⚡ Execute #2
-│
-┆  (Δ 1.5s Interval)
-▼
-🖼️ T+3.0s | Repeat 2/4
-⚡ Execute #3
-│
-┆  (Δ 1.5s Interval)
-▼
-🖼️ T+4.5s | Repeat 3/4
-⚡ Execute #4
-│
-┆  (Δ 1.5s Interval)
-▼
-🖼️ T+6.0s | Repeat 4/4
-⚡ Execute #5 ➔ [Final Execution]
-│
-🏁 T+7.5s | Lifecycle End
-🛑 [ Sequence Terminated: Counter at 0 ]
-```
+**相同的接收器方法：**
+两个事件都绑定到 `RepeatingEventReceiver.OnPulseReceived()`。接收器不知道也不关心哪个事件触发了它——它只是响应每个脉冲。
 
 ---
 
-#### Infinite Loop Configuration
+### 行为配置比较
 
-Click the **(void)** icon for `onInfinitePulseEvent` to open the Behavior Window:
+#### 有限循环配置
 
-![Infinite Behavior](/img/game-event-system/examples/08-repeating-event/demo-08-behavior-infinite.png)
+点击 `onFinitePulseEvent` 的**(void)**图标打开行为窗口：
 
-**Schedule Configuration:**
-- ⏱️ **Action Delay:** `0`
-- 🔄 **Repeat Interval:** `1` second (faster than finite mode)
-- 🔢 **Repeat Count:** `Infinite Loop` ♾️
-  - Special value: `-1` means unlimited
-  - Will never auto-stop
+![有限行为](/img/game-event-system/examples/08-repeating-event/demo-08-behavior-finite.png)
 
-**Behavior:**
+**调度配置：**
+- ⏱️ **动作延迟：** `0`（无初始延迟）
+- 🔄 **重复间隔：** `1.5`秒
+  - 每次脉冲执行之间的时间
+- 🔢 **重复次数：** `5`
+  - 脉冲总数
+  - 第5次执行后自动停止
+
+**行为：**
 ```
-🚀 Initiation: Raise()
+🖼️ T+0.0s | 初始触发
+🚀 Raise() ➔ ⚡ 执行 #1
 │
-▼ ❮━━━━━━━━━  Perpetual Loop  ━━━━━━━━━┓
-⚡ Execute #1 (Initial)                ┃
-│                                      ┃
-⏳ (Wait 1.0s)                         ┃
-│                                      ┃
-⚡ Execute #2 (Repeat)                 ┃
-│                                      ┃
-⏳ (Wait 1.0s)                         ┃
-│                                      ┃
-⚡ Execute #N... (Repeat)              ┛
+┆  (Δ 1.5s 间隔)
+▼
+🖼️ T+1.5s | 重复 1/4
+⚡ 执行 #2
 │
-│   [ External Intervention Required ]
-└─► 🛠️ Call: .Cancel() 
-    └─► 🛑 Loop Terminated ➔ 🏁 Cleanup
+┆  (Δ 1.5s 间隔)
+▼
+🖼️ T+3.0s | 重复 2/4
+⚡ 执行 #3
+│
+┆  (Δ 1.5s 间隔)
+▼
+🖼️ T+4.5s | 重复 3/4
+⚡ 执行 #4
+│
+┆  (Δ 1.5s 间隔)
+▼
+🖼️ T+6.0s | 重复 4/4
+⚡ 执行 #5 ➔ [最终执行]
+│
+🏁 T+7.5s | 生命周期结束
+🛑 [ 序列终止：计数器归零 ]
 ```
 
-:::tip ⚙️ Configuring Infinite Loops
+---
 
-To set infinite repetition, click the **Infinite Loop** toggle button (♾️ icon) next to Repeat Count. This automatically sets the value to `-1`.
+#### 无限循环配置
+
+点击 `onInfinitePulseEvent` 的**(void)**图标打开行为窗口：
+
+![无限行为](/img/game-event-system/examples/08-repeating-event/demo-08-behavior-infinite.png)
+
+**调度配置：**
+- ⏱️ **动作延迟：** `0`
+- 🔄 **重复间隔：** `1`秒（比有限模式更快）
+- 🔢 **重复次数：** `Infinite Loop` ♾️
+  - 特殊值：`-1` 表示无限制
+  - 永不自动停止
+
+**行为：**
+```
+🚀 启动：Raise()
+│
+▼ ❮━━━━━━━━━  永久循环  ━━━━━━━━━┓
+⚡ 执行 #1（初始）              ┃
+│                              ┃
+⏳ (等待 1.0s)                 ┃
+│                              ┃
+⚡ 执行 #2（重复）              ┃
+│                              ┃
+⏳ (等待 1.0s)                 ┃
+│                              ┃
+⚡ 执行 #N...（重复）           ┛
+│
+│   [ 需要外部干预 ]
+└─► 🛠️ 调用：.Cancel() 
+    └─► 🛑 循环终止 ➔ 🏁 清理
+```
+
+:::tip ⚙️ 配置无限循环
+
+要设置无限重复，点击重复次数旁边的**Infinite Loop**切换按钮（♾️图标）。这会自动将值设置为 `-1`。
 
 :::
 
 ---
 
-### Sender Setup (RepeatingEventRaiser)
+### 发送器设置（RepeatingEventRaiser）
 
-Select the **RepeatingEventRaiser** GameObject:
+选择**RepeatingEventRaiser**游戏对象：
 
-![RepeatingEventRaiser Inspector](/img/game-event-system/examples/08-repeating-event/demo-08-inspector.png)
+![RepeatingEventRaiser检查器](/img/game-event-system/examples/08-repeating-event/demo-08-inspector.png)
 
-**Event Channels:**
-- `Finite Pulse Event`: `onFinitePulseEvent`
-  - Tooltip: "Interval = 1.0s, Count = 5"
-- `Infinite Pulse Event`: `onInfinitePulseEvent`
-  - Tooltip: "Interval = 0.5s, Count = -1 (Infinite)"
+**事件通道：**
+- `Finite Pulse Event`：`onFinitePulseEvent`
+  - 提示："间隔 = 1.0秒，次数 = 5"
+- `Infinite Pulse Event`：`onInfinitePulseEvent`
+  - 提示："间隔 = 0.5秒，次数 = -1（无限）"
 
-**References:**
-- `Repeating Event Receiver`: RepeatingEventReceiver (for coordination)
+**引用：**
+- `Repeating Event Receiver`：RepeatingEventReceiver（用于协调）
 
-**Visual References:**
-- `Rotating Core`: RotatingCore (Transform) - visual indicator of active state
-- `Mode Text`: Text (TMP) (TextMeshProUGUI) - displays current mode
-
----
-
-### Receiver Setup (RepeatingEventReceiver)
-
-Select the **RepeatingEventReceiver** GameObject:
-
-![RepeatingEventReceiver Inspector](/img/game-event-system/examples/08-repeating-event/demo-08-receiver.png)
-
-**Configuration:**
-- `Beacon Origin`: SonarBeacon (Transform) - pulse spawn point
-
-**Visual Resources:**
-- `Shockwave Prefab`: ShockwaveVFX (Particle System) - expanding ring effect
-- `Scanned Material`: Prototype_Guide_Red - target highlight material
-- `Default Material`: Prototype_Guide_Default - target normal material
-
-**Audio:**
-- `Sonar Ping Clip`: SonarPingSFX - pulse sound
-- `Power Down Clip`: PowerDownSFX - stop sound
+**视觉引用：**
+- `Rotating Core`：RotatingCore（Transform）- 激活状态的视觉指示器
+- `Mode Text`：Text（TMP）（TextMeshProUGUI）- 显示当前模式
 
 ---
 
-## 💻 Code Breakdown
+### 接收器设置（RepeatingEventReceiver）
 
-### 📤 RepeatingEventRaiser.cs (Sender)
+选择**RepeatingEventReceiver**游戏对象：
+
+![RepeatingEventReceiver检查器](/img/game-event-system/examples/08-repeating-event/demo-08-receiver.png)
+
+**配置：**
+- `Beacon Origin`：SonarBeacon（Transform）- 脉冲生成点
+
+**视觉资源：**
+- `Shockwave Prefab`：ShockwaveVFX（粒子系统）- 扩张环效果
+- `Scanned Material`：Prototype_Guide_Red - 目标高亮材质
+- `Default Material`：Prototype_Guide_Default - 目标正常材质
+
+**音频：**
+- `Sonar Ping Clip`：SonarPingSFX - 脉冲声音
+- `Power Down Clip`：PowerDownSFX - 停止声音
+
+---
+
+## 💻 代码详解
+
+### 📤 RepeatingEventRaiser.cs（发送器）
 ```csharp
 using UnityEngine;
 using TinyGiants.GameEventSystem.Runtime;
@@ -406,10 +406,10 @@ using TMPro;
 public class RepeatingEventRaiser : MonoBehaviour
 {
     [Header("Event Channels")]
-    [Tooltip("Configured in Editor: Interval = 1.5s, Count = 5.")]
+    [Tooltip("在编辑器中配置：间隔 = 1.5秒，次数 = 5。")]
     [GameEventDropdown] public GameEvent finitePulseEvent;
 
-    [Tooltip("Configured in Editor: Interval = 1.0s, Count = -1 (Infinite).")]
+    [Tooltip("在编辑器中配置：间隔 = 1.0秒，次数 = -1（无限）。")]
     [GameEventDropdown] public GameEvent infinitePulseEvent;
 
     [SerializeField] private Transform rotatingCore;
@@ -421,22 +421,22 @@ public class RepeatingEventRaiser : MonoBehaviour
 
     private void Update()
     {
-        // Visual feedback: Rotation speed indicates state
+        // 视觉反馈：旋转速度指示状态
         if (rotatingCore != null)
         {
             float speed = _isActive 
-                ? (_isInfiniteMode ? 300f : 150f)  // Active: fast or medium
-                : 20f;                              // Idle: slow
+                ? (_isInfiniteMode ? 300f : 150f)  // 激活：快速或中速
+                : 20f;                              // 空闲：慢速
             rotatingCore.Rotate(Vector3.up, speed * Time.deltaTime);
         }
     }
 
     /// <summary>
-    /// Button Action: Starts the repeating event loop.
+    /// 按钮动作：启动重复事件循环。
     /// 
-    /// CRITICAL: This calls Raise() only ONCE.
-    /// The Event System's scheduler handles all repetition automatically
-    /// based on the Repeat Interval and Repeat Count configured in the Editor.
+    /// 关键：这只调用一次 Raise()。
+    /// 事件系统的调度器根据编辑器中配置的重复间隔和重复次数
+    /// 自动处理所有重复。
     /// </summary>
     public void ActivateBeacon()
     {
@@ -444,14 +444,14 @@ public class RepeatingEventRaiser : MonoBehaviour
 
         _isActive = true;
         
-        // Select which event to use based on current mode
+        // 根据当前模式选择使用哪个事件
         _currentEvent = _isInfiniteMode ? infinitePulseEvent : finitePulseEvent;
 
         if (_currentEvent != null)
         {
-            // THE MAGIC: Single Raise() call starts entire loop
-            // System checks event's Repeat Interval & Repeat Count
-            // Automatically schedules all future executions
+            // 魔法时刻：单次 Raise() 调用启动整个循环
+            // 系统检查事件的重复间隔和重复次数
+            // 自动调度所有未来的执行
             _currentEvent.Raise();
             
             Debug.Log($"[Raiser] Beacon Activated. Mode: " +
@@ -460,12 +460,12 @@ public class RepeatingEventRaiser : MonoBehaviour
     }
     
     /// <summary>
-    /// Button Action: Switches between Finite and Infinite modes.
-    /// Stops any active loop before switching.
+    /// 按钮动作：在有限和无限模式之间切换。
+    /// 切换前停止任何激活的循环。
     /// </summary>
     public void ToggleMode()
     {
-        // Must stop before switching modes
+        // 切换模式前必须停止
         if (_isActive) StopSignal();
 
         _isInfiniteMode = !_isInfiniteMode;
@@ -473,17 +473,17 @@ public class RepeatingEventRaiser : MonoBehaviour
     }
 
     /// <summary>
-    /// Button Action: Manually cancels the active loop.
+    /// 按钮动作：手动取消激活的循环。
     /// 
-    /// Essential for Infinite loops - they never auto-stop.
-    /// For Finite loops, this allows early termination.
+    /// 对于无限循环至关重要 - 它们永不自动停止。
+    /// 对于有限循环，这允许提前终止。
     /// </summary>
     public void StopSignal()
     {
         if (!_isActive || _currentEvent == null) return;
 
-        // THE CRITICAL API: Cancel removes event from scheduler
-        // Stops timer immediately - no more pulses will fire
+        // 关键API：Cancel从调度器中移除事件
+        // 立即停止计时器 - 不再触发脉冲
         _currentEvent.Cancel();
         
         _isActive = false;
@@ -502,15 +502,15 @@ public class RepeatingEventRaiser : MonoBehaviour
 }
 ```
 
-**Key Points:**
-- 🎯 **Single Raise()** - Only called once to start entire loop
-- 🔀 **Mode Selection** - Switches between two pre-configured events
-- 🛑 **Cancel API** - Stops infinite loops or terminates finite loops early
-- 🎨 **Visual Feedback** - Rotation speed indicates active state and mode
+**要点：**
+- 🎯 **单次Raise()** - 仅调用一次即可启动整个循环
+- 🔀 **模式选择** - 在两个预配置事件之间切换
+- 🛑 **取消API** - 停止无限循环或提前终止有限循环
+- 🎨 **视觉反馈** - 旋转速度指示激活状态和模式
 
 ---
 
-### 📥 RepeatingEventReceiver.cs (Listener)
+### 📥 RepeatingEventReceiver.cs（监听器）
 ```csharp
 using UnityEngine;
 using System.Collections;
@@ -532,17 +532,17 @@ public class RepeatingEventReceiver : MonoBehaviour
     private int _pulseCount = 0;
 
     /// <summary>
-    /// [Event Callback - Repeating Execution]
+    /// [事件回调 - 重复执行]
     /// 
-    /// Bound to both 'onFinitePulseEvent' and 'onInfinitePulseEvent'.
+    /// 绑定到 'onFinitePulseEvent' 和 'onInfinitePulseEvent'。
     /// 
-    /// This method executes:
-    /// - Immediately when Raise() is called (first pulse)
-    /// - Then repeatedly at each Repeat Interval
-    /// - Until Repeat Count reached (finite) or Cancel() called (infinite)
+    /// 此方法执行：
+    /// - 调用 Raise() 时立即执行（第一次脉冲）
+    /// - 然后在每个重复间隔重复执行
+    /// - 直到达到重复次数（有限）或调用 Cancel()（无限）
     /// 
-    /// The receiver is STATELESS - it doesn't track pulse numbers or loop status.
-    /// It simply reacts to each trigger.
+    /// 接收器是无状态的 - 它不跟踪脉冲数量或循环状态。
+    /// 它只是对每次触发做出反应。
     /// </summary>
     public void OnPulseReceived()
     {
@@ -553,7 +553,7 @@ public class RepeatingEventReceiver : MonoBehaviour
             ? beaconOrigin.position 
             : transform.position;
 
-        // Spawn visual shockwave
+        // 生成视觉冲击波
         if (shockwavePrefab != null)
         {
             var vfx = Instantiate(shockwavePrefab, spawnPos, Quaternion.identity);
@@ -561,37 +561,37 @@ public class RepeatingEventReceiver : MonoBehaviour
             Destroy(vfx.gameObject, 2.0f);
         }
 
-        // Play sonar ping with slight pitch variation
+        // 播放声呐脉冲，带有轻微音调变化
         if (sonarPingClip) 
         {
             _audioSource.pitch = Random.Range(0.95f, 1.05f);
             _audioSource.PlayOneShot(sonarPingClip);
         }
 
-        // Start physics-based target scanning
+        // 启动基于物理的目标扫描
         StartCoroutine(ScanRoutine(spawnPos));
     }
 
     public void OnPowerDown()
     {
-        _pulseCount = 0;  // Reset counter when system powers down
+        _pulseCount = 0;  // 系统断电时重置计数器
     }
 
     /// <summary>
-    /// Expands an invisible sphere from the beacon origin.
-    /// Targets within the expanding wavefront get highlighted.
+    /// 从信标原点扩展一个不可见的球体。
+    /// 扩张波前内的目标被高亮显示。
     /// </summary>
     private IEnumerator ScanRoutine(Vector3 center)
     {
-        float maxRadius = 40f;      // Match cyan ring size
-        float speed = 10f;          // Expansion speed
+        float maxRadius = 40f;      // 匹配青色环大小
+        float speed = 10f;          // 扩张速度
         float currentRadius = 0f;
 
         while (currentRadius < maxRadius)
         {
             currentRadius += speed * Time.deltaTime;
             
-            // Physics sphere cast to find targets
+            // 物理球体投射查找目标
             Collider[] hits = Physics.OverlapSphere(center, currentRadius);
             
             foreach (var hit in hits)
@@ -603,7 +603,7 @@ public class RepeatingEventReceiver : MonoBehaviour
                     {
                         float dist = Vector3.Distance(center, hit.transform.position);
                         
-                        // Only highlight if at wavefront edge (within 1 unit)
+                        // 仅在波前边缘时高亮（1单位内）
                         if (dist <= currentRadius && dist > currentRadius - 1.0f)
                         {
                             StartCoroutine(HighlightTarget(rend));
@@ -618,7 +618,7 @@ public class RepeatingEventReceiver : MonoBehaviour
 
     private IEnumerator HighlightTarget(Renderer target)
     {
-        // Flash red temporarily
+        // 临时闪红
         target.material = scannedMaterial;
         
         var tmp = target.GetComponentInChildren<TMPro.TextMeshPro>();
@@ -626,74 +626,73 @@ public class RepeatingEventReceiver : MonoBehaviour
 
         yield return new WaitForSeconds(0.4f);
 
-        // Reset to default
+        // 重置为默认
         target.material = defaultMaterial;
         if(tmp) tmp.text = "?";
     }
 }
 ```
 
-**Key Points:**
-- 🎯 **Stateless Receiver** - Doesn't track loop count or timing
-- 📡 **Physics Scanning** - Expanding sphere cast detects targets
-- 🎨 **Wavefront Detection** - Only highlights targets at shockwave edge
-- 🔢 **Pulse Counter** - Tracks total pulses received (cosmetic)
+**要点：**
+- 🎯 **无状态接收器** - 不跟踪循环计数或时间
+- 📡 **物理扫描** - 扩张的球体投射检测目标
+- 🎨 **波前检测** - 仅在冲击波边缘高亮目标
+- 🔢 **脉冲计数器** - 跟踪接收到的总脉冲（装饰性）
 
 ---
 
-## 🔑 Key Takeaways
+## 🔑 核心要点
 
-| Concept                   | Implementation                                            |
-| ------------------------- | --------------------------------------------------------- |
-| 🔄 **Repeat Interval**     | Time between each execution (configured in Editor)        |
-| 🔢 **Repeat Count**        | Number of repetitions (`N` for finite, `-1` for infinite) |
-| 🎯 **Single Raise()**      | One call starts entire loop—no manual triggers needed     |
-| ✅ **Auto-Stop**           | Finite loops terminate automatically after N executions   |
-| 🛑 **Manual Cancel**       | `.Cancel()` required to stop infinite loops               |
-| 🎨 **Stateless Receivers** | Callbacks don't need to track loop state                  |
+| 概念                  | 实现                                         |
+| --------------------- | -------------------------------------------- |
+| 🔄 **重复间隔**        | 每次执行之间的时间（在编辑器中配置）         |
+| 🔢 **重复次数**        | 重复数量（有限为 `N`，无限为 `-1`）          |
+| 🎯 **单次Raise()**     | 一次调用启动整个循环——无需手动触发           |
+| ✅ **自动停止**        | 有限循环在N次执行后自动终止                  |
+| 🛑 **手动取消**        | 需要 `.Cancel()` 来停止无限循环              |
+| 🎨 **无状态接收器**    | 回调无需跟踪循环状态                         |
 
-:::note 🎓 Design Insight
+:::note 🎓 设计洞察
 
-Repeating events are perfect for:
+重复事件非常适合：
 
-- **Periodic abilities** - Poison damage, regeneration, area denial
-- **Environmental effects** - Lava bubbles, steam vents, lighthouse beacons
-- **Spawning systems** - Enemy waves, item drops, particle bursts
-- **Radar/detection** - Sonar pulses, security scans, proximity alerts
-- **Gameplay loops** - Turn timers, checkpoint autosaves, periodic events
+- **周期性能力** - 毒性伤害、再生、区域拒止
+- **环境效果** - 熔岩气泡、蒸汽喷口、灯塔信标
+- **生成系统** - 敌人波次、物品掉落、粒子爆发
+- **雷达/检测** - 声呐脉冲、安全扫描、邻近警报
+- **游戏循环** - 回合计时器、检查点自动保存、周期性事件
 
-Use **Finite** loops when you know exactly how many times something should repeat (e.g., "fire 3 shots"). Use **Infinite** loops for ongoing effects that should continue until a specific condition is met (e.g., "pulse until player leaves area").
+当您确切知道某事应该重复多少次时使用**有限**循环（例如"射击3次"）。对于应该持续直到满足特定条件的持续效果使用**无限**循环（例如"脉冲直到玩家离开区域"）。
 
 :::
 
-:::tip 💻 Programmatic API
+:::tip 💻 编程API
 
-You can also configure loops purely via code, overriding Inspector settings:
-
+您也可以纯粹通过代码配置循环，覆盖检查器设置：
 ```csharp
-// Override Inspector settings temporarily
+// 临时覆盖检查器设置
 myEvent.RaiseRepeating(interval: 0.5f, repeatCount: 10);
 
-// Or use default Inspector settings
+// 或使用默认的检查器设置
 myEvent.Raise();
 ```
 
-This allows dynamic adjustment based on runtime conditions (e.g., difficulty modifiers, power-ups).
+这允许基于运行时条件进行动态调整（例如难度修改器、增益道具）。
 
 :::
 
 ---
 
-## 🎯 What's Next?
+## 🎯 下一步
 
-You've mastered repeating events for automated loops. Now let's explore **persistent events** that survive scene transitions.
+您已经掌握了用于自动化循环的重复事件。现在让我们探索在场景转换中存活的**持久化事件**。
 
-**Next Chapter**: Learn about cross-scene events in **[09 Persistent Event](./09-persistent-event.md)**
+**下一章**：在**[09 持久化事件](./09-persistent-event.md)**中学习跨场景事件
 
 ---
 
-## 📚 Related Documentation
+## 📚 相关文档
 
-- **[Game Event Behavior](../visual-workflow/game-event-behavior.md)** - Complete guide to schedule configuration
-- **[Raising and Scheduling](../scripting/raising-and-scheduling.md)** - API reference for `.Raise()`, `.RaiseRepeating()`, `.Cancel()`
-- **[Best Practices](../scripting/best-practices.md)** - Patterns for periodic gameplay mechanics
+- **[游戏事件行为](../visual-workflow/game-event-behavior.md)** - 调度配置完整指南
+- **[触发与调度](../scripting/raising-and-scheduling.md)** - `.Raise()`、`.RaiseRepeating()`、`.Cancel()` 的API参考
+- **[最佳实践](../scripting/best-practices.md)** - 周期性游戏机制的模式
