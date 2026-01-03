@@ -12,7 +12,11 @@
     height: 100%;
     z-index: 1;
     pointer-events: none;
-    opacity: 0.05;
+    opacity: 0.04;
+}
+
+#interactive-bg-canvas {
+    will-change: transform, opacity;
 }
 
 .mouseSpotlight {
@@ -28,6 +32,7 @@
             rgba(226, 177, 60, 0.08),
             transparent 80%
     );
+    will-change: background;
 }
 
 [data-theme='light'] .mouseSpotlight {
@@ -93,7 +98,6 @@
 [data-theme='light'] .customThemeToggle:hover { background-color: rgba(0, 0, 0, 0.05); }
 [data-theme='dark'] .customThemeToggle:hover { background-color: rgba(255, 255, 255, 0.1); }
 
-
 .langDropdownContainer {
     position: relative;
     display: flex;
@@ -132,8 +136,9 @@
 
 .langArrow {
     transition: transform 0.3s ease;
-    opacity: 0.7;
+    opacity: 0.8;
     display: block;
+    color: var(--ifm-color-primary);
 }
 
 .langArrowOpen { transform: rotate(180deg); }
@@ -189,7 +194,15 @@
     justify-content: center;
 }
 
-.heroImage { position: absolute; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+.heroImage {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+    will-change: transform;
+}
+
 .heroMask {
     position: absolute;
     inset: 0;
@@ -389,10 +402,28 @@
 }
 
 @media (max-width: 996px) {
+    /* 主页自定义容器优化：减小间距并极力靠右 */
     .customNavbarRight {
         height: 60px;
-        gap: 8px;
-        padding: 0 10px;
+        gap: 6px; /* 减小图标间距 */
+        padding: 0 5px; /* 减小右边距，使整组图标贴近边缘 */
+    }
+
+    /* 针对文档页（标准 Docusaurus 导航栏）的全局覆盖 */
+    /* 强制减小标准导航栏右侧项的容器边距 */
+    :global(.navbar__items--right) {
+        padding-right: 2px !important;
+    }
+
+    /* 压缩每个导航项之间的默认外边距 */
+    :global(.navbar__item) {
+        margin-left: 2px !important;
+        padding: 0 4px !important;
+    }
+
+    /* 专门处理 Mail 图标，确保它是最右侧且无多余间距 */
+    :global(.header-mail-link) {
+        margin-right: 0 !important;
     }
 
     .langDropButton {
@@ -403,6 +434,11 @@
 
     .langTextMain {
         font-size: 0.8rem;
+    }
+
+    @media (max-width: 360px) {
+        .langTextMain { display: none; }
+        .langArrow { margin-left: -4px; }
     }
 
     .navIcon {
