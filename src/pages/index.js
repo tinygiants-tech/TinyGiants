@@ -221,19 +221,19 @@ function LanguageDropdown() {
 
   const enFlag = useBaseUrl('/img/language/en.png');
   const zhFlag = useBaseUrl('/img/language/zh.png');
+  const jaFlag = useBaseUrl('/img/language/ja.png');
+  const koFlag = useBaseUrl('/img/language/ko.png');
 
   const languages = [
     {code: 'en', label: 'English', flag: enFlag},
-    {code: 'zh', label: '简体中文', flag: zhFlag}
+    {code: 'zh', label: '简体中文', flag: zhFlag},
+    {code: 'ja', label: '日語', flag: jaFlag},
+    {code: 'ko', label: '한국어', flag: koFlag}
   ];
 
   const getTargetUrl = (localeCode) => {
     const sitePath = localeCode === 'en' ? '/' : `/${localeCode}/`;
-
-    if (typeof window === 'undefined') {
-      return sitePath;
-    }
-
+    if (typeof window === 'undefined') return sitePath;
     try {
       const { search, hash } = window.location;
       return `${sitePath}${search}${hash}`;
@@ -242,10 +242,19 @@ function LanguageDropdown() {
     }
   };
 
+  const getCurrentFlag = () => {
+    switch (currentLocale) {
+      case 'zh': return zhFlag;
+      case 'ja': return jaFlag;
+      case 'ko': return koFlag;
+      default: return enFlag;
+    }
+  };
+
   return (
     <div className={styles.langDropdownContainer}>
       <button className={styles.langDropButton}>
-        <img src={currentLocale === 'en' ? enFlag : zhFlag} alt="" className={styles.langFlagMain}/>
+        <img src={getCurrentFlag()} alt="" className={styles.langFlagMain}/>
         <span className={styles.langTextMain}>{currentLocale.toUpperCase()}</span>
         <svg
           width="12"

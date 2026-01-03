@@ -1,0 +1,10 @@
+{
+  "title": {
+    "message": "TinyGiants",
+    "description": "The title in the navbar"
+  },
+  "logo.alt": {
+    "message": "TinyGiants Logo",
+    "description": "The alt text of navbar logo"
+  }
+}

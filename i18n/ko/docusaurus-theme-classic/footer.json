@@ -1,0 +1,38 @@
+{
+  "link.title.CORE TOOLS": {
+    "message": "CORE TOOLS",
+    "description": "The title of the footer links column with title=CORE TOOLS in the footer"
+  },
+  "link.title.COMMUNITY": {
+    "message": "COMMUNITY",
+    "description": "The title of the footer links column with title=COMMUNITY in the footer"
+  },
+  "link.title.SUPPORT": {
+    "message": "SUPPORT",
+    "description": "The title of the footer links column with title=SUPPORT in the footer"
+  },
+  "link.item.label.Game Event System": {
+    "message": "Game Event System",
+    "description": "The label of footer link with label=Game Event System linking to /docs/game-event-system/intro/overview"
+  },
+  "link.item.label.Asset Store Page": {
+    "message": "Asset Store Page",
+    "description": "The label of footer link with label=Asset Store Page linking to https://assetstore.unity.com/"
+  },
+  "link.item.label.Official Discord": {
+    "message": "Official Discord",
+    "description": "The label of footer link with label=Official Discord linking to https://discord.tinygiants.tech"
+  },
+  "link.item.label.Unity Forum": {
+    "message": "Unity Forum",
+    "description": "The label of footer link with label=Unity Forum linking to https://forum.unity.com/"
+  },
+  "link.item.label.Technical Support": {
+    "message": "Technical Support",
+    "description": "The label of footer link with label=Technical Support linking to mailto:support@tinygiants.tech"
+  },
+  "copyright": {
+    "message": "Copyright © 2026 <strong>TinyGiants</strong>. <br/> <small style=\"opacity: 0.6; font-weight: 400;\">Crafting professional Unity tools and games for giants with tiny ideas.</small>",
+    "description": "The footer copyright"
+  }
+}
