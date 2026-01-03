@@ -405,20 +405,20 @@
     /* 主页自定义容器优化：减小间距并极力靠右 */
     .customNavbarRight {
         height: 60px;
-        gap: 6px; /* 减小图标间距 */
+        gap: 10px; /* 减小图标间距 */
         padding: 0 5px; /* 减小右边距，使整组图标贴近边缘 */
     }
 
     /* 针对文档页（标准 Docusaurus 导航栏）的全局覆盖 */
     /* 强制减小标准导航栏右侧项的容器边距 */
     :global(.navbar__items--right) {
-        padding-right: 2px !important;
+        padding-right: 0px !important;
     }
 
     /* 压缩每个导航项之间的默认外边距 */
     :global(.navbar__item) {
-        margin-left: 2px !important;
-        padding: 0 4px !important;
+        margin-left: 0px !important;
+        padding: 0 2px !important;
     }
 
     /* 专门处理 Mail 图标，确保它是最右侧且无多余间距 */
