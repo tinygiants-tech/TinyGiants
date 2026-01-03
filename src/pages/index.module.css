@@ -120,7 +120,41 @@
     position: relative;
     display: flex;
     align-items: center;
-    height: 100%;
+    height: 60px;
+}
+
+.langDropdownContainer:hover .langMenu {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+    display: block;
+    pointer-events: auto;
+    animation: dropdownFadeIn 0.2s ease-out;
+}
+
+.langDropdownContainer:hover .langArrow {
+    transform: rotate(180deg);
+}
+
+.langMenu::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 0;
+    right: 0;
+    height: 12px;
+    background: transparent;
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .langDropButton {
@@ -135,6 +169,7 @@
     color: var(--ifm-color-primary);
     font-weight: 700;
     font-family: var(--font-family-heading);
+    margin: 0;
     transition: opacity 0.2s;
 }
 
@@ -179,6 +214,12 @@
     min-width: 140px;
     z-index: 1000;
     overflow: hidden;
+    display: block;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(5px);
+    transition: all 0.2s ease;
+    pointer-events: none;
 }
 
 .langMenuItem {
@@ -477,6 +518,10 @@
 
     :global(.header-mail-link) {
         margin-right: -10px !important;
+    }
+
+    .langDropdownContainer:active .langMenu {
+        display: block;
     }
 
     .langDropButton {

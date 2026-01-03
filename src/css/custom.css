@@ -288,7 +288,7 @@ html[data-site-render='home'] .navbar__toggle {
     align-items: center !important;
     gap: 8px !important;
     padding: 0 12px !important;
-    height: 40px !important;
+    height: 100% !important;
     font-weight: 700 !important;
     font-family: var(--font-family-heading) !important;
     color: var(--ifm-color-primary) !important;
@@ -303,6 +303,17 @@ html[data-site-render='home'] .navbar__toggle {
     background-size: contain;
     background-repeat: no-repeat;
     order: -1;
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 html[lang='en'] .navbar__item.dropdown > .navbar__link::before {
@@ -338,7 +349,8 @@ html[lang='zh'] .navbar__item.dropdown > .navbar__link::before {
 }
 
 .dropdown__menu {
-    top: 52px !important;
+    top: 100% !important;
+    margin-top: 0 !important;
     min-width: 140px !important;
     padding: 8px 0 !important;
     border-radius: 8px !important;
@@ -347,6 +359,24 @@ html[lang='zh'] .navbar__item.dropdown > .navbar__link::before {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
     right: 0 !important;
     left: auto !important;
+    animation: dropdownFadeIn 0.2s ease-out;
+}
+
+.dropdown__menu::before {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: 0;
+    right: 0;
+    height: 15px;
+    background: transparent;
+    z-index: -1;
+}
+
+.navbar__item.dropdown {
+    height: 100%;
+    display: flex;
+    align-items: center;
 }
 
 .dropdown__link {

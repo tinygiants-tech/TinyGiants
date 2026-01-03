@@ -215,10 +215,9 @@ function CustomThemeToggle() {
   );
 }
 
+// 找到 LanguageDropdown 组件，修改为如下精简代码：
 function LanguageDropdown() {
   const {i18n} = useDocusaurusContext();
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
   const currentLocale = i18n.currentLocale;
 
   const enFlag = useBaseUrl('/img/language/en.png');
@@ -228,16 +227,6 @@ function LanguageDropdown() {
     {code: 'en', label: 'English', flag: enFlag},
     {code: 'zh', label: '简体中文', flag: zhFlag}
   ];
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const getTargetUrl = (localeCode) => {
     if (typeof window === 'undefined') return '#';
@@ -255,12 +244,8 @@ function LanguageDropdown() {
   };
 
   return (
-    <div className={styles.langDropdownContainer} ref={dropdownRef}>
-      <button
-        className={styles.langDropButton}
-        onClick={() => setIsOpen(!isOpen)}
-        aria-expanded={isOpen}
-      >
+    <div className={styles.langDropdownContainer}>
+      <button className={styles.langDropButton}>
         <img src={currentLocale === 'en' ? enFlag : zhFlag} alt="" className={styles.langFlagMain}/>
         <span className={styles.langTextMain}>{currentLocale.toUpperCase()}</span>
         <svg
@@ -272,23 +257,21 @@ function LanguageDropdown() {
           strokeWidth="3"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={`${styles.langArrow} ${isOpen ? styles.langArrowOpen : ''}`}
+          className={styles.langArrow}
         >
           <path d="M6 9l6 6 6-6"/>
         </svg>
       </button>
-      {isOpen && (
-        <ul className={styles.langMenu}>
-          {languages.map((lang) => (
-            <li key={lang.code}>
-              <a href={getTargetUrl(lang.code)} className={styles.langMenuItem}>
-                <img src={lang.flag} alt="" className={styles.langMenuItemFlag}/>
-                {lang.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      )}
+      <ul className={styles.langMenu}>
+        {languages.map((lang) => (
+          <li key={lang.code}>
+            <a href={getTargetUrl(lang.code)} className={styles.langMenuItem}>
+              <img src={lang.flag} alt="" className={styles.langMenuItemFlag}/>
+              {lang.label}
+            </a>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
