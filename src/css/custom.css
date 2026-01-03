@@ -5,6 +5,7 @@
     font-style: normal;
     font-display: swap;
 }
+
 @font-face {
     font-family: 'Inter';
     src: url('/fonts/Inter-Italic-Variable.ttf') format('truetype');
@@ -12,6 +13,7 @@
     font-style: italic;
     font-display: swap;
 }
+
 @font-face {
     font-family: 'Montserrat';
     src: url('/fonts/Montserrat-Variable.ttf') format('truetype');
@@ -19,6 +21,7 @@
     font-style: normal;
     font-display: swap;
 }
+
 @font-face {
     font-family: 'Montserrat';
     src: url('/fonts/Montserrat-Italic-Variable.ttf') format('truetype');
@@ -89,7 +92,9 @@ h1, h2, h3, h4, h5, h6 {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-[data-theme='light'] .navbar { border-bottom: 1px solid var(--card-border-color); }
+[data-theme='light'] .navbar {
+    border-bottom: 1px solid var(--card-border-color);
+}
 
 .navbar__inner {
     width: 100%;
@@ -121,7 +126,9 @@ h1, h2, h3, h4, h5, h6 {
     border-right: 1px solid rgba(255, 255, 255, 0.07);
 }
 
-.theme-doc-sidebar-container { z-index: 2; }
+.theme-doc-sidebar-container {
+    z-index: 2;
+}
 
 [data-theme='light'] .menu__link--active {
     background-color: rgba(113, 79, 61, 0.06);
@@ -203,7 +210,9 @@ article .markdown .image-row p img {
     margin: 0 !important;
 }
 
-article .markdown .image-row p { display: contents; }
+article .markdown .image-row p {
+    display: contents;
+}
 
 .footer {
     padding: 4rem 0 2rem 0;
@@ -213,19 +222,35 @@ article .markdown .image-row p { display: contents; }
     z-index: 2;
 }
 
-.footer__copyright { text-align: center; }
+.footer__copyright {
+    text-align: center;
+}
 
 .navbar .header-discord-link,
 .navbar .header-unity-forum-link,
 .navbar .header-mail-link {
-    display: block; width: 24px; height: 24px; margin-right: 20px;
-    background-position: center; background-repeat: no-repeat; background-size: contain;
-    transition: all 0.2s ease; opacity: 0.8;
+    display: block;
+    width: 24px;
+    height: 24px;
+    margin-right: 20px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    transition: all 0.2s ease;
+    opacity: 0.8;
 }
 
-.navbar .header-discord-link { background-image: url('/img/home-page/discord.png'); }
-.navbar .header-unity-forum-link { background-image: url('/img/home-page/unity-forum.png'); }
-.navbar .header-mail-link { background-image: url('/img/home-page/mail.png'); }
+.navbar .header-discord-link {
+    background-image: url('/img/home-page/discord.png');
+}
+
+.navbar .header-unity-forum-link {
+    background-image: url('/img/home-page/unity-forum.png');
+}
+
+.navbar .header-mail-link {
+    background-image: url('/img/home-page/mail.png');
+}
 
 [data-theme='light'] .navbar .header-discord-link,
 [data-theme='light'] .navbar .header-unity-forum-link,
@@ -245,14 +270,18 @@ article .markdown .image-row p { display: contents; }
     opacity: 0.9 !important;
 }
 
-.medium-zoom-image--opened { z-index: 2001 !important; }
+.medium-zoom-image--opened {
+    z-index: 2001 !important;
+}
 
 html[data-site-render='home'] .navbar__items--right,
 html[data-site-render='home'] .navbar__toggle {
     display: none !important;
 }
 
-.navbar__item.dropdown > .navbar__link svg { display: none !important; }
+.navbar__item.dropdown > .navbar__link svg {
+    display: none !important;
+}
 
 .navbar__item.dropdown > .navbar__link {
     display: flex !important;
@@ -276,8 +305,13 @@ html[data-site-render='home'] .navbar__toggle {
     order: -1;
 }
 
-html[lang='en'] .navbar__item.dropdown > .navbar__link::before { background-image: url('/img/language/en.png'); }
-html[lang='zh'] .navbar__item.dropdown > .navbar__link::before { background-image: url('/img/language/zh.png'); }
+html[lang='en'] .navbar__item.dropdown > .navbar__link::before {
+    background-image: url('/img/language/en.png');
+}
+
+html[lang='zh'] .navbar__item.dropdown > .navbar__link::before {
+    background-image: url('/img/language/zh.png');
+}
 
 .navbar__item.dropdown > .navbar__link::after {
     content: '';
@@ -299,7 +333,9 @@ html[lang='zh'] .navbar__item.dropdown > .navbar__link::before { background-imag
     position: static !important;
 }
 
-.navbar__item.dropdown--show > .navbar__link::after { transform: rotate(180deg) !important; }
+.navbar__item.dropdown--show > .navbar__link::after {
+    transform: rotate(180deg) !important;
+}
 
 .dropdown__menu {
     top: 52px !important;
@@ -308,7 +344,7 @@ html[lang='zh'] .navbar__item.dropdown > .navbar__link::before { background-imag
     border-radius: 8px !important;
     background-color: var(--ifm-navbar-background-color) !important;
     border: 1px solid var(--card-border-color) !important;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
     right: 0 !important;
     left: auto !important;
 }
@@ -324,7 +360,9 @@ html[lang='zh'] .navbar__item.dropdown > .navbar__link::before { background-imag
     background: transparent !important;
 }
 
-.dropdown__link:hover { background-color: rgba(113, 79, 61, 0.08) !important; }
+.dropdown__link:hover {
+    background-color: rgba(113, 79, 61, 0.08) !important;
+}
 
 .dropdown__link::before {
     content: '';
@@ -336,11 +374,23 @@ html[lang='zh'] .navbar__item.dropdown > .navbar__link::before { background-imag
     flex-shrink: 0;
 }
 
-.dropdown__link:not([href*="/zh/"])::before { background-image: url('/img/language/en.png') !important; }
-.dropdown__link:not([href*="/zh/"])::after { content: 'English' !important; font-size: 0.9rem !important; }
+.dropdown__link:not([href*="/zh/"])::before {
+    background-image: url('/img/language/en.png') !important;
+}
 
-.dropdown__link[href*="/zh/"]::before { background-image: url('/img/language/zh.png') !important; }
-.dropdown__link[href*="/zh/"]::after { content: '简体中文' !important; font-size: 0.9rem !important; }
+.dropdown__link:not([href*="/zh/"])::after {
+    content: 'English' !important;
+    font-size: 0.9rem !important;
+}
+
+.dropdown__link[href*="/zh/"]::before {
+    background-image: url('/img/language/zh.png') !important;
+}
+
+.dropdown__link[href*="/zh/"]::after {
+    content: '简体中文' !important;
+    font-size: 0.9rem !important;
+}
 
 @media (max-width: 996px) {
     html:not([data-site-render='home']) .navbar__items--right {
@@ -368,6 +418,8 @@ html[lang='zh'] .navbar__item.dropdown > .navbar__link::before { background-imag
     }
 
     @media (max-width: 360px) {
-        html:not([data-site-render='home']) .navbar__item.dropdown > .navbar__link { font-size: 0 !important; }
+        html:not([data-site-render='home']) .navbar__item.dropdown > .navbar__link {
+            font-size: 0 !important;
+        }
     }
 }

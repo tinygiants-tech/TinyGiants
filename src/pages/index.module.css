@@ -74,10 +74,18 @@
     display: block;
 }
 
-.navIcon:hover { opacity: 1.0; transform: scale(1.1); }
+.navIcon:hover {
+    opacity: 1.0;
+    transform: scale(1.1);
+}
 
-[data-theme='light'] .navIcon img { filter: invert(31%) sepia(13%) saturate(1472%) hue-rotate(336deg) brightness(98%) contrast(89%); }
-[data-theme='dark'] .navIcon img { filter: invert(1) brightness(2); }
+[data-theme='light'] .navIcon img {
+    filter: invert(31%) sepia(13%) saturate(1472%) hue-rotate(336deg) brightness(98%) contrast(89%);
+}
+
+[data-theme='dark'] .navIcon img {
+    filter: invert(1) brightness(2);
+}
 
 .customThemeToggle {
     display: flex;
@@ -94,9 +102,19 @@
     padding: 0;
 }
 
-.customThemeToggle svg { width: 24px; height: 24px; display: block; }
-[data-theme='light'] .customThemeToggle:hover { background-color: rgba(0, 0, 0, 0.05); }
-[data-theme='dark'] .customThemeToggle:hover { background-color: rgba(255, 255, 255, 0.1); }
+.customThemeToggle svg {
+    width: 24px;
+    height: 24px;
+    display: block;
+}
+
+[data-theme='light'] .customThemeToggle:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme='dark'] .customThemeToggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
 
 .langDropdownContainer {
     position: relative;
@@ -120,7 +138,9 @@
     transition: opacity 0.2s;
 }
 
-.langDropButton:hover { opacity: 0.8; }
+.langDropButton:hover {
+    opacity: 0.8;
+}
 
 .langFlagMain {
     width: 18px;
@@ -141,7 +161,9 @@
     color: var(--ifm-color-primary);
 }
 
-.langArrowOpen { transform: rotate(180deg); }
+.langArrowOpen {
+    transform: rotate(180deg);
+}
 
 .langMenu {
     position: absolute;
@@ -153,7 +175,7 @@
     background-color: var(--ifm-navbar-background-color);
     border: 1px solid var(--card-border-color);
     border-radius: 8px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     min-width: 140px;
     z-index: 1000;
     overflow: hidden;
@@ -207,9 +229,8 @@
     position: absolute;
     inset: 0;
     z-index: 2;
-    background:
-            linear-gradient(to right, #000 0%, transparent 12%, transparent 88%, #000 100%),
-            linear-gradient(to top, #000 0%, transparent 25%);
+    background: linear-gradient(to right, #000 0%, transparent 12%, transparent 88%, #000 100%),
+    linear-gradient(to top, #000 0%, transparent 25%);
 }
 
 .featureSection {
@@ -224,7 +245,9 @@
     z-index: 2;
 }
 
-.featureReverse { flex-direction: row-reverse; }
+.featureReverse {
+    flex-direction: row-reverse;
+}
 
 .featureImageColumn,
 .featureTextColumn {
@@ -241,7 +264,10 @@
 .featureTextColumn::after {
     content: '';
     position: absolute;
-    top: 0; left: -10%; width: 120%; height: 2px;
+    top: 0;
+    left: -10%;
+    width: 120%;
+    height: 2px;
     background: linear-gradient(90deg, transparent, var(--ifm-color-primary), transparent);
     box-shadow: 0 0 15px var(--ifm-color-primary);
     opacity: 0;
@@ -260,10 +286,20 @@
 }
 
 @keyframes scanLineMove {
-    0% { top: 0; opacity: 0; }
-    10% { opacity: 1; }
-    90% { opacity: 1; }
-    100% { top: 100%; opacity: 0; }
+    0% {
+        top: 0;
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        top: 100%;
+        opacity: 0;
+    }
 }
 
 .featureImg {
@@ -300,7 +336,11 @@
     opacity: 0.9;
 }
 
-.buttonGroup { display: flex; gap: 16px; align-items: center; }
+.buttonGroup {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
 
 .btnIconImg {
     width: 18px;
@@ -326,7 +366,7 @@
     font-weight: 700;
     text-decoration: none !important;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     font-family: var(--font-family-heading);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -334,7 +374,7 @@
 
 .featureButton:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
 
 .featureButtonSecondary {
@@ -380,10 +420,28 @@
     letter-spacing: 0.5px;
 }
 
-[data-theme='light'] .featureButtonDisabled { background-color: #e5e5e5; color: #999999 !important; border: 1px solid rgba(0, 0, 0, 0.05); }
+[data-theme='light'] .featureButtonDisabled {
+    background-color: #e5e5e5;
+    color: #999999 !important;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
 
-.comingSoonWrapper { position: relative; width: 100%; border-radius: 16px; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.4); border: 1px solid var(--card-border-color); }
-.blurred { width: 100%; height: auto; display: block; filter: blur(10px) brightness(0.4); transform: scale(1.1); }
+.comingSoonWrapper {
+    position: relative;
+    width: 100%;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--card-border-color);
+}
+
+.blurred {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: blur(10px) brightness(0.4);
+    transform: scale(1.1);
+}
 
 .comingSoonOverlay {
     position: absolute;
@@ -402,26 +460,21 @@
 }
 
 @media (max-width: 996px) {
-    /* 主页自定义容器优化：减小间距并极力靠右 */
     .customNavbarRight {
         height: 60px;
-        gap: 14px; /* 减小图标间距 */
-        padding: 0 5px; /* 减小右边距，使整组图标贴近边缘 */
+        gap: 14px;
+        padding: 0 5px;
     }
 
-    /* 针对文档页（标准 Docusaurus 导航栏）的全局覆盖 */
-    /* 强制减小标准导航栏右侧项的容器边距 */
     :global(.navbar__items--right) {
         padding-right: 0px !important;
     }
 
-    /* 压缩每个导航项之间的默认外边距 */
     :global(.navbar__item) {
         margin-left: -6px !important;
         padding: 0 -6px !important;
     }
 
-    /* 专门处理 Mail 图标，确保它是最右侧且无多余间距 */
     :global(.header-mail-link) {
         margin-right: -10px !important;
     }
@@ -437,8 +490,13 @@
     }
 
     @media (max-width: 360px) {
-        .langTextMain { display: none; }
-        .langArrow { margin-left: -4px; }
+        .langTextMain {
+            display: none;
+        }
+
+        .langArrow {
+            margin-left: -4px;
+        }
     }
 
     .navIcon {
@@ -465,9 +523,31 @@
         height: 30vh;
         min-height: 220px;
     }
-    .featureSection, .featureReverse { flex-direction: column; gap: 40px; padding: 60px 20px; }
-    .featureImageColumn, .featureTextColumn { width: 100%; text-align: center; clip-path: none !important; opacity: 1 !important; }
-    .featureImageColumn::after, .featureTextColumn::after { display: none; }
-    .buttonGroup { flex-direction: column; width: 100%; }
-    .featureButton, .featureButtonSecondary, .featureButtonDisabled { width: 100%; justify-content: center; }
+
+    .featureSection, .featureReverse {
+        flex-direction: column;
+        gap: 40px;
+        padding: 60px 20px;
+    }
+
+    .featureImageColumn, .featureTextColumn {
+        width: 100%;
+        text-align: center;
+        clip-path: none !important;
+        opacity: 1 !important;
+    }
+
+    .featureImageColumn::after, .featureTextColumn::after {
+        display: none;
+    }
+
+    .buttonGroup {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .featureButton, .featureButtonSecondary, .featureButtonDisabled {
+        width: 100%;
+        justify-content: center;
+    }
 }
