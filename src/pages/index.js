@@ -215,7 +215,6 @@ function CustomThemeToggle() {
   );
 }
 
-// 找到 LanguageDropdown 组件，修改为如下精简代码：
 function LanguageDropdown() {
   const {i18n} = useDocusaurusContext();
   const currentLocale = i18n.currentLocale;
@@ -229,18 +228,18 @@ function LanguageDropdown() {
   ];
 
   const getTargetUrl = (localeCode) => {
-    if (typeof window === 'undefined') return '#';
-    const {pathname, search, hash} = window.location;
-    let newPath = pathname;
-    if (currentLocale !== 'en') {
-      const prefix = `/${currentLocale}`;
-      if (newPath.startsWith(prefix)) {
-        newPath = newPath.substring(prefix.length);
-      }
+    const sitePath = localeCode === 'en' ? '/' : `/${localeCode}/`;
+
+    if (typeof window === 'undefined') {
+      return sitePath;
     }
-    if (!newPath.startsWith('/')) newPath = '/' + newPath;
-    const finalPath = localeCode === 'en' ? newPath : `/${localeCode}${newPath === '/' ? '' : newPath}`;
-    return `${finalPath}${search}${hash}`;
+
+    try {
+      const { search, hash } = window.location;
+      return `${sitePath}${search}${hash}`;
+    } catch (e) {
+      return sitePath;
+    }
   };
 
   return (
