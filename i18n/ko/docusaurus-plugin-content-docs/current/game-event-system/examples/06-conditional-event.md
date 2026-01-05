@@ -1,316 +1,316 @@
 ﻿---
-sidebar_label: '06 Conditional Event'
+sidebar_label: '06 조건부 이벤트'
 sidebar_position: 7
 ---
 
 import VideoGif from '@site/src/components/Video/VideoGif';
 
-# 06 Conditional Event: Visual Logic Builder
+# 06 조건부 이벤트: 비주얼 로직 빌더
 
 <!-- <VideoGif src="/video/game-event-system/06-conditional-event.mp4" /> -->
 
-## 📋 Overview
+## 📋 개요
 
-Usually, checking if a door should open requires code like: `if (powerOn && (isAdmin || isLucky))`. This demo demonstrates the **Visual Condition Tree Builder**, which lets you create complex, nested validation rules directly in the Editor—removing the need for `if/else` checks in your scripts.
+일반적으로 문이 열려야 하는지 확인하려면 `if (powerOn && (isAdmin || isLucky))`와 같은 코드가 필요합니다. 이 데모는 **비주얼 조건 트리 빌더**를 보여주며, 에디터에서 직접 복잡하고 중첩된 검증 규칙을 생성할 수 있어 스크립트에서 `if/else` 체크가 필요 없습니다.
 
-:::tip 💡 What You'll Learn
-- How to build complex logic trees without code
-- How to reference scene objects in conditions
-- How to use AND/OR groups for branching logic
-- How conditions act as gatekeepers for event callbacks
+:::tip 💡 배울 내용
+- 코드 없이 복잡한 로직 트리를 구축하는 방법
+- 조건에서 씬 객체를 참조하는 방법
+- 분기 로직을 위해 AND/OR 그룹을 사용하는 방법
+- 조건이 이벤트 콜백의 게이트키퍼 역할을 하는 방법
 
 :::
 
 ---
 
-## 🎬 Demo Scene
+## 🎬 데모 씬
 ```
 Assets/TinyGiants/GameEventSystem/Demo/06_ConditionalEvent/06_ConditionalEvent.unity
 ```
 
-### Scene Composition
+### 씬 구성
 
-**UI Layer (Canvas):**
-- 🎮 **Power Toggle Button** - Top left corner
+**UI 레이어 (Canvas):**
+- 🎮 **전원 토글 버튼** - 왼쪽 상단 모서리
   - "Toggle Power (On)" / "Toggle Power (Off)"
-  - Triggers `ConditionalEventRaiser.TogglePower()`
-  - Controls the global `SecurityGrid.IsPowerOn` state
+  - `ConditionalEventRaiser.TogglePower()` 트리거
+  - 전역 `SecurityGrid.IsPowerOn` 상태 제어
   
-- 🎮 **Four Access Card Buttons** - Bottom of screen
-  - "Swipe GuestCard" → `ConditionalEventRaiser.SwipeGuestCard()` (Level 1, Visitor dept)
-  - "Swipe StaffCard" → `ConditionalEventRaiser.SwipeStaffCard()` (Level 3, Management dept)
-  - "Swipe AdminCard" → `ConditionalEventRaiser.SwipeAdminCard()` (Level 5, Director dept)
-  - "Attempt Hacking" → `ConditionalEventRaiser.AttemptHacking()` (Level 0, DarkWeb dept)
+- 🎮 **네 개의 액세스 카드 버튼** - 화면 하단
+  - "Swipe GuestCard" → `ConditionalEventRaiser.SwipeGuestCard()` (레벨 1, Visitor 부서)
+  - "Swipe StaffCard" → `ConditionalEventRaiser.SwipeStaffCard()` (레벨 3, Management 부서)
+  - "Swipe AdminCard" → `ConditionalEventRaiser.SwipeAdminCard()` (레벨 5, Director 부서)
+  - "Attempt Hacking" → `ConditionalEventRaiser.AttemptHacking()` (레벨 0, DarkWeb 부서)
 
-**Game Logic Layer (Demo Scripts):**
-- 📤 **ConditionalEventRaiser** - GameObject with the raiser script
-  - Constructs `AccessCard` objects with different credentials
-  - Raises `OnAccessCard` event for validation
-  - Has NO validation logic—just passes data
+**게임 로직 레이어 (Demo Scripts):**
+- 📤 **ConditionalEventRaiser** - raiser 스크립트가 있는 GameObject
+  - 다양한 자격 증명으로 `AccessCard` 객체 생성
+  - 검증을 위해 `OnAccessCard` 이벤트 발동
+  - 검증 로직 없음—단지 데이터 전달
 
-- 📥 **ConditionalEventReceiver** - GameObject with the receiver script
-  - Contains `OpenVault()` method with **ZERO** conditional logic
-  - Simply plays door animation when called
-  - Assumes if called, all conditions passed
+- 📥 **ConditionalEventReceiver** - receiver 스크립트가 있는 GameObject
+  - **제로** 조건 로직을 가진 `OpenVault()` 메서드 포함
+  - 호출되면 단순히 문 애니메이션 재생
+  - 호출되면 모든 조건이 통과했다고 가정
 
-- 🔌 **SecurityGrid** - Scene object holding system state
-  - Public property: `IsPowerOn` (bool)
-  - Condition tree reads this value directly from scene instance
+- 🔌 **SecurityGrid** - 시스템 상태를 보유한 씬 객체
+  - 공개 속성: `IsPowerOn` (bool)
+  - 조건 트리가 씬 인스턴스에서 이 값을 직접 읽음
 
-**Visual Feedback Layer (Demo Objects):**
-- 🚪 **VaultDoorSystem** - Massive double doors
-  - Left and right doors slide open/closed
-  - Status text displays: "LOCKED" / "ACCESS GRANTED" / "CLOSING..."
-  - Steam VFX plays when doors open
-- 💡 **Power Indicator** - Green sphere light
-  - Glows when power is ON
-  - Dims when power is OFF
-- 🖼️ **Screen Vignette** - Fullscreen overlay
-  - Green flash when power turns ON
-  - Red flash when power turns OFF
+**시각적 피드백 레이어 (Demo Objects):**
+- 🚪 **VaultDoorSystem** - 거대한 이중 문
+  - 왼쪽과 오른쪽 문이 슬라이드로 열림/닫힘
+  - 상태 텍스트 표시: "LOCKED" / "ACCESS GRANTED" / "CLOSING..."
+  - 문이 열릴 때 Steam VFX 재생
+- 💡 **Power Indicator** - 녹색 구체 조명
+  - 전원이 ON일 때 빛남
+  - 전원이 OFF일 때 어두워짐
+- 🖼️ **Screen Vignette** - 전체 화면 오버레이
+  - 전원이 ON될 때 녹색 플래시
+  - 전원이 OFF될 때 빨간색 플래시
 
 ---
 
-## 🎮 How to Interact
+## 🎮 상호작용 방법
 
-### The Logic Gate Challenge
+### 로직 게이트 챌린지
 
-The vault opens **ONLY IF** this condition evaluates to `true`:
+금고는 이 조건이 `true`로 평가될 때**만** 열립니다:
 ```
-[⚡ Power ON]  AND  ([🏅 Admin] Level  OR  [🏷️ Valid Department]  OR  [🎲 Lucky Hacker])
+[⚡ 전원 ON]  AND  ([🏅 관리자] 레벨  OR  [🏷️ 유효한 부서]  OR  [🎲 운 좋은 해커])
 ```
 
-### Step 1: Enter Play Mode
+### 1단계: 플레이 모드 진입
 
-Press the **Play** button in Unity. The vault should show "LOCKED" in red.
-
----
-
-### Step 2: Test with Power ON (Correct Setup)
-
-**Ensure Power is ON:**
-- Look at the top-left button: Should show "Toggle Power (On)"
-- Look at the power indicator (green sphere): Should be glowing
-- Screen vignette flashes green when toggled ON
-
-**Click "Swipe StaffCard":**
-- **Credentials:** Level 3, Department "Management"
-- **Logic Path:**
-  - ✅ Power ON → Pass
-  - ❌ Level 3 < 4 → Fail (Admin check)
-  - ✅ Department "Management" is in whitelist → Pass
-  - **Result:** One branch passed in OR group
-- **Outcome:** 🟢 **ACCESS GRANTED**
-  - Status text turns green
-  - Steam VFX erupts from door base
-  - Doors slide open smoothly
-  - Doors close after 2 seconds
-- **Console:** `[Vault] ACCESS GRANTED to Staff_Alice. Opening doors.`
-
-**Click "Swipe AdminCard":**
-- **Credentials:** Level 5, Department "Director"
-- **Logic Path:**
-  - ✅ Power ON → Pass
-  - ✅ Level 5 >= 4 → Pass (Admin check succeeds immediately)
-  - **Result:** First condition in OR group passed
-- **Outcome:** 🟢 **ACCESS GRANTED**
-
-**Click "Swipe GuestCard":**
-- **Credentials:** Level 1, Department "Visitor"
-- **Logic Path:**
-  - ✅ Power ON → Pass
-  - ❌ Level 1 < 4 → Fail (Admin check)
-  - ❌ Department "Visitor" not in whitelist → Fail
-  - 🎲 Random(0-100) > 70 in nested AND group → ~30% chance
-  - **Result:** Most likely all branches fail
-- **Outcome:** 🔴 **LOCKED** (90% of the time)
-  - Vault remains closed
-  - Status text stays red
-- **Console:** (No receiver log because condition failed)
+**Play** 버튼을 누릅니다. 금고는 빨간색으로 "LOCKED"를 표시해야 합니다.
 
 ---
 
-### Step 3: Test with Power OFF (Failure Case)
+### 2단계: 전원 ON으로 테스트 (올바른 설정)
 
-**Click "Toggle Power" (Turn OFF):**
-- Button text changes to "Toggle Power (Off)"
-- Power indicator dims
-- Screen vignette flashes RED
+**전원이 ON인지 확인:**
+- 왼쪽 상단 버튼 확인: "Toggle Power (On)" 표시되어야 함
+- 전원 표시기(녹색 구체) 확인: 빛나고 있어야 함
+- ON으로 전환할 때 화면 비네트가 녹색으로 플래시
 
-**Click "Swipe AdminCard":**
-- **Credentials:** Level 5 (Admin level)
-- **Logic Path:**
-  - ❌ Power OFF → **Fail at root AND condition**
-  - Evaluation stops immediately (short-circuit)
-- **Outcome:** 🔴 **LOCKED**
-  - Even admins cannot bypass the power requirement
-  - Receiver method is NEVER called
-- **Console:** `[Terminal] Scanning...` (but no vault log)
+**"Swipe StaffCard" 클릭:**
+- **자격 증명:** 레벨 3, 부서 "Management"
+- **로직 경로:**
+  - ✅ 전원 ON → 통과
+  - ❌ 레벨 3 < 4 → 실패 (관리자 확인)
+  - ✅ 부서 "Management"가 화이트리스트에 있음 → 통과
+  - **결과:** OR 그룹에서 하나의 분기 통과
+- **결과:** 🟢 **ACCESS GRANTED**
+  - 상태 텍스트가 녹색으로 변경
+  - 문 베이스에서 Steam VFX 분출
+  - 문이 부드럽게 슬라이드로 열림
+  - 2초 후 문 닫힘
+- **콘솔:** `[Vault] ACCESS GRANTED to Staff_Alice. Opening doors.`
 
-:::note 🔐 Security Design
+**"Swipe AdminCard" 클릭:**
+- **자격 증명:** 레벨 5, 부서 "Director"
+- **로직 경로:**
+  - ✅ 전원 ON → 통과
+  - ✅ 레벨 5 >= 4 → 통과 (관리자 확인이 즉시 성공)
+  - **결과:** OR 그룹의 첫 번째 조건 통과
+- **결과:** 🟢 **ACCESS GRANTED**
 
-The AND logic at the root ensures that **no credential** can bypass the power requirement. This demonstrates how condition trees can enforce hard requirements.
+**"Swipe GuestCard" 클릭:**
+- **자격 증명:** 레벨 1, 부서 "Visitor"
+- **로직 경로:**
+  - ✅ 전원 ON → 통과
+  - ❌ 레벨 1 < 4 → 실패 (관리자 확인)
+  - ❌ 부서 "Visitor"가 화이트리스트에 없음 → 실패
+  - 🎲 중첩된 AND 그룹에서 Random(0-100) > 70 → ~30% 확률
+  - **결과:** 대부분 모든 분기 실패
+- **결과:** 🔴 **LOCKED** (90%의 경우)
+  - 금고는 닫힌 상태 유지
+  - 상태 텍스트는 빨간색 유지
+- **콘솔:** (조건 실패로 receiver 로그 없음)
+
+---
+
+### 3단계: 전원 OFF로 테스트 (실패 사례)
+
+**"Toggle Power" 클릭 (OFF로 전환):**
+- 버튼 텍스트가 "Toggle Power (Off)"로 변경
+- 전원 표시기가 어두워짐
+- 화면 비네트가 빨간색으로 플래시
+
+**"Swipe AdminCard" 클릭:**
+- **자격 증명:** 레벨 5 (관리자 레벨)
+- **로직 경로:**
+  - ❌ 전원 OFF → **루트 AND 조건에서 실패**
+  - 평가가 즉시 중지됨(단락)
+- **결과:** 🔴 **LOCKED**
+  - 관리자조차 전원 요구사항을 우회할 수 없음
+  - Receiver 메서드가 **절대** 호출되지 않음
+- **콘솔:** `[Terminal] Scanning...` (하지만 금고 로그 없음)
+
+:::note 🔐 보안 설계
+
+루트의 AND 로직은 **어떤 자격 증명도** 전원 요구사항을 우회할 수 없도록 보장합니다. 이것은 조건 트리가 어떻게 엄격한 요구사항을 강제할 수 있는지 보여줍니다.
 
 :::
 
 ---
 
-## 🏗️ Scene Architecture
+## 🏗️ 씬 아키텍처
 
-### The Condition Tree Structure
+### 조건 트리 구조
 
-The vault's access logic is implemented as a visual tree in the Behavior Window:
+금고의 액세스 로직은 Behavior Window에서 시각적 트리로 구현됩니다:
 ```
-🟦 ROOT (AND) ➔ Must pass BOTH major branches
+🟦 ROOT (AND) ➔ 두 가지 주요 분기 모두 통과해야 함
 │
-├─ ⚡ SecurityGrid.IsPowerOn == true      ➔ [Power Status Check]
+├─ ⚡ SecurityGrid.IsPowerOn == true      ➔ [전원 상태 확인]
 │
-└─ 🟧 Branch 2 (OR) ➔ Must pass AT LEAST ONE below
+└─ 🟧 분기 2 (OR) ➔ 아래 중 최소 하나 통과해야 함
    │
-   ├─ 🏅 Arg.securityLevel >= 4          ➔ [High Clearance]
-   ├─ 🏷️ Arg.department ∈ [Mgmt, IT]     ➔ [Dept. Validation]
-   ├─ 🎲 Random(0-100) > 90              ➔ [10% Luck Pass]
+   ├─ 🏅 Arg.securityLevel >= 4          ➔ [높은 권한]
+   ├─ 🏷️ Arg.department ∈ [Mgmt, IT]     ➔ [부서 검증]
+   ├─ 🎲 Random(0-100) > 90              ➔ [10% 행운 통과]
    │
-   └─ 🟦 Nested Group (AND) ➔ Combined low-level check
-      ├─ 🔢 Arg.securityLevel >= 1       ➔ [Basic Access]
-      └─ 🎲 Random(0-100) > 70           ➔ [30% Luck Pass]
+   └─ 🟦 중첩된 그룹 (AND) ➔ 결합된 낮은 레벨 확인
+      ├─ 🔢 Arg.securityLevel >= 1       ➔ [기본 액세스]
+      └─ 🎲 Random(0-100) > 70           ➔ [30% 행운 통과]
 ```
 
 ---
 
-### Event Definition
+### 이벤트 정의
 
 ![Game Event Editor](/img/game-event-system/examples/06-conditional-event/demo-06-editor.png)
 
-| Event Name     | Type                    | Purpose                                           |
-| -------------- | ----------------------- | ------------------------------------------------- |
-| `OnAccessCard` | `GameEvent<AccessCard>` | Validates card credentials through condition tree |
+| 이벤트 이름    | 타입                    | 목적                                    |
+| -------------- | ----------------------- | --------------------------------------- |
+| `OnAccessCard` | `GameEvent<AccessCard>` | 조건 트리를 통해 카드 자격 증명 검증    |
 
-**The AccessCard Data Structure:**
+**AccessCard 데이터 구조:**
 ```csharp
 [System.Serializable]
 public class AccessCard
 {
-    public string holderName;        // "Staff_Alice", "Admin_Root", etc.
-    public int securityLevel;        // 1=Guest, 3=Staff, 5=Admin
-    public string department;        // "Management", "IT", "Visitor", etc.
+    public string holderName;        // "Staff_Alice", "Admin_Root" 등
+    public int securityLevel;        // 1=게스트, 3=직원, 5=관리자
+    public string department;        // "Management", "IT", "Visitor" 등
 }
 ```
 
 ---
 
-### Behavior Configuration with Condition Tree
+### 조건 트리를 사용한 Behavior 구성
 
-Click the **(AccessCard)** icon in the Behavior column to open the Behavior Window:
+Behavior 열의 **(AccessCard)** 아이콘을 클릭하여 Behavior Window를 엽니다:
 
 ![Condition Tree](/img/game-event-system/examples/06-conditional-event/demo-06-condition-tree.png)
 
-**Root AND Group:**
-- **Condition 1:** Scene Object Reference
-  - Source: `SecurityGrid` GameObject in scene
-  - Property: `IsPowerOn` (bool)
-  - Operator: `==` (Equals)
-  - Target: `true`
-  - **Purpose:** Hard requirement—power must be ON
+**루트 AND 그룹:**
+- **조건 1:** 씬 객체 참조
+  - 소스: 씬의 `SecurityGrid` GameObject
+  - 속성: `IsPowerOn` (bool)
+  - 연산자: `==` (같음)
+  - 타겟: `true`
+  - **목적:** 엄격한 요구사항—전원이 ON이어야 함
 
-**Nested OR Group:**
-The OR group provides multiple valid paths to access:
+**중첩된 OR 그룹:**
+OR 그룹은 액세스를 위한 여러 유효한 경로를 제공합니다:
 
-- **Condition A:** Event Argument Check
-  - Source: `Arg.securityLevel` (int from AccessCard)
-  - Operator: `>=` (Greater Or Equal)
-  - Target: `4`
-  - **Purpose:** Admin-level credentials
+- **조건 A:** 이벤트 인수 확인
+  - 소스: `Arg.securityLevel` (AccessCard의 int)
+  - 연산자: `>=` (크거나 같음)
+  - 타겟: `4`
+  - **목적:** 관리자 레벨 자격 증명
 
-- **Condition B:** List Membership Check
-  - Source: `Arg.department` (string from AccessCard)
-  - Operator: `In List` (Contained In)
-  - Target: Constant List `["Management", "IT"]`
-  - **Purpose:** Whitelisted departments
+- **조건 B:** 목록 멤버십 확인
+  - 소스: `Arg.department` (AccessCard의 string)
+  - 연산자: `In List` (포함됨)
+  - 타겟: 상수 목록 `["Management", "IT"]`
+  - **목적:** 화이트리스트 부서
 
-- **Condition C:** Random Chance
-  - Source: `Random Value` (0-100 range)
-  - Operator: `>` (Greater)
-  - Target: `90`
-  - **Purpose:** 10% lucky bypass for hackers
+- **조건 C:** 무작위 확률
+  - 소스: `Random Value` (0-100 범위)
+  - 연산자: `>` (보다 큼)
+  - 타겟: `90`
+  - **목적:** 해커를 위한 10% 행운 우회
 
-- **Nested AND Group:** Guest Access Logic
-  - Sub-condition 1: `Arg.securityLevel >= 1` (Valid card)
-  - Sub-condition 2: `Random(0-100) > 70` (30% chance)
-  - **Purpose:** Guests have lower chance but must have valid card
+- **중첩된 AND 그룹:** 게스트 액세스 로직
+  - 하위 조건 1: `Arg.securityLevel >= 1` (유효한 카드)
+  - 하위 조건 2: `Random(0-100) > 70` (30% 확률)
+  - **목적:** 게스트는 낮은 확률을 가지지만 유효한 카드가 있어야 함
 
-:::tip 🎨 Drag & Drop Building
+:::tip 🎨 드래그 앤 드롭 빌딩
 
-You can build this tree visually in the Behavior Window:
+Behavior Window에서 이 트리를 시각적으로 구축할 수 있습니다:
 
-1. Click **"+ Condition"** to add individual checks
-2. Click **"+ Group"** to add AND/OR containers
-3. Drag the `≡` handle to reorder conditions
-4. Switch between AND/OR logic by clicking the group label
+1. **"+ Condition"** 클릭하여 개별 확인 추가
+2. **"+ Group"** 클릭하여 AND/OR 컨테이너 추가
+3. `≡` 핸들을 드래그하여 조건 재정렬
+4. 그룹 레이블을 클릭하여 AND/OR 로직 전환
 
 :::
 
 ---
 
-### Sender Setup (ConditionalEventRaiser)
+### Sender 설정 (ConditionalEventRaiser)
 
-Select the **ConditionalEventRaiser** GameObject:
+**ConditionalEventRaiser** GameObject를 선택하세요:
 
 ![ConditionalEventRaiser Inspector](/img/game-event-system/examples/06-conditional-event/demo-06-inspector.png)
 
-**Event Channel:**
+**이벤트 채널:**
 - `Request Access Event`: `OnAccessCard`
 
-**Scene Reference:**
-- `Security Grid`: SecurityGrid GameObject (for power toggle functionality)
-- `Screen Vignette`: UI overlay for visual power feedback
+**씬 참조:**
+- `Security Grid`: SecurityGrid GameObject (전원 토글 기능용)
+- `Screen Vignette`: 시각적 전원 피드백용 UI 오버레이
 
-**How Cards Work:**
+**카드 작동 방식:**
 ```csharp
-// Guest Card (Relies on luck)
+// 게스트 카드 (행운에 의존)
 SwipeGuestCard() → AccessCard("Guest_Bob", 1, "Visitor")
 
-// Staff Card (Valid department)
+// 직원 카드 (유효한 부서)
 SwipeStaffCard() → AccessCard("Staff_Alice", 3, "Management")
 
-// Admin Card (High level)
+// 관리자 카드 (높은 레벨)
 SwipeAdminCard() → AccessCard("Admin_Root", 5, "Director")
 
-// Hacker (Pure randomness)
+// 해커 (순수 무작위성)
 AttemptHacking() → AccessCard("Unknown_Hacker", 0, "DarkWeb")
 ```
 
 ---
 
-### Receiver Setup (ConditionalEventReceiver)
+### Receiver 설정 (ConditionalEventReceiver)
 
-Select the **ConditionalEventReceiver** GameObject:
+**ConditionalEventReceiver** GameObject를 선택하세요:
 
 ![ConditionalEventReceiver Inspector](/img/game-event-system/examples/06-conditional-event/demo-06-receiver.png)
 
-**Vault Visuals:**
+**금고 비주얼:**
 - `Door ROOT`: VaultDoorSystem (Transform)
-- `Left Door`: DoorLeft (Transform) - slides left when opening
-- `Right Door`: DoorRight (Transform) - slides right when opening
-- `Steam VFX Prefab`: Particle system for door opening effect
+- `Left Door`: DoorLeft (Transform) - 열릴 때 왼쪽으로 슬라이드
+- `Right Door`: DoorRight (Transform) - 열릴 때 오른쪽으로 슬라이드
+- `Steam VFX Prefab`: 문 열림 효과용 파티클 시스템
 
-**Feedback:**
-- `Status Text`: StatusText (TextMeshPro) - displays access status
+**피드백:**
+- `Status Text`: StatusText (TextMeshPro) - 액세스 상태 표시
 
-**Behavior Binding:**
-- Event: `OnAccessCard`
-- Method: `ConditionalEventReceiver.OpenVault(AccessCard card)`
-- **Condition Tree:** Acts as gatekeeper (configured above)
+**Behavior 바인딩:**
+- 이벤트: `OnAccessCard`
+- 메서드: `ConditionalEventReceiver.OpenVault(AccessCard card)`
+- **조건 트리:** 게이트키퍼 역할(위에서 구성됨)
 
-:::note 🎯 Zero-Logic Receiver
+:::note 🎯 제로 로직 Receiver
 
-The `OpenVault()` method contains **NO** conditional checks. It's called **only if** the condition tree evaluates to `true`. This separates validation logic (data layer) from action logic (behavior layer).
+`OpenVault()` 메서드는 조건부 확인을 **포함하지 않습니다**. 조건 트리가 `true`로 평가될 때**만** 호출됩니다. 이것은 검증 로직(데이터 레이어)을 액션 로직(동작 레이어)과 분리합니다.
 
 :::
 
 ---
 
-## 💻 Code Breakdown
+## 💻 코드 분석
 
 ### 📤 ConditionalEventRaiser.cs (Sender)
 ```csharp
@@ -327,31 +327,31 @@ public class ConditionalEventRaiser : MonoBehaviour
 
     public void SwipeGuestCard()
     {
-        // Level 1, Dept "Visitor"
-        // Fails level check, fails dept check
-        // Relies on Random > 70 in nested AND group (~30% chance)
+        // 레벨 1, 부서 "Visitor"
+        // 레벨 확인 실패, 부서 확인 실패
+        // 중첩된 AND 그룹의 Random > 70에 의존 (~30% 확률)
         SendRequest("Guest_Bob", 1, "Visitor");
     }
 
     public void SwipeStaffCard()
     {
-        // Level 3, Dept "Management"
-        // Fails level check (3 < 4)
-        // Passes department check (Management is whitelisted)
+        // 레벨 3, 부서 "Management"
+        // 레벨 확인 실패 (3 < 4)
+        // 부서 확인 통과 (Management가 화이트리스트에 있음)
         SendRequest("Staff_Alice", 3, "Management");
     }
 
     public void SwipeAdminCard()
     {
-        // Level 5
-        // Passes level check immediately (5 >= 4)
+        // 레벨 5
+        // 레벨 확인 즉시 통과 (5 >= 4)
         SendRequest("Admin_Root", 5, "Director");
     }
 
     public void AttemptHacking()
     {
-        // Level 0
-        // Pure reliance on Random > 90 (10% chance)
+        // 레벨 0
+        // Random > 90에 순수 의존 (10% 확률)
         SendRequest("Unknown_Hacker", 0, "DarkWeb");
     }
 
@@ -359,11 +359,11 @@ public class ConditionalEventRaiser : MonoBehaviour
     {
         if (requestAccessEvent == null) return;
 
-        // Construct the data packet
+        // 데이터 패킷 구성
         AccessCard card = new AccessCard(name, level, dept);
         
-        // Raise the event
-        // The condition tree evaluates BEFORE calling the receiver
+        // 이벤트 발동
+        // 조건 트리는 receiver를 호출하기 전에 평가됨
         requestAccessEvent.Raise(card);
         
         Debug.Log($"[Terminal] Scanning... Name: {name} | Lv: {level} | Dept: {dept}");
@@ -371,10 +371,10 @@ public class ConditionalEventRaiser : MonoBehaviour
 }
 ```
 
-**Key Points:**
-- 🎯 **No Validation** - Sender just creates data and raises event
-- 📦 **Data Construction** - Each button creates a unique credential profile
-- 🔇 **Zero Logic** - No knowledge of what conditions must be met
+**핵심 포인트:**
+- 🎯 **검증 없음** - Sender는 단지 데이터를 생성하고 이벤트를 발동
+- 📦 **데이터 구성** - 각 버튼이 고유한 자격 증명 프로필 생성
+- 🔇 **제로 로직** - 어떤 조건을 충족해야 하는지에 대한 지식 없음
 
 ---
 
@@ -400,7 +400,7 @@ public class ConditionalEventReceiver : MonoBehaviour
 
     private void Start()
     {
-        // Store closed positions for animation
+        // 애니메이션을 위한 닫힌 위치 저장
         if(leftDoor) _leftClosedPos = leftDoor.localPosition;
         if(rightDoor) _rightClosedPos = rightDoor.localPosition;
         
@@ -408,17 +408,17 @@ public class ConditionalEventReceiver : MonoBehaviour
     }
 
     /// <summary>
-    /// [Event Callback - Condition Gated]
+    /// [이벤트 콜백 - 조건 제어됨]
     /// 
-    /// CRITICAL: This method contains NO validation logic!
+    /// 중요: 이 메서드는 검증 로직을 포함하지 않습니다!
     /// 
-    /// The GameEvent Condition Tree acts as the gatekeeper.
-    /// If this method executes, it means ALL conditions evaluated to TRUE:
-    /// - Power is ON
-    /// - AND at least one of: Admin level, Valid dept, or Lucky random
+    /// GameEvent 조건 트리가 게이트키퍼 역할을 합니다.
+    /// 이 메서드가 실행되면 모든 조건이 TRUE로 평가되었음을 의미합니다:
+    /// - 전원이 ON
+    /// - AND 다음 중 최소 하나: 관리자 레벨, 유효한 부서 또는 행운의 무작위
     /// 
-    /// This separation allows designers to modify access rules in the Editor
-    /// without touching code.
+    /// 이러한 분리를 통해 디자이너는 코드를 건드리지 않고
+    /// 에디터에서 액세스 규칙을 수정할 수 있습니다.
     /// </summary>
     public void OpenVault(AccessCard card)
     {
@@ -435,7 +435,7 @@ public class ConditionalEventReceiver : MonoBehaviour
         _isOpen = true;
         UpdateStatusText("ACCESS GRANTED", Color.green);
 
-        // Spawn steam VFX
+        // Steam VFX 생성
         if (doorROOT != null && steamVFXPrefab != null)
         {
             Vector3 spawnPos = doorROOT.position;
@@ -446,7 +446,7 @@ public class ConditionalEventReceiver : MonoBehaviour
             Destroy(vfxInstance.gameObject, 2.0f);
         }
         
-        // Open doors (slide outward)
+        // 문 열기 (밖으로 슬라이드)
         float t = 0;
         while(t < 1f)
         {
@@ -463,7 +463,7 @@ public class ConditionalEventReceiver : MonoBehaviour
         yield return new WaitForSeconds(2.0f);
         UpdateStatusText("CLOSING...", Color.yellow);
         
-        // Close doors (slide back)
+        // 문 닫기 (뒤로 슬라이드)
         t = 0;
         while(t < 1f)
         {
@@ -492,77 +492,77 @@ public class ConditionalEventReceiver : MonoBehaviour
 }
 ```
 
-**Key Points:**
-- 🎯 **Zero Conditional Logic** - No `if` statements checking credentials
-- 🔓 **Trust-Based Execution** - If called, all conditions already passed
-- 🎨 **Pure Presentation** - Just plays door animation and VFX
-- 🏗️ **Separation of Concerns** - Validation (data) vs Action (behavior)
+**핵심 포인트:**
+- 🎯 **제로 조건 로직** - 자격 증명을 확인하는 `if` 문 없음
+- 🔓 **신뢰 기반 실행** - 호출되면 모든 조건이 이미 통과됨
+- 🎨 **순수 프레젠테이션** - 단지 문 애니메이션과 VFX 재생
+- 🏗️ **관심사 분리** - 검증(데이터) vs 액션(동작)
 
 ---
 
-### 🔌 SecurityGrid.cs (Scene State)
+### 🔌 SecurityGrid.cs (씬 상태)
 ```csharp
 using UnityEngine;
 
 public class SecurityGrid : MonoBehaviour
 {
-    // This public property is read by the condition tree
+    // 이 공개 속성은 조건 트리에 의해 읽힘
     public bool IsPowerOn = true;
 
     public void TogglePower()
     {
         IsPowerOn = !IsPowerOn;
         
-        // Update visuals...
+        // 비주얼 업데이트...
         Debug.Log($"[Environment] Power System is now: {(IsPowerOn ? "ONLINE" : "OFFLINE")}");
     }
 }
 ```
 
-**Key Points:**
-- 🔌 **Public State** - `IsPowerOn` is accessible to condition tree
-- 📍 **Scene Object** - Condition references this specific GameObject instance
-- 🎮 **Runtime Changes** - Toggling power immediately affects condition evaluation
+**핵심 포인트:**
+- 🔌 **공개 상태** - `IsPowerOn`이 조건 트리에 접근 가능
+- 📍 **씬 객체** - 조건이 이 특정 GameObject 인스턴스를 참조
+- 🎮 **런타임 변경** - 전원 토글이 즉시 조건 평가에 영향
 
 ---
 
-## 🔑 Key Takeaways
+## 🔑 핵심 요점
 
-| Concept                  | Implementation                                         |
-| ------------------------ | ------------------------------------------------------ |
-| 🎯 **Visual Logic**       | Build complex conditions without writing code          |
-| 🌳 **Tree Structure**     | AND/OR groups allow nested branching logic             |
-| 📍 **Scene References**   | Read properties directly from GameObjects in the scene |
-| 🎲 **Random Conditions**  | Built-in random value source for chance-based logic    |
-| 🔀 **Argument Access**    | Reference event data properties in conditions          |
-| 🚪 **Gatekeeper Pattern** | Conditions control whether callbacks execute           |
+| 개념                     | 구현                                               |
+| ------------------------ | -------------------------------------------------- |
+| 🎯 **비주얼 로직**        | 코드 작성 없이 복잡한 조건 구축                    |
+| 🌳 **트리 구조**          | AND/OR 그룹이 중첩된 분기 로직 허용                |
+| 📍 **씬 참조**            | 씬의 GameObject에서 직접 속성 읽기                 |
+| 🎲 **무작위 조건**        | 확률 기반 로직을 위한 내장 무작위 값 소스          |
+| 🔀 **인수 액세스**        | 조건에서 이벤트 데이터 속성 참조                   |
+| 🚪 **게이트키퍼 패턴**    | 조건이 콜백 실행 여부 제어                         |
 
-:::note 🎓 Design Insight
+:::note 🎓 설계 인사이트
 
-The Visual Condition Tree is perfect for:
+비주얼 조건 트리는 다음에 완벽합니다:
 
-- **Access control systems** - Doors, terminals, restricted areas
-- **Quest requirements** - Check multiple conditions before quest completion
-- **Buff activation** - Only apply effects if prerequisites met
-- **AI behavior** - Decision trees for enemy reactions
-- **Loot systems** - Validate drop conditions (level, luck, location)
+- **액세스 제어 시스템** - 문, 터미널, 제한 구역
+- **퀘스트 요구사항** - 퀘스트 완료 전 여러 조건 확인
+- **버프 활성화** - 전제 조건이 충족되는 경우에만 효과 적용
+- **AI 동작** - 적 반응을 위한 의사 결정 트리
+- **전리품 시스템** - 드롭 조건 검증(레벨, 행운, 위치)
 
-By moving logic into data (the condition tree asset), you enable **designers** to tune gameplay rules without programmer intervention!
+로직을 데이터(조건 트리 에셋)로 이동함으로써 **디자이너**가 프로그래머 개입 없이 게임플레이 규칙을 조정할 수 있게 합니다!
 
 :::
 
 ---
 
-## 🎯 What's Next?
+## 🎯 다음 단계
 
-You've mastered conditional logic. Now let's explore **time-based event control** with delays and scheduling.
+조건부 로직을 마스터했습니다. 이제 지연 및 스케줄링을 통한 **시간 기반 이벤트 제어**를 탐색해 봅시다.
 
-**Next Chapter**: Learn about delayed execution in **[07 Delayed Event](./07-delayed-event.md)**
+**다음 챕터**: **[07 Delayed Event](./07-delayed-event.md)**에서 지연된 실행에 대해 배우기
 
 ---
 
-## 📚 Related Documentation
+## 📚 관련 문서
 
-- **[Visual Condition Tree](../visual-workflow/visual-condition-tree.md)** - Complete guide to condition builder
-- **[Game Event Behavior](../visual-workflow/game-event-behavior.md)** - How to configure action conditions
-- **[Best Practices](../scripting/best-practices.md)** - Patterns for data-driven design
+- **[Visual Condition Tree](../visual-workflow/visual-condition-tree.md)** - 조건 빌더에 대한 완전한 가이드
+- **[Game Event Behavior](../visual-workflow/game-event-behavior.md)** - 액션 조건을 구성하는 방법
+- **[Best Practices](../scripting/best-practices.md)** - 데이터 기반 설계를 위한 패턴

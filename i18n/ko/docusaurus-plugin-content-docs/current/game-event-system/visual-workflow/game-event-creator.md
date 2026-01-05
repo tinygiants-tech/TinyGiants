@@ -1,5 +1,5 @@
 ﻿---
-sidebar_label: 'Create Game Event'
+sidebar_label: '게임 이벤트 생성'
 sidebar_position: 4
 ---
 
@@ -11,250 +11,250 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 
 
-# Game Event Creator
+# 게임 이벤트 생성기 (Game Event Creator)
 
-Your high-speed event creation wizard. This specialized tool handles batch event generation, automatic code compilation, and ScriptableObject creation—all in one streamlined workflow.
+고속 이벤트 생성 위자드입니다. 이 전문 도구는 일괄 이벤트 생성, 자동 코드 컴파일, ScriptableObject 제작을 하나의 효율적인 워크플로우로 처리합니다.
 
 <VideoGif src="/video/game-event-system/event-create.mp4" />
 
 
 ---
 
-## 🚀 Opening the Creator
+## 🚀 생성기 열기
 
-The Creator only opens from the **[Game Event Editor](./game-event-editor.md)**:
+생성기는 **[게임 이벤트 에디터](./game-event-editor.md)**에서만 열 수 있습니다:
 ```
-Game Event Editor → Click "+ New Event" button (top-right)
+게임 이벤트 에디터 → 우측 상단의 "+ New Event" 버튼 클릭
 ```
 
-:::info Why From Editor Only?
-The Creator needs to know which database to add events to. Opening from the Editor ensures proper context.
+:::info 왜 에디터에서만 열 수 있나요?
+생성기는 이벤트를 추가할 데이터베이스를 알아야 합니다. 에디터에서 열면 적절한 컨텍스트가 보장됩니다.
 :::
 
 ---
 
-## 🗺️ Interface Zones
+## 🗺️ 인터페이스 구역
 
-The window is organized into four functional areas:
+창은 네 개의 기능 영역으로 구성되어 있습니다:
 
-| Zone                      | Location  | Purpose                                                 |
+| 구역                      | 위치  | 용도                                                 |
 | ------------------------- | --------- | ------------------------------------------------------- |
-| **A. Event Mode Tabs**    | Top       | Switch between Void, Single Parameter, or Sender events |
-| **B. Configuration Area** | Middle    | Select types and configure event details                |
-| **C. Events Queue**       | Bottom    | Review pending events before creation                   |
-| **D. Status Badge**       | Top-right | Shows total queued count (e.g., "7 Queued Total")       |
+| **A. 이벤트 모드 탭**    | 상단       | Void, 단일 매개변수 또는 송신자(Sender) 이벤트 간 전환 |
+| **B. 설정 영역** | 중간    | 타입 선택 및 이벤트 세부 사항 설정                |
+| **C. 이벤트 큐**       | 하단    | 생성 전 대기 중인 이벤트 검토                   |
+| **D. 상태 배지**       | 우측 상단 | 총 대기열 수 표시 (예: "7 Queued Total")       |
 
 ---
 
-## 🎭 Three Event Modes
+## 🎭 세 가지 이벤트 모드
 
-Choose the architecture that fits your need:
+필요에 맞는 아키텍처를 선택하세요:
 
 <Tabs>
-<TabItem value="void" label="1. Parameterless" default>
+<TabItem value="void" label="1. 매개변수 없음" default>
 
-### Parameterless Events
+### 매개변수 없는 이벤트
 
-**Type**: `GameEvent` (Void)
+**타입**: `GameEvent` (Void)
 
-The simplest signal—no data, just notification.
+데이터 없이 알림만 전달하는 가장 단순한 신호입니다.
 
 <img src="/img/game-event-system/visual-workflow/game-event-creator/creator-parameterless.png" alt="Parameterless Mode" />
 
-**Best For**:
+**적합한 용도**:
 ```
-🖱️ UI Triggers ➔ OnPauseButtonClick, OnMenuOpen
-🌍 Global States ➔ OnGameStart, OnLevelComplete
-🏃 Simple Actions ➔ OnJump, OnFire, OnInteract
+🖱️ UI 트리거 ➔ OnPauseButtonClick, OnMenuOpen
+🌍 글로벌 상태 ➔ OnGameStart, OnLevelComplete
+🏃 단순 액션 ➔ OnJump, OnFire, OnInteract
 ```
 
-**How to Use**:
-1. Click **"Add Event"** button
-2. Event appears in queue with default name "NewEvent"
-3. Rename it in the queue (e.g., "OnGameStart")
-4. Set category if desired (e.g., "Core")
-5. Click **"Create X Event(s)"** at bottom
+**사용 방법**:
+1. **"Add Event"** 버튼 클릭
+2. 대기열에 기본 이름 "NewEvent"로 이벤트가 나타남
+3. 대기열에서 이름 변경 (예: "OnGameStart")
+4. 원하는 경우 카테고리 설정 (예: "Core")
+5. 하단의 **"Create X Event(s)"** 클릭
 
-**No Type Selection Needed**: Since it's parameterless, you just click and add.
+**타입 선택 불필요**: 매개변수가 없으므로 클릭하여 추가하기만 하면 됩니다.
 
 </TabItem>
 
-<TabItem value="single" label="2. Single Parameter">
+<TabItem value="single" label="2. 단일 매개변수">
 
-### Single Parameter Events
+### 단일 매개변수 이벤트
 
-**Type**: `GameEvent<T>`
+**타입**: `GameEvent<T>`
 
-Carries one piece of data with the notification.
+알림과 함께 한 가지 데이터를 전달합니다.
 
 <img src="/img/game-event-system/visual-workflow/game-event-creator/creator-single.png" alt="Single Parameter Mode" />
 
-**Best For**:
+**적합한 용도**:
 ```
-📈 Value Changes ➔ OnHealthChanged(float), OnScoreUpdated(int)
-🔄 State Updates ➔ OnGameStateChanged(GameState)
-📦 Object Events ➔ OnEnemySpawned(GameObject)
-💾 Data Sync ➔ OnPlayerDataChanged(PlayerData)
+📈 값 변경 ➔ OnHealthChanged(float), OnScoreUpdated(int)
+🔄 상태 업데이트 ➔ OnGameStateChanged(GameState)
+📦 오브젝트 이벤트 ➔ OnEnemySpawned(GameObject)
+💾 데이터 동기화 ➔ OnPlayerDataChanged(PlayerData)
 ```
 
-**Two Ways to Add**:
+**추가하는 두 가지 방법**:
 
-#### Method 1: Quick Add - Basic Types
+#### 방법 1: 빠른 추가 - 기본 타입
 
-For built-in Unity types (int, float, Vector3, GameObject, etc.):
+내장된 유니티 타입(int, float, Vector3, GameObject 등)의 경우:
 
-1. **Select Type** from dropdown (shows all 32 basic types)
-2. Click **"Add"** button
-3. Event added to queue automatically
+1. 드롭다운에서 **타입 선택** (모든 32개 기본 타입 표시)
+2. **"Add"** 버튼 클릭
+3. 이벤트가 자동으로 대기열에 추가됨
 
-**Available Basic Types**:
-- C# Primitives: `int`, `float`, `bool`, `string`, etc.
-- Math Types: `Vector2`, `Vector3`, `Quaternion`, `Color`, etc.
-- Components: `GameObject`, `Transform`, `Rigidbody`, etc.
-- Assets: `Sprite`, `Material`, `AudioClip`, etc.
+**사용 가능한 기본 타입**:
+- C# 기본형: `int`, `float`, `bool`, `string` 등
+- 수학 타입: `Vector2`, `Vector3`, `Quaternion`, `Color` 등
+- 컴포넌트: `GameObject`, `Transform`, `Rigidbody` 등
+- 에셋: `Sprite`, `Material`, `AudioClip` 등
 
 ---
 
-#### Method 2: Search - Custom Types
+#### 방법 2: 검색 - 커스텀 타입
 
-For your own C# classes:
+직접 만든 C# 클래스의 경우:
 
-1. **Type in search bar** (e.g., "PlayerData")
-2. System searches all serializable types in your project
-3. Click **"Add"** next to your type
-4. Event added to queue
+1. **검색바에 입력** (예: "PlayerData")
+2. 시스템이 프로젝트 내의 모든 직렬화 가능한 타입을 검색
+3. 타입 옆의 **"Add"** 클릭
+4. 이벤트가 대기열에 추가됨
 
-**Search Features**:
-- ✅ Fuzzy matching (type "plr" finds "PlayerData")
-- ✅ Shows namespace for disambiguation
-- ✅ Badge shows how many events of this type are queued
-- ✅ Green flash effect when adding
+**검색 기능**:
+- ✅ 퍼지 매칭 (유사 검색) 지원 ("plr" 입력 시 "PlayerData" 찾음)
+- ✅ 중복 방지를 위해 네임스페이스 표시
+- ✅ 이 타입의 이벤트가 몇 개 대기열에 있는지 배지로 표시
+- ✅ 추가 시 녹색 플래시 효과
 
-**Requirements for Custom Types**:
+**커스텀 타입 요구 사항**:
 ```csharp
-// ✅ This works
+// ✅ 작동함
 [System.Serializable]
 public class PlayerData {
     public string playerName;
     public int level;
 }
 
-// ❌ This won't appear in search
-public class NonSerializableClass { } // Missing [Serializable]
+// ❌ 검색에 나타나지 않음
+public class NonSerializableClass { } // [Serializable] 누락
 ```
 
 </TabItem>
 
-<TabItem value="sender" label="3. With Sender">
+<TabItem value="sender" label="3. 송신자 포함">
 
-### Sender Events
+### 송신자(Sender) 이벤트
 
-**Type**: `GameEvent<TSender, TArgs>`
+**타입**: `GameEvent<TSender, TArgs>`
 
-Carries both **who fired it** (sender) and **what happened** (argument).
+**누가 실행했는지**(sender)와 **무슨 일이 일어났는지**(argument)를 모두 전달합니다.
 
 <img src="/img/game-event-system/visual-workflow/game-event-creator/creator-sender.png" alt="Sender Mode" />
 
-**Best For**:
+**적합한 용도**:
 ```
-⚔️ Combat ➔ OnDamageTaken(GameObject victim, DamageInfo damage)
-🤝 Interactions ➔ OnItemPickedUp(Player player, ItemID item)
-🌐 Networking ➔ OnPlayerJoined(NetworkPlayer sender, string playerName)
-📜 Complex Events ➔ OnQuestCompleted(QuestGiver npc, QuestData quest)
+⚔️ 전투 ➔ OnDamageTaken(GameObject victim, DamageInfo damage)
+🤝 상호작용 ➔ OnItemPickedUp(Player player, ItemID item)
+🌐 네트워킹 ➔ OnPlayerJoined(NetworkPlayer sender, string playerName)
+📜 복잡한 이벤트 ➔ OnQuestCompleted(QuestGiver npc, QuestData quest)
 ```
 
-**Recommended Pattern**:
-- **TSender** = The actor/source (`GameObject`, `Player`, `Enemy`)
-- **TArgs** = The data/payload (`int`, `DamageInfo`, `Vector3`)
+**권장 패턴**:
+- **TSender** = 행위자/소스 (`GameObject`, `Player`, `Enemy`)
+- **TArgs** = 데이터/페이로드 (`int`, `DamageInfo`, `Vector3`)
 
-**How to Use**:
+**사용 방법**:
 
-1. **Select Sender Type**:
-   - Choose from Basic Types dropdown, OR
-   - Search for custom type
-   - Click "Select" when ready
+1. **송신자(Sender) 타입 선택**:
+   - 기본 타입 드롭다운에서 선택 또는
+   - 커스텀 타입 검색
+   - 준비되면 "Select" 클릭
 
-2. **Select Argument Type**:
-   - Choose from Basic Types dropdown, OR
-   - Search for custom type
-   - Click "Select" when ready
+2. **인자(Argument) 타입 선택**:
+   - 기본 타입 드롭다운에서 선택 또는
+   - 커스텀 타입 검색
+   - 준비되면 "Select" 클릭
 
-3. **Add Event**:
-   - Blue button appears: "Add Event: GameObject → int" (example)
-   - Click it to add to queue
+3. **이벤트 추가**:
+   - 파란색 버튼 나타남: "Add Event: GameObject → int" (예시)
+   - 클릭하여 대기열에 추가
 
-**Selected Type Display**:
+**선택된 타입 표시**:
 
-When you select types, they appear in green boxes:
+타입을 선택하면 녹색 상자에 나타납니다:
 ```
 ✅ Selected Sender: GameObject <small>(UnityEngine)</small>
 ✅ Selected Argument: DamageInfo <small>(YourGame.Combat)</small>
 ```
 
-Click the **×** to clear and choose different types.
+**×**를 클릭하여 지우고 다른 타입을 선택할 수 있습니다.
 
 </TabItem>
 </Tabs>
 
 ---
 
-## 📦 Batch Creation Workflow
+## 📦 일괄 생성 워크플로우
 
-The Creator's power is **batch processing**—create many events at once instead of one-by-one.
+생성기의 강점은 **일괄 처리**입니다. 하나씩 만들지 않고 여러 이벤트를 한 번에 생성할 수 있습니다.
 
-### Step-by-Step Process
+### 단계별 프로세스
 
-#### 1️⃣ Queue Events
+#### 1️⃣ 이벤트 대기열 추가
 
-Add multiple events across different modes:
+다양한 모드에서 여러 이벤트를 추가합니다:
 ```
-🔘 Switch to Parameterless ➔ Add OnGameStart  
-🔘 Switch to Parameterless ➔ Add OnGamePause  
-🔢 Switch to Single Parameter(int) ➔ Add OnScoreChanged  
-🌊 Switch to Single Parameter(float) ➔ Add OnHealthChanged  
-👥 Switch to Sender <GameObject,int> ➔ Add OnEnemyDamaged  
+🔘 매개변수 없음으로 전환 ➔ OnGameStart 추가  
+🔘 매개변수 없음으로 전환 ➔ OnGamePause 추가  
+🔢 단일 매개변수(int)로 전환 ➔ OnScoreChanged 추가  
+🌊 단일 매개변수(float)로 전환 ➔ OnHealthChanged 추가  
+👥 송신자 <GameObject,int>로 전환 ➔ OnEnemyDamaged 추가  
 
-Total in Queue: 5 events pending creation
+대기열 합계: 생성 보류 중인 이벤트 5개
 ```
 
-**Visual Feedback**:
-- Top-right badge updates: "5 Queued Total"
-- Each mode shows its own count: "Events Queue (2)"
+**시각적 피드백**:
+- 우측 상단 배지 업데이트: "5 Queued Total"
+- 각 모드별 개수 표시: "Events Queue (2)"
 
 ---
 
-#### 2️⃣ Review & Configure
+#### 2️⃣ 검토 및 설정
 
-In the **Events Queue** section:
+**이벤트 큐** 섹션에서:
 
-**Per Event**:
-- ☑️ **Checkbox**: Toggle selection (only selected events will be created)
-- **Name Field**: Rename event (default: "NewEvent", "OnInt", etc.)
-- **Category Field**: Set category for filtering later
-- **Type Label**: Shows event type signature
-- **× Button**: Remove from queue
+**이벤트별 설정**:
+- ☑️ **체크박스**: 선택 전환 (선택된 이벤트만 생성됨)
+- **이름 필드**: 이벤트 이름 변경 (기본값: "NewEvent", "OnInt" 등)
+- **카테고리 필드**: 나중에 필터링을 위한 카테고리 설정
+- **타입 라벨**: 이벤트 타입 시그니처 표시
+- **× 버튼**: 대기열에서 제거
 
-**Bulk Actions**:
-- **Select All**: Check all events in current queue
-- **Clear Selection**: Uncheck all events
-- **Remove All**: Clear entire queue (with confirmation)
+**대량 작업**:
+- **Select All**: 현재 대기열의 모든 이벤트 체크
+- **Clear Selection**: 모든 이벤트 체크 해제
+- **Remove All**: 전체 대기열 비우기 (확인 창 표시)
 
 ---
 
-#### 3️⃣ Execute Creation
+#### 3️⃣ 생성 실행
 
-Click the big green button at bottom:
+하단의 큰 녹색 버튼을 클릭합니다:
 ```
 + Create 5 Event(s)
 ```
 
-**What Happens Next**: See the next section ⬇️
+**이후 단계**: 다음 섹션을 참조하세요 ⬇️
 
 ---
 
-## ⚙️ Understanding the Creation Process
+## ⚙️ 생성 프로세스 이해하기
 
-When you click "Create", a sophisticated automation pipeline runs. Here's what happens behind the scenes:
+"Create"를 클릭하면 정교한 자동화 파이프라인이 실행됩니다. 무대 뒤에서 일어나는 일은 다음과 같습니다:
 
 ```mermaid
 graph LR
@@ -265,23 +265,23 @@ graph LR
     classDef wait fill:#b45309,stroke:#020617,stroke-width:2px,color:#ffffff,font-style:italic
     classDef endNode fill:#020617,stroke:#000000,stroke-width:2px,color:#ffffff,font-weight:bold
 
-    A(🆕 Create Asset):::start --> B(🔍 Check Events):::decision
-    B --> C([📝 Code Exists?]):::decision
+    A(🆕 에셋 생성):::start --> B(🔍 이벤트 확인):::decision
+    B --> C([📝 코드 존재?]):::decision
     
-    C -- Yes --> D(✅ Create Asset):::success
-    C -- No --> E(⚠️ Generation Required):::warning
+    C -- 예 --> D(✅ 에셋 생성):::success
+    C -- 아니오 --> E(⚠️ 코드 생성 필요):::warning
     
-    E --> F(⚙️ Gen & Compile):::wait
-    F --> G(⏳ Wait...):::wait
-    G --> H(✅ Auto-Create):::success
+    E --> F(⚙️ 생성 및 컴파일):::wait
+    F --> G(⏳ 대기...):::wait
+    G --> H(✅ 자동 생성):::success
     
-    D --> I(🏁 Done):::endNode
+    D --> I(🏁 완료):::endNode
     H --> I
 ```
 
-### Scenario 1: Code Already Exists ✅
+### 시나리오 1: 코드가 이미 존재하는 경우 ✅
 
-**Example**: Creating an `int` event.
+**예시**: `int` 이벤트를 생성할 때.
 
 ```mermaid
 graph LR
@@ -291,22 +291,22 @@ graph LR
     classDef success fill:#0f766e,stroke:#042f2e,stroke-width:2px,color:#ffffff
     classDef system fill:#020617,stroke:#000000,stroke-width:2px,color:#ffffff,font-weight:bold
 
-    A(🔢 OnScoreChanged <int>):::event --> B(🔍 Check: IntGameEvent.cs):::decision
+    A(🔢 OnScoreChanged <int>):::event --> B(🔍 확인: Int32GameEvent.cs):::decision
     
-    B -- "Yes (Pre-generated)" --> C(✅ Instant Creation):::success
+    B -- "예 (미리 생성됨)" --> C(✅ 즉시 생성):::success
     
-    C --> D(🗄️ Database Updated):::system
+    C --> D(🗄️ 데이터베이스 업데이트):::system
 ```
 
-**Speed**: Instant (< 1 second)
+**속도**: 즉시 (1초 미만)
 
-**No Compilation**: You see the event in the Editor immediately.
+**컴파일 불필요**: 에디터에서 즉시 이벤트를 확인할 수 있습니다.
 
 ---
 
-### Scenario 2: Code Needs Generation ⚠️
+### 시나리오 2: 코드 생성이 필요한 경우 ⚠️
 
-**Example**: Creating a `PlayerData` event (your custom class).
+**예시**: `PlayerData` 이벤트(사용자 정의 커스텀 클래스)를 생성할 때.
 
 ```mermaid
 graph LR
@@ -320,37 +320,37 @@ graph LR
 
     classDef file fill:#4c0519,stroke:#020617,stroke-width:2px,color:#ffffff
 
-    A(👤 OnPlayerDataChanged):::event --> B(🔍 Check Code):::decision
+    A(👤 OnPlayerDataChanged):::event --> B(🔍 코드 확인):::decision
     
-    B -- "No" --> C(🛠️ 1. Generate C#):::warning
+    B -- "아니오" --> C(🛠️ 1. C# 생성):::warning
     
-    C --> P[📄 File: .../Custom/PlayerDataGameEvent.cs]:::file
+    C --> P[📄 파일: .../Custom/PlayerDataGameEvent.cs]:::file
 
-    C --> D(⚙️ 2 & 3. Unity Compiling):::wait
+    C --> D(⚙️ 2 & 3. 유니티 컴파일 중):::wait
     
-    D --> E(✅ 4. Auto-Create):::step
+    D --> E(✅ 4. 자동 생성):::step
     
-    E --> F(🏁 Done):::system
+    E --> F(🏁 완료):::system
 ```
 
-**Speed**: 3-10 seconds (depends on project size)
+**속도**: 3-10초 (프로젝트 규모에 따라 다름)
 
-**You'll See**:
-1. Creator window closes
-2. Unity compilation spinner appears
-3. Console logs appear
-4. Event appears in Editor automatically
+**진행 상황**:
+1. 생성기 창이 닫힘
+2. 유니티 컴파일 스피너가 나타남
+3. 콘솔 로그가 표시됨
+4. 이벤트가 에디터에 자동으로 나타남
 
-:::info What Gets Generated?
+:::info 무엇이 생성되나요?
 
-For each custom type, the system creates **one C# file** containing:
+각 커스텀 타입에 대해 시스템은 다음을 포함하는 **하나의 C# 파일**을 생성합니다:
 ```csharp
-// File: PlayerDataGameEvent.cs
+// 파일: PlayerDataGameEvent.cs
 
-// 1. The Event Class
+// 1. 이벤트 클래스
 public class PlayerDataGameEvent : GameEvent<PlayerData> { }
 
-// 2. The Binding Field (for Inspector)
+// 2. 바인딩 필드 (인스펙터용)
 public partial class GameEventManager {
     public partial class EventBinding {
         public UnityEvent<PlayerData> PlayerDataGameEventAction;
@@ -358,23 +358,23 @@ public partial class GameEventManager {
 }
 ```
 
-**Why Both?** The event class is for raising events. The binding field is for Inspector callbacks.
+**왜 둘 다 필요한가요?** 이벤트 클래스는 이벤트를 발생시키기 위한 것이고, 바인딩 필드는 인스펙터 콜백을 위한 것입니다.
 :::
 
 ---
 
-### Mixed Batch Handling
+### 혼합 일괄 처리
 
-**What if you queue both existing and new types?**
+**기존 타입과 새로운 타입이 섞여 있으면 어떻게 되나요?**
 ```
-Your Queue:
-1. OnGameStart (void) ✅ Code exists
-2. OnScoreChanged (int) ✅ Code exists  
-3. OnPlayerDataChanged (PlayerData) ⚠️ Needs generation
-4. OnQuestCompleted (QuestData) ⚠️ Needs generation
+대기열:
+1. OnGameStart (void) ✅ 코드 존재
+2. OnScoreChanged (int) ✅ 코드 존재  
+3. OnPlayerDataChanged (PlayerData) ⚠️ 생성 필요
+4. OnQuestCompleted (QuestData) ⚠️ 생성 필요
 ```
 
-**System Behavior**:
+**시스템 동작**:
 
 ```mermaid
 graph LR
@@ -385,63 +385,63 @@ graph LR
     classDef system fill:#020617,stroke:#000000,stroke-width:2px,color:#ffffff,font-weight:bold
 
     %% 流程逻辑
-    A(⚡ Step 1: Create Events 1 & 2):::instant --> B(🛠️ Step 2: Gen Code for Data Types):::warning
+    A(⚡ 1단계: 이벤트 1 & 2 즉시 생성):::instant --> B(🛠️ 2단계: 데이터 타입 코드 생성):::warning
     
-    B --> C(⚙️ Step 3: Trigger Compilation):::wait
+    B --> C(⚙️ 3단계: 컴파일 트리거):::wait
     
-    C --> D(✅ Step 4: Auto-create Events 3 & 4):::instant
+    C --> D(✅ 4단계: 이벤트 3 & 4 자동 생성):::instant
     
-    D --> E(🏁 All Assets Ready):::system
+    D --> E(🏁 모든 에셋 준비 완료):::system
 
     %% 提示说明 (可选)
     linkStyle 0 stroke:#0f766e,stroke-width:2px
     linkStyle 2 stroke:#0f766e,stroke-width:2px
 ```
 
-**Console Output**:
+**콘솔 출력**:
 ```
 ✅ [Batch] Immediate events created successfully. (2 events)
 ⏳ Generated 2 script files. Triggering compilation to finish creation...
-   (After compilation)
+   (컴파일 후)
 🎯 Batch Creation Complete: 2 events created.
 ```
 
 ---
 
-### Sender Events Special Case
+### 송신자(Sender) 이벤트 특이 사항
 
-Sender events (`GameEvent<TSender, TArgs>`) follow the same logic but generate more complex code:
+송신자 이벤트(`GameEvent<TSender, TArgs>`)도 동일한 로직을 따르지만 더 복잡한 코드를 생성합니다:
 ```csharp
-// File: GameObjectDamageInfoGameEvent.cs
+// 파일: GameObjectDamageInfoGameEvent.cs
 
-// Event class with TWO type parameters
+// 두 개의 타입 매개변수를 가진 이벤트 클래스
 public class GameObjectDamageInfoGameEvent 
     : GameEvent<GameObject, DamageInfo> { }
 
-// Binding field with TWO parameters
+// 두 개의 매개변수를 가진 바인딩 필드
 public UnityEvent<GameObject, DamageInfo> 
     GameObjectDamageInfoGameEventAction;
 ```
 
 ---
 
-## 🎯 Best Practices
+## 🎯 권장 사항
 
-### ✅ DO
+### ✅ 하세요 (DO)
 
-**Pre-Generate Common Types**: If you know you'll use certain types frequently, you can refer to [Code Gen & Cleanup](../tools/codegen-and-cleanup.md) to pre generate custom type classes and event binding code.
+**자주 쓰는 타입 미리 생성**: 특정 타입을 자주 사용할 예정이라면, [코드 생성 및 정리](../tools/codegen-and-cleanup.md)를 참고하여 커스텀 타입 클래스와 이벤트 바인딩 코드를 미리 생성해 둘 수 있습니다.
 
 ---
 
-**Use Meaningful Names**
+**의미 있는 이름 사용**
 ```
-✅ Good Names:
+✅ 좋은 이름:
   - OnPlayerHealthChanged
   - OnEnemySpawned
   - OnQuestCompleted
   - OnScoreUpdated
 
-❌ Avoid:
+❌ 피할 이름:
   - NewEvent1
   - Test
   - Event_Copy
@@ -450,21 +450,21 @@ public UnityEvent<GameObject, DamageInfo>
 
 ---
 
-**Organize with Categories**
+**카테고리로 정리**
 
-Use categories to group related events:
+관련된 이벤트를 그룹화하려면 카테고리를 사용하세요:
 ```
-🟥 Category: "Combat"
+🟥 카테고리: "Combat"
   - ⚡ OnDamageTaken
   - ⚡ OnEnemyKilled
   - ⚡ OnWeaponFired
 
-🟩 Category: "UI"
+🟩 카테고리: "UI"
   - ⚡ OnButtonClicked
   - ⚡ OnMenuOpened
   - ⚡ OnDialogClosed
 
-🟪 Category: "Player"
+🟪 카테고리: "Player"
   - ⚡ OnPlayerJumped
   - ⚡ OnPlayerDied
   - ⚡ OnLevelUp
@@ -472,65 +472,65 @@ Use categories to group related events:
 
 ---
 
-### ❌ AVOID
+### ❌ 피하세요 (AVOID)
 
-**Don't Close During Compilation**
+**컴파일 중 종료 금지**
 ```
-❌ WRONG:
-1. Click Create
-2. See "Triggering compilation..." message
-3. Immediately close Unity or force-stop compilation
+❌ 잘못된 예:
+1. Create 클릭
+2. "Triggering compilation..." 메시지 확인
+3. 즉시 유니티를 닫거나 컴파일 강제 중단
 
-✅ RIGHT:
-1. Click Create  
-2. Wait for compilation bar to finish
-3. Events appear automatically
+✅ 올바른 예:
+1. Create 클릭  
+2. 컴파일 바가 끝날 때까지 대기
+3. 이벤트가 자동으로 나타나는 것 확인
 ```
 
-**Why?** Interrupting compilation may leave generated code files without corresponding assets.
+**이유?** 컴파일을 중단하면 생성된 코드 파일은 있지만 그에 해당하는 에셋이 없는 상태가 될 수 있습니다.
 
 ---
 
-**Don't Manually Edit Generated Files**
+**생성된 파일 수동 수정 금지**
 ```
-❌ WRONG:
-Open: TinyGiantsData/GameEventSystem/CodeGen/Custom/PlayerDataGameEvent.cs
-Edit: Add custom methods, change namespace, etc.
+❌ 잘못된 예:
+파일 열기: TinyGiantsData/GameEventSystem/CodeGen/Custom/PlayerDataGameEvent.cs
+수정: 커스텀 메서드 추가, 네임스페이스 변경 등
 
-✅ RIGHT:
-Let the system manage generated files.
-Extend functionality through separate scripts.
+✅ 올바른 예:
+생성된 파일은 시스템이 관리하게 두십시오.
+기능 확장은 별도의 스크립트를 통해 수행하십시오.
 ```
 
-**Why?** The system may regenerate these files, overwriting your changes.
+**이유?** 시스템이 파일을 다시 생성할 때 수동으로 수정한 내용이 덮어씌워질 수 있습니다.
 
 ---
 
-## 🔍 Progress Indicators
+## 🔍 진행 상태 표시
 
-### During Creation
+### 생성 중
 
-**Immediate Creation** (code exists):
+**즉시 생성** (코드 존재 시):
 ```
 ✅ Events created successfully.
 ```
 
-**Code Generation** (new types):
+**코드 생성** (새로운 타입):
 
 ```
 ⏳ Generated 3 script files. Triggering compilation to finish creation...
 ```
 
-**After Compilation**:
+**컴파일 후**:
 ```
 🎯 Batch Creation Complete: 1 events created.
 ```
 
 ---
 
-### Console Logs Explained
+### 콘솔 로그 설명
 
-**Detailed Generation Report**:
+**상세 생성 보고서**:
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🧩 Event Code Generation Complete
@@ -541,88 +541,88 @@ Extend functionality through separate scripts.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-**What This Means**:
+**의미**:
 
-- 3 new C# files created
-- Each file contains event class + binding field
-- Files are in `TinyGiantsData/GameEventSystem/CodeGen/Custom/`
-- Assets will be created automatically after compilation
-
----
-
-## ❓ Troubleshooting
-
-### Events Not Appearing After Compilation
-
-**Problem**: Clicked Create, compilation finished, but events missing.
-
-**Solutions**:
-
-**Check Console for Errors**:
-```
-Look for red errors during compilation
-Common issue: Type not serializable
-Fix: Add [System.Serializable] to your class
-```
-
-**Verify Database Selection**:
-```
-1. Open Game Event Editor
-2. Check which database is selected
-3. Events are added to THAT database
-```
-
-**Manual Asset Check**:
-```
-1. Navigate to: TinyGiantsData/GameEventSystem/Databases/
-2. Find your database asset
-3. Expand it in Project window
-4. Look for your event sub-assets
-```
+- 3개의 새로운 C# 파일이 생성됨
+- 각 파일에는 이벤트 클래스 + 바인딩 필드가 포함됨
+- 파일 위치: `TinyGiantsData/GameEventSystem/CodeGen/Custom/`
+- 컴파일 후 에셋이 자동으로 생성됨
 
 ---
 
-### Compilation Takes Too Long
+## ❓ 문제 해결
 
-**Problem**: Stuck on "Compiling Scripts..." for minutes.
+### 컴파일 후에도 이벤트가 나타나지 않음
 
-**Causes**:
-- Large project with many scripts
-- Other compilation errors blocking progress
-- Unity Editor performance issues
+**문제**: Create를 클릭하고 컴파일이 끝났는데 이벤트가 보이지 않음.
 
-**Solutions**:
+**해결 방법**:
+
+**콘솔 에러 확인**:
 ```
-1. Check Console for compilation errors
-2. Fix any red errors first
-3. Try: Assets → Reimport All (last resort)
-4. Restart Unity if stuck > 5 minutes
+컴파일 중 빨간색 에러가 있는지 확인하세요.
+흔한 문제: 타입이 직렬화 가능하지 않음
+해결: 클래스 위에 [System.Serializable] 추가
+```
+
+**데이터베이스 선택 확인**:
+```
+1. 게임 이벤트 에디터 열기
+2. 어떤 데이터베이스가 선택되어 있는지 확인
+3. 이벤트는 '그' 데이터베이스에 추가됩니다.
+```
+
+**수동 에셋 확인**:
+```
+1. 경로 이동: TinyGiantsData/GameEventSystem/Databases/
+2. 데이터베이스 에셋 찾기
+3. 프로젝트 창에서 확장하여 보기
+4. 이벤트 하위 에셋이 있는지 확인
 ```
 
 ---
 
-### "Type Not Found" After Generation
+### 컴파일이 너무 오래 걸림
 
-**Problem**: Console says type not found even after compilation.
+**문제**: "Compiling Scripts..." 상태로 몇 분간 멈춤.
 
-**Checklist**:
+**원인**:
+- 스크립트가 많은 대규모 프로젝트
+- 진행을 방해하는 다른 컴파일 에러
+- 유니티 에디터 성능 문제
 
-✅ Is your type [Serializable]?
+**해결 방법**:
+```
+1. 콘솔에서 컴파일 에러 확인
+2. 빨간색 에러부터 먼저 수정
+3. 시도: Assets → Reimport All (최후의 수단)
+4. 5분 이상 멈춰 있다면 유니티 재시작
+```
 
-✅ Is your type public?
+---
 
-✅ Does Unity recognize your type? (check Inspector)
+### 생성 후 "Type Not Found" 에러
 
-✅ Did compilation actually finish? (no spinner)
+**문제**: 컴파일 후에도 타입을 찾을 수 없다는 콘솔 로그 발생.
 
-**Fix**:
+**체크리스트**:
+
+✅ 타입이 [Serializable]입니까?
+
+✅ 타입이 public입니까?
+
+✅ 유니티가 타입을 인식합니까? (인스펙터에서 확인)
+
+✅ 컴파일이 실제로 끝났습니까? (스피너 사라짐)
+
+**해결**:
 ```csharp
-// Make sure your class looks like this:
+// 클래스가 다음과 같은지 확인하세요:
 using System;
 using UnityEngine;
 
-[Serializable]  // ← Required
-public class PlayerData  // ← Must be public
+[Serializable]  // ← 필수
+public class PlayerData  // ← 반드시 public이어야 함
 {
     public string playerName;
     public int level;
@@ -631,33 +631,33 @@ public class PlayerData  // ← Must be public
 
 ---
 
-### Duplicate Event Names
+### 중복된 이벤트 이름
 
-**Problem**: Two events with same name in queue.
+**문제**: 대기열에 같은 이름의 이벤트가 두 개 있음.
 
-**Behavior**: System auto-renames with suffix:
+**동작**: 시스템이 접미사를 붙여 자동으로 이름을 변경합니다:
 ```
-Queue:
+대기열:
 - OnPlayerDeath
 - OnPlayerDeath_1
 - OnPlayerDeath_2
 ```
 
-**Better Practice**: Rename manually in the queue before creating it.
+**권장 사항**: 생성하기 전에 대기열에서 수동으로 이름을 변경하는 것이 좋습니다.
 
 ---
 
-:::tip Pro Workflow
-**First-Time Setup**: Create all your common event types in one batch session. Wait for compilation once. From then on, event creation is instant since all code exists. This one-time investment saves hours over the project lifetime.
+:::tip 전문가 워크플로우
+**최초 설정**: 자주 사용하는 모든 이벤트 타입을 한 번에 일괄 생성하세요. 컴파일을 한 번만 기다리면 됩니다. 그 이후로는 코드가 이미 존재하므로 이벤트 생성이 즉시 이루어집니다. 이 한 번의 투자가 프로젝트 기간 내내 수많은 시간을 아껴줍니다.
 :::
 
-:::info Code Location
-Generated files live in:
+:::info 코드 위치
+생성된 파일 저장 위치:
 ```
 Assets/TinyGiantsData/GameEventSystem/CodeGen/
-├─ Basic/    (pre-generated for int, float, etc.)
-└─ Custom/   (your custom types)
+├─ Basic/    (int, float 등 미리 생성된 타입)
+└─ Custom/   (직접 정의한 커스텀 타입)
 ```
 
-These folders are safe to commit to version control—they're deterministic and won't cause merge conflicts.
+이 폴더들은 버전 관리 시스템(Git 등)에 커밋해도 안전합니다. 결정론적으로 생성되므로 머지 충돌을 일으키지 않습니다.
 :::

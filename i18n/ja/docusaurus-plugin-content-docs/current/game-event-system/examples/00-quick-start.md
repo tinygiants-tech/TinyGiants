@@ -1,133 +1,133 @@
 ﻿---
-sidebar_label: '00 Quick Start'
+sidebar_label: '00 クイックスタート'
 sidebar_position: 1
 ---
 
 import VideoGif from '@site/src/components/Video/VideoGif';
 
-# 🚀 Quick Start
+# 🚀 クイックスタート (Quick Start)
 
 <!-- <VideoGif src="/video/game-event-system/00-quick-start.mp4" /> -->
 
-## 📋 Overview
+## 📋 概要
 
-This introductory scene walks you through the **one-time setup** required to activate the Game Event System in your project. Before exploring any demos, you'll need to initialize the core framework components.
+この導入シーンでは、プロジェクトで Game Event System を有効にするために必要な**初回セットアップ**の手順を説明します。デモを詳しく見る前に、フレームワークのコアコンポーネントを初期化する必要があります。
 
-:::tip 💡 What You'll Learn
-- How to open the **Game Event System Dashboard**
-- How to initialize the system with one click
-- What components are created during setup
+:::tip 💡 学べること
+- **Game Event System Dashboard** の開き方
+- ワンクリックでシステムを初期化する方法
+- セットアップ中に作成されるコンポーネントの内容
 
 :::
 
 ---
 
-## 🎬 Demo Scene
+## 🎬 デモシーン
 ```
 Assets/TinyGiants/GameEventSystem/Demo/00_QuickStart/00_QuickStart.unity
 ```
 
-Open this scene to begin the initialization process.
+このシーンを開いて初期化プロセスを開始してください。
 
 ---
 
-## 🤔 Why Initialize?
+## 🤔 なぜ初期化が必要なのですか？
 
-The Game Event System relies on a **persistent manager** (`GameEventManager`) to coordinate all event operations. Without this manager, events cannot be raised or listened to. 
+Game Event System は、すべてのイベント操作を調整するために**常駐マネージャー** (`GameEventManager`) に依存しています。このマネージャーがないと、イベントの発行やリスニングを行うことができません。
 
-The initialization process automatically sets up:
+初期化プロセスにより、以下が自動的にセットアップされます：
 
-| Component              | Description                                                  |
+| コンポーネント              | 説明                                                  |
 | ---------------------- | ------------------------------------------------------------ |
-| 🎮 **GameEventManager** | Singleton manager (marked as `DontDestroyOnLoad`)            |
-| 📚 **Event Database**   | Default asset to store your event definitions                |
-| 🔗 **Flow Container**   | Visual logic graph for event orchestration                   |
-| ⚙️ **Generated Code**   | C# classes for built-in event types (`void`, `int`, `float`, etc.) |
+| 🎮 **GameEventManager** | シングルトンマネージャー（`DontDestroyOnLoad` 指定）            |
+| 📚 **Event Database**   | イベント定義を保存するためのデフォルトアセット                |
+| 🔗 **Flow Container**   | イベントオーケストレーション用のビジュアルロジックグラフ       |
+| ⚙️ **生成済みコード**    | 組み込みイベント型 (`void`, `int`, `float` など) 用の C# クラス |
 
 ---
 
-## 📖 Step-by-Step Setup
+## 📖 ステップ・バイ・ステップのセットアップ
 
-### 1️⃣ Open the Dashboard
+### 1️⃣ ダッシュボードを開く
 
-From Unity's top menu, navigate to:
+Unity のトップメニューから以下に移動します：
 ```
 Tools → TinyGiants → Game Event System
 ```
 
-This opens the **Game Event System** window — your central hub for managing events, databases, and flow graphs.
+これにより **Game Event System** ウィンドウが開きます。ここはイベント、データベース、フローグラフを管理するセントラルハブとなります。
 
 ---
 
-### 2️⃣ Check System Status
+### 2️⃣ システムステータスの確認
 
-Locate the **"Initialize System"** section in the window:
+ウィンドウ内の **"Initialize System"** セクションを確認します：
 
-#### 🔵 Before Initialization
+#### 🔵 初期化前
 
 ![System Uninitialized](/img/game-event-system/examples/00-quick-start/uninitialized.png)
 
-- The blue button **"Initialize Event System"** is visible
-- ⚠️ Warning: "Please initialize the system first"
+- 青いボタン **"Initialize Event System"** が表示されています。
+- ⚠️ 警告: "Please initialize the system first（まずシステムを初期化してください）"
 
-#### 🟢 After Initialization
+#### 🟢 初期化後
 
 ![System Initialized](/img/game-event-system/examples/00-quick-start/initialized.png)
 
-- The status bar turns **green** with "✓ System Initialized"
-- ✅ Confirmation: "Core managers, database and codes are ready"
+- ステータスバーが**緑色**になり、"✓ System Initialized" と表示されます。
+- ✅ 確認メッセージ: "Core managers, database and codes are ready（コアマネージャー、データベース、コードの準備が完了しました）"
 
 ---
 
-### 3️⃣ Click Initialize
+### 3️⃣ 初期化をクリック
 
-Press the **"Initialize Event System"** button. The plugin will automatically perform the following:
+**"Initialize Event System"** ボタンを押します。プラグインは自動的に以下の処理を実行します：
 
-| Action                | Result                                                       |
+| アクション             | 結果                                                         |
 | --------------------- | ------------------------------------------------------------ |
-| **Create Managers**   | Adds `GameEventManager` GameObject to the scene (persistent) |
-| **Generate Database** | Creates `DefaultEventDatabase.asset` in your project         |
-| **Setup Flow Graph**  | Creates `DefaultFlowContainer.asset` for visual logic        |
-| **Compile Code**      | Generates type-safe C# event classes                         |
+| **マネージャーの作成** | `GameEventManager` GameObject をシーンに追加（常駐設定）     |
+| **データベースの生成** | プロジェクト内に `DefaultEventDatabase.asset` を作成         |
+| **フローグラフの設定** | ビジュアルロジック用の `DefaultFlowContainer.asset` を作成    |
+| **コードのコンパイル** | 型安全な C# イベントクラスを生成                             |
 
-The Console will display: **🎉 GameEvent initialization complete**
+コンソールには **🎉 GameEvent initialization complete** と表示されます。
 
 ---
 
-## ✅ Verification
+## ✅ 確認 (Verification)
 
-After initialization completes, verify the setup:
+初期化が完了したら、セットアップを確認してください：
 
-1. **Hierarchy Check** 🔍  
+1. **ヒエラルキーの確認** 🔍  
 
-   A `GameEventManager` GameObject should appear at the root level
+   ルートレベルに `GameEventManager` GameObject が表示されているはずです。
 
-2. **Inspector Check** 👀  
+2. **インスペクターの確認** 👀  
    
-   Select the manager to see assigned Database and Flow Container references
+   マネージャーを選択し、割り当てられた Database と Flow Container の参照を確認します。
    
-3. **Console Check** 📝  
+3. **コンソールの確認** 📝  
    
-   Look for the success message confirming initialization
+   初期化が成功したことを示すメッセージを探します。
 
 ![GameEventManager in Hierarchy](/img/game-event-system/examples/00-quick-start/hierarchy.png)
 
-:::info 🔔 Scene-Level Setup
+:::info 🔔 シーンレベルのセットアップ
 
-Each scene needs its own **GameEventManager** to function. The manager determines which **Event Databases** and **Flow Graphs** are active in that scene. While the databases themselves (ScriptableObject assets) are persistent and reusable across scenes, each scene must explicitly bind which databases it will use.
+各シーンが機能するためには、それぞれ独自の **GameEventManager** が必要です。マネージャーは、そのシーンでどの **Event Databases** と **Flow Graphs** がアクティブであるかを決定します。データベース自体（ScriptableObject アセット）はシーンを跨いで再利用可能ですが、各シーンでどのデータベースを使用するかを明示的にバインドする必要があります。
 
 :::
 
 ---
 
-## 🎯 What's Next?
+## 🎯 次のステップは？
 
-With the environment ready, you can now explore the core functionality of the framework.
+環境の準備が整いました。これでフレームワークのコア機能を詳しく見ていくことができます。
 
-**Next Chapter**: Learn how to create and trigger your first event with **[01 Void Event](./01-void-event.md)**
+**次の章**: **[01 Void Event](./01-void-event.md)** で、最初のイベントを作成してトリガーする方法を学びましょう。
 
-:::note 📚 Deep Dive
+:::note 📚 さらに詳しく
 
-For technical details about the initialization process and manual setup options, see **[Installation Guide](../intro/installation.md)**.
+初期化プロセスや手動セットアップオプションに関する技術的な詳細は、**[インストールガイド](../intro/installation.md)** を参照してください。
 
 :::

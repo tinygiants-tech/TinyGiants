@@ -1,402 +1,402 @@
 ﻿---
-sidebar_label: '09 Persistent Event'
+sidebar_label: '09 常駐イベント'
 sidebar_position: 10
 ---
 
 import VideoGif from '@site/src/components/Video/VideoGif';
 
-# 09 Persistent Event: Surviving Scene Loads
+# 09 常駐イベント：シーンロードを跨ぐ生存
 
 <!-- <VideoGif src="/video/game-event-system/09-persistent-event.mp4" /> -->
 
-## 📋 Overview
+## 📋 概要
 
-In Unity, when you load a new scene, all GameObjects (and their event listeners) from the previous scene are destroyed. **Persistent Events** solve this problem by storing listener bindings in a global manager that survives scene transitions—essential for global systems like music controllers, inventory managers, or achievement trackers.
+Unityでは、新しいシーンをロードすると、前のシーンにあったすべてのGameObject（およびそのイベントリスナー）が破棄されます。**常駐イベント (Persistent Events)** は、シーン遷移後も維持されるグローバルマネージャーにリスナーの紐付け（バインディング）を保存することで、この問題を解決します。これは、ミュージックコントローラー、インベントリマネージャー、実績トラッカーなどのグローバルシステムに不可欠な機能です。
 
-:::tip 💡 What You'll Learn
-- The scene transition cleanup problem in Unity
-- How to enable event persistence with a single checkbox
-- The difference between persistent and non-persistent event behavior
-- Architectural patterns for cross-scene event systems
+:::tip 💡 学べること
+- Unityにおけるシーン遷移時のクリーンアップ問題
+- チェックボックス一つでイベントの常駐を有効にする方法
+- 常駐イベントと通常イベントの挙動の違い
+- シーンを跨ぐイベントシステムの設計パターン
 
 :::
 
 ---
 
-## 🎬 Demo Scene
+## 🎬 デモシーン
 ```
 Assets/TinyGiants/GameEventSystem/Demo/09_PersistentEvent/09_PersistentEvent_1.unity
 ```
 
-### Scene Composition
+### シーン構成
 
-**Visual Elements:**
-- 🔴 **Turret_A (Left)** - Red turret with grey base
-  - Controlled by **persistent** event `OnTurretA`
-  - Has rotating head mechanism
-  - Will continue working after scene reload
+**視覚的要素:**
+- 🔴 **Turret_A (左)** - 赤色のタレット
+  - **常駐 (Persistent)** イベント `OnTurretA` によって制御されます。
+  - 回転ヘッド機構を持ちます。
+  - シーンのリロード後も動作し続けます。
   
-- 🔵 **Turret_B (Right)** - Blue turret with grey base
-  - Controlled by **non-persistent** event `OnTurretB`
-  - Identical functionality to Turret A
-  - Will stop working after scene reload
+- 🔵 **Turret_B (右)** - 青色のタレット
+  - **通常 (Non-Persistent)** イベント `OnTurretB` によって制御されます。
+  - 機能はタレットAと同一です。
+  - シーンのリロード後は動作しなくなります。
 
-- 🎯 **TargetDummy** - Center capsule target
-  - Both turrets aim and fire at this target
-  - Has Rigidbody for knockback physics
+- 🎯 **TargetDummy** - 中央のターゲット（カプセル）
+  - 両方のタレットはこのターゲットを狙って発射します。
+  - ノックバック物理用の Rigidbody を保持しています。
 
-- 📋 **HoloDisplay** - Information panel
-  - Displays explanatory text about the experiment
-  - Shows persistent state information
+- 📋 **HoloDisplay** - 情報パネル
+  - 実験内容の説明テキストを表示します。
+  - 常駐状態に関する情報を表示します。
 
-**UI Layer (Canvas):**
-- 🎮 **Three Buttons** - Bottom of the screen
-  - "Fire A" (White) → Triggers `PersistentEventRaiser.FireTurretA()`
-  - "Fire B" (White) → Triggers `PersistentEventRaiser.FireTurretB()`
-  - "Load Scene 2" (Green) → Reloads the scene to test persistence
+**UIレイヤー (Canvas):**
+- 🎮 **3つのボタン** - 画面下部
+  - "Fire A" (白) ➔ `PersistentEventRaiser.FireTurretA()` を実行
+  - "Fire B" (白) ➔ `PersistentEventRaiser.FireTurretB()` を実行
+  - "Load Scene 2" (緑) ➔ 常駐をテストするためにシーンをリロード
 
-**Game Logic Layer (Demo Scripts):**
-- 📤 **PersistentEventRaiser** - Standard scene-based raiser
-  - Holds references to both events
-  - Destroyed and recreated on scene reload
+**ゲームロジックレイヤー (デモスクリプト):**
+- 📤 **PersistentEventRaiser** - 標準的なシーンベースの発行側
+  - 両方のイベントへの参照を保持します。
+  - シーンリロード時に破棄され、再生成されます。
   
-- 📥 **PersistentEventReceiver** - **DontDestroyOnLoad** singleton
-  - Survives scene transitions
-  - Holds combat logic for both turrets
-  - Uses **dependency injection** pattern for scene references
+- 📥 **PersistentEventReceiver** - **DontDestroyOnLoad** シングルトン
+  - シーン遷移を跨いで生存します。
+  - 両方のタレットの戦闘ロジックを保持します。
+  - シーン参照の解決に**依存性の注入 (Dependency Injection)** パターンを使用します。
 
-- 🔧 **Scene Setup** - Dependency injection helper
-  - Runs on scene load
-  - Re-injects new turret references into persistent receiver
-  - Enables persistent receiver to control new scene objects
-
----
-
-## 🎮 How to Interact
-
-### The Persistence Experiment
-
-This demo proves that persistent events maintain their bindings across scene loads while non-persistent events are cleared.
+- 🔧 **Scene Setup** - 依存性注入のヘルパー
+  - シーンロード時に実行されます。
+  - 常駐している受信側（Receiver）に、新しいシーンのタレット参照を再注入します。
+  - これにより、常駐した受信側が新しいシーンのオブジェクトを制御できるようになります。
 
 ---
 
-### Step 1: Enter Play Mode
+## 🎮 操作方法
 
-Press the **Play** button in Unity.
+### 常駐実験の内容
 
-**Initial State:**
-- Two turrets (red and blue) idle in the scene
-- HoloDisplay shows explanatory text
-- Console is clear
+このデモでは、シーンロード後も常駐イベントがバインディングを維持する一方で、通常イベントはクリアされることを証明します。
 
 ---
 
-### Step 2: Initial Functionality Test
+### ステップ 1: プレイモードに入る
 
-**Click "Fire A":**
-- 🎯 Red turret (left) rotates toward target
-- 🚀 Projectile fires and travels
-- 💥 On impact:
-  - Orange floating text "CRIT! -500"
-  - Large explosion VFX
-  - Camera shake
-  - Target knocked back
-- 📝 Console: `[Raiser] Broadcasting Command: Fire Turret A`
-- 📝 Console: `[Receiver] Received Command A. Engaging...`
+Unityの **Play** ボタンを押します。
 
-**Click "Fire B":**
-- 🎯 Blue turret (right) rotates toward target
-- 🚀 Projectile fires
-- 💥 On impact:
-  - White floating text "-200"
-  - Normal explosion VFX
-  - No camera shake (weaker attack)
-  - Target knocked back
-- 📝 Console: `[Raiser] Broadcasting Command: Fire Turret B`
-- 📝 Console: `[Receiver] Received Command B. Engaging...`
-
-**Result:** ✅ Both turrets work perfectly in the initial scene.
+**初期状態:**
+- シーン内に2つのタレット（赤と青）が待機しています。
+- ホロディスプレイに説明文が表示されます。
+- コンソールはクリアな状態です。
 
 ---
 
-### Step 3: The Scene Reload (The Purge)
+### ステップ 2: 初回の機能テスト
 
-**Click "Load Scene 2":**
+**"Fire A" をクリック:**
+- 🎯 赤タレット（左）がターゲットの方を向きます。
+- 🚀 弾丸が発射され、飛んでいきます。
+- 💥 着弾時：
+  - オレンジ色のテキスト「CRIT! -500」が表示
+  - 巨大な爆発VFXが発生
+  - カメラシェイクが発生
+  - ターゲットがノックバック
+- 📝 コンソール: `[Raiser] Broadcasting Command: Fire Turret A`
+- 📝 コンソール: `[Receiver] Received Command A. Engaging...`
 
-**What Happens Behind the Scenes:**
-1. 🔄 Unity's `SceneManager.LoadScene()` is called
-2. 💀 **Scene Destruction Phase:**
-   - All scene GameObjects are destroyed:
-     - ❌ Turret_A destroyed
-     - ❌ Turret_B destroyed
-     - ❌ TargetDummy destroyed
-     - ❌ PersistentEventRaiser destroyed
-   - 🗑️ GameEventManager cleans up **non-persistent** event listeners
-     - `OnTurretB` listeners cleared
-     - `OnTurretA` listeners **preserved** (persistent flag)
+**"Fire B" をクリック:**
+- 🎯 青タレット（右）がターゲットの方を向きます。
+- 🚀 弾丸が発射されます。
+- 💥 着弾時：
+  - 白いテキスト「-200」が表示
+  - 標準的な爆発VFXが発生
+  - カメラシェイクなし（弱い攻撃）
+  - ターゲットがノックバック
+- 📝 コンソール: `[Raiser] Broadcasting Command: Fire Turret B`
+- 📝 コンソール: `[Receiver] Received Command B. Engaging...`
 
-3. 🏗️ **Scene Recreation Phase:**
-   - New Turret_A spawned
-   - New Turret_B spawned
-   - New TargetDummy spawned
-   - New PersistentEventRaiser spawned
-
-4. ✨ **Persistent Objects:**
-   - ✅ `PersistentEventReceiver` **survives** (DontDestroyOnLoad)
-   - ✅ Its method bindings to `OnTurretA` **still active**
-
-5. 🔧 **Dependency Injection:**
-   - `PersistentEventSceneSetup.Start()` runs
-   - Calls `PersistentEventReceiver.UpdateSceneReferences()`
-   - Injects new scene turret references into persistent receiver
-
-**Visual Changes:**
-- Scene briefly goes black during reload
-- Turrets respawn in same positions
-- UI buttons remain functional
+**結果:** ✅ 初回のシーンでは、両方のタレットが完璧に動作します。
 
 ---
 
-### Step 4: Post-Reload Survival Test
+### ステップ 3: シーンのリロード（パージ）
 
-**Click "Fire A" (After Reload):**
+**"Load Scene 2" をクリック:**
 
-**What Happens:**
-1. 🎯 Red turret rotates and fires (works perfectly!)
-2. 💥 Full combat sequence plays
-3. 📝 Console: `[Receiver] Received Command A. Engaging...`
+**舞台裏で起きていること:**
+1. 🔄 Unity の `SceneManager.LoadScene()` が呼び出されます。
+2. 💀 **シーン破棄フェーズ:**
+   - シーン内のすべての GameObject が破棄されます：
+     - ❌ Turret_A 破棄
+     - ❌ Turret_B 破棄
+     - ❌ TargetDummy 破棄
+     - ❌ PersistentEventRaiser 破棄
+   - 🗑️ GameEventManager が **通常 (Non-Persistent)** イベントのリスナーをクリーンアップします。
+     - `OnTurretB` のリスナーがクリアされます。
+     - `OnTurretA` のリスナーは **維持** されます（常駐フラグが有効なため）。
 
-**Why It Works:**
+3. 🏗️ **シーン再生成フェーズ:**
+   - 新しい Turret_A が生成されます。
+   - 新しい Turret_B が生成されます。
+   - 新しい TargetDummy が生成されます。
+   - 新しい PersistentEventRaiser が生成されます。
+
+4. ✨ **常駐オブジェクト:**
+   - ✅ `PersistentEventReceiver` は **生存** します (DontDestroyOnLoad)。
+   - ✅ その内部にある `OnTurretA` へのメソッドバインディングは **有効なまま** です。
+
+5. 🔧 **依存性の注入:**
+   - `PersistentEventSceneSetup.Start()` が実行されます。
+   - `PersistentEventReceiver.UpdateSceneReferences()` を呼び出します。
+   - 新しく生成されたシーン内のタレット参照を、常駐している受信側に注入します。
+
+**視覚的な変化:**
+- リロード中、一瞬画面が暗くなります。
+- 同じ位置にタレットが再配置されます。
+- UI ボタンは引き続き機能します。
+
+---
+
+### ステップ 4: リロード後の生存テスト
+
+**リロード後に "Fire A" をクリック:**
+
+**何が起きるか:**
+1. 🎯 赤タレットが回転し、発射します（完璧に動作！）。
+2. 💥 戦闘シーケンスがすべて実行されます。
+3. 📝 コンソール: `[Receiver] Received Command A. Engaging...`
+
+**なぜ動作するのか:**
 ```
-Button → fireAEvent.Raise() 
-       → GameEventManager finds persistent binding
-       → PersistentEventReceiver.OnFireCommandA() executes
-       → Uses newly injected turret reference
-       → Turret fires
+ボタン ➔ fireAEvent.Raise() 
+      ➔ GameEventManager が常駐バインディングを発見
+      ➔ PersistentEventReceiver.OnFireCommandA() が実行
+      ➔ 新しく注入されたタレット参照を使用
+      ➔ タレットが発射
 ```
 
-**Result:** ✅ **Persistent event survived scene reload!**
+**結果:** ✅ **常駐イベントはシーンリロード後も生存しました！**
 
 ---
 
-**Click "Fire B" (After Reload):**
+**リロード後に "Fire B" をクリック:**
 
-**What Happens:**
-1. 🔇 **NOTHING**
-2. 📝 Console: `[Raiser] Broadcasting Command: Fire Turret B`
-3. ❌ No receiver log
-4. Blue turret does not move or fire
+**何が起きるか:**
+1. 🔇 **何も起きません**
+2. 📝 コンソール: `[Raiser] Broadcasting Command: Fire Turret B`
+3. ❌ 受信側のログが出ません。
+4. 青タレットは動きも発射もしません。
 
-**Why It Failed:**
+**なぜ失敗したのか:**
 ```
-🔘 Input: Button Click
+🔘 入力: ボタンクリック
 │
-🚀 Event: fireBEvent.Raise()
+🚀 イベント: fireBEvent.Raise()
 │
-🔍 Registry: [ GameEventManager Lookup ]
+🔍 登録簿: [ GameEventManager による検索 ]
 │   
-├─❓ Result: NONE Found
-│  └─ 🗑️ Reason: Bindings cleared during Scene Reload
+├─❓ 結果: 何も見つからない
+│  └─ 🗑️ 理由: シーンリロード時にバインディングがクリアされたため
 │
-🌑 Outcome: Signal Dissipated
-│  └─ 👻 Result: "Lost in the void" (No receivers called)
+🌑 結末: 信号の霧散
+│  └─ 👻 結果: 虚空に消える（受信側が呼び出されない）
 │
-📊 Status: 0 Actions Executed | ✅ System Safe (No NullRef)
+📊 ステータス: 実行されたアクション 0 | ✅ システムは安全（NullRefは発生しない）
 ```
 
-**Result:** ❌ **Non-persistent event binding was destroyed!**
+**結果:** ❌ **通常イベントのバインディングは破棄されました！**
 
-:::danger 🔴 The Dead Event
+:::danger 🔴 死んだイベント
 
-`OnTurretB` listener was cleared when the scene unloaded. The event asset still exists, but its connection to `PersistentEventReceiver.OnFireCommandB()` is **permanently broken** (unless you manually re-subscribe via code).
+`OnTurretB` のリスナーは、シーンがアンロードされた際にクリアされました。イベントアセット自体は存在し続けますが、`PersistentEventReceiver.OnFireCommandB()` との接続は**永久に断たれています**（コード経由で手動で再購読しない限り）。
 
 :::
 
 ---
 
-## 🏗️ Scene Architecture
+## 🏗️ シーンのアーキテクチャ
 
-### The Scene Transition Problem
+### シーン遷移の問題点
 
-In standard Unity event systems:
+標準的な Unity のイベントシステムでは：
 ```
-🖼️ Scene A: Loaded
-   └─ 🔗 Listeners: Subscribed (Local Context)
+🖼️ シーン A: ロード済み
+   └─ 🔗 リスナー: 購読中 (ローカルコンテキスト)
 │
-🚚 [ Loading Scene B... ]
+🚚 [ シーン B をロード中... ]
 │
-🧹 Cleanup: Memory Purged
-   └─ ❌ Result: ALL listeners cleared from the registry
+🧹 クリーンアップ: メモリのパージ
+   └─ ❌ 結果: すべてのリスナーが登録簿から削除される
 │
-🖼️ Scene B: Active
-   └─ 🌑 Status: Event is "Empty" (No receivers)
-```
-
-This breaks global systems that need to persist across scenes.
-
-### The Persistent Event Solution
-```
-🖼️ Scene A: Loaded
-   └─ 🛡️ Listeners: Subscribed (Global Context)
-│
-🚚 [ Loading Scene B... ]
-│
-💎 Preservation: Handover Successful
-   └─ ✅ Result: Bindings stored in the Global Persistent Registry
-│
-🖼️ Scene B: Active
-   └─ 🔥 Status: Event is "Hot" (Listeners remain ready to fire)
+🖼️ シーン B: アクティブ
+   └─ 🌑 状態: イベントは「空」（受信側がいない）
 ```
 
-Persistent events behave like `DontDestroyOnLoad` for event logic.
+これにより、シーンを跨いで存続する必要があるグローバルシステムが機能しなくなります。
+
+### 常駐イベントによる解決策
+```
+🖼️ シーン A: ロード済み
+   └─ 🛡️ リスナー: 購読中 (グローバルコンテキスト)
+│
+🚚 [ シーン B をロード中... ]
+│
+💎 保持: 引き継ぎ成功
+   └─ ✅ 結果: バインディングはグローバル常駐登録簿に保存される
+│
+🖼️ シーン B: アクティブ
+   └─ 🔥 状態: イベントは「ホット」（リスナーは準備完了のまま）
+```
+
+常駐イベントは、イベントロジックにおける `DontDestroyOnLoad` のように振る舞います。
 
 ---
 
-### Architectural Pattern: Dependency Injection
+### 設計パターン：依存性の注入 (Dependency Injection)
 
-This demo uses a sophisticated pattern to handle scene references:
+このデモでは、シーン参照を処理するために高度なパターンを使用しています：
 
-**The Challenge:**
-- `PersistentEventReceiver` survives (DontDestroyOnLoad)
-- But turrets are destroyed and recreated each scene load
-- Receiver needs references to new turret instances
+**課題:**
+- `PersistentEventReceiver` は生存します (DontDestroyOnLoad)。
+- しかし、タレットはシーンロードのたびに破棄され、再生成されます。
+- 受信側は、新しいタレットインスタンスへの参照を必要とします。
 
-**The Solution:**
-1. **Persistent Receiver** holds combat logic
-2. **Scene Setup Script** runs on each scene load
-3. Setup injects new scene references into persistent receiver
-4. Receiver can now control new turrets
+**解決策:**
+1. **常駐受信側**が戦闘ロジックを保持します。
+2. **Scene Setup スクリプト**がシーンロードごとに実行されます。
+3. Setup スクリプトが新しいシーンの参照を受信側に注入します。
+4. 受信側は新しいタレットを制御できるようになります。
 ```
-🛡️ Persistent Layer (The "Survivor")
-┃  └─ 💎 PersistentEventReceiver [Survives Scene Load]
+🛡️ 常駐レイヤー (生存者)
+┃  └─ 💎 PersistentEventReceiver [シーンロードを跨いで生存]
 ┃        ▲
-┃        ║ 💉 Dependency Injection (References Re-bound)
+┃        ║ 💉 依存性注入 (参照の再結合)
 ┃        ╚══════════════════════════════════════╗
 ┃                                               ║
-🖼️ Scene Layer (The "Context")                  ║
-┃  └─ ⚙️ PersistentEventSceneSetup [Recreated]  ║
+🖼️ シーンレイヤー (コンテキスト)                  ║
+┃  └─ ⚙️ PersistentEventSceneSetup [再生成]     ║
 ┃        │                                      ║
-┃        └── 🔍 Finds & Passes References ➔ ════╝
+┃        └── 🔍 参照を検索して渡す ➔ ════════════╝
 ┃              │
-┃              ├── 🤖 New Turret_A [Scene Instance]
-┃              └── 🤖 New Turret_B [Scene Instance]
+┃              ├── 🤖 新しい Turret_A [シーンインスタンス]
+┃              └── 🤖 新しい Turret_B [シーンインスタンス]
 ```
 
 ---
 
-### Event Definitions
+### イベント定義 (Event Definitions)
 
 ![Game Event Editor](/img/game-event-system/examples/09-persistent-event/demo-09-editor.png)
 
-| Event Name  | Type               | Persistent Flag |
+| イベント名  | 型                 | 常駐フラグ (Persistent) |
 | ----------- | ------------------ | --------------- |
-| `OnTurretA` | `GameEvent` (void) | ✅ Checked       |
-| `OnTurretB` | `GameEvent` (void) | ❌ Unchecked     |
+| `OnTurretA` | `GameEvent` (void) | ✅ チェックあり       |
+| `OnTurretB` | `GameEvent` (void) | ❌ チェックなし       |
 
-**Identical Events, Different Fate:**
-Both are void events with the same configuration—except for one checkbox that determines their survival.
+**同一のイベント、異なる運命:**
+どちらも同じ設定の Void イベントですが、生存を決定するのはたった一つのチェックボックスです。
 
 ---
 
-### Behavior Configuration
+### ビヘイビア設定
 
-#### Persistent Event (OnTurretA)
+#### 常駐イベント (OnTurretA)
 
-Click the **(void)** icon for `OnTurretA` to open the Behavior Window:
+`OnTurretA` の **(void)** アイコンをクリックして、Behavior Window を開きます：
 
 ![Persistent Behavior](/img/game-event-system/examples/09-persistent-event/demo-09-behavior-persistent.png)
 
-**Critical Setting:**
-- 💾 **Persistent Event:** ✅ **CHECKED**
+**重要な設定:**
+- 💾 **常駐イベント (Persistent Event):** ✅ **チェックを入れる**
 
-**Warning Message:**
-> "Event will behave like DontDestroyOnLoad."
+**警告メッセージ:**
+> 「イベントは DontDestroyOnLoad のように振る舞います。」
 
-**What This Means:**
-- Listener bindings stored in global persistent manager
-- NOT cleared during scene transitions
-- Survives until explicitly removed or game exit
-- Essential for cross-scene systems
-
----
-
-#### Non-Persistent Event (OnTurretB)
-
-Same configuration except:
-- 💾 **Persistent Event:** ❌ **UNCHECKED**
-
-**Result:**
-- Standard Unity lifecycle
-- Listeners cleared on scene unload
-- Must re-subscribe if needed in new scene
+**これが意味すること:**
+- リスナーのバインディングはグローバル常駐マネージャーに保存されます。
+- シーン遷移中にクリアされません。
+- 明示的に削除されるか、ゲームが終了するまで生存します。
+- シーンを跨ぐシステムには必須の設定です。
 
 ---
 
-### Sender Setup (PersistentEventRaiser)
+#### 通常イベント (OnTurretB)
 
-Select the **PersistentEventRaiser** GameObject:
+以下の点を除き、同じ設定です：
+- 💾 **常駐イベント (Persistent Event):** ❌ **チェックを外す**
+
+**結果:**
+- 標準的な Unity のライフサイクルに従います。
+- シーンアンロード時にリスナーがクリアされます。
+- 新しいシーンで必要な場合は、再購読が必要です。
+
+---
+
+### 発行側の設定 (PersistentEventRaiser)
+
+**PersistentEventRaiser** GameObject を選択します：
 
 ![PersistentEventRaiser Inspector](/img/game-event-system/examples/09-persistent-event/demo-09-inspector.png)
 
-**Game Events:**
-- `Fire A Event`: `OnTurretA` (Persistent)
-  - Tooltip: "Checked 'Persistent Event' in Editor"
-- `Fire B Event`: `OnTurretB` (Non-Persistent)
-  - Tooltip: "Unchecked 'Persistent Event' in Editor"
+**ゲームイベント:**
+- `Fire A Event`: `OnTurretA` (常駐)
+  - ツールチップ: "エディタで 'Persistent Event' をチェック済み"
+- `Fire B Event`: `OnTurretB` (通常)
+  - ツールチップ: "エディタで 'Persistent Event' のチェックを外した状態"
 
-**Lifecycle:**
-- ❌ Destroyed on scene reload
-- ✅ Recreated with new scene
-- Holds new event references (assets are persistent ScriptableObjects)
+**ライフサイクル:**
+- ❌ シーンリロード時に破棄。
+- ✅ 新しいシーンと共に再生成。
+- 新しいイベント参照を保持（アセット自体は永続的な ScriptableObject です）。
 
 ---
 
-### Receiver Setup (PersistentEventReceiver)
+### 受信側の設定 (PersistentEventReceiver)
 
-Select the **PersistentEventReceiver** GameObject:
+**PersistentEventReceiver** GameObject を選択します：
 
 ![PersistentEventReceiver Inspector](/img/game-event-system/examples/09-persistent-event/demo-09-receiver.png)
 
-**Combat Resources:**
-- `Projectile Prefab`: Projectile (Turret Projectile)
-- `Fire VFX`: MuzzleFlashVFX (Particle System)
+**戦闘リソース:**
+- `Projectile Prefab`: タレット弾丸プレハブ
+- `Fire VFX`: 発射時のマズルフラッシュ
 
-**Feedback:**
-- `Hit Normal VFX`: HitVFX_Normal (Particle System)
-- `Hit Crit VFX`: HitVFX_Crit (Particle System)
-- `Floating Text Prefab`: DamageFloatingText (Text Mesh Pro)
-- `Hit Clip`: ExplosionSFX (Audio Clip)
+**フィードバック:**
+- `Hit Normal VFX`: 通常ヒットエフェクト
+- `Hit Crit VFX`: クリティカルエフェクト
+- `Floating Text Prefab`: ダメージ数値表示
+- `Hit Clip`: 爆発音
 
-**Dynamic References (Hidden):**
-These are injected at runtime by Scene Setup:
-- `turretA`, `headA` (Turret A references)
-- `turretB`, `headB` (Turret B references)
-- `targetDummy`, `targetRigidbody` (Target references)
+**動的参照 (隠し項目):**
+これらは Scene Setup によって実行時に注入されます：
+- `turretA`, `headA` (タレット A の参照)
+- `turretB`, `headB` (タレット B の参照)
+- `targetDummy`, `targetRigidbody` (ターゲットの参照)
 
 ---
 
-### Scene Setup Configuration
+### シーンセットアップの設定
 
-Select the **Scene Setup** GameObject:
+**Scene Setup** GameObject を選択します：
 
 ![Scene Setup Inspector](/img/game-event-system/examples/09-persistent-event/demo-09-scenesetup.png)
 
-**Current Scene Objects:**
-- `Turret A`: Turret_A (GameObject)
-- `Head A`: Head (Transform) - rotation pivot
-- `Turret B`: Turret_B (GameObject)
-- `Head B`: Head (Transform)
-- `Target Dummy`: TargetDummy (Transform)
-- `Target Rigidbody`: TargetDummy (Rigidbody)
+**現在のシーン内のオブジェクト:**
+- `Turret A`: シーン内の Turret_A インスタンス
+- `Head A`: 回転の軸となる Transform
+- `Turret B`: シーン内の Turret_B インスタンス
+- `Head B`: 同上
+- `Target Dummy`: ターゲットの Transform
+- `Target Rigidbody`: ターゲットの Rigidbody
 
-**Purpose:**
-On `Start()`, this script finds the persistent receiver and injects these references, enabling it to control new scene objects.
+**目的:**
+`Start()` 実行時に、このスクリプトが常駐受信側を見つけ、これらの参照を注入します。これにより、常駐ロジックが新しいシーンのオブジェクトを制御できるようになります。
 
 ---
 
-## 💻 Code Breakdown
+## 💻 コード解説
 
-### 📤 PersistentEventRaiser.cs (Sender)
+### 📤 PersistentEventRaiser.cs (発行側)
 ```csharp
 using UnityEngine;
 using TinyGiants.GameEventSystem.Runtime;
@@ -404,50 +404,50 @@ using TinyGiants.GameEventSystem.Runtime;
 public class PersistentEventRaiser : MonoBehaviour
 {
     [Header("Game Events")]
-    [Tooltip("Configuration: Checked 'Persistent Event' in Editor.")]
+    [Tooltip("エディタ設定: 'Persistent Event' をチェック済み。")]
     [GameEventDropdown] public GameEvent fireAEvent;
     
-    [Tooltip("Configuration: Unchecked 'Persistent Event' in Editor.")]
+    [Tooltip("エディタ設定: 'Persistent Event' のチェックなし。")]
     [GameEventDropdown] public GameEvent fireBEvent;
 
     /// <summary>
-    /// UI Button: Commands Turret A to fire.
+    /// UI ボタン: タレット A に発射を命じます。
     /// 
-    /// Since 'fireAEvent' is Persistent, this binding survives scene loads.
-    /// Even after reloading, the persistent receiver will still respond.
+    /// 'fireAEvent' は常駐設定のため、このバインディングはシーンロードを跨いで生存します。
+    /// リロード後も、常駐受信側が引き続き反応します。
     /// </summary>
     public void FireTurretA()
     {
         if (fireAEvent == null) return;
         
         fireAEvent.Raise();
-        Debug.Log("<color=cyan>[Raiser] Broadcasting Command: Fire Turret A</color>");
+        Debug.Log("<color=cyan>[Raiser] 指令をブロードキャスト: タレット A 発射</color>");
     }
 
     /// <summary>
-    /// UI Button: Commands Turret B to fire.
+    /// UI ボタン: タレット B に発射を命じます。
     /// 
-    /// Since 'fireBEvent' is NOT Persistent, this binding BREAKS after scene load.
-    /// The event is raised, but no one is listening anymore.
+    /// 'fireBEvent' は常駐設定ではないため、このバインディングはシーンロード後に「切断」されます。
+    /// イベントは発行されますが、誰もリッスンしていません。
     /// </summary>
     public void FireTurretB()
     {
         if (fireBEvent == null) return;
         
         fireBEvent.Raise();
-        Debug.Log("<color=orange>[Raiser] Broadcasting Command: Fire Turret B</color>");
+        Debug.Log("<color=orange>[Raiser] 指令をブロードキャスト: タレット B 発射</color>");
     }
 }
 ```
 
-**Key Points:**
-- 🎯 **Standard Component** - Not persistent, recreated each scene
-- 📡 **Event References** - ScriptableObject assets (persistent)
-- 🔇 **No Lifecycle Awareness** - Doesn't know if listeners survived
+**ポイント:**
+- 🎯 **標準コンポーネント** - 常駐せず、シーンごとに再生成されます。
+- 📡 **イベント参照** - ScriptableObject アセット（永続的）。
+- 🔇 **ライフサイクル非認識** - リスナーが生存しているかどうかは関知しません。
 
 ---
 
-### 📥 PersistentEventReceiver.cs (Listener - Singleton)
+### 📥 PersistentEventReceiver.cs (受信側 - シングルトン)
 ```csharp
 using UnityEngine;
 using System.Collections;
@@ -457,9 +457,9 @@ public class PersistentEventReceiver : MonoBehaviour
     [Header("Combat Resources")]
     [SerializeField] private TurretProjectile projectilePrefab;
     [SerializeField] private ParticleSystem fireVFX;
-    // ... other resources ...
+    // ... その他のリソース ...
 
-    // Runtime-injected scene references
+    // 実行時に注入されるシーン参照
     [HideInInspector] public GameObject turretA;
     [HideInInspector] public Transform headA;
     [HideInInspector] public GameObject turretB;
@@ -470,62 +470,62 @@ public class PersistentEventReceiver : MonoBehaviour
     private bool _isFiringA;
     private bool _isFiringB;
 
-    // Singleton pattern for persistence
+    // 常駐のためのシングルトンパターン
     private static PersistentEventReceiver _instance;
     public static PersistentEventReceiver Instance => _instance;
 
     private void Awake()
     {
-        // CRITICAL: DontDestroyOnLoad makes this survive scene transitions
+        // 重要: DontDestroyOnLoad によりシーン遷移を跨いで生存します
         if (_instance == null)
         {
             _instance = this;
             DontDestroyOnLoad(gameObject);
-            Debug.Log("[PersistentReceiver] Initialized with DontDestroyOnLoad.");
+            Debug.Log("[PersistentReceiver] DontDestroyOnLoad で初期化されました。");
         }
         else if (_instance != this)
         {
-            // Prevent duplicates if scene reloaded
+            // シーンリロード時に重複するのを防ぎます
             Destroy(gameObject);
         }
     }
 
     private void Update()
     {
-        // Control turrets using injected references
+        // 注入された参照を使用してタレットを制御します
         HandleTurretRotation(turretA, headA, ref _isFiringA);
         HandleTurretRotation(turretB, headB, ref _isFiringB);
     }
 
     /// <summary>
-    /// [Event Callback - Persistent Binding]
-    /// Bound to 'OnTurretA' with Persistent Event flag checked.
+    /// [イベントコールバック - 常駐バインディング]
+    /// 常駐フラグをチェックした 'OnTurretA' に紐付け。
     /// 
-    /// This method binding SURVIVES scene reload.
-    /// After reload, this will still be called when fireAEvent.Raise() executes.
+    /// このメソッドバインディングはシーンリロードを跨いで「生存」します。
+    /// リロード後も、fireAEvent.Raise() が実行されるとこれが呼び出されます。
     /// </summary>
     public void OnFireCommandA()
     {
-        Debug.Log("<color=cyan>[Receiver] Received Command A. Engaging...</color>");
+        Debug.Log("<color=cyan>[Receiver] 指令 A を受信。攻撃開始...</color>");
         _isFiringA = true;
     }
 
     /// <summary>
-    /// [Event Callback - Non-Persistent Binding]
-    /// Bound to 'OnTurretB' with Persistent Event flag UNCHECKED.
+    /// [イベントコールバック - 通常バインディング]
+    /// 常駐フラグを外した 'OnTurretB' に紐付け。
     /// 
-    /// This method binding is CLEARED on scene reload.
-    /// After reload, this will NEVER be called again (binding is lost).
+    /// このメソッドバインディングはシーンリロード時に「クリア」されます。
+    /// リロード後は、二度と呼び出されません（結合が失われます）。
     /// </summary>
     public void OnFireCommandB()
     {
-        Debug.Log("<color=orange>[Receiver] Received Command B. Engaging...</color>");
+        Debug.Log("<color=orange>[Receiver] 指令 B を受信。攻撃開始...</color>");
         _isFiringB = true;
     }
     
     /// <summary>
-    /// Called by PersistentEventSceneSetup on each scene load.
-    /// Injects new scene object references into persistent receiver.
+    /// シーンロードごとに PersistentEventSceneSetup から呼び出されます。
+    /// 新しいシーンオブジェクトの参照を常駐受信側に注入します。
     /// </summary>
     public void UpdateSceneReferences(
         GameObject tA, Transform hA, 
@@ -539,20 +539,20 @@ public class PersistentEventReceiver : MonoBehaviour
         this.targetDummy = target;
         this.targetRigidbody = rb;
         
-        Debug.Log("[PersistentReceiver] Scene references updated.");
+        Debug.Log("[PersistentReceiver] シーン参照を更新しました。");
     }
 
     private void HandleTurretRotation(GameObject turret, Transform head, ref bool isFiring)
     {
         if (head == null || targetDummy == null) return;
 
-        // Idle sway or active targeting
+        // 待機時の揺れ、またはアクティブなターゲティング
         Quaternion targetRot;
         float speed = isFiring ? 10f : 2f;
 
         if (isFiring)
         {
-            // Aim at target
+            // ターゲットを狙う
             Vector3 dir = targetDummy.position - head.position;
             dir.y = 0;
             if (dir != Vector3.zero) 
@@ -562,14 +562,14 @@ public class PersistentEventReceiver : MonoBehaviour
         }
         else
         {
-            // Idle patrol sweep
+            // 待機中の巡回（パトロール）
             float angle = Mathf.Sin(Time.time * 0.5f) * 30f;
             targetRot = Quaternion.Euler(0, 180 + angle, 0);
         }
 
         head.rotation = Quaternion.Slerp(head.rotation, targetRot, speed * Time.deltaTime);
 
-        // Fire when aimed
+        // 照準が合ったら発射
         if (isFiring && Quaternion.Angle(head.rotation, targetRot) < 5f)
         {
             PerformFireSequence(turret);
@@ -579,21 +579,21 @@ public class PersistentEventReceiver : MonoBehaviour
 
     private void PerformFireSequence(GameObject turret)
     {
-        // Spawn muzzle flash, launch projectile, etc.
-        // ... (combat logic) ...
+        // マズルフラッシュ生成、弾丸発射など
+        // ... (戦闘ロジック) ...
     }
 }
 ```
 
-**Key Points:**
-- 🎯 **DontDestroyOnLoad** - Survives scene transitions
-- 🔀 **Singleton Pattern** - Only one instance exists globally
-- 📍 **Dependency Injection** - Scene references injected at runtime
-- 🎭 **Dual Binding** - Persistent (A) and non-persistent (B) methods
+**ポイント:**
+- 🎯 **DontDestroyOnLoad** - シーン遷移を跨いで生存。
+- 🔀 **シングルトンパターン** - グローバルにただ一つのインスタンス。
+- 📍 **依存性の注入** - 実行時にシーン参照を流し込む。
+- 🎭 **二重バインディング** - 常駐型 (A) と通常型 (B) メソッド。
 
 ---
 
-### 🔧 PersistentEventSceneSetup.cs (Dependency Injector)
+### 🔧 PersistentEventSceneSetup.cs (依存性注入スクリプト)
 ```csharp
 using UnityEngine;
 
@@ -609,95 +609,94 @@ public class PersistentEventSceneSetup : MonoBehaviour
 
     private void Start()
     {
-        // Find the persistent receiver (lives in DontDestroyOnLoad scene)
+        // 常駐している受信側を探す（DontDestroyOnLoad シーンに存在）
         var receiver = PersistentEventReceiver.Instance;
         
         if (receiver != null)
         {
-            // Inject this scene's object references
+            // このシーンのオブジェクト参照を注入
             receiver.UpdateSceneReferences(
                 turretA, headA, 
                 turretB, headB, 
                 targetDummy, targetRigidbody
             );
             
-            Debug.Log("[SceneSetup] Successfully injected scene references " +
-                     "into persistent receiver.");
+            Debug.Log("[SceneSetup] 常駐受信側へのシーン参照注入に成功しました。");
         }
         else
         {
-            Debug.LogWarning("[SceneSetup] PersistentEventReceiver not found! " +
-                            "Is the demo started correctly?");
+            Debug.LogWarning("[SceneSetup] PersistentEventReceiver が見つかりません！");
         }
     }
 }
 ```
 
-**Key Points:**
-- 🔧 **Runs on Scene Load** - `Start()` executes when scene initializes
-- 🔍 **Finds Singleton** - Accesses persistent receiver via static instance
-- 💉 **Injects References** - Passes new scene objects to persistent logic
-- 🏗️ **Enables Cross-Scene Control** - Bridges persistent logic with transient objects
+**ポイント:**
+- 🔧 **シーンロード時に実行** - シーン初期化時に `Start()` が走ります。
+- 🔍 **シングルトンを特定** - 静的インスタンス経由で受信側にアクセス。
+- 💉 **参照の注入** - 新しいシーンのオブジェクトを常駐ロジックに渡します。
+- 🏗️ **シーン跨ぎ制御の実現** - 常駐ロジックと一時的なシーンオブジェクトを橋渡しします。
 
 ---
 
-## 🔑 Key Takeaways
+## 🔑 重要なまとめ
 
-| Concept                    | Implementation                                               |
+| コンセプト                | 実装内容                                                     |
 | -------------------------- | ------------------------------------------------------------ |
-| 💾 **Persistent Event**     | Checkbox in Behavior Window preserves bindings across scenes |
-| 🗑️ **Cleanup Behavior**     | Non-persistent events cleared on scene unload                |
-| 🔄 **DontDestroyOnLoad**    | Receiver must survive for persistent events to work          |
-| 💉 **Dependency Injection** | Pattern for connecting persistent logic with scene objects   |
-| 🎯 **Single Checkbox**      | One setting determines cross-scene survival                  |
+| 💾 **常駐イベント**         | Behavior Window のチェックボックス一つで、シーン跨ぎのバインディングを実現 |
+| 🗑️ **クリーンアップ挙動**   | 通常イベントはシーンアンロード時に自動的にクリアされる       |
+| 🔄 **DontDestroyOnLoad**    | 常駐イベントを機能させるには、受信側自体も生存させる必要がある |
+| 💉 **依存性の注入**         | 常駐ロジックを新しいシーンオブジェクトに結びつけるための重要パターン |
+| 🎯 **ワンクリック設定**      | エディタ上の設定一つで、シーン遷移の運命が決まる             |
 
-:::note 🎓 Design Insight
+:::note 🎓 設計の洞察
 
-Persistent events are perfect for:
+常駐イベントは、以下のような用途に最適です：
 
-- **Music systems** - Background music controller that spans multiple levels
-- **Inventory managers** - Player inventory persists across scene transitions
-- **Achievement trackers** - Global achievement listeners that monitor all scenes
-- **Analytics systems** - Event logging that never gets interrupted
-- **UI systems** - Persistent HUD controllers for health, score, etc.
+- **ミュージックシステム** - 複数のレベルを跨いで流れ続ける BGM コントローラー
+- **インベントリマネージャー** - シーン遷移中も保持されるプレイヤーの持ち物
+- **実績トラッカー** - すべてのシーンを監視するグローバルな実績リスナー
+- **分析システム** - 中断されることのないイベントログの送信
+- **UI システム** - 体力、スコアなどを表示し続ける常駐 HUD コントローラー
 
-**Architecture Pattern:**
+**推奨されるアーキテクチャパターン:**
 ```
-[Persistent Layer - DontDestroyOnLoad]
-- Global managers
-- Event receivers
-- Cross-scene logic
+[常駐レイヤー - DontDestroyOnLoad]
+- グローバルマネージャー
+- イベント受信側
+- シーンを跨ぐロジック
 
-[Scene Layer - Recreated]
-- Level-specific objects
-- Scene setup scripts (dependency injection)
-- UI buttons and raisers
+[シーンレイヤー - 再生成される]
+- レベル固有のオブジェクト
+- シーンセットアップスクリプト（依存性注入）
+- UI ボタンや発行側
 ```
 
-This separation enables clean cross-scene architecture without manual re-subscription.
+この分離により、手動での再購読を必要としない、クリーンなシーン跨ぎアーキテクチャが可能になります。
 
 :::
 
-:::warning ⚠️ Important Considerations
+:::warning ⚠️ 重要な注意事項
 
-1. **Receiver Must Be Persistent:** Checking "Persistent Event" only preserves the binding. The receiver GameObject must use `DontDestroyOnLoad` to survive.
-2. **Scene References Break:** Even though bindings persist, references to destroyed scene objects become null. Use dependency injection to update them.
-3. **Memory Management:** Persistent events stay active until game exit. Be mindful of accumulating bindings in long-running games.
-4. **Initial Scene Requirement:** The persistent receiver must be present in the first loaded scene. If Scene B loads first without the receiver, persistent events won't work.
+1. **受信側も生存させる必要がある:** 「常駐イベント」にチェックを入れるのは、バインディング（繋がり）を維持するためです。受信側の GameObject 自体も `DontDestroyOnLoad` を使用して生存させる必要があります。
+2. **シーン参照の断絶:** バインディングは維持されますが、破棄された前のシーンのオブジェクトへの参照は null になります。依存性注入を使用して、常に新しい参照に更新してください。
+3. **メモリ管理:** 常駐イベントはゲーム終了までアクティブなままです。長時間プレイされるゲームでは、バインディングが際限なく蓄積されないよう注意してください。
+4. **初期シーンの要件:** 常駐受信側は、最初にロードされるシーンに存在する必要があります。受信側がいない状態で次のシーンに進んでしまうと、常駐イベントは機能しません。
 
 :::
 
 ---
 
-## 🎯 What's Next?
+## 🎯 次のステップは？
 
-You've mastered persistent events for cross-scene systems. Now let's explore **trigger events** for collision-based interactions.
+シーンを跨ぐシステムのための常駐イベントをマスターしました。次は、衝突判定に基づいたインタラクションのための**トリガーイベント**を見ていきましょう。
 
-**Next Chapter**: Learn about collision triggers in **[10 Trigger Event](./10-trigger-event.md)**
+**次の章**: 衝突トリガーについて学ぶ **[10 トリガーイベント](./10-trigger-event.md)**
 
 ---
 
-## 📚 Related Documentation
+## 📚 関連ドキュメント
 
-- **[Game Event Behavior](../visual-workflow/game-event-behavior.md)** - Complete guide to persistence configuration
-- **[Best Practices](../scripting/best-practices.md)** - Patterns for cross-scene event architecture
+- **[ゲームイベントビヘイビア](../visual-workflow/game-event-behavior.md)** - 常駐設定の完全ガイド
+- **[ベストプラクティス](../scripting/best-practices.md)** - シーンを跨ぐイベントアーキテクチャのパターン
+```

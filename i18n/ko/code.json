@@ -1,37 +1,37 @@
 {
   "Home": {
-    "message": "Home"
+    "message": "홈"
   },
   "homepage.feature1.title": {
-    "message": "Game Event System"
+    "message": "게임 이벤트 시스템"
   },
   "homepage.feature1.description": {
-    "message": "A professional, visual, and type-safe event architecture for Unity. Streamline your development with our ScriptableObject-driven graph editor, designed for performance and maintainability."
+    "message": "Unity를 위한 전문적이고 시각적이며 타입 안전(Type-safe)한 이벤트 아키텍처입니다. 성능과 유지 보수성을 고려해 설계된 ScriptableObject 기반 그래프 에디터로 개발 효율을 극대화하세요."
   },
   "homepage.feature.viewDocs": {
-    "message": "View Documentation"
+    "message": "문서 보기"
   },
   "homepage.feature.assetStore": {
-    "message": "Asset Store"
+    "message": "에셋 스토어"
   },
   "homepage.feature.comingSoon": {
-    "message": "COMING SOON"
+    "message": "출시 예정"
   },
   "homepage.feature2.title": {
-    "message": "The Next Giant Leap"
+    "message": "다음 단계로의 도약"
   },
   "homepage.feature2.description": {
-    "message": "We are building the next generation of core game systems. Innovative tools that balance visual clarity with raw coding power, helping you build giants from tiny ideas."
+    "message": "저희는 차세대 코어 게임 시스템을 구축하고 있습니다. 시각적 명확성과 강력한 코딩 능력을 결합한 혁신적인 도구로, 여러분의 작은 아이디어를 거대한 결과물로 완성할 수 있도록 돕습니다."
   },
   "homepage.feature.inDevelopment": {
-    "message": "In Development"
+    "message": "개발 중"
   },
   "theme.ErrorPageContent.title": {
-    "message": "페이지에 오류가 발생하였습니다.",
+    "message": "페이지에 오류가 발생했습니다.",
     "description": "The title of the fallback page when the page crashed"
   },
   "theme.BackToTopButton.buttonAriaLabel": {
-    "message": "맨 위로 스크롤하기",
+    "message": "맨 위로 이동",
     "description": "The ARIA label for the back to top button"
   },
   "theme.blog.archive.title": {
@@ -71,19 +71,19 @@
     "description": "The label of the link targeting the tag list page"
   },
   "theme.colorToggle.ariaLabel.mode.system": {
-    "message": "system mode",
+    "message": "시스템 모드",
     "description": "The name for the system color mode"
   },
   "theme.colorToggle.ariaLabel.mode.light": {
-    "message": "밝은 모드",
+    "message": "라이트 모드",
     "description": "The name for the light color mode"
   },
   "theme.colorToggle.ariaLabel.mode.dark": {
-    "message": "어두운 모드",
+    "message": "다크 모드",
     "description": "The name for the dark color mode"
   },
   "theme.colorToggle.ariaLabel": {
-    "message": "어두운 모드와 밝은 모드 전환하기 (현재 {mode})",
+    "message": "다크/라이트 모드 전환 (현재 {mode})",
     "description": "The ARIA label for the color mode toggle"
   },
   "theme.docs.breadcrumbs.navAriaLabel": {
@@ -111,7 +111,7 @@
     "description": "Pluralized label for \"{count} docs tagged\". Use as much plural forms (separated by \"|\") as your language support (see https://www.unicode.org/cldr/cldr-aux/charts/34/supplemental/language_plural_rules.html)"
   },
   "theme.docs.tagDocListPageTitle": {
-    "message": "{nDocsTagged} \"{tagName}\" 태그에 분류되었습니다",
+    "message": "\"{tagName}\" 태그가 포함된 {nDocsTagged}",
     "description": "The title of the page for a docs tag"
   },
   "theme.docs.versionBadge.label": {
@@ -138,19 +138,19 @@
     "description": "The link label to edit the current page"
   },
   "theme.common.headingLinkTitle": {
-    "message": "{heading}에 대한 직접 링크",
+    "message": "{heading} 직접 링크",
     "description": "Title for link to heading"
   },
   "theme.lastUpdated.atDate": {
-    "message": " {date}에",
+    "message": "{date}",
     "description": "The words used to describe on which date a page has been last updated"
   },
   "theme.lastUpdated.byUser": {
-    "message": " {user}가",
+    "message": "{user} 님",
     "description": "The words used to describe by who the page has been last updated"
   },
   "theme.lastUpdated.lastUpdatedAtBy": {
-    "message": "최종 수정: {atDate}{byUser}",
+    "message": "최종 수정: {atDate} ({byUser})",
     "description": "The sentence used to display when a page has been last updated, and by who"
   },
   "theme.navbar.mobileVersionsDropdown.label": {
@@ -206,11 +206,11 @@
     "description": "The ARIA label to collapse the sidebar category"
   },
   "theme.IconExternalLink.ariaLabel": {
-    "message": "(opens in new tab)",
+    "message": "(새 탭에서 열기)",
     "description": "The ARIA label for the external link icon"
   },
   "theme.NavBar.navAriaLabel": {
-    "message": "메인",
+    "message": "메인 내비게이션",
     "description": "The ARIA label for the main navigation"
   },
   "theme.navbar.mobileLanguageDropdown.label": {
@@ -218,19 +218,19 @@
     "description": "The label for the mobile language switcher dropdown"
   },
   "theme.NotFound.p1": {
-    "message": "원하는 페이지를 찾을 수 없습니다.",
+    "message": "요청하신 페이지를 찾을 수 없습니다.",
     "description": "The first paragraph of the 404 page"
   },
   "theme.NotFound.p2": {
-    "message": "사이트 관리자에게 링크가 깨진 것을 알려주세요.",
+    "message": "해당 링크가 잘못되었다면 사이트 관리자에게 문의해주세요.",
     "description": "The 2nd paragraph of the 404 page"
   },
   "theme.TOCCollapsible.toggleButtonLabel": {
-    "message": "이 페이지에서",
+    "message": "이 페이지의 목차",
     "description": "The label used by the button on the collapsible TOC component"
   },
   "theme.blog.post.readingTime.plurals": {
-    "message": "약 {readingTime}분",
+    "message": "약 {readingTime}분 소요",
     "description": "Pluralized label for \"{readingTime} min read\". Use as much plural forms (separated by \"|\") as your language support (see https://www.unicode.org/cldr/cldr-aux/charts/34/supplemental/language_plural_rules.html)"
   },
   "theme.blog.post.readMore": {
@@ -238,7 +238,7 @@
     "description": "The label used in blog post item excerpts to link to full blog posts"
   },
   "theme.blog.post.readMoreLabel": {
-    "message": "{title} 에 대해 더 읽어보기",
+    "message": "{title} 더 읽어보기",
     "description": "The ARIA label for the link to full blog posts from excerpts"
   },
   "theme.CodeBlock.copy": {
@@ -246,7 +246,7 @@
     "description": "The copy button label on code blocks"
   },
   "theme.CodeBlock.copied": {
-    "message": "복사했습니다",
+    "message": "복사됨",
     "description": "The copied button label on code blocks"
   },
   "theme.CodeBlock.copyButtonAriaLabel": {
@@ -282,15 +282,15 @@
     "description": "The label of the back button to return to main menu, inside the mobile navbar sidebar secondary menu (notably used to display the docs sidebar)"
   },
   "theme.docs.sidebar.toggleSidebarButtonAriaLabel": {
-    "message": "사이드바 펼치거나 접기",
+    "message": "사이드바 토글",
     "description": "The ARIA label for hamburger menu button of mobile navigation"
   },
   "theme.navbar.mobileDropdown.collapseButton.expandAriaLabel": {
-    "message": "Expand the dropdown",
+    "message": "드롭다운 펼치기",
     "description": "The ARIA label of the button to expand the mobile dropdown navbar item"
   },
   "theme.navbar.mobileDropdown.collapseButton.collapseAriaLabel": {
-    "message": "Collapse the dropdown",
+    "message": "드롭다운 접기",
     "description": "The ARIA label of the button to collapse the mobile dropdown navbar item"
   },
   "theme.docs.sidebar.expandButtonTitle": {
@@ -306,7 +306,7 @@
     "description": "Pluralized label for \"{count} posts\". Use as much plural forms (separated by \"|\") as your language support (see https://www.unicode.org/cldr/cldr-aux/charts/34/supplemental/language_plural_rules.html)"
   },
   "theme.blog.tagTitle": {
-    "message": "\"{tagName}\" 태그로 연결된 {nPosts}개의 게시물이 있습니다.",
+    "message": "\"{tagName}\" 태그의 게시물 {nPosts}건",
     "description": "The title of the page for a blog tag"
   },
   "theme.blog.author.pageTitle": {
@@ -314,39 +314,39 @@
     "description": "The title of the page for a blog author"
   },
   "theme.blog.authorsList.pageTitle": {
-    "message": "저자",
+    "message": "작성자 목록",
     "description": "The title of the authors page"
   },
   "theme.blog.authorsList.viewAll": {
-    "message": "모든 저자 보기",
+    "message": "모든 작성자 보기",
     "description": "The label of the link targeting the blog authors page"
   },
   "theme.blog.author.noPosts": {
-    "message": "작성자가 아직 게시글을 작성하지 않았습니다.",
+    "message": "이 작성자의 게시물이 아직 없습니다.",
     "description": "The text for authors with 0 blog post"
   },
   "theme.contentVisibility.unlistedBanner.title": {
-    "message": "색인되지 않은 문서",
+    "message": "목록에 없는 페이지",
     "description": "The unlisted content banner title"
   },
   "theme.contentVisibility.unlistedBanner.message": {
-    "message": "이 문서는 색인되지 않습니다. 검색 엔진이 이 문서를 색인하지 않으며, 주소를 알고 있는 사용자만 접근할 수 있습니다.",
+    "message": "이 페이지는 목록에 표시되지 않습니다. 검색 엔진에서 제외되며, 직접 링크를 가진 사용자만 접근할 수 있습니다.",
     "description": "The unlisted content banner message"
   },
   "theme.contentVisibility.draftBanner.title": {
-    "message": "작성 중인 페이지",
+    "message": "초안 페이지",
     "description": "The draft content banner title"
   },
   "theme.contentVisibility.draftBanner.message": {
-    "message": "이 페이지는 아직 작성 중입니다. 개발 환경에서만 보이며 프로덕션 빌드에서는 제외됩니다.",
+    "message": "이 페이지는 초안입니다. 개발 환경에서만 표시되며 프로덕션 빌드에는 포함되지 않습니다.",
     "description": "The draft content banner message"
   },
   "theme.ErrorPageContent.tryAgain": {
-    "message": "다시 시도해 보세요",
+    "message": "다시 시도하기",
     "description": "The label of the button to try again rendering when the React error boundary captures an error"
   },
   "theme.common.skipToMainContent": {
-    "message": "본문으로 건너뛰기",
+    "message": "메인 콘텐츠로 건너뛰기",
     "description": "The skip to content label used for accessibility, allowing to rapidly navigate to main content with keyboard tab/enter navigation"
   },
   "theme.tags.tagsPageTitle": {

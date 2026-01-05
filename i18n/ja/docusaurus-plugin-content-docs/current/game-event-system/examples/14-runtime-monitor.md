@@ -1,688 +1,591 @@
 ﻿---
-sidebar_label: '14 Runtime Monitor'
+sidebar_label: '14 ランタイムモニター'
 sidebar_position: 15
 ---
 
 import VideoGif from '@site/src/components/Video/VideoGif';
 
-# 14 Runtime Monitor: Production Observability
+# 14 ランタイムモニター：プロダクションレベルの可視性
 
 <!-- <VideoGif src="/video/game-event-system/14-runtime-monitor.mp4" /> -->
 
-## 📋 Overview
+## 📋 概要
 
-In production, events fire thousands of times per second. `Debug.Log()` creates garbage, floods the console, and provides no structured insight into system health. You need **enterprise-grade observability**—real-time performance profiling, listener tracking, frequency analysis, and integrity warnings.
+実際のプロダクション環境では、イベントは1秒間に数千回も発行されることがあります。`Debug.Log()` はガベージを生成し、コンソールを埋め尽くすだけで、システムの健全性に関する構造的な洞察を提供してくれません。必要なのは、リアルタイムのパフォーマンスプロファイリング、リスナーの追跡、頻度分析、および整合性警告を備えた**エンタープライズグレードの可視性（オブザーバビリティ）**です。
 
-The **Game Event Monitor** is a specialized debugging window that answers critical questions:
-- *"Which event is causing that frame drop?"*
-- *"Is this event firing too often?"*
-- *"Who is actually listening to this event right now?"*
-- *"Why did my chain sequence break?"*
+**ゲームイベントモニター（Game Event Monitor）**は、以下のような重要な問いに答えるための専門的なデバッグウィンドウです：
+- *「どのイベントがフレームドロップの原因になっているのか？」*
+- *「このイベントは頻繁に発行されすぎていないか？」*
+- *「今、実際に誰がこのイベントをリッスンしているのか？」*
+- *「なぜチェーンシーケンスが途切れてしまったのか？」*
 
-This demo simulates a **high-load stress test facility** with four specialized test units, each designed to populate specific Monitor tabs with diagnostic data.
+このデモでは、4つの専用テストユニットを備えた**高負荷ストレステスト施設**をシミュレートし、モニターの各タブに診断データを入力するように設計されています。
 
-:::tip 💡 What You'll Learn
-- How to open and navigate the Runtime Monitor window
-- Reading performance metrics (avg/min/max execution time)
-- Analyzing event frequency and detecting spam
-- Inspecting listener counts (Inspector vs API bindings)
-- Visualizing programmatic Flow Graphs
-- Detecting integrity issues (ghost events, broken chains)
-- Interpreting warnings and health indicators
+:::tip 💡 学べること
+- ランタイムモニターウィンドウの開き方と操作方法
+- パフォーマンスメトリクス（平均/最小/最大実行時間）の読み方
+- イベント頻度の分析とスパムの検出
+- リスナー数の検査（インスペクター vs API バインディング）
+- プログラムによって構築されたフローグラフの視覚化
+- 整合性の問題の検出（ゴーストイベント、断絶されたチェーン）
+- 警告と健全性インジケーターの解釈
 
 :::
 
 ---
 
-## 🎬 Demo Scene
+## 🎬 デモシーン
 ```
 Assets/TinyGiants/GameEventSystem/Demo/14_RuntimeMonitor/14_RuntimeMonitor.unity
 ```
 
-### Scene Composition
+### シーン構成
 
-**Visual Elements:**
-- 🎯 **Test Console** - Information panel describing 4 test units
-- 🧊 **Simple Geometry** - Plane and Cube (minimal scene)
+**視覚的要素:**
+- 🎯 **テストコンソール** - 4つのテストユニットを説明する情報パネル
+- 🧊 **シンプルなジオメトリ** - 平面とキューブ（最小限のシーン構成）
 
-**UI Layer (Canvas):**
-- 🎮 **Four Control Buttons** - Bottom of screen
-  - "Toggle Spammer (Unit A)" → Starts/stops high-frequency spam
-  - "Trigger Heavy Load (Unit B)" → Fires expensive operation
-  - "Fire Chain Reaction (Unit C)" → Executes programmatic chain
-  - "Fire Ghost Event (Unit D)" → Raises event with no listeners
+**UIレイヤー (Canvas):**
+- 🎮 **4つのコントロールボタン** - 画面下部
+  - 「Toggle Spammer (Unit A)」➔ 高頻度スパムの開始/停止
+  - 「Trigger Heavy Load (Unit B)」➔ 負荷の高い操作を実行
+  - 「Fire Chain Reaction (Unit C)」➔ プログラムによるチェーンを実行
+  - 「Fire Ghost Event (Unit D)」➔ リスナーのいないイベントを発行
 
-**Game Logic Layer:**
-- 📤 **RuntimeMonitorRaiser** - Test orchestrator
-- 📥 **RuntimeMonitorReceiver** - Test responder with instrumented listeners
-
----
-
-## 🧪 The 4 Test Units
-
-Each unit is designed to stress-test a specific Monitor subsystem:
-
-### Unit A: The Spammer (Frequency Test)
-
-**Purpose:** Generate high-frequency event spam to test Statistics tab
-
-**Configuration:**
-- **Events:** `OnSpammer` (void), `OnSpammerPersistent` (void)
-- **Behavior:** Fires **>60 times/second** in `Update()` while active
-- **Monitor Goal:** Detect high-frequency warnings
-
-**Expected Results:**
-- 📈 **Statistics Tab:** Shows >60 fires/sec (RED warning)
-- ⚠️ **Warnings Tab:** Flags `[High Frequency]` issue
+**ゲームロジックレイヤー:**
+- 📤 **RuntimeMonitorRaiser** - テストのオーケストレーター
+- 📥 **RuntimeMonitorReceiver** - 計測用リスナーを備えたテストレスポンダー
 
 ---
 
-### Unit B: The Heavy Lifter (Performance Test)
+## 🧪 4つのテストユニット
 
-**Purpose:** Simulate expensive computation to test Performance tab
+各ユニットは、モニターの特定のサブシステムに負荷をかけるように設計されています：
 
-**Configuration:**
-- **Events:** `OnHeavyLoad`, `OnHeavyLoadCondition` (GameObject, DamageInfo)
-- **Behavior:** Listener calls `Thread.Sleep(6)` to simulate 6ms+ lag
-- **Monitor Goal:** Trigger performance warnings
+### ユニット A: スパマー (頻度テスト)
 
-**Expected Results:**
-- ⚡ **Performance Tab:** Execution time shows 6-12ms (YELLOW/RED)
-- 📊 **Dashboard:** Performance bar turns yellow/red
+**目的:** 統計（Statistics）タブをテストするために、高頻度のイベントスパムを生成します。
 
-**Code Mechanism:**
+**設定:**
+- **イベント:** `OnSpammer` (void), `OnSpammerPersistent` (void)
+- **挙動:** アクティブな間、`Update()` 内で **毎秒60回以上** 発行されます。
+- **モニターの目標:** 高頻度警告を検出すること。
+
+**期待される結果:**
+- 📈 **Statistics タブ:** 毎秒60回以上の発行を表示（赤色の警告）。
+- ⚠️ **Warnings タブ:** `[High Frequency]` 問題としてフラグを立てる。
+
+---
+
+### ユニット B: ヘビーリフター (パフォーマンステスト)
+
+**目的:** パフォーマンス（Performance）タブをテストするために、高負荷な計算をシミュレートします。
+
+**設定:**
+- **イベント:** `OnHeavyLoad`, `OnHeavyLoadCondition` (GameObject, DamageInfo)
+- **挙動:** リスナーが `Thread.Sleep(6)` を呼び出し、6ms以上のラグをシミュレートします。
+- **モニターの目標:** パフォーマンス警告をトリガーすること。
+
+**期待される結果:**
+- ⚡ **Performance タブ:** 実行時間が 6-12ms と表示される（黄色/赤色）。
+- 📊 **Dashboard:** パフォーマンスバーが黄色または赤色に変化する。
+
+**コードの仕組み:**
 ```csharp
 public void OnHeavyExecution(GameObject sender, DamageInfo info)
 {
-    // Simulate heavy computation (BAD in production, perfect for testing!)
-    Thread.Sleep(6);  // ← Forces 6ms execution time
+    // 重い計算をシミュレート（プロダクションでは厳禁ですが、テストには最適です！）
+    Thread.Sleep(6);  // ← 意図的に6msの実行時間を強制
 }
 ```
 
 ---
 
-### Unit C: The Chain Reactor (Automation Test)
+### ユニット C: チェーンリアクター (オートメーションテスト)
 
-**Purpose:** Demonstrate programmatic Flow Graph visualization
+**目的:** プログラムによって構築されたフローグラフの視覚化を実演します。
 
-**Configuration:**
-- **Events:** `OnChainStart` → `OnChainProcess` → `OnChainFinish` → `OnTriggerComplete`
-- **Behavior:** Code-built sequential pipeline with delays and conditions
-- **Monitor Goal:** Visualize dynamic automation in Automation tab
+**設定:**
+- **イベント:** `OnChainStart` ➔ `OnChainProcess` ➔ `OnChainFinish` ➔ `OnTriggerComplete`
+- **挙動:** 遅延と条件を備えた、コード構築による直列パイプライン。
+- **モニターの目標:** オートメーション（Automation）タブで動的な自動化を視覚化すること。
 
-**Graph Structure:**
+**グラフ構造:**
 ```
 🚀 [ START ] OnChainStart (DamageInfo)
-│   ➔ Payload: { amount: 75.0, type: Physical, ... }
+│   ➔ ペイロード: { amount: 75.0, type: Physical, ... }
 │
-├─ ⏱️ [ STEP 1 ] ➔ Delay: 0.5s
-│  └─► ⚙️ OnChainProcess (DamageInfo)      ✅ Data Relayed
+├─ ⏱️ [ STEP 1 ] ➔ 遅延: 0.5秒
+│  └─► ⚙️ OnChainProcess (DamageInfo)      ✅ データを中継
 │
-├─ ⚖️ [ STEP 2 ] ➔ Delay: 0.2s | Guard: `amount > 50`
-│  └─► 🎯 OnChainFinish (DamageInfo)       ✅ Logic Passed (75 > 50)
+├─ ⚖️ [ STEP 2 ] ➔ 遅延: 0.2秒 | ガード: `amount > 50`
+│  └─► 🎯 OnChainFinish (DamageInfo)       ✅ ロジック通過 (75 > 50)
 │
-└─ 🧹 [ STEP 3 ] ➔ Trigger Mode | Block Args
-   └─► 🏁 OnTriggerComplete (void)        ✅ Signal Purified
+└─ 🧹 [ STEP 3 ] ➔ トリガーモード | 引数をブロック
+   └─► 🏁 OnTriggerComplete (void)        ✅ 信号を精製
 │
-📊 Result: Pipeline Completed | 🛡️ Data Safety: Argument Blocked at Exit
+📊 結果: パイプライン完了 | 🛡️ データ安全: 出口で引数をブロック
 ```
 
-**Expected Results:**
-- 🔗 **Automation Tab:** Shows hierarchical tree with timing/condition badges
-- 📝 **Recent Events Tab:** Sequential firing pattern visible
+**期待される結果:**
+- 🔗 **Automation タブ:** タイミングや条件バッジを伴う階層ツリーを表示。
+- 📝 **Recent Events タブ:** 連続した発行パターンが表示される。
 
 ---
 
-### Unit D: The Ghost (Integrity Test)
+### ユニット D: ゴースト (整合性テスト)
 
-**Purpose:** Detect events fired with no listeners
+**目的:** リスナーがいない状態で発行されたイベントを検出します。
 
-**Configuration:**
-- **Event:** `OnGhost` (void)
-- **Behavior:** Raises event with **zero listeners** bound
-- **Monitor Goal:** Trigger integrity warning
+**設定:**
+- **イベント:** `OnGhost` (void)
+- **挙動:** **リスナーがゼロ**の状態でイベントを発行します。
+- **モニターの目標:** 整合性警告をトリガーすること。
 
-**Expected Results:**
-- ⚠️ **Warnings Tab:** Shows `[No Listeners]` warning
-- 📊 **Dashboard:** Warning count increases
+**期待される結果:**
+- ⚠️ **Warnings タブ:** `[No Listeners]` 警告を表示。
+- 📊 **Dashboard:** 警告カウントが増加。
 
 ---
 
-## 🎮 How to Test (Step-by-Step)
+## 🎮 テスト手順（ステップ・バイ・ステップ）
 
-### Phase 1: Preparation
+### フェーズ 1: 準備
 
-**Step 1: Open Monitor Window**
-- **Menu**
+**ステップ 1: モニターウィンドウを開く**
+- **メニュー**
+  このユーティリティは **[Game Event System](../visual-workflow/game-event-system)** 内にあり、以下の方法でアクセスできます：
 
-  The utility is located within the **[Game Event System](../visual-workflow/game-event-system)**, you can access through the following method:
-
-  **From the System Dashboard:**
-
+  **システムダッシュボードから:**
   ```tex
-  Game Event System Window → Click "Game Event Monitor"
+  Game Event System Window → "Game Event Monitor" をクリック
   ```
 
-- **Window appears** 
+- **ウィンドウの表示**
+  他のUnityエディタウィンドウと同様にドッキング可能です。
 
-  dockable like any Unity Editor window
-
-**Step 2: Enter Play Mode**
-- Click Unity's Play button
-- Monitor remains visible during play
+**ステップ 2: プレイモードに入る**
+- Unityのプレイボタンをクリックします。
+- プレイ中もモニターは表示されたままになります。
 
 ---
 
-### Phase 2: Generate Test Data
+### フェーズ 2: テストデータの生成
 
-**Step 3: Activate Unit A (Spammer)**
-- Click **"Toggle Spammer (Unit A)"** button
-- **Observe:** Button stays active (toggled ON)
-- **Effect:** `OnSpammer` fires >60 times/second
+**ステップ 3: ユニット A (スパマー) を起動**
+- **「Toggle Spammer (Unit A)」**ボタンをクリックします。
+- **観察:** ボタンがアクティブ（ON）のままになります。
+- **効果:** `OnSpammer` が毎秒60回以上発行されます。
 
-**Step 4: Activate Unit B (Heavy Load)**
-- Click **"Trigger Heavy Load (Unit B)"** button **3-5 times**
-- **Effect:** Each click triggers one expensive operation (6ms lag)
+**ステップ 4: ユニット B (高負荷) を起動**
+- **「Trigger Heavy Load (Unit B)」**ボタンを **3～5回** クリックします。
+- **効果:** クリックごとに、負荷の高い操作（6msのラグ）が1回トリガーされます。
 
-**Step 5: Activate Unit C (Chain Reaction)**
-- Click **"Fire Chain Reaction (Unit C)"** button **once**
-- **Effect:** Initiates 4-step sequential pipeline
+**ステップ 5: ユニット C (チェーン反応) を起動**
+- **「Fire Chain Reaction (Unit C)」**ボタンを **1回** クリックします。
+- **効果:** 4ステップの直列パイプラインが開始されます。
 
-**Step 6: Activate Unit D (Ghost Event)**
-- Click **"Fire Ghost Event (Unit D)"** button **once**
-- **Effect:** Raises event with no listeners (integrity violation)
+**ステップ 6: ユニット D (ゴーストイベント) を起動**
+- **「Fire Ghost Event (Unit D)」**ボタンを **1回** クリックします。
+- **効果:** リスナーのいないイベントを発行します（整合性違反）。
 
-:::tip ⏱️ Wait Time
+:::tip ⏱️ 待機時間
 
-After triggering all units, wait **5-10 seconds** to accumulate data before analyzing Monitor tabs.
+すべてのユニットをトリガーした後、データを蓄積するために **5～10秒間** 待ってからモニターの各タブを分析してください。
 
 :::
 
 ---
 
-## 📊 Monitor Window Analysis
+## 📊 モニターウィンドウの分析
 
-### Tab 1: 🏠 Dashboard (System Health Overview)
+### タブ 1: 🏠 Dashboard (システム健全性の概要)
 
-The landing page—aggregates metrics from all subsystems into a single health report.
+ランディングページです。すべてのサブシステムからのメトリクスを一つの健全性レポートに集約します。
 
 ![Monitor Dashboard](/img/game-event-system/examples/14-runtime-monitor/demo-14-dashboard.png)
 
-**Metric Cards (Top Row):**
+**メトリックカード（上段）:**
 
-| Card             | Meaning                                 | Expected Value    |
+| カード | 意味 | 期待される値 |
 | ---------------- | --------------------------------------- | ----------------- |
-| **Total Events** | Loaded event count                      | 9                 |
-| **Total Logs**   | Cumulative fires since play start       | 500+ (climbing)   |
-| **Monitored**    | Events with active performance tracking | 4-6               |
-| **Warnings**     | Current active issues                   | 2+ (Spam + Ghost) |
+| **Total Events** | ロードされたイベント数 | 9 |
+| **Total Logs** | プレイ開始からの累積発行数 | 500+ (増加中) |
+| **Monitored** | パフォーマンス追跡が有効なイベント数 | 4-6 |
+| **Warnings** | 現在アクティブな問題数 | 2+ (スパム + ゴースト) |
 
-**Active Databases Section:**
-- Lists all loaded database assets
-- **PRIMARY** badge shows main database
-- Click database name to filter views
+**Active Databases セクション:**
+- ロードされているすべてのデータベースアセットを表示します。
+- **PRIMARY** バッジはメインデータベースを示します。
+- データベース名をクリックして表示をフィルタリングできます。
 
-**Performance Overview (Traffic Light Bar):**
-- 🟢 **Green:** All events &lt;1ms (healthy)
-- 🟡 **Yellow:** Some events 1-5ms (caution)
-- 🔴 **Red:** Events >5ms detected (critical)
-- Shows percentage distribution
+**Performance Overview (信号機型バー):**
+- 🟢 **緑:** すべてのイベントが 1ms 未満（健全）。
+- 🟡 **黄:** 一部のイベントが 1-5ms（注意）。
+- 🔴 **赤:** 5ms を超えるイベントを検出（深刻）。
+- 割合の分布が表示されます。
 
-**Recent Activity (Mini-Log):**
-- Last 15 event firings
-- Format: `[Frame] EventName (args)`
-- Click to jump to Details tab
+**Recent Activity (ミニログ):**
+- 直近の 15 件のイベント発行を表示。
+- 形式: `[Frame] EventName (args)`。
+- クリックすると Details タブへジャンプします。
 
-**Quick Warnings (Top 3):**
-- Most critical alerts surfaced
-- Severity icons: 🔵 Info, 🟡 Warning, 🔴 Critical
-- Click to jump to Warnings tab
+**Quick Warnings (トップ 3):**
+- 最も深刻なアラートが表示されます。
+- 重要度アイコン: 🔵 Info, 🟡 Warning, 🔴 Critical。
 
-:::note 🎯 Dashboard Purpose
+:::note 🎯 ダッシュボードの目的
 
-Single-glance system health check—like a car's instrument panel. If this shows red/yellow, drill into specific tabs for diagnosis.
+車の計器パネルのように、一目でシステムの健全性を確認するためのものです。ここが赤や黄色を示している場合は、原因を特定するために特定のタブを詳しく調査してください。
 
 :::
 
 ---
 
-### Tab 2: ⚡ Performance (Execution Profiling)
+### タブ 2: ⚡ Performance (実行プロファイリング)
 
-**Focus:** Detect performance bottlenecks by execution time
+**焦点:** 実行時間によってパフォーマンスのボトルネックを検出します。
 
 ![Monitor Performance](/img/game-event-system/examples/14-runtime-monitor/demo-14-performance.png)
 
-**Columns:**
+**カラム:**
 
-| Column         | Meaning                     | Healthy Range     |
+| カラム | 意味 | 健全な範囲 |
 | -------------- | --------------------------- | ----------------- |
-| **Event Name** | Event identifier            | -                 |
-| **Avg Time**   | Average execution ms        | &lt;1ms 🟢         |
-| **Min Time**   | Fastest execution           | -                 |
-| **Max Time**   | Slowest execution           | &lt;5ms 🟡, >5ms 🔴 |
-| **Listeners**  | Avg listener count per fire | -                 |
-| **GC Alloc**   | Garbage generated per fire  | 0 KB ideal        |
+| **Event Name** | イベントの識別名 | - |
+| **Avg Time** | 平均実行時間 (ms) | &lt;1ms 🟢 |
+| **Min Time** | 最速実行時間 | - |
+| **Max Time** | 最遅実行時間 | &lt;5ms 🟡, >5ms 🔴 |
+| **Listeners** | 発行あたりの平均リスナー数 | - |
+| **GC Alloc** | 発行あたりの生成ガベージ量 | 0 KB が理想 |
 
-**Color Coding:**
-- 🟢 **Green:** 0-1ms (excellent)
-- 🟡 **Yellow:** 1-5ms (monitor)
-- 🔴 **Red:** >5ms (investigate)
+**カラーコード:**
+- 🟢 **緑:** 0-1ms (優秀)
+- 🟡 **黄:** 1-5ms (監視が必要)
+- 🔴 **赤:** >5ms (調査が必要)
 
-**Test Results (Unit B):**
-1. Locate `OnHeavyLoad` event in table
-2. **Avg Time:** Shows ~6.00ms (🟡 Yellow)
-3. **Max Time:** May show ~12.00ms if clicked multiple times (🔴 Red)
-4. **Cause:** `Thread.Sleep(6)` in listener code
+**テスト結果 (Unit B):**
+1. 表の中から `OnHeavyLoad` イベントを探します。
+2. **Avg Time:** 約 6.00ms と表示されます (🟡 黄)。
+3. **Max Time:** 複数回クリックした場合、約 12.00ms と表示されることがあります (🔴 赤)。
+4. **原因:** リスナーコード内の `Thread.Sleep(6)`。
 
-**Usage:**
-- Sort by "Avg Time" to find worst offenders
-- Click event name to see Details tab
-- Compare listener counts—more listeners = higher risk
+:::warning ⚠️ パフォーマンス予算
 
-:::warning ⚠️ Performance Budget
-
-General rule: Keep avg execution time &lt;1ms. Budget total frame time (16ms @ 60fps) across all systems.
+一般的なルールとして、平均実行時間は 1ms 未満に抑えるべきです。すべてのシステムを合わせて、1フレームの予算（60fpsなら16ms）内に収めるようにしてください。
 
 :::
 
 ---
 
-### Tab 3: 📝 Recent Events (Real-Time Event Log)
+### タブ 3: 📝 Recent Events (リアルタイムイベントログ)
 
-**Focus:** Chronological stream of all event firings
+**焦点:** すべてのイベント発行の時系列ストリーム。
 
 ![Monitor Recent](/img/game-event-system/examples/14-runtime-monitor/demo-14-recent.png)
 
-**Columns:**
+**カラム:**
 
-| Column        | Meaning                       | Example                                 |
+| カラム | 意味 | 例 |
 | ------------- | ----------------------------- | --------------------------------------- |
-| **Frame**     | Unity frame number            | `F:1450`                                |
-| **Time**      | Timestamp since play start    | `12.45s`                                |
-| **Event**     | Event name                    | `OnHeavyLoad`                           |
-| **Arguments** | Payload preview               | `<DamageInfo: 100>`                     |
-| **Caller**    | Method that called `.Raise()` | `RuntimeMonitorRaiser.TriggerHeavyLoad` |
+| **Frame** | Unity のフレーム番号 | `F:1450` |
+| **Time** | プレイ開始からの経過時間 | `12.45s` |
+| **Event** | イベント名 | `OnHeavyLoad` |
+| **Arguments** | ペイロードのプレビュー | `<DamageInfo: 100>` |
+| **Caller** | `.Raise()` を呼んだメソッド | `RuntimeMonitorRaiser.TriggerHeavyLoad` |
 
-**Features:**
-- 🔍 **Search:** Filter by event name
-- 📋 **Stack Trace:** Toggle to see full call stack
-- 🔗 **Details Link:** Click event to see deep dive
+**機能:**
+- 🔍 **検索:** イベント名でフィルタリング。
+- 📋 **スタックトレース:** 切り替えて完全なコールスタックを表示。
+- 🔗 **詳細リンク:** イベントをクリックして深掘り分析へ。
 
-**Test Results (All Units):**
-- **Unit A:** Rapid succession of `OnSpammer` entries (60+/sec)
-- **Unit C:** Sequential pattern: `OnChainStart` → (delay) → `OnChainProcess` → `OnChainFinish` → `OnTriggerComplete`
-- **Unit D:** Single `OnGhost` entry
+**テスト結果 (全ユニット):**
+- **ユニット A:** `OnSpammer` エントリが高速に連続して表示される (60回以上/秒)。
+- **ユニット C:** 直列パターン: `OnChainStart` ➔ (遅延) ➔ `OnChainProcess` ➔ `OnChainFinish` ➔ `OnTriggerComplete`。
+- **ユニット D:** 単一の `OnGhost` エントリ。
 
-**Usage:**
-- Verify event firing order (sequential vs parallel)
-- Debug unexpected event triggers
-- Investigate caller methods (who's raising this?)
+:::tip 🎯 プロのヒント
 
-:::tip 🎯 Pro Tip
-
-Unlike Unity Console, this log is **specialized for events**—no noise from other Debug.Log calls, structured data preview, direct caller info.
+Unity コンソールとは異なり、このログは**イベントに特化**しています。他の Debug.Log によるノイズがなく、構造化されたデータのプレビューや呼び出し元情報が直接表示されます。
 
 :::
 
 ---
 
-### Tab 4: 📈 Statistics (Frequency Analysis)
+### タブ 4: 📈 Statistics (頻度分析)
 
-**Focus:** Long-term usage patterns and frequency tracking
+**焦点:** 長期的な使用パターンと発行頻度の追跡。
 
 ![Monitor Statistics](/img/game-event-system/examples/14-runtime-monitor/demo-14-statistics.png)
 
-**Columns:**
+**カラム:**
 
-| Column            | Meaning                      | Healthy Range            |
+| カラム | 意味 | 健全な範囲 |
 | ----------------- | ---------------------------- | ------------------------ |
-| **Event Name**    | Event identifier             | -                        |
-| **Trigger Count** | Total fires since play start | -                        |
-| **Freq/sec**      | Fires per second             | &lt;10 🟢, 10-30 🟡, >30 🔴 |
-| **Avg Interval**  | Time between fires (ms)      | >100ms ideal             |
-| **Last Trigger**  | Time since last fire         | -                        |
+| **Event Name** | イベントの識別名 | - |
+| **Trigger Count** | プレイ開始からの合計発行数 | - |
+| **Freq/sec** | 1秒あたりの発行数 | &lt;10 🟢, 10-30 🟡, >30 🔴 |
+| **Avg Interval** | 発行間の平均時間 (ms) | 100ms以上が理想 |
+| **Last Trigger** | 最後の発行からの経過時間 | - |
 
-**Test Results (Unit A):**
-1. Locate `OnSpammer` event
-2. **Trigger Count:** Rapidly climbing (1000+ after 10sec)
-3. **Freq/sec:** Shows **>60/s** (🔴 Red warning)
-4. **Avg Interval:** Shows **~16ms** (every frame at 60fps)
+**テスト結果 (Unit A):**
+1. `OnSpammer` イベントを探します。
+2. **Trigger Count:** 急速に増加します（10秒後に1000回以上）。
+3. **Freq/sec:** **>60/s** と表示されます (🔴 赤色の警告)。
+4. **Avg Interval:** **~16ms** と表示されます (60fps環境で毎フレーム)。
 
-**Warning Triggers:**
-- 🟡 **Yellow:** 10-30 fires/sec
-- 🔴 **Red:** >30 fires/sec (potential performance issue)
+**警告トリガー:**
+- 🟡 **黄:** 1秒間に 10-30 回の発行。
+- 🔴 **赤:** 1秒間に 30 回以上の発行（パフォーマンス問題の可能性）。
 
-**Usage:**
-- Identify event spam (too frequent)
-- Detect idle events (never firing)
-- Analyze firing patterns over time
-
-:::warning 🚨 Frequency Red Flags
-- **>60/sec:** Likely firing every frame—consider batching
-- **Irregular spikes:** May indicate logic bug
-- **Zero frequency:** Dead code or misconfigured event
+:::warning 🚨 頻度に関する危険信号
+- **60回以上/秒:** おそらく毎フレーム発行されています。バッチ処理を検討してください。
+- **不規則なスパイク:** ロジックのバグを示唆している可能性があります。
+- **頻度がゼロ:** デッドコード、あるいは設定ミスの可能性があります。
 
 :::
 
 ---
 
-### Tab 5: ⚠️ Warnings (Integrity & Health Alerts)
+### タブ 5: ⚠️ Warnings (整合性と健全性アラート)
 
-**Focus:** Filter noise, surface critical issues
+**焦点:** ノイズをフィルタリングし、深刻な問題を表面化させます。
 
 ![Monitor Warnings](/img/game-event-system/examples/14-runtime-monitor/demo-14-warnings.png)
 
-**Severity Levels:**
+**重要度レベル:**
 
-| Icon | Level        | Meaning                          |
+| アイコン | レベル | 意味 |
 | ---- | ------------ | -------------------------------- |
-| 🔵    | **Info**     | Advisory notice (FYI)            |
-| 🟡    | **Warning**  | Non-critical issue (monitor)     |
-| 🔴    | **Critical** | Severe problem (fix immediately) |
+| 🔵 | **Info** | 参考情報 (FYI) |
+| 🟡 | **Warning** | 非クリティカルな問題（監視推奨） |
+| 🔴 | **Critical** | 深刻な問題（即座に修正が必要） |
 
-**Warning Types:**
+**警告の種類:**
 
-| Warning            | Trigger                             | Severity   |
+| 警告 | トリガー条件 | 重要度 |
 | ------------------ | ----------------------------------- | ---------- |
-| `[No Listeners]`   | Event raised but no listeners bound | 🔵 Info     |
-| `[High Frequency]` | Fires >30 times/sec                 | 🟡 Warning  |
-| `[Performance]`    | Execution time >5ms                 | 🔴 Critical |
-| `[GC Pressure]`    | Garbage allocation >1KB/fire        | 🟡 Warning  |
+| `[No Listeners]` | イベントが発行されたがリスナーがいない | 🔵 Info |
+| `[High Frequency]` | 1秒間に30回以上発行されている | 🟡 Warning |
+| `[Performance]` | 実行時間が 5ms を超えている | 🔴 Critical |
+| `[GC Pressure]` | 1回の発行で 1KB 以上のガベージが発生 | 🟡 Warning |
 
-**Test Results:**
-- **Unit A:** `OnSpammer - [High Frequency] Firing at 62/sec`
-- **Unit D:** `OnGhost - [No Listeners] Event raised with zero subscribers`
+**テスト結果:**
+- **ユニット A:** `OnSpammer - [High Frequency] Firing at 62/sec`
+- **ユニット D:** `OnGhost - [No Listeners] Event raised with zero subscribers`
 
-**Usage:**
-- Check after major feature additions
-- Monitor during stress tests
-- Ignore expected warnings (e.g., debug events)
+:::note 🎓 ゴーストイベント
 
-:::note 🎓 Ghost Events
+`[No Listeners]` 警告は通常、以下のいずれかのバグです：
 
-`[No Listeners]` warnings are usually bugs—either:
-
-1. Listener registration failed (check `OnEnable`)
-2. Event asset reference is wrong
-3. Dead code (remove the `.Raise()` call)
+1. リスナーの登録に失敗している（`OnEnable` を確認）
+2. イベントアセットの参照が間違っている
+3. デッドコード（その `.Raise()` 呼び出しを削除すべき）
 
 :::
 
 ---
 
-### Tab 6: 👂 Listeners (Subscription Inspector)
+### タブ 6: 👂 Listeners (購読インスペクター)
 
-**Focus:** Granular breakdown of WHO is listening
+**焦点:** 「誰が」リッスンしているかの詳細な内訳。
 
 ![Monitor Listeners](/img/game-event-system/examples/14-runtime-monitor/demo-14-listeners.png)
 
-**Select an event** (e.g., `OnHeavyLoad`) to see detailed breakdown:
+イベント（例: `OnHeavyLoad`）を選択すると、詳細な内訳が表示されます：
 
-**Listener Categories:**
+**リスナーカテゴリ:**
 
-| Category        | Meaning                                   | Icon |
+| カテゴリ | 意味 | アイコン |
 | --------------- | ----------------------------------------- | ---- |
-| **Basic**       | Standard `AddListener`                    | 📌    |
-| **Priority**    | `AddPriorityListener` with priority value | 🔢    |
-| **Conditional** | `AddConditionalListener` with predicate   | ✅    |
-| **Persistent**  | `AddPersistentListener` (survives scenes) | 🧬    |
+| **Basic** | 標準的な `AddListener` | 📌 |
+| **Priority** | 優先度付きの `AddPriorityListener` | 🔢 |
+| **Conditional** | 述語付きの `AddConditionalListener` | ✅ |
+| **Persistent** | シーンを跨ぐ `AddPersistentListener` | 🧬 |
 
-**Breakdown Grid:**
+**内訳グリッドの例:**
 ```
-📊 Total Active Listeners: 5
+📊 合計アクティブリスナー数: 5
 │
-├─ 🔗 Basic Listeners (1)
-│  ├─ 📦 Inspector Bindings: 0
-│  └─ 💻 API Bindings: 1
+├─ 🔗 基本リスナー (1)
+│  ├─ 📦 インスペクターバインディング: 0
+│  └─ 💻 API バインディング: 1
 │     └─ ⚙️ RuntimeMonitorReceiver.OnHeavyExecution
 │
-├─ ⚖️ Priority Queue (3)
-│  ├─ 🥇 High Priority (100): 1
+├─ ⚖️ 優先度キュー (3)
+│  ├─ 🥇 高優先度 (100): 1
 │  │  └─ ⚙️ RuntimeMonitorReceiver.OnHeavyPreCheck
-│  ├─ 🥈 Normal Priority (0): 1
+│  ├─ 🥈 通常優先度 (0): 1
 │  │  └─ ⚙️ RuntimeMonitorReceiver.OnHeavyExecution
-│  └─ 🥉 Low Priority (-100): 1
+│  └─ 🥉 低優先度 (-100): 1
 │     └─ ⚙️ RuntimeMonitorReceiver.OnHeavyPostCheck
 │
-├─ 🛡️ Conditional Guards (1)
+├─ 🛡️ 条件付きガード (1)
 │  └─ 💎 [Prio: 50] RuntimeMonitorReceiver.OnHeavyCriticalWarning
-│     └─ 🔍 Predicate: (sender, info) => info.isCritical
+│     └─ 🔍 述語: (sender, info) => info.isCritical
 │
-└─ 💎 Persistent Registry (0)
-   └─ (No cross-scene listeners active)
+└─ 💎 常駐レジストリ (0)
+   └─ (アクティブなシーン跨ぎリスナーなし)
 ```
 
-**Test Results (Unit B):**
-- **Total:** 4-5 listeners
-- **Priority Distribution:** High (1), Normal (1), Low (1)
-- **Conditional:** 1 (with predicate preview)
+**テスト結果 (Unit B):**
+- **合計:** 4-5 リスナー。
+- **優先度分布:** 高(1), 通常(1), 低(1)。
+- **条件付き:** 1 (判定用関数のプレビュー付き)。
 
-**Usage:**
-- Verify code-based registrations worked
-- Check listener execution order (priority values)
-- Debug missing listeners (expected vs actual count)
-- Audit persistent listeners (memory leak prevention)
-
-:::tip 🔍 Inspector vs API
-- **Inspector Bindings:** Configured in Behavior window
-- **API Bindings:** Registered via `AddListener` in code
-- Both show up here—validates your hybrid approach
+:::tip 🔍 インスペクター vs API
+- **インスペクターバインディング:** Behavior ウィンドウで設定。
+- **API バインディング:** コード内の `AddListener` で登録。
+両方がここに表示されるため、ハイブリッドな手法が正しく動作しているか検証できます。
 
 :::
 
 ---
 
-### Tab 7: 🔗 Automation (Programmatic Flow Visualization)
+### タブ 7: 🔗 Automation (プログラムによるフローの可視化)
 
-**Focus:** Visualize code-built Trigger/Chain graphs
+**焦点:** コードで構築されたトリガー/チェーンのグラフを視覚化します。
 
 ![Monitor Automation](/img/game-event-system/examples/14-runtime-monitor/demo-14-automation.png)
 
-**Tree View Structure:**
+**ツリービュー構造:**
 ```
 ▼ OnChainStart (Root, <DamageInfo>)
   │
   ├─ 🔗 Chain → OnChainProcess
-  │   ├─ ⏱️ Delay: 0.5s
-  │   ├─ ✅ Pass Argument
-  │   └─ Type: <DamageInfo>
+  │   ├─ ⏱️ 遅延: 0.5秒
+  │   ├─ ✅ 引数を渡す
+  │   └─ 型: <DamageInfo>
   │
-  └─ (OnChainProcess expanded)
+  └─ (OnChainProcess 展開時)
       │
       ├─ 🔗 Chain → OnChainFinish
-      │   ├─ ⏱️ Delay: 0.2s
-      │   ├─ 🧩 Condition: info.amount > 50
-      │   ├─ ✅ Pass Argument
-      │   └─ Type: <DamageInfo>
+      │   ├─ ⏱️ 遅延: 0.2秒
+      │   ├─ 🧩 条件: info.amount > 50
+      │   ├─ ✅ 引数を渡す
+      │   └─ 型: <DamageInfo>
       │
-      └─ (OnChainFinish expanded)
+      └─ (OnChainFinish 展開時)
           │
           └─ 🕹️ Trigger → OnTriggerComplete
-              ├─ ❌ Block Argument
-              └─ Type: (void)
+              ├─ ❌ 引数をブロック
+              └─ 型: (void)
 ```
 
-**Badge Legend:**
+**バッジの凡例:**
 
-| Badge    | Meaning                  |
+| バッジ | 意味 |
 | -------- | ------------------------ |
-| ⏱️ `0.5s` | Delay configured         |
-| 🧩        | Condition enabled        |
-| ✅        | Argument passing enabled |
-| ❌        | Argument blocked         |
-| 🔗        | Chain node (sequential)  |
-| 🕹️        | Trigger node (parallel)  |
+| ⏱️ `0.5s` | 遅延が設定されています |
+| 🧩 | 条件が有効です |
+| ✅ | 引数の受け渡しが有効です |
+| ❌ | 引数がブロックされています |
+| 🔗 | チェーンノード（直列） |
+| 🕹️ | トリガーノード（並列） |
 
-**Test Results (Unit C):**
-- **Root:** `OnChainStart`
-- **Depth:** 3 levels (Start → Process → Finish → Complete)
-- **Mixed Types:** Chain (sequential) + Trigger (parallel) combined
+**テスト結果 (Unit C):**
+- **ルート:** `OnChainStart`。
+- **深さ:** 3レベル (Start ➔ Process ➔ Finish ➔ Complete)。
+- **混合型:** チェーン（直列）とトリガー（並列）が組み合わされています。
 
-**Usage:**
-- Verify programmatic graphs built correctly
-- Debug broken chains (missing nodes)
-- Visualize complex automation without opening Flow Graph window
-- Compare code-built vs visual-built graphs
-
-:::note 🎨 Code vs Visual Graphs
-- **This tab:** Shows **code-built** graphs (`AddChainEvent`, `AddTriggerEvent`)
-- **Flow Graph window:** Shows **visual-built** graphs (created via UI)
-- Both are valid, both are debuggable
+:::note 🎨 コード vs ビジュアルグラフ
+- **このタブ:** コードで構築されたグラフ (`AddChainEvent`, `AddTriggerEvent`) を表示します。
+- **Flow Graph ウィンドウ:** UI で構築された視覚的なグラフを表示します。
+どちらも有効であり、どちらもデバッグ可能です。
 
 :::
 
 ---
 
-### Tab 8: 🔍 Event Details (Deep Dive)
+### タブ 8: 🔍 Event Details (深掘り分析)
 
-**Focus:** Single-event analysis and history
+**焦点:** 単一イベントの分析と履歴。
 
 ![Monitor Details](/img/game-event-system/examples/14-runtime-monitor/demo-14-details.png)
 
-Click "Details" or "View" from any other tab to drill down.
+他のタブから「Details」や「View」をクリックして詳細を表示します。
 
-**Sections:**
+**セクション:**
 
-**1. Metadata:**
-- **GUID:** Unique identifier (immutable)
-- **Type:** Full generic signature
-- **Category:** Organizational tag
-- **Database:** Source asset file
+**1. メタデータ:**
+- **GUID:** 不変の一意な識別子。
+- **型:** 完全なジェネリックシグネチャ。
+- **カテゴリ:** 整理用のタグ。
+- **データベース:** ソースアセットファイル。
 
-**2. Performance Summary:**
-- **Avg/Min/Max Time:** Same as Performance tab
-- **GC Allocation:** Memory profile
-- **Listener Count:** Current subscribers
+**2. パフォーマンスサマリー:**
+- Performance タブと同様の数値。
+- **GC Allocation:** メモリプロファイル。
+- **Listener Count:** 現在の購読者数。
 
-**3. Frequency Summary:**
-- **Total Fires:** Since play start
-- **Fires/Sec:** Current rate
-- **Avg Interval:** Between fires
-- **Last Fire:** Time ago
+**3. 頻度サマリー:**
+- **Total Fires:** 累計発行数。
+- **Fires/Sec:** 現在の頻度。
+- **Avg Interval:** 平均間隔。
+- **Last Fire:** 最後に発行されてからの時間。
 
-**4. Recent Activity (Filtered):**
-- Event-specific log stream
-- Only shows this event's history
-- Full stack traces available
-
-**5. Automation (If Applicable):**
-- Shows this event's place in Flow Graph
-- Upstream/downstream connections
-
-**Usage:**
-- Comprehensive single-event analysis
-- Compare before/after optimization
-- Export data for team review
+**4. Recent Activity (フィルタ済み):**
+- このイベントのみに絞り込まれたログストリーム。
+- 完全なスタックトレースが利用可能です。
 
 ---
 
-## 🏗️ Scene Architecture
+## 🏗️ シーンのアーキテクチャ
 
-### Event Organization
+### イベントの整理
 
-Events organized by test unit in Game Event Editor:
+Game Event Editor 内で、テストユニットごとにイベントを整理しています：
 
-![Game Event Editor](/img/game-event-system/examples/14-runtime-monitor/demo-14-editor.png)
-
-| Category   | Event Name             | Type                                | Purpose                |
+| カテゴリ | イベント名 | 型 | 用途 |
 | ---------- | ---------------------- | ----------------------------------- | ---------------------- |
-| **Unit A** | `OnSpammer`            | `GameEvent`                         | High-frequency spam    |
-| **Unit A** | `OnSpammerPersistent`  | `GameEvent`                         | Persistent spam        |
-| **Unit B** | `OnHeavyLoad`          | `GameEvent<GameObject, DamageInfo>` | Performance test       |
-| **Unit B** | `OnHeavyLoadCondition` | `GameEvent<GameObject, DamageInfo>` | Conditional test       |
-| **Unit C** | `OnChainStart`         | `GameEvent<DamageInfo>`             | Root (gold)            |
-| **Unit C** | `OnChainProcess`       | `GameEvent<DamageInfo>`             | Chain step 1           |
-| **Unit C** | `OnChainFinish`        | `GameEvent<DamageInfo>`             | Chain step 2           |
-| **Unit C** | `OnTriggerComplete`    | `GameEvent`                         | Chain step 3 (trigger) |
-| **Unit D** | `OnGhost`              | `GameEvent`                         | Integrity test         |
+| **Unit A** | `OnSpammer` | `GameEvent` | 高頻度スパム |
+| **Unit A** | `OnSpammerPersistent` | `GameEvent` | 常駐スパム |
+| **Unit B** | `OnHeavyLoad` | `GameEvent<GameObject, DamageInfo>` | パフォーマンステスト |
+| **Unit B** | `OnHeavyLoadCondition` | `GameEvent<GameObject, DamageInfo>` | 条件付きテスト |
+| **Unit C** | `OnChainStart` | `GameEvent<DamageInfo>` | ルート (ゴールド) |
+| **Unit C** | `OnChainProcess` | `GameEvent<DamageInfo>` | チェーン Step 1 |
+| **Unit C** | `OnChainFinish` | `GameEvent<DamageInfo>` | チェーン Step 2 |
+| **Unit C** | `OnTriggerComplete` | `GameEvent` | チェーン Step 3 (トリガー) |
+| **Unit D** | `OnGhost` | `GameEvent` | 整合性テスト |
 
 ---
 
-### Flow Graph Configuration
+### フローグラフの設定
 
-Programmatic chain built in code:
+コード内で構築された直列チェーン：
 
 ![Flow Graph](/img/game-event-system/examples/14-runtime-monitor/demo-14-graph.png)
 
-**Graph Structure:**
-- 🔴 **OnChainStart (Root, Red)** - Entry point
-- 🟢 **OnChainProcess (Chain, Green)** - Step 1 (Delay: 0.5s)
-- 🟢 **OnChainFinish (Chain, Green)** - Step 2 (Delay: 0.2s, Condition: amount > 50)
-- 🟡 **OnTriggerComplete (Trigger, Yellow)** - Step 3 (Argument blocked)
-
-**Connection Types:**
-- 🟢 **Green "CHAIN" lines** - Sequential execution
-- 🟡 **Yellow "TRIGGER" line** - Parallel execution
+**グラフ構造:**
+- 🔴 **OnChainStart (Root, Red)** - エントリポイント
+- 🟢 **OnChainProcess (Chain, Green)** - Step 1 (遅延: 0.5s)
+- 🟢 **OnChainFinish (Chain, Green)** - Step 2 (遅延: 0.2s, 条件: amount > 50)
+- 🟡 **OnTriggerComplete (Trigger, Yellow)** - Step 3 (引数をブロック)
 
 ---
 
-### Raiser Setup (RuntimeMonitorRaiser)
+## 💻 コード解説
 
-![RuntimeMonitorRaiser Inspector](/img/game-event-system/examples/14-runtime-monitor/demo-14-raiser.png)
+### パフォーマンス問題のシミュレート (Unit B)
 
-**Unit A: Frequency Test**
-- `On Spam Event`: OnSpammer
-- `On Spam Persistent Event`: OnSpammerPersistent
-
-**Unit B: Performance Test**
-- `On Heavy Load Event`: OnHeavyLoad
-- `On Heavy Load Condition Event`: OnHeavyLoadCondition
-
-**Unit C: Automation Test (Roots)**
-- `On Chain Start`: OnChainStart
-
-**Unit C: Automation Test (Targets)**
-- `On Chain Process`: OnChainProcess
-- `On Chain Finish`: OnChainFinish
-- `On Trigger Complete`: OnTriggerComplete
-
-**Unit D: Integrity Test**
-- `On Ghost Event`: OnGhost
-
----
-
-### Receiver Setup (RuntimeMonitorReceiver)
-
-![RuntimeMonitorReceiver Inspector](/img/game-event-system/examples/14-runtime-monitor/demo-14-receiver.png)
-
-**Events (Asset References):**
-- Same events as Raiser
-
-**Chain Events (For Inspector Binding):**
-- `On Chain Process`, `On Chain Finish`, `On Trigger Complete`
-- These have **Inspector-based listeners** (drag & drop in Behavior window)
-- Complements code-based API listeners
-
----
-
-## 💻 Code Breakdown
-
-### Simulating Performance Issues (Unit B)
-
-**RuntimeMonitorReceiver.cs - Heavy Execution:**
+**RuntimeMonitorReceiver.cs - 重い処理の実行:**
 ```csharp
 public void OnHeavyExecution(GameObject sender, DamageInfo info)
 {
-    // ⚠️ INTENTIONAL LAG FOR TESTING
-    // In production, NEVER use Thread.Sleep in game logic!
-    // This forces execution time to >5ms to trigger Monitor warnings
-    Thread.Sleep(6);  // ← Simulates expensive computation
+    // ⚠️ テスト用の意図的なラグ
+    // 本番環境ではゲームロジック内で Thread.Sleep を絶対に使用しないでください！
+    // モニターの警告をトリガーするために、実行時間を 5ms 以上に強制しています
+    Thread.Sleep(6);  // ← 負荷の高い計算をシミュレート
     
-    Debug.Log($"[Receiver] Processed heavy data. Latency: 6ms (simulated)");
+    Debug.Log($"[Receiver] 重いデータを処理しました。レイテンシ: 6ms (シミュレート)");
 }
 ```
 
-**Why this works:**
-- `Thread.Sleep(6)` blocks main thread for 6 milliseconds
-- Monitor's Performance tab tracks execution time per listener
-- 6ms exceeds 5ms threshold → triggers YELLOW warning
-- Click button 2x with `Thread.Sleep(12)` → RED critical warning
-
 ---
 
-### Building Programmatic Automation (Unit C)
+### プログラムによるオートメーションの構築 (Unit C)
 
-**RuntimeMonitorRaiser.cs - Awake() Graph Construction:**
+**RuntimeMonitorRaiser.cs - Awake() でのグラフ構築:**
 ```csharp
 private ChainHandle _chainProcessHandle;
 private ChainHandle _chainFinishHandle;
@@ -690,282 +593,157 @@ private TriggerHandle _triggerCompleteHandle;
 
 private void Awake()
 {
-    // ✅ BUILD CHAIN IN CODE (Not visual graph!)
+    // ✅ コードによるチェーンの構築（ビジュアルグラフは不使用！）
     
-    // Step 1: Start → (Delay 0.5s) → Process
+    // Step 1: Start ➔ (遅延 0.5s) ➔ Process
     _chainProcessHandle = onChainStart.AddChainEvent(
         targetEvent: onChainProcess,
-        delay: 0.5f,           // ← Pause for half a second
-        passArgument: true     // ← Forward DamageInfo
-    );
-    
-    // Step 2: Process → (Condition + Delay 0.2s) → Finish
-    _chainFinishHandle = onChainProcess.AddChainEvent(
-        targetEvent: onChainFinish,
-        delay: 0.2f,
-        condition: (info) => info.amount > 50f,  // ← Only high damage continues
+        delay: 0.5f,
         passArgument: true
     );
     
-    // Step 3: Finish → (Trigger, Block Args) → Complete
+    // Step 2: Process ➔ (条件 + 遅延 0.2s) ➔ Finish
+    _chainFinishHandle = onChainProcess.AddChainEvent(
+        targetEvent: onChainFinish,
+        delay: 0.2f,
+        condition: (info) => info.amount > 50f,  // ← 高ダメージのみ続行
+        passArgument: true
+    );
+    
+    // Step 3: Finish ➔ (トリガー, 引数ブロック) ➔ Complete
     _triggerCompleteHandle = onChainFinish.AddTriggerEvent(
         targetEvent: onTriggerComplete,
-        passArgument: false    // ← Block arguments (type conversion void)
+        passArgument: false    // ← 引数をブロック（void への型変換）
     );
 }
 
 private void OnDestroy()
 {
-    // ✅ CLEANUP: MANDATORY for dynamic graphs
+    // ✅ 解除：動的グラフには必須です
     onChainStart.RemoveChainEvent(_chainProcessHandle);
     onChainProcess.RemoveChainEvent(_chainFinishHandle);
     onChainFinish.RemoveTriggerEvent(_triggerCompleteHandle);
 }
 ```
 
-**Graph Execution Flow:**
-```
-🖱️ User Interaction: Button Clicked
-│
-🚀 [ INITIATION ] ➔ onChainStart.Raise(DamageInfo)
-│   📦 Payload: { amount: 100, isCritical: true }
-│
-⏳ [ SCHEDULING ] ➔ System Pauses for 0.5s
-│   └─► ⚙️ onChainProcess.Raise(DamageInfo)
-│
-⚖️ [ EVALUATION ] ➔ Gate: `100 > 50` ? 
-│   └─► ✅ Result: YES (Condition Passed)
-│
-⏳ [ SCHEDULING ] ➔ System Pauses for 0.2s
-│   └─► 🎯 onChainFinish.Raise(DamageInfo)
-│
-🧪 [ PURIFICATION ] ➔ Parameter Stripping: `DamageInfo` ➔ `void`
-│   └─► 🏁 onTriggerComplete.Raise()
-│
-📊 Final Outcome: Pipeline Finalized | ⚡ Timing: 0.7s Total Delay
-```
-
-**Monitor Visibility:**
-- **Automation Tab:** Shows this exact tree structure
-- **Recent Events Tab:** Shows sequential firing pattern with timing
-- **Performance Tab:** Tracks each step's execution time
-
 ---
 
-### Registering Multi-Priority Listeners (Unit B)
+### マルチ優先度リスナーの登録 (Unit B)
 
 **RuntimeMonitorReceiver.cs - OnEnable():**
 ```csharp
 private void OnEnable()
 {
-    // ✅ POPULATE LISTENERS TAB WITH VARIETY
+    // ✅ バリエーション豊かなリスナーを登録
     
-    // Basic listener (no priority)
+    // 基本リスナー（優先度なし）
     onSpamEvent.AddListener(OnSpamReceived);
     
-    // Priority listeners (execution order)
-    onHeavyLoadEvent.AddPriorityListener(OnHeavyPreCheck, priority: 100);   // Runs 1st
-    onHeavyLoadEvent.AddPriorityListener(OnHeavyExecution, priority: 0);    // Runs 2nd (lag here)
-    onHeavyLoadEvent.AddPriorityListener(OnHeavyPostCheck, priority: -100); // Runs 3rd
+    // 優先度付きリスナー（実行順序）
+    onHeavyLoadEvent.AddPriorityListener(OnHeavyPreCheck, priority: 100);   // 1番目
+    onHeavyLoadEvent.AddPriorityListener(OnHeavyExecution, priority: 0);    // 2番目（ここでラグ）
+    onHeavyLoadEvent.AddPriorityListener(OnHeavyPostCheck, priority: -100); // 3番目
     
-    // Conditional listener with priority
+    // 優先度付きの条件リスナー
     onHeavyLoadConditionEvent.AddConditionalListener(
         OnHeavyCriticalWarning,
-        predicate: (sender, info) => info.isCritical,  // ← Only if critical
+        predicate: (sender, info) => info.isCritical,  // ← クリティカル時のみ
         priority: 50
     );
 }
-
-private void OnDisable()
-{
-    // ✅ CLEANUP
-    onSpamEvent.RemoveListener(OnSpamReceived);
-    
-    onHeavyLoadEvent.RemovePriorityListener(OnHeavyPreCheck);
-    onHeavyLoadEvent.RemovePriorityListener(OnHeavyExecution);
-    onHeavyLoadEvent.RemovePriorityListener(OnHeavyPostCheck);
-    
-    onHeavyLoadConditionEvent.RemoveConditionalListener(OnHeavyCriticalWarning);
-}
 ```
 
-**Monitor Visibility:**
-- **Listeners Tab:** Shows 4 listeners for `OnHeavyLoad`
-  - Priority breakdown: High (1), Normal (1), Low (1)
-  - Conditional (1) with predicate preview
-- **Performance Tab:** Tracks cumulative execution time (sum of all listeners)
+---
+
+## 🎯 プロダクションでのデバッグワークフロー
+
+### シナリオ 1: 戦闘中にフレームドロップが発生する
+
+**症状:** 戦闘中、FPS が 60 から 30 に低下する。Unity プロファイラーでは明確なスパイクが見当たらない。
+
+**デバッグ手順:**
+1. **Performance タブ**を開く。
+2. "Avg Time" で降順にソート。
+3. 実行時間が 2ms を超えるイベントを探す。
+4. イベントをクリック ➔ **Details タブ** ➔ 呼び出し元メソッドを確認。
+5. 重いリスナーを最適化するか、発行頻度を下げる。
 
 ---
 
-### Persistent Listener Management (Unit A)
+### シナリオ 2: イベントが発行されない
 
-**RuntimeMonitorReceiver.cs - Awake/OnDestroy:**
-```csharp
-private void Awake()
-{
-    // ✅ PERSISTENT LISTENER (Survives scene reload)
-    // Registered in Awake, cleaned in OnDestroy
-    onSpamPersistentEvent.AddPersistentListener(OnSpamPersistentLog, priority: -10);
-}
+**症状:** UI ボタンをクリックしても反応がなく、期待した挙動が発生しない。
 
-private void OnDestroy()
-{
-    // ✅ CLEANUP PERSISTENT
-    onSpamPersistentEvent.RemovePersistentListener(OnSpamPersistentLog);
-}
-
-public void OnSpamPersistentLog()
-{
-    // Empty method—exists only for Monitor to count
-    // Simulates background tracking (e.g., analytics, achievements)
-}
-```
-
-**Monitor Visibility:**
-- **Listeners Tab:** Shows "Persistent Listeners: 1" for `OnSpammerPersistent`
-- **Dashboard:** Tracks persistent listener health
+**デバッグ手順:**
+1. **Recent Events タブ**を開く。
+2. 期待されるイベント名で検索。
+3. **見つかった場合:** イベントは発行されているが、リスナーが反応していない。
+   - **Listeners タブ** ➔ リスナー数を確認。
+   - メソッド名が一致しているか検証。
+4. **見つからない場合:** イベント自体が発行されていない。
+   - 発行側のコードで `.Raise()` が呼ばれているか確認。
+   - インスペクターでイベントアセットの参照を確認。
 
 ---
 
-## 🎯 Production Debugging Workflow
+### シナリオ 3: メモリリークの疑い
 
-### Scenario 1: Frame Drops During Combat
+**症状:** 時間の経過とともにメモリ使用量が増加し、GC スパイクが頻発する。
 
-**Symptoms:**
-- FPS drops from 60 to 30 during combat
-- No obvious Unity Profiler spikes
-
-**Debug Steps:**
-1. Open **Performance Tab**
-2. Sort by "Avg Time" (descending)
-3. Look for events with >2ms execution
-4. Click event → **Details Tab** → See caller methods
-5. Optimize heavy listeners or reduce fire frequency
+**デバッグ手順:**
+1. **Performance タブ**を開く。
+2. "GC Alloc" カラムをチェック。
+3. 1回の発行で 0 KB を超えるアロケーションを行っているイベントを探す。
+4. イベントをクリック ➔ **Listeners タブ** ➔ クロージャ（ラムダ式等）によるアロケーションがないか確認。
+5. 毎フレームの発行でアロケーションが発生しないようリファクタリング。
 
 ---
 
-### Scenario 2: Event Not Firing
+## 🔑 モニター使用のベストプラクティス
 
-**Symptoms:**
-- UI button click does nothing
-- Expected behavior doesn't occur
+### ✅ 推奨事項
 
-**Debug Steps:**
-1. Open **Recent Events Tab**
-2. Search for expected event name
-3. **If found:** Event firing but listeners not responding
-   - Go to **Listeners Tab** → Check listener count
-   - Verify method names match
-4. **If not found:** Event not being raised
-   - Check raiser code's `.Raise()` call
-   - Verify event asset reference in Inspector
+**開発中:**
+- モニターをサブディスプレイで常に開いておく。
+- 新しいイベントを追加した後に確認する。
+- リスナー数が想定通りか検証する。
+- 最適化の前後でプロファイリングを行う。
 
----
-
-### Scenario 3: Memory Leak Suspected
-
-**Symptoms:**
-- Memory usage grows over time
-- GC spikes increase
-
-**Debug Steps:**
-1. Open **Performance Tab**
-2. Check "GC Alloc" column
-3. Look for events allocating >0 KB per fire
-4. Click event → **Listeners Tab** → Check for closure allocations
-5. Refactor to avoid per-fire allocations
+**ストレステスト中:**
+- 高負荷を生成し（このデモのように）、Performance タブで 1ms を超えるイベントを監視する。
+- Warnings タブで整合性の問題をチェックする。
+- メトリクスをエクスポートしてチームで共有する。
 
 ---
 
-### Scenario 4: Ghost Events (Dead Code)
+### ❌ 避けるべき事項
 
-**Symptoms:**
-- Warning tab shows `[No Listeners]`
+**パフォーマンスのアンチパターン:**
+- バッチ化せずに、毎フレームイベントを発行する（>60回/秒）。
+- リスナー内でメモリ割り当て（クロージャ、LINQ等）を行う。
+- 重い処理を同期的に呼び出す。
 
-**Debug Steps:**
-1. Open **Warnings Tab**
-2. Identify ghost events
-3. **Option A:** Event is debug-only → Ignore warning
-4. **Option B:** Listener registration failed
-   - Check `OnEnable` for `AddListener` call
-   - Verify event asset reference matches
-5. **Option C:** Dead code → Remove `.Raise()` call
+**デバッグのアンチパターン:**
+- 黄色の警告を無視する（「ただの警告だ」と思わないこと）。
+- イベントのデバッグを `Debug.Log` だけで済ませる。
+- リスナーの解除（`OnDisable` での処理）を忘れる。
 
 ---
 
-## 🔑 Monitor Best Practices
+## 🎯 次のステップは？
 
-### ✅ DO
+これで `GameEventSystem` の完全なワークフロー（基本的なイベントからプロダクションレベルの可視化まで）をマスターしました。Examples（サンプル）セクションは以上で完了です！
 
-**During Development:**
-- Keep Monitor open in second display
-- Check after adding new events
-- Verify listener counts match expectations
-- Profile before/after optimizations
-
-**During Stress Testing:**
-- Generate high load (like this demo)
-- Monitor Performance tab for >1ms events
-- Check Warnings tab for integrity issues
-- Export metrics for team review
-
-**In Production Builds:**
-- Enable Monitor in Development Builds
-- Test on target devices (mobile, console)
-- Profile in realistic scenarios
-- Document performance baselines
+**次のステップ:**
+- 高度な機能について **[ツールとサポート](../tools/codegen-and-cleanup.md)** を探索する。
+- プロダクション向けのパターンとして **[ベストプラクティス](../scripting/best-practices.md)** を復習する。
+- 困ったときは **[コミュニティとサポート](../tools/community-and-support.md)** をチェックする。
 
 ---
 
-### ❌ DON'T
+## 📚 関連ドキュメント
 
-**Performance Anti-Patterns:**
-- Fire events every frame (>60/sec) without batching
-- Allocate memory in listeners (closures, LINQ)
-- Call expensive operations synchronously
-
-**Debugging Anti-Patterns:**
-- Ignore yellow warnings ("it's just a warning")
-- Rely solely on `Debug.Log` for event debugging
-- Skip listener cleanup (`OnDisable` missing)
-- Leave test events in production builds
-
----
-
-## 📊 Monitor vs Unity Profiler
-
-| Feature                | Game Event Monitor | Unity Profiler      |
-| ---------------------- | ------------------ | ------------------- |
-| **Focus**              | Event system only  | Entire engine       |
-| **Granularity**        | Per-event metrics  | Per-method calls    |
-| **Listener Tracking**  | ✅ Built-in         | ❌ Manual            |
-| **Frequency Analysis** | ✅ Built-in         | ⚠️ Indirect          |
-| **Flow Visualization** | ✅ Automation tab   | ❌ N/A               |
-| **Warnings**           | ✅ Automatic        | ❌ Manual analysis   |
-| **Learning Curve**     | Easy               | Steep               |
-| **Best For**           | Event debugging    | Overall performance |
-
-**Recommended Workflow:**
-1. **Monitor:** Identify problematic events
-2. **Unity Profiler:** Deep-dive into listener methods
-3. **Monitor:** Verify fixes reduced execution time
-
----
-
-## 🎯 What's Next?
-
-You've mastered the complete `GameEventSystem` workflow—from basic events to enterprise observability. The Examples section is complete!
-
-**Next Steps:**
-- Explore **[Tools & Support](../tools/codegen-and-cleanup.md)** for advanced features
-- Review **[Best Practices](../scripting/best-practices.md)** for production patterns
-- Check **[Community & Support](../tools/community-and-support.md)** for help
-
----
-
-## 📚 Related Documentation
-
-- **[Runtime Monitor Tool](../tools/runtime-monitor.md)** - Complete Monitor documentation
-- **[Best Practices](../scripting/best-practices.md)** - Performance optimization patterns
-- **[Programmatic Flow](../scripting/programmatic-flow.md)** - Building graphs in code
-- **[API Reference](../scripting/api-reference.md)** - Complete method signatures
+- **[ランタイムモニターツール](../tools/runtime-monitor.md)** - モニターの完全なドキュメント
+- **[ベストプラクティス](../scripting/best-practices.md)** - パフォーマンス最適化のパターン
+- **[プログラムによるフロー](../scripting/programmatic-flow.md)** - コードによるグラフ構築
+- **[API リファレンス](../scripting/api-reference.md)** - 完全なメソッドシグネチャ

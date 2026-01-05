@@ -1,104 +1,96 @@
 ﻿---
-sidebar_label: 'API Reference'
-
+sidebar_label: 'APIリファレンス'
 sidebar_position: 5
 ---
 
 import Tabs from '@theme/Tabs'; import TabItem from '@theme/TabItem';
 
-# API Reference
+# APIリファレンス
 
-Complete API reference documentation for the GameEvent system. All event types implement strict type-safe interfaces with comprehensive functionality for event-driven architecture.
+GameEventシステムの完全なAPIリファレンスドキュメントです。すべてのイベント型は、イベント駆動アーキテクチャのための包括的な機能を備えた厳格な型安全インターフェースを実装しています。
 
-:::info Namespace 
+:::info 名前空間
 
-All classes and interfaces are located in the `TinyGiants.GameEventSystem.Runtime` namespace.
+すべてのクラスとインターフェースは`TinyGiants.GameEventSystem.Runtime`名前空間に配置されています。
 
 :::
-
 ```csharp
 using TinyGiants.GameEventSystem.Runtime;
 ```
 
 ------
 
-## Event Types Overview
+## イベント型の概要
 
-The GameEvent system provides three event type variants
+GameEventシステムは3つのイベント型バリアントを提供します
 
-| Type                            | Description                                         |
-| ------------------------------- | --------------------------------------------------- |
-| **`GameEvent`**                 | Parameterless events for simple notifications       |
-| **`GameEvent<T>`**              | Single-argument events for passing typed data       |
-| **`GameEvent<TSender, TArgs>`** | Dual-argument events for sender-aware communication |
+| 型                              | 説明                                          |
+| ------------------------------- | --------------------------------------------- |
+| **`GameEvent`**                 | シンプルな通知のためのパラメータなしイベント  |
+| **`GameEvent<T>`**              | 型付きデータを渡すための単一引数イベント      |
+| **`GameEvent<TSender, TArgs>`** | 送信者を認識した通信のための二重引数イベント  |
 
-All methods below are available across these types with appropriate parameter variations.
+以下のすべてのメソッドは、適切なパラメータのバリエーションを持ち、これらの型全体で使用できます。
 
 ------
 
-## 🚀 Event Raising & Cancellation
+## 🚀 イベントの発行とキャンセル
 
 <details>
 <summary>Raise()</summary>
 
-Triggers the event immediately, invoking all registered listeners in execution order.
+イベントを即座にトリガーし、登録されたすべてのリスナーを実行順序で呼び出します。
 
-**Execution Order**: Basic → Priority → Conditional → Persistent → Triggers → Chains
+**実行順序**: Basic → Priority → Conditional → Persistent → Triggers → Chains
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 void Raise();
 ```
 
-**Example:**
-
+**使用例:**
 ```csharp
 myEvent.Raise();
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 void Raise(T argument);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name       | Type | Description                               |
+| 名前       | 型   | 説明                                      |
 | ---------- | ---- | ----------------------------------------- |
-| `argument` | `T`  | The data payload to pass to all listeners |
+| `argument` | `T`  | すべてのリスナーに渡されるデータペイロード |
 
-**Example:**
-
+**使用例:**
 ```csharp
-// Raise with float value
+// float値で発行
 healthEvent.Raise(50.5f);
 
-// Raise with custom type
+// カスタム型で発行
 scoreEvent.Raise(new ScoreData { points = 100, combo = 5 });
 ```
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 void Raise(TSender sender, TArgs args);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name     | Type      | Description                            |
-| -------- | --------- | -------------------------------------- |
-| `sender` | `TSender` | The source object triggering the event |
-| `args`   | `TArgs`   | The data payload to pass to listeners  |
+| 名前     | 型        | 説明                                  |
+| -------- | --------- | ------------------------------------- |
+| `sender` | `TSender` | イベントをトリガーするソースオブジェクト |
+| `args`   | `TArgs`   | リスナーに渡されるデータペイロード      |
 
-**Example:**
-
+**使用例:**
 ```csharp
-// Raise with GameObject sender and damage data
+// GameObjectの送信者とダメージデータで発行
 damageEvent.Raise(this.gameObject, new DamageInfo(10));
 
-// Raise with player sender
+// プレイヤーの送信者で発行
 playerEvent.Raise(playerInstance, new PlayerAction { type = "Jump" });
 ```
 
@@ -109,103 +101,95 @@ playerEvent.Raise(playerInstance, new PlayerAction { type = "Jump" });
 <details>
 <summary>Cancel()</summary>
 
-Stops any active Inspector-configured scheduled execution (delay or repeating) for this event asset.
-
+このイベントアセットに対して、Inspectorで設定されたアクティブなスケジュール実行(遅延または繰り返し)を停止します。
 ```csharp
 void Cancel();
 ```
 
-**Example:**
-
+**使用例:**
 ```csharp
-// Stop automatic repeating configured in Inspector
+// Inspectorで設定された自動繰り返しを停止
 myEvent.Cancel();
 ```
 
-:::warning Scope Limitation 
+:::warning 適用範囲の制限
 
-This **ONLY** cancels schedules initiated by the Inspector's "Schedule Configuration". It does **NOT** cancel manual schedules created via `RaiseDelayed()` or `RaiseRepeating()`. Use `CancelDelayed(handle)` or `CancelRepeating(handle)` for those. 
+これはInspectorの「スケジュール設定」によって開始されたスケジュール**のみ**をキャンセルします。`RaiseDelayed()`または`RaiseRepeating()`で作成された手動スケジュールはキャンセル**されません**。それらには`CancelDelayed(handle)`または`CancelRepeating(handle)`を使用してください。
 
 :::
 
 </details>
 
-## ⏱️ Time-Based Scheduling
+## ⏱️ 時間ベースのスケジューリング
 
 <details>
 <summary>RaiseDelayed()</summary>
 
-Schedules the event to fire once after a specified delay.
+指定された遅延後に一度だけイベントを発行するようスケジュールします。
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 ScheduleHandle RaiseDelayed(float delay);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name    | Type    | Description                                      |
-| ------- | ------- | ------------------------------------------------ |
-| `delay` | `float` | Time in seconds to wait before raising the event |
+| 名前    | 型      | 説明                                  |
+| ------- | ------- | ------------------------------------- |
+| `delay` | `float` | イベント発行前の待機時間(秒)           |
 
-**Returns:** `ScheduleHandle` - Handle for cancellation
+**戻り値:** `ScheduleHandle` - キャンセル用のハンドル
 
-**Example:**
-
+**使用例:**
 ```csharp
-// Raise after 5 seconds
+// 5秒後に発行
 ScheduleHandle handle = myEvent.RaiseDelayed(5f);
 
-// Cancel if needed
+// 必要に応じてキャンセル
 myEvent.CancelDelayed(handle);
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 ScheduleHandle RaiseDelayed(T argument, float delay);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name       | Type    | Description                                      |
-| ---------- | ------- | ------------------------------------------------ |
-| `argument` | `T`     | The data to pass when the event executes         |
-| `delay`    | `float` | Time in seconds to wait before raising the event |
+| 名前       | 型      | 説明                                  |
+| ---------- | ------- | ------------------------------------- |
+| `argument` | `T`     | イベント実行時に渡されるデータ         |
+| `delay`    | `float` | イベント発行前の待機時間(秒)           |
 
-**Returns:** `ScheduleHandle` - Handle for cancellation
+**戻り値:** `ScheduleHandle` - キャンセル用のハンドル
 
-**Example:**
-
+**使用例:**
 ```csharp
-// Spawn enemy after 3 seconds
+// 3秒後に敵をスポーン
 ScheduleHandle handle = spawnEvent.RaiseDelayed(enemyType, 3f);
 
-// Cancel spawn
+// スポーンをキャンセル
 spawnEvent.CancelDelayed(handle);
 ```
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 ScheduleHandle RaiseDelayed(TSender sender, TArgs args, float delay);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name     | Type      | Description                                      |
-| -------- | --------- | ------------------------------------------------ |
-| `sender` | `TSender` | The sender to pass when the event executes       |
-| `args`   | `TArgs`   | The data to pass when the event executes         |
-| `delay`  | `float`   | Time in seconds to wait before raising the event |
+| 名前     | 型        | 説明                                  |
+| -------- | --------- | ------------------------------------- |
+| `sender` | `TSender` | イベント実行時に渡される送信者         |
+| `args`   | `TArgs`   | イベント実行時に渡されるデータ         |
+| `delay`  | `float`   | イベント発行前の待機時間(秒)           |
 
-**Returns:** `ScheduleHandle` - Handle for cancellation
+**戻り値:** `ScheduleHandle` - キャンセル用のハンドル
 
-**Example:**
-
+**使用例:**
 ```csharp
-// Delayed damage application
+// 遅延ダメージ適用
 ScheduleHandle handle = damageEvent.RaiseDelayed(
     attackerObject, 
     new DamageInfo(25), 
@@ -220,83 +204,77 @@ ScheduleHandle handle = damageEvent.RaiseDelayed(
 <details>
 <summary>RaiseRepeating()</summary>
 
-Schedules the event to fire repeatedly at fixed intervals.
+固定間隔でイベントを繰り返し発行するようスケジュールします。
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 ScheduleHandle RaiseRepeating(float interval, int repeatCount = -1);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name          | Type    | Description                                                  |
-| ------------- | ------- | ------------------------------------------------------------ |
-| `interval`    | `float` | Seconds between each execution                               |
-| `repeatCount` | `int`   | Number of repetitions. Use `-1` for infinite (default: `-1`) |
+| 名前          | 型      | 説明                                                 |
+| ------------- | ------- | ---------------------------------------------------- |
+| `interval`    | `float` | 各実行間の秒数                                        |
+| `repeatCount` | `int`   | 繰り返し回数。無限の場合は`-1`を使用(デフォルト: `-1`) |
 
-**Returns:** `ScheduleHandle` - Handle for cancellation
+**戻り値:** `ScheduleHandle` - キャンセル用のハンドル
 
-**Example:**
-
+**使用例:**
 ```csharp
-// Repeat 10 times
+// 10回繰り返し
 ScheduleHandle handle = tickEvent.RaiseRepeating(1f, repeatCount: 10);
 
-// Repeat forever (infinite loop)
+// 永久に繰り返し(無限ループ)
 ScheduleHandle infinite = pulseEvent.RaiseRepeating(0.5f);
 
-// Stop infinite loop
+// 無限ループを停止
 pulseEvent.CancelRepeating(infinite);
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 ScheduleHandle RaiseRepeating(T argument, float interval, int repeatCount = -1);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name          | Type    | Description                                                  |
-| ------------- | ------- | ------------------------------------------------------------ |
-| `argument`    | `T`     | The data to pass with each execution                         |
-| `interval`    | `float` | Seconds between each execution                               |
-| `repeatCount` | `int`   | Number of repetitions. Use `-1` for infinite (default: `-1`) |
+| 名前          | 型      | 説明                                                 |
+| ------------- | ------- | ---------------------------------------------------- |
+| `argument`    | `T`     | 各実行時に渡されるデータ                              |
+| `interval`    | `float` | 各実行間の秒数                                        |
+| `repeatCount` | `int`   | 繰り返し回数。無限の場合は`-1`を使用(デフォルト: `-1`) |
 
-**Returns:** `ScheduleHandle` - Handle for cancellation
+**戻り値:** `ScheduleHandle` - キャンセル用のハンドル
 
-**Example:**
-
+**使用例:**
 ```csharp
-// Deal damage every second, 5 times
+// 1秒ごとにダメージを与え、5回実行
 ScheduleHandle poison = damageEvent.RaiseRepeating(5, 1f, repeatCount: 5);
 
-// Spawn waves infinitely every 30 seconds
+// 30秒ごとに無限にウェーブをスポーン
 ScheduleHandle waves = waveEvent.RaiseRepeating(waveData, 30f);
 ```
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 ScheduleHandle RaiseRepeating(TSender sender, TArgs args, float interval, int repeatCount = -1);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name          | Type      | Description                                                  |
-| ------------- | --------- | ------------------------------------------------------------ |
-| `sender`      | `TSender` | The sender to pass with each execution                       |
-| `args`        | `TArgs`   | The data to pass with each execution                         |
-| `interval`    | `float`   | Seconds between each execution                               |
-| `repeatCount` | `int`     | Number of repetitions. Use `-1` for infinite (default: `-1`) |
+| 名前          | 型        | 説明                                                 |
+| ------------- | --------- | ---------------------------------------------------- |
+| `sender`      | `TSender` | 各実行時に渡される送信者                              |
+| `args`        | `TArgs`   | 各実行時に渡されるデータ                              |
+| `interval`    | `float`   | 各実行間の秒数                                        |
+| `repeatCount` | `int`     | 繰り返し回数。無限の場合は`-1`を使用(デフォルト: `-1`) |
 
-**Returns:** `ScheduleHandle` - Handle for cancellation
+**戻り値:** `ScheduleHandle` - キャンセル用のハンドル
 
-**Example:**
-
+**使用例:**
 ```csharp
-// Regenerate health every 2 seconds, 10 times
+// 2秒ごとに体力を回復、10回実行
 ScheduleHandle regen = healEvent.RaiseRepeating(
     playerObject,
     new HealInfo(5),
@@ -312,29 +290,27 @@ ScheduleHandle regen = healEvent.RaiseRepeating(
 <details>
 <summary>CancelDelayed()</summary>
 
-Cancels a specific delayed event created with `RaiseDelayed()`.
-
+`RaiseDelayed()`で作成された特定の遅延イベントをキャンセルします。
 ```csharp
 bool CancelDelayed(ScheduleHandle handle);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name     | Type             | Description                             |
-| -------- | ---------------- | --------------------------------------- |
-| `handle` | `ScheduleHandle` | The handle returned by `RaiseDelayed()` |
+| 名前     | 型               | 説明                                |
+| -------- | ---------------- | ----------------------------------- |
+| `handle` | `ScheduleHandle` | `RaiseDelayed()`から返されたハンドル |
 
-**Returns:** `bool` - `true` if successfully cancelled, `false` if already executed or invalid
+**戻り値:** `bool` - 正常にキャンセルされた場合は`true`、既に実行済みまたは無効な場合は`false`
 
-**Example:**
-
+**使用例:**
 ```csharp
 ScheduleHandle handle = explosionEvent.RaiseDelayed(5f);
 
-// Cancel before explosion happens
+// 爆発が起こる前にキャンセル
 if (explosionEvent.CancelDelayed(handle))
 {
-    Debug.Log("Explosion defused!");
+    Debug.Log("爆発を解除しました!");
 }
 ```
 
@@ -343,115 +319,107 @@ if (explosionEvent.CancelDelayed(handle))
 <details>
 <summary>CancelRepeating()</summary>
 
-Cancels a specific repeating event created with `RaiseRepeating()`.
-
+`RaiseRepeating()`で作成された特定の繰り返しイベントをキャンセルします。
 ```csharp
 bool CancelRepeating(ScheduleHandle handle);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name     | Type             | Description                               |
-| -------- | ---------------- | ----------------------------------------- |
-| `handle` | `ScheduleHandle` | The handle returned by `RaiseRepeating()` |
+| 名前     | 型               | 説明                                  |
+| -------- | ---------------- | ------------------------------------- |
+| `handle` | `ScheduleHandle` | `RaiseRepeating()`から返されたハンドル |
 
-**Returns:** `bool` - `true` if successfully cancelled, `false` if already finished or invalid
+**戻り値:** `bool` - 正常にキャンセルされた場合は`true`、既に終了済みまたは無効な場合は`false`
 
-**Example:**
-
+**使用例:**
 ```csharp
 ScheduleHandle handle = tickEvent.RaiseRepeating(1f);
 
-// Stop repeating
+// 繰り返しを停止
 if (tickEvent.CancelRepeating(handle))
 {
-    Debug.Log("Timer stopped!");
+    Debug.Log("タイマーを停止しました!");
 }
 ```
 
 </details>
 
-## 🎧 Listener Management
+## 🎧 リスナー管理
 
 <details>
 <summary>AddListener()</summary>
 
-Registers a basic listener with standard execution priority.
+標準的な実行優先度を持つ基本リスナーを登録します。
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 void AddListener(UnityAction call);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name   | Type          | Description                        |
-| ------ | ------------- | ---------------------------------- |
-| `call` | `UnityAction` | Callback method with no parameters |
+| 名前   | 型            | 説明                          |
+| ------ | ------------- | ----------------------------- |
+| `call` | `UnityAction` | パラメータなしのコールバックメソッド |
 
-**Example:**
-
+**使用例:**
 ```csharp
 myEvent.AddListener(OnEventTriggered);
 
 void OnEventTriggered()
 {
-    Debug.Log("Event fired!");
+    Debug.Log("イベントが発行されました!");
 }
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 void AddListener(UnityAction<T> call);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name   | Type             | Description                              |
-| ------ | ---------------- | ---------------------------------------- |
-| `call` | `UnityAction<T>` | Callback method receiving typed argument |
+| 名前   | 型               | 説明                              |
+| ------ | ---------------- | --------------------------------- |
+| `call` | `UnityAction<T>` | 型付き引数を受け取るコールバックメソッド |
 
-**Example:**
-
+**使用例:**
 ```csharp
 scoreEvent.AddListener(OnScoreChanged);
 
 void OnScoreChanged(int newScore)
 {
-    Debug.Log($"Score: {newScore}");
+    Debug.Log($"スコア: {newScore}");
 }
 ```
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 void AddListener(UnityAction<TSender, TArgs> call);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name   | Type                          | Description                             |
-| ------ | ----------------------------- | --------------------------------------- |
-| `call` | `UnityAction<TSender, TArgs>` | Callback receiving sender and arguments |
+| 名前   | 型                            | 説明                                |
+| ------ | ----------------------------- | ----------------------------------- |
+| `call` | `UnityAction<TSender, TArgs>` | 送信者と引数を受け取るコールバックメソッド |
 
-**Example:**
-
+**使用例:**
 ```csharp
 damageEvent.AddListener(OnDamageDealt);
 
 void OnDamageDealt(GameObject attacker, DamageInfo info)
 {
-    Debug.Log($"{attacker.name} dealt {info.amount} damage");
+    Debug.Log($"{attacker.name}が{info.amount}のダメージを与えました");
 }
 ```
 
 </TabItem> </Tabs>
 
-:::tip Duplicate Prevention 
+:::tip 重複防止
 
-If the listener already exists, it will be removed and re-added to prevent duplicates. 
+リスナーが既に存在する場合、重複を防ぐために削除されてから再追加されます。
 
 :::
 
@@ -460,58 +428,52 @@ If the listener already exists, it will be removed and re-added to prevent dupli
 <details>
 <summary>RemoveListener()</summary>
 
-Unregisters a basic listener from the event.
+イベントから基本リスナーの登録を解除します。
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 void RemoveListener(UnityAction call);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name   | Type          | Description                        |
-| ------ | ------------- | ---------------------------------- |
-| `call` | `UnityAction` | Callback method with no parameters |
+| 名前   | 型            | 説明                          |
+| ------ | ------------- | ----------------------------- |
+| `call` | `UnityAction` | パラメータなしのコールバックメソッド |
 
-**Example:**
-
+**使用例:**
 ```csharp
 myEvent.RemoveListener(OnEventTriggered);
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 void RemoveListener(UnityAction<T> call);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name   | Type             | Description                              |
-| ------ | ---------------- | ---------------------------------------- |
-| `call` | `UnityAction<T>` | Callback method receiving typed argument |
+| 名前   | 型               | 説明                              |
+| ------ | ---------------- | --------------------------------- |
+| `call` | `UnityAction<T>` | 型付き引数を受け取るコールバックメソッド |
 
-**Example:**
-
+**使用例:**
 ```csharp
 scoreEvent.RemoveListener(OnScoreChanged);
 ```
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 void RemoveListener(UnityAction<TSender, TArgs> call);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name   | Type                          | Description                             |
-| ------ | ----------------------------- | --------------------------------------- |
-| `call` | `UnityAction<TSender, TArgs>` | Callback receiving sender and arguments |
+| 名前   | 型                            | 説明                                |
+| ------ | ----------------------------- | ----------------------------------- |
+| `call` | `UnityAction<TSender, TArgs>` | 送信者と引数を受け取るコールバックメソッド |
 
-**Example:**
-
+**使用例:**
 ```csharp
 damageEvent.RemoveListener(OnDamageDealt);
 ```
@@ -523,22 +485,20 @@ damageEvent.RemoveListener(OnDamageDealt);
 <details>
 <summary>RemoveAllListeners()</summary>
 
-Clears all Basic, Priority, and Conditional listeners from the event.
-
+イベントからすべてのBasic、Priority、Conditionalリスナーをクリアします。
 ```csharp
 void RemoveAllListeners();
 ```
 
-**Example:**
-
+**使用例:**
 ```csharp
-// Clean up all listeners
+// すべてのリスナーをクリーンアップ
 myEvent.RemoveAllListeners();
 ```
 
-:::warning Scope 
+:::warning 適用範囲
 
-Does **NOT** remove Persistent listeners or Trigger/Chain events for safety reasons. 
+安全上の理由から、Persistentリスナーやトリガー/チェーンイベントは削除**されません**。
 
 :::
 
@@ -547,65 +507,59 @@ Does **NOT** remove Persistent listeners or Trigger/Chain events for safety reas
 <details>
 <summary>AddPriorityListener()</summary>
 
-Registers a listener with explicit execution priority. Higher priority values execute first.
+明示的な実行優先度を持つリスナーを登録します。優先度の値が高いほど先に実行されます。
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 void AddPriorityListener(UnityAction call, int priority);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name       | Type          | Description                                       |
-| ---------- | ------------- | ------------------------------------------------- |
-| `call`     | `UnityAction` | Callback method                                   |
-| `priority` | `int`         | Execution priority (higher = earlier, default: 0) |
+| 名前       | 型            | 説明                                           |
+| ---------- | ------------- | ---------------------------------------------- |
+| `call`     | `UnityAction` | コールバックメソッド                            |
+| `priority` | `int`         | 実行優先度(高い = 早い、デフォルト: 0)          |
 
-**Example:**
-
+**使用例:**
 ```csharp
 myEvent.AddPriorityListener(CriticalHandler, 100);
 myEvent.AddPriorityListener(NormalHandler, 50);
 myEvent.AddPriorityListener(LowPriorityHandler, 10);
-// Execution order: CriticalHandler → NormalHandler → LowPriorityHandler
+// 実行順序: CriticalHandler → NormalHandler → LowPriorityHandler
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 void AddPriorityListener(UnityAction<T> call, int priority);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name       | Type             | Description                                       |
-| ---------- | ---------------- | ------------------------------------------------- |
-| `call`     | `UnityAction<T>` | Callback method                                   |
-| `priority` | `int`            | Execution priority (higher = earlier, default: 0) |
+| 名前       | 型               | 説明                                           |
+| ---------- | ---------------- | ---------------------------------------------- |
+| `call`     | `UnityAction<T>` | コールバックメソッド                            |
+| `priority` | `int`            | 実行優先度(高い = 早い、デフォルト: 0)          |
 
-**Example:**
-
+**使用例:**
 ```csharp
 healthEvent.AddPriorityListener(UpdateUI, 100);
 healthEvent.AddPriorityListener(PlaySound, 50);
 ```
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 void AddPriorityListener(UnityAction<TSender, TArgs> call, int priority);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name       | Type                          | Description                                       |
-| ---------- | ----------------------------- | ------------------------------------------------- |
-| `call`     | `UnityAction<TSender, TArgs>` | Callback method                                   |
-| `priority` | `int`                         | Execution priority (higher = earlier, default: 0) |
+| 名前       | 型                            | 説明                                           |
+| ---------- | ----------------------------- | ---------------------------------------------- |
+| `call`     | `UnityAction<TSender, TArgs>` | コールバックメソッド                            |
+| `priority` | `int`                         | 実行優先度(高い = 早い、デフォルト: 0)          |
 
-**Example:**
-
+**使用例:**
 ```csharp
 attackEvent.AddPriorityListener(ProcessCombat, 100);
 attackEvent.AddPriorityListener(ShowVFX, 50);
@@ -618,58 +572,52 @@ attackEvent.AddPriorityListener(ShowVFX, 50);
 <details>
 <summary>RemovePriorityListener()</summary>
 
-Unregisters a priority listener.
+優先度リスナーの登録を解除します。
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 void RemovePriorityListener(UnityAction call);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name   | Type          | Description                        |
-| ------ | ------------- | ---------------------------------- |
-| `call` | `UnityAction` | Callback method with no parameters |
+| 名前   | 型            | 説明                          |
+| ------ | ------------- | ----------------------------- |
+| `call` | `UnityAction` | パラメータなしのコールバックメソッド |
 
-**Example:**
-
+**使用例:**
 ```csharp
 myEvent.RemovePriorityListener(OnEventTriggered);
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 void RemovePriorityListener(UnityAction<T> call);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name   | Type             | Description                              |
-| ------ | ---------------- | ---------------------------------------- |
-| `call` | `UnityAction<T>` | Callback method receiving typed argument |
+| 名前   | 型               | 説明                              |
+| ------ | ---------------- | --------------------------------- |
+| `call` | `UnityAction<T>` | 型付き引数を受け取るコールバックメソッド |
 
-**Example:**
-
+**使用例:**
 ```csharp
 scoreEvent.RemovePriorityListener(OnScoreChanged);
 ```
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 void RemovePriorityListener(UnityAction<TSender, TArgs> call);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name   | Type                          | Description                             |
-| ------ | ----------------------------- | --------------------------------------- |
-| `call` | `UnityAction<TSender, TArgs>` | Callback receiving sender and arguments |
+| 名前   | 型                            | 説明                                |
+| ------ | ----------------------------- | ----------------------------------- |
+| `call` | `UnityAction<TSender, TArgs>` | 送信者と引数を受け取るコールバックメソッド |
 
-**Example:**
-
+**使用例:**
 ```csharp
 damageEvent.RemovePriorityListener(OnDamageDealt);
 ```
@@ -681,24 +629,22 @@ damageEvent.RemovePriorityListener(OnDamageDealt);
 <details>
 <summary>AddConditionalListener()</summary>
 
-Registers a listener that only executes when a condition evaluates to true.
+条件がtrueと評価された場合にのみ実行されるリスナーを登録します。
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 void AddConditionalListener(UnityAction call, Func<bool> condition, int priority = 0);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name        | Type          | Description                                |
-| ----------- | ------------- | ------------------------------------------ |
-| `call`      | `UnityAction` | Callback method                            |
-| `condition` | `Func<bool>`  | Predicate function (null = always execute) |
-| `priority`  | `int`         | Execution priority (default: 0)            |
+| 名前        | 型            | 説明                                      |
+| ----------- | ------------- | ----------------------------------------- |
+| `call`      | `UnityAction` | コールバックメソッド                       |
+| `condition` | `Func<bool>`  | 述語関数(null = 常に実行)                  |
+| `priority`  | `int`         | 実行優先度(デフォルト: 0)                  |
 
-**Example:**
-
+**使用例:**
 ```csharp
 myEvent.AddConditionalListener(
     OnHealthLow,
@@ -708,21 +654,19 @@ myEvent.AddConditionalListener(
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 void AddConditionalListener(UnityAction<T> call, Func<T, bool> condition, int priority = 0);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name        | Type             | Description                      |
-| ----------- | ---------------- | -------------------------------- |
-| `call`      | `UnityAction<T>` | Callback method                  |
-| `condition` | `Func<T, bool>`  | Predicate receiving the argument |
-| `priority`  | `int`            | Execution priority (default: 0)  |
+| 名前        | 型               | 説明                          |
+| ----------- | ---------------- | ----------------------------- |
+| `call`      | `UnityAction<T>` | コールバックメソッド           |
+| `condition` | `Func<T, bool>`  | 引数を受け取る述語関数         |
+| `priority`  | `int`            | 実行優先度(デフォルト: 0)      |
 
-**Example:**
-
+**使用例:**
 ```csharp
 scoreEvent.AddConditionalListener(
     OnHighScore,
@@ -732,7 +676,6 @@ scoreEvent.AddConditionalListener(
 ```
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 void AddConditionalListener(
     UnityAction<TSender, TArgs> call, 
@@ -741,16 +684,15 @@ void AddConditionalListener(
 );
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name        | Type                          | Description                              |
-| ----------- | ----------------------------- | ---------------------------------------- |
-| `call`      | `UnityAction<TSender, TArgs>` | Callback method                          |
-| `condition` | `Func<TSender, TArgs, bool>`  | Predicate receiving sender and arguments |
-| `priority`  | `int`                         | Execution priority (default: 0)          |
+| 名前        | 型                            | 説明                              |
+| ----------- | ----------------------------- | --------------------------------- |
+| `call`      | `UnityAction<TSender, TArgs>` | コールバックメソッド               |
+| `condition` | `Func<TSender, TArgs, bool>`  | 送信者と引数を受け取る述語関数     |
+| `priority`  | `int`                         | 実行優先度(デフォルト: 0)          |
 
-**Example:**
-
+**使用例:**
 ```csharp
 damageEvent.AddConditionalListener(
     OnCriticalHit,
@@ -766,58 +708,52 @@ damageEvent.AddConditionalListener(
 <details>
 <summary>RemoveConditionalListener()</summary>
 
-Unregisters a conditional listener.
+条件付きリスナーの登録を解除します。
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 void RemoveConditionalListener(UnityAction call);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name   | Type          | Description                        |
-| ------ | ------------- | ---------------------------------- |
-| `call` | `UnityAction` | Callback method with no parameters |
+| 名前   | 型            | 説明                          |
+| ------ | ------------- | ----------------------------- |
+| `call` | `UnityAction` | パラメータなしのコールバックメソッド |
 
-**Example:**
-
+**使用例:**
 ```csharp
 myEvent.RemoveConditionalListener(OnEventTriggered);
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 void RemoveConditionalListener(UnityAction<T> call);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name   | Type             | Description                              |
-| ------ | ---------------- | ---------------------------------------- |
-| `call` | `UnityAction<T>` | Callback method receiving typed argument |
+| 名前   | 型               | 説明                              |
+| ------ | ---------------- | --------------------------------- |
+| `call` | `UnityAction<T>` | 型付き引数を受け取るコールバックメソッド |
 
-**Example:**
-
+**使用例:**
 ```csharp
 scoreEvent.RemoveConditionalListener(OnScoreChanged);
 ```
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 void RemoveConditionalListener(UnityAction<TSender, TArgs> call);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name   | Type                          | Description                             |
-| ------ | ----------------------------- | --------------------------------------- |
-| `call` | `UnityAction<TSender, TArgs>` | Callback receiving sender and arguments |
+| 名前   | 型                            | 説明                                |
+| ------ | ----------------------------- | ----------------------------------- |
+| `call` | `UnityAction<TSender, TArgs>` | 送信者と引数を受け取るコールバックメソッド |
 
-**Example:**
-
+**使用例:**
 ```csharp
 damageEvent.RemoveConditionalListener(OnDamageDealt);
 ```
@@ -829,58 +765,54 @@ damageEvent.RemoveConditionalListener(OnDamageDealt);
 <details>
 <summary>AddPersistentListener()</summary>
 
-Registers a global listener that survives scene changes (DontDestroyOnLoad).
+シーン変更を超えて存続するグローバルリスナー(DontDestroyOnLoad)を登録します。
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 void AddPersistentListener(UnityAction call, int priority = 0);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name       | Type          | Description                     |
-| ---------- | ------------- | ------------------------------- |
-| `call`     | `UnityAction` | Callback method                 |
-| `priority` | `int`         | Execution priority (default: 0) |
+| 名前       | 型            | 説明                         |
+| ---------- | ------------- | ---------------------------- |
+| `call`     | `UnityAction` | コールバックメソッド          |
+| `priority` | `int`         | 実行優先度(デフォルト: 0)     |
 
-**Example:**
-
+**使用例:**
 ```csharp
 globalEvent.AddPersistentListener(OnGlobalAction, priority: 100);
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 void AddPersistentListener(UnityAction<T> call, int priority = 0);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name       | Type             | Description                     |
-| ---------- | ---------------- | ------------------------------- |
-| `call`     | `UnityAction<T>` | Callback method                 |
-| `priority` | `int`            | Execution priority (default: 0) |
+| 名前       | 型               | 説明                         |
+| ---------- | ---------------- | ---------------------------- |
+| `call`     | `UnityAction<T>` | コールバックメソッド          |
+| `priority` | `int`            | 実行優先度(デフォルト: 0)     |
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 void AddPersistentListener(UnityAction<TSender, TArgs> call, int priority = 0);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name       | Type                          | Description                     |
-| ---------- | ----------------------------- | ------------------------------- |
-| `call`     | `UnityAction<TSender, TArgs>` | Callback method                 |
-| `priority` | `int`                         | Execution priority (default: 0) |
+| 名前       | 型                            | 説明                         |
+| ---------- | ----------------------------- | ---------------------------- |
+| `call`     | `UnityAction<TSender, TArgs>` | コールバックメソッド          |
+| `priority` | `int`                         | 実行優先度(デフォルト: 0)     |
 
 </TabItem> </Tabs>
 
-:::info Persistence 
+:::info 永続性
 
-Persistent listeners remain active across scene loads. Use for global systems like save management or analytics. 
+Persistentリスナーはシーンのロード間もアクティブなままです。セーブ管理や分析などのグローバルシステムに使用してください。
 
 :::
 
@@ -889,58 +821,52 @@ Persistent listeners remain active across scene loads. Use for global systems li
 <details>
 <summary>RemovePersistentListener()</summary>
 
-Unregisters a persistent listener.
+永続的リスナーの登録を解除します。
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 void RemovePersistentListener(UnityAction call);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name   | Type          | Description                        |
-| ------ | ------------- | ---------------------------------- |
-| `call` | `UnityAction` | Callback method with no parameters |
+| 名前   | 型            | 説明                          |
+| ------ | ------------- | ----------------------------- |
+| `call` | `UnityAction` | パラメータなしのコールバックメソッド |
 
-**Example:**
-
+**使用例:**
 ```csharp
 myEvent.RemovePersistentListener(OnEventTriggered);
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 void RemovePersistentListener(UnityAction<T> call);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name   | Type             | Description                              |
-| ------ | ---------------- | ---------------------------------------- |
-| `call` | `UnityAction<T>` | Callback method receiving typed argument |
+| 名前   | 型               | 説明                              |
+| ------ | ---------------- | --------------------------------- |
+| `call` | `UnityAction<T>` | 型付き引数を受け取るコールバックメソッド |
 
-**Example:**
-
+**使用例:**
 ```csharp
 scoreEvent.RemovePersistentListener(OnScoreChanged);
 ```
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 void RemovePersistentListener(UnityAction<TSender, TArgs> call);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name   | Type                          | Description                             |
-| ------ | ----------------------------- | --------------------------------------- |
-| `call` | `UnityAction<TSender, TArgs>` | Callback receiving sender and arguments |
+| 名前   | 型                            | 説明                                |
+| ------ | ----------------------------- | ----------------------------------- |
+| `call` | `UnityAction<TSender, TArgs>` | 送信者と引数を受け取るコールバックメソッド |
 
-**Example:**
-
+**使用例:**
 ```csharp
 damageEvent.RemovePersistentListener(OnDamageDealt);
 ```
@@ -949,15 +875,14 @@ damageEvent.RemovePersistentListener(OnDamageDealt);
 
 </details>
 
-## ⚡ Trigger Events (Fan-Out Pattern)
+## ⚡ トリガーイベント(ファンアウトパターン)
 
 <details>
 <summary>AddTriggerEvent()</summary>
 
-Registers a target event to be triggered automatically when this event is raised.
+このイベントが発行されたときに自動的にトリガーされるターゲットイベントを登録します。
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 TriggerHandle AddTriggerEvent(
     GameEventBase targetEvent,
@@ -967,40 +892,38 @@ TriggerHandle AddTriggerEvent(
 );
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name          | Type            | Description                                             |
-| ------------- | --------------- | ------------------------------------------------------- |
-| `targetEvent` | `GameEventBase` | The event to trigger                                    |
-| `delay`       | `float`         | Optional delay in seconds (default: 0)                  |
-| `condition`   | `Func<bool>`    | Optional predicate to gate execution                    |
-| `priority`    | `int`           | Execution order relative to other triggers (default: 0) |
+| 名前          | 型              | 説明                                           |
+| ------------- | --------------- | ---------------------------------------------- |
+| `targetEvent` | `GameEventBase` | トリガーするイベント                            |
+| `delay`       | `float`         | オプションの遅延(秒)(デフォルト: 0)             |
+| `condition`   | `Func<bool>`    | 実行をゲートするオプションの述語                |
+| `priority`    | `int`           | 他のトリガーに対する実行順序(デフォルト: 0)     |
 
-**Returns:** `TriggerHandle` - Unique identifier for safe removal
+**戻り値:** `TriggerHandle` - 安全な削除のための一意の識別子
 
-**Example:**
-
+**使用例:**
 ```csharp
-// Simple trigger: door opens → light turns on
+// シンプルなトリガー: ドアが開く → ライトが点灯
 doorOpenEvent.AddTriggerEvent(lightOnEvent);
 
-// Delayed trigger: explosion after 2 seconds
+// 遅延トリガー: 2秒後に爆発
 fuseEvent.AddTriggerEvent(explosionEvent, delay: 2f);
 
-// Conditional trigger
+// 条件付きトリガー
 doorOpenEvent.AddTriggerEvent(
     alarmEvent,
     condition: () => isNightTime
 );
 
-// Priority-ordered triggers
+// 優先順位付きトリガー
 bossDefeatedEvent.AddTriggerEvent(stopMusicEvent, priority: 100);
 bossDefeatedEvent.AddTriggerEvent(victoryMusicEvent, priority: 90);
 bossDefeatedEvent.AddTriggerEvent(showRewardsEvent, priority: 50);
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 TriggerHandle AddTriggerEvent(
     GameEventBase targetEvent,
@@ -1012,37 +935,36 @@ TriggerHandle AddTriggerEvent(
 );
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name                  | Type              | Description                                    |
+| 名前                  | 型                | 説明                                           |
 | --------------------- | ----------------- | ---------------------------------------------- |
-| `targetEvent`         | `GameEventBase`   | The event to trigger                           |
-| `delay`               | `float`           | Optional delay in seconds (default: 0)         |
-| `condition`           | `Func<T, bool>`   | Optional predicate receiving the argument      |
-| `passArgument`        | `bool`            | Whether to pass data to target (default: true) |
-| `argumentTransformer` | `Func<T, object>` | Optional function to transform data            |
-| `priority`            | `int`             | Execution priority (default: 0)                |
+| `targetEvent`         | `GameEventBase`   | トリガーするイベント                            |
+| `delay`               | `float`           | オプションの遅延(秒)(デフォルト: 0)             |
+| `condition`           | `Func<T, bool>`   | 引数を受け取るオプションの述語                  |
+| `passArgument`        | `bool`            | ターゲットにデータを渡すかどうか(デフォルト: true) |
+| `argumentTransformer` | `Func<T, object>` | データを変換するオプションの関数                |
+| `priority`            | `int`             | 実行優先度(デフォルト: 0)                       |
 
-**Returns:** `TriggerHandle` - Unique identifier for safe removal
+**戻り値:** `TriggerHandle` - 安全な削除のための一意の識別子
 
-**Example:**
-
+**使用例:**
 ```csharp
-// Pass argument directly
+// 引数を直接渡す
 GameEvent<int> scoreEvent;
 GameEvent<int> updateUIEvent;
 scoreEvent.AddTriggerEvent(updateUIEvent, passArgument: true);
 
-// Transform argument: int → string
+// 引数を変換: int → string
 GameEvent<int> scoreEvent;
 GameEvent<string> notificationEvent;
 scoreEvent.AddTriggerEvent(
     notificationEvent,
     passArgument: true,
-    argumentTransformer: score => $"Score: {score}"
+    argumentTransformer: score => $"スコア: {score}"
 );
 
-// Conditional with argument check
+// 引数チェック付き条件付き
 GameEvent<float> healthEvent;
 GameEvent lowHealthWarningEvent;
 healthEvent.AddTriggerEvent(
@@ -1053,7 +975,6 @@ healthEvent.AddTriggerEvent(
 ```
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 TriggerHandle AddTriggerEvent(
     GameEventBase targetEvent,
@@ -1065,28 +986,27 @@ TriggerHandle AddTriggerEvent(
 );
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name                  | Type                           | Description                                    |
+| 名前                  | 型                             | 説明                                           |
 | --------------------- | ------------------------------ | ---------------------------------------------- |
-| `targetEvent`         | `GameEventBase`                | The event to trigger                           |
-| `delay`               | `float`                        | Optional delay in seconds (default: 0)         |
-| `condition`           | `Func<TSender, TArgs, bool>`   | Optional predicate receiving sender and args   |
-| `passArgument`        | `bool`                         | Whether to pass data to target (default: true) |
-| `argumentTransformer` | `Func<TSender, TArgs, object>` | Optional transformation function               |
-| `priority`            | `int`                          | Execution priority (default: 0)                |
+| `targetEvent`         | `GameEventBase`                | トリガーするイベント                            |
+| `delay`               | `float`                        | オプションの遅延(秒)(デフォルト: 0)             |
+| `condition`           | `Func<TSender, TArgs, bool>`   | 送信者と引数を受け取るオプションの述語          |
+| `passArgument`        | `bool`                         | ターゲットにデータを渡すかどうか(デフォルト: true) |
+| `argumentTransformer` | `Func<TSender, TArgs, object>` | オプションの変換関数                            |
+| `priority`            | `int`                          | 実行優先度(デフォルト: 0)                       |
 
-**Returns:** `TriggerHandle` - Unique identifier for safe removal
+**戻り値:** `TriggerHandle` - 安全な削除のための一意の識別子
 
-**Example:**
-
+**使用例:**
 ```csharp
-// Pass sender and args to another sender event
+// 送信者と引数を別の送信者イベントに渡す
 GameEvent<GameObject, DamageInfo> damageEvent;
 GameEvent<GameObject, DamageInfo> logEvent;
 damageEvent.AddTriggerEvent(logEvent, passArgument: true);
 
-// Transform: extract damage value only
+// 変換: ダメージ値のみを抽出
 GameEvent<GameObject, DamageInfo> damageEvent;
 GameEvent<int> damageNumberEvent;
 damageEvent.AddTriggerEvent(
@@ -1095,7 +1015,7 @@ damageEvent.AddTriggerEvent(
     argumentTransformer: (sender, info) => info.amount
 );
 
-// Conditional based on sender and args
+// 送信者と引数に基づく条件付き
 GameEvent<GameObject, DamageInfo> damageEvent;
 GameEvent criticalHitEvent;
 damageEvent.AddTriggerEvent(
@@ -1108,70 +1028,66 @@ damageEvent.AddTriggerEvent(
 
 </TabItem> </Tabs>
 
-:::tip Fan-Out Pattern 
+:::tip ファンアウトパターン
 
-Triggers execute in **parallel** - each trigger is independent. If one trigger's condition fails or throws an exception, other triggers still execute. 
+トリガーは**並列**に実行されます - 各トリガーは独立しています。1つのトリガーの条件が失敗したり例外をスローしても、他のトリガーは実行されます。
 
 :::
 
 </details>
 
 <details>
-<summary>RemoveTriggerEvent() (by Handle)</summary>
+<summary>RemoveTriggerEvent() (ハンドルによる)</summary>
 
-Safely removes a specific trigger using its unique handle.
-
+一意のハンドルを使用して特定のトリガーを安全に削除します。
 ```csharp
 void RemoveTriggerEvent(TriggerHandle handle);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name     | Type            | Description                                |
-| -------- | --------------- | ------------------------------------------ |
-| `handle` | `TriggerHandle` | The handle returned by `AddTriggerEvent()` |
+| 名前     | 型              | 説明                                    |
+| -------- | --------------- | --------------------------------------- |
+| `handle` | `TriggerHandle` | `AddTriggerEvent()`から返されたハンドル |
 
-**Example:**
-
+**使用例:**
 ```csharp
 TriggerHandle handle = doorEvent.AddTriggerEvent(lightEvent);
 
-// Remove specific trigger
+// 特定のトリガーを削除
 doorEvent.RemoveTriggerEvent(handle);
 ```
 
-:::tip Recommended 
+:::tip 推奨
 
-This is the **safest** removal method as it only removes your specific trigger instance. 
+これは特定のトリガーインスタンスのみを削除するため、**最も安全な**削除方法です。
 
 :::
 
 </details>
 
 <details>
-<summary>RemoveTriggerEvent() (by Target)</summary>
+<summary>RemoveTriggerEvent() (ターゲットによる)</summary>
 
-Removes **all** triggers pointing to a specific target event.
-
+特定のターゲットイベントを指すトリガーを**すべて**削除します。
 ```csharp
 void RemoveTriggerEvent(GameEventBase targetEvent);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name          | Type            | Description                    |
-| ------------- | --------------- | ------------------------------ |
-| `targetEvent` | `GameEventBase` | The target event to disconnect |
+| 名前          | 型              | 説明                        |
+| ------------- | --------------- | --------------------------- |
+| `targetEvent` | `GameEventBase` | 切断するターゲットイベント   |
 
-**Example:**
-
+**使用例:**
 ```csharp
 doorEvent.RemoveTriggerEvent(lightEvent);
 ```
 
-:::warning Broad Impact 
+:::warning 広範囲への影響
 
-This removes **ALL** triggers targeting this event, including those registered by other systems. Use `RemoveTriggerEvent(handle)` for precision. 
+これは、このイベントをターゲットとする**すべての**トリガーを削除します。他のシステムによって登録されたものも含まれます。正確性のために`RemoveTriggerEvent(handle)`を使用してください。
 
 :::
 
@@ -1180,29 +1096,26 @@ This removes **ALL** triggers targeting this event, including those registered b
 <details>
 <summary>RemoveAllTriggerEvents()</summary>
 
-Removes all trigger events from this event.
-
+このイベントからすべてのトリガーイベントを削除します。
 ```csharp
 void RemoveAllTriggerEvents();
 ```
 
-**Example:**
-
+**使用例:**
 ```csharp
 myEvent.RemoveAllTriggerEvents();
 ```
 
 </details>
 
-## 🔗 Chain Events (Sequential Pattern)
+## 🔗 チェーンイベント(シーケンシャルパターン)
 
 <details>
 <summary>AddChainEvent()</summary>
 
-Registers a target event to execute sequentially in a chain.
+チェーンで順次実行されるターゲットイベントを登録します。
 
 <Tabs> <TabItem value="void" label="GameEvent" default>
-
 ```csharp
 ChainHandle AddChainEvent(
     GameEventBase targetEvent,
@@ -1213,36 +1126,35 @@ ChainHandle AddChainEvent(
 );
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name                | Type            | Description                                     |
-| ------------------- | --------------- | ----------------------------------------------- |
-| `targetEvent`       | `GameEventBase` | The event to execute in the chain               |
-| `delay`             | `float`         | Delay before executing this node (default: 0)   |
-| `duration`          | `float`         | Delay after executing this node (default: 0)    |
-| `condition`         | `Func<bool>`    | Optional predicate - chain breaks if false      |
-| `waitForCompletion` | `bool`          | Wait one frame after execution (default: false) |
+| 名前                | 型              | 説明                                         |
+| ------------------- | --------------- | -------------------------------------------- |
+| `targetEvent`       | `GameEventBase` | チェーンで実行するイベント                    |
+| `delay`             | `float`         | このノードを実行する前の遅延(デフォルト: 0)   |
+| `duration`          | `float`         | このノードを実行した後の遅延(デフォルト: 0)   |
+| `condition`         | `Func<bool>`    | オプションの述語 - falseの場合チェーンが中断   |
+| `waitForCompletion` | `bool`          | 実行後に1フレーム待機(デフォルト: false)      |
 
-**Returns:** `ChainHandle` - Unique identifier for safe removal
+**戻り値:** `ChainHandle` - 安全な削除のための一意の識別子
 
-**Example:**
-
+**使用例:**
 ```csharp
-// Simple sequence: A → B → C
+// シンプルなシーケンス: A → B → C
 eventA.AddChainEvent(eventB);
 eventB.AddChainEvent(eventC);
 
-// Cutscene with delays
+// 遅延を伴うカットシーン
 fadeOutEvent.AddChainEvent(loadSceneEvent, delay: 1f);
 loadSceneEvent.AddChainEvent(fadeInEvent, delay: 0.5f);
 
-// Conditional chain: only continue if condition met
+// 条件付きチェーン: 条件が満たされた場合のみ続行
 combatEndEvent.AddChainEvent(
     victoryEvent,
     condition: () => playerHealth > 0
 );
 
-// Chain with frame wait for async operations
+// 非同期操作のためのフレーム待機付きチェーン
 showDialogEvent.AddChainEvent(
     typeTextEvent,
     waitForCompletion: true
@@ -1250,7 +1162,6 @@ showDialogEvent.AddChainEvent(
 ```
 
 </TabItem> <TabItem value="t" label="GameEvent&lt;T&gt;">
-
 ```csharp
 ChainHandle AddChainEvent(
     GameEventBase targetEvent,
@@ -1263,24 +1174,23 @@ ChainHandle AddChainEvent(
 );
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name                  | Type              | Description                                     |
-| --------------------- | ----------------- | ----------------------------------------------- |
-| `targetEvent`         | `GameEventBase`   | The event to execute in the chain               |
-| `delay`               | `float`           | Delay before executing this node (default: 0)   |
-| `duration`            | `float`           | Delay after executing this node (default: 0)    |
-| `condition`           | `Func<T, bool>`   | Optional predicate receiving the argument       |
-| `passArgument`        | `bool`            | Whether to pass data to target (default: true)  |
-| `argumentTransformer` | `Func<T, object>` | Optional transformation function                |
-| `waitForCompletion`   | `bool`            | Wait one frame after execution (default: false) |
+| 名前                  | 型                | 説明                                         |
+| --------------------- | ----------------- | -------------------------------------------- |
+| `targetEvent`         | `GameEventBase`   | チェーンで実行するイベント                    |
+| `delay`               | `float`           | このノードを実行する前の遅延(デフォルト: 0)   |
+| `duration`            | `float`           | このノードを実行した後の遅延(デフォルト: 0)   |
+| `condition`           | `Func<T, bool>`   | 引数を受け取るオプションの述語                |
+| `passArgument`        | `bool`            | ターゲットにデータを渡すかどうか(デフォルト: true) |
+| `argumentTransformer` | `Func<T, object>` | オプションの変換関数                          |
+| `waitForCompletion`   | `bool`            | 実行後に1フレーム待機(デフォルト: false)      |
 
-**Returns:** `ChainHandle` - Unique identifier for safe removal
+**戻り値:** `ChainHandle` - 安全な削除のための一意の識別子
 
-**Example:**
-
+**使用例:**
 ```csharp
-// Chain with argument passing
+// 引数を渡すチェーン
 GameEvent<int> damageEvent;
 GameEvent<int> applyDamageEvent;
 GameEvent<int> updateHealthBarEvent;
@@ -1288,7 +1198,7 @@ GameEvent<int> updateHealthBarEvent;
 damageEvent.AddChainEvent(applyDamageEvent, passArgument: true);
 applyDamageEvent.AddChainEvent(updateHealthBarEvent, passArgument: true);
 
-// Chain with transformation
+// 変換を伴うチェーン
 GameEvent<int> damageEvent;
 GameEvent<float> healthPercentEvent;
 
@@ -1299,7 +1209,7 @@ damageEvent.AddChainEvent(
         (float)(currentHealth - damage) / maxHealth
 );
 
-// Conditional chain with argument check
+// 引数チェック付き条件付きチェーン
 GameEvent<int> damageEvent;
 GameEvent deathEvent;
 
@@ -1311,7 +1221,6 @@ damageEvent.AddChainEvent(
 ```
 
 </TabItem> <TabItem value="sender" label="GameEvent&lt;TSender, TArgs&gt;">
-
 ```csharp
 ChainHandle AddChainEvent(
     GameEventBase targetEvent,
@@ -1324,24 +1233,23 @@ ChainHandle AddChainEvent(
 );
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name                  | Type                           | Description                                     |
-| --------------------- | ------------------------------ | ----------------------------------------------- |
-| `targetEvent`         | `GameEventBase`                | The event to execute in the chain               |
-| `delay`               | `float`                        | Delay before executing this node (default: 0)   |
-| `duration`            | `float`                        | Delay after executing this node (default: 0)    |
-| `condition`           | `Func<TSender, TArgs, bool>`   | Optional predicate receiving sender and args    |
-| `passArgument`        | `bool`                         | Whether to pass data to target (default: true)  |
-| `argumentTransformer` | `Func<TSender, TArgs, object>` | Optional transformation function                |
-| `waitForCompletion`   | `bool`                         | Wait one frame after execution (default: false) |
+| 名前                  | 型                             | 説明                                         |
+| --------------------- | ------------------------------ | -------------------------------------------- |
+| `targetEvent`         | `GameEventBase`                | チェーンで実行するイベント                    |
+| `delay`               | `float`                        | このノードを実行する前の遅延(デフォルト: 0)   |
+| `duration`            | `float`                        | このノードを実行した後の遅延(デフォルト: 0)   |
+| `condition`           | `Func<TSender, TArgs, bool>`   | 送信者と引数を受け取るオプションの述語        |
+| `passArgument`        | `bool`                         | ターゲットにデータを渡すかどうか(デフォルト: true) |
+| `argumentTransformer` | `Func<TSender, TArgs, object>` | オプションの変換関数                          |
+| `waitForCompletion`   | `bool`                         | 実行後に1フレーム待機(デフォルト: false)      |
 
-**Returns:** `ChainHandle` - Unique identifier for safe removal
+**戻り値:** `ChainHandle` - 安全な削除のための一意の識別子
 
-**Example:**
-
+**使用例:**
 ```csharp
-// Attack sequence chain
+// 攻撃シーケンスチェーン
 GameEvent<GameObject, AttackData> attackStartEvent;
 GameEvent<GameObject, AttackData> playAnimationEvent;
 GameEvent<GameObject, AttackData> dealDamageEvent;
@@ -1349,7 +1257,7 @@ GameEvent<GameObject, AttackData> dealDamageEvent;
 attackStartEvent.AddChainEvent(playAnimationEvent, delay: 0f);
 playAnimationEvent.AddChainEvent(dealDamageEvent, delay: 0.5f);
 
-// Extract damage value
+// ダメージ値を抽出
 GameEvent<GameObject, AttackData> dealDamageEvent;
 GameEvent<int> showDamageNumberEvent;
 
@@ -1359,7 +1267,7 @@ dealDamageEvent.AddChainEvent(
     argumentTransformer: (attacker, data) => data.damage
 );
 
-// Victory chain with condition
+// 条件付き勝利チェーン
 GameEvent<GameObject, AttackData> attackEndEvent;
 GameEvent<GameObject, VictoryData> victoryEvent;
 
@@ -1373,71 +1281,67 @@ attackEndEvent.AddChainEvent(
 
 </TabItem> </Tabs>
 
-:::warning Sequential Execution 
+:::warning 順次実行
 
-Chains are **sequential** (A → B → C). If any node's condition returns `false` or throws an exception, the entire chain **stops** at that point. 
+チェーンは**順次**(A → B → C)実行されます。いずれかのノードの条件が`false`を返すか例外をスローした場合、チェーン全体がその時点で**停止**します。
 
 :::
 
-:::tip Triggers vs Chains
+:::tip トリガー vs チェーン
 
-- **Triggers** = Parallel (A → [B, C, D]) - all execute independently
-- **Chains** = Sequential (A → B → C) - strict order, stops on failure 
+- **トリガー** = 並列(A → [B, C, D]) - すべて独立して実行
+- **チェーン** = 順次(A → B → C) - 厳密な順序、失敗時に停止
 
 :::
 
 </details>
 
 <details>
-<summary>RemoveChainEvent() (by Handle)</summary>
+<summary>RemoveChainEvent() (ハンドルによる)</summary>
 
-Safely removes a specific chain node using its unique handle.
-
+一意のハンドルを使用して特定のチェーンノードを安全に削除します。
 ```csharp
 void RemoveChainEvent(ChainHandle handle);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name     | Type          | Description                              |
-| -------- | ------------- | ---------------------------------------- |
-| `handle` | `ChainHandle` | The handle returned by `AddChainEvent()` |
+| 名前     | 型            | 説明                                  |
+| -------- | ------------- | ------------------------------------- |
+| `handle` | `ChainHandle` | `AddChainEvent()`から返されたハンドル |
 
-**Example:**
-
+**使用例:**
 ```csharp
 ChainHandle handle = eventA.AddChainEvent(eventB);
 
-// Remove specific chain node
+// 特定のチェーンノードを削除
 eventA.RemoveChainEvent(handle);
 ```
 
 </details>
 
 <details>
-<summary>RemoveChainEvent() (by Target)</summary>
+<summary>RemoveChainEvent() (ターゲットによる)</summary>
 
-Removes **all** chain nodes pointing to a specific target event.
-
+特定のターゲットイベントを指すチェーンノードを**すべて**削除します。
 ```csharp
 void RemoveChainEvent(GameEventBase targetEvent);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name          | Type            | Description                    |
-| ------------- | --------------- | ------------------------------ |
-| `targetEvent` | `GameEventBase` | The target event to disconnect |
+| 名前          | 型              | 説明                        |
+| ------------- | --------------- | --------------------------- |
+| `targetEvent` | `GameEventBase` | 切断するターゲットイベント   |
 
-**Example:**
-
+**使用例:**
 ```csharp
 eventA.RemoveChainEvent(eventB);
 ```
 
-:::warning Broad Impact 
+:::warning 広範囲への影響
 
-This removes **ALL** chain nodes targeting this event. Use `RemoveChainEvent(handle)` for precision. 
+これは、このイベントをターゲットとする**すべての**チェーンノードを削除します。正確性のために`RemoveChainEvent(handle)`を使用してください。
 
 :::
 
@@ -1446,60 +1350,56 @@ This removes **ALL** chain nodes targeting this event. Use `RemoveChainEvent(han
 <details>
 <summary>RemoveAllChainEvents()</summary>
 
-Removes all chain events from this event.
-
+このイベントからすべてのチェーンイベントを削除します。
 ```csharp
 void RemoveAllChainEvents();
 ```
 
-**Example:**
-
+**使用例:**
 ```csharp
 myEvent.RemoveAllChainEvents();
 ```
 
 </details>
 
-## 🔧 Configuration & Utility
+## 🔧 設定とユーティリティ
 
 <details>
 <summary>SetInspectorListenersActive()</summary>
 
-Controls whether Inspector-configured listeners should execute when the event is raised.
-
+イベントが発行されたときにInspectorで設定されたリスナーを実行するかどうかを制御します。
 ```csharp
 void SetInspectorListenersActive(bool isActive);
 ```
 
-**Parameters:**
+**パラメータ:**
 
-| Name       | Type   | Description                                                |
-| ---------- | ------ | ---------------------------------------------------------- |
-| `isActive` | `bool` | `true` to enable Inspector listeners, `false` to mute them |
+| 名前       | 型     | 説明                                                      |
+| ---------- | ------ | --------------------------------------------------------- |
+| `isActive` | `bool` | Inspectorリスナーを有効にする場合は`true`、ミュートする場合は`false` |
 
-**Example:**
-
+**使用例:**
 ```csharp
-// Mute Inspector-configured UI/Audio effects
+// Inspectorで設定されたUI/オーディオエフェクトをミュート
 damageEvent.SetInspectorListenersActive(false);
 
-// Event will only trigger code-registered listeners
+// イベントはコードで登録されたリスナーのみをトリガー
 damageEvent.Raise(10);
 
-// Re-enable Inspector listeners
+// Inspectorリスナーを再度有効化
 damageEvent.SetInspectorListenersActive(true);
 ```
 
-**Use Cases:**
+**ユースケース:**
 
-- Temporarily silence visual/audio effects during cutscenes
-- Run backend calculations without triggering UI updates
-- Disable scene-specific behavior during loading screens
-- Simulate game logic in test/debug mode
+- カットシーン中に一時的にビジュアル/オーディオエフェクトを無音化
+- UI更新をトリガーせずにバックエンド計算を実行
+- ロード画面中にシーン固有の動作を無効化
+- テスト/デバッグモードでゲームロジックをシミュレート
 
-:::info Scope 
+:::info 適用範囲
 
-This setting only affects listeners configured in the **Unity Inspector** via GameEventManager. Listeners registered via `AddListener()` in code are **not affected** and will always execute. 
+この設定は、GameEventManagerを介してUnity **Inspector**で設定されたリスナーにのみ影響します。コードで`AddListener()`を介して登録されたリスナーは**影響を受けず**、常に実行されます。
 
 :::
 
@@ -1507,18 +1407,18 @@ This setting only affects listeners configured in the **Unity Inspector** via Ga
 
 ------
 
-## 📊 Quick Reference Table
+## 📊 クイックリファレンステーブル
 
-### Method Categories
+### メソッドカテゴリ
 
-| Category                  | Methods                                                      | Purpose                                     |
-| ------------------------- | ------------------------------------------------------------ | ------------------------------------------- |
-| **Execution**             | `Raise()`, `Cancel()`                                        | Trigger events and stop scheduled execution |
-| **Scheduling**            | `RaiseDelayed()`, `RaiseRepeating()`, `CancelDelayed()`, `CancelRepeating()` | Time-based event execution                  |
-| **Basic Listeners**       | `AddListener()`, `RemoveListener()`, `RemoveAllListeners()`  | Standard callback registration              |
-| **Priority Listeners**    | `AddPriorityListener()`, `RemovePriorityListener()`          | Ordered callback execution                  |
-| **Conditional Listeners** | `AddConditionalListener()`, `RemoveConditionalListener()`    | Gated callback execution                    |
-| **Persistent Listeners**  | `AddPersistentListener()`, `RemovePersistentListener()`      | Scene-independent callbacks                 |
-| **Trigger Events**        | `AddTriggerEvent()`, `RemoveTriggerEvent()`, `RemoveAllTriggerEvents()` | Parallel event chains                       |
-| **Chain Events**          | `AddChainEvent()`, `RemoveChainEvent()`, `RemoveAllChainEvents()` | Sequential event chains                     |
-| **Configuration**         | `SetInspectorListenersActive()`                              | Runtime behavior control                    |
+| カテゴリ                | メソッド                                                     | 目的                                     |
+| ----------------------- | ------------------------------------------------------------ | ---------------------------------------- |
+| **実行**                | `Raise()`, `Cancel()`                                        | イベントのトリガーとスケジュール実行の停止 |
+| **スケジューリング**    | `RaiseDelayed()`, `RaiseRepeating()`, `CancelDelayed()`, `CancelRepeating()` | 時間ベースのイベント実行                  |
+| **基本リスナー**        | `AddListener()`, `RemoveListener()`, `RemoveAllListeners()`  | 標準的なコールバック登録                  |
+| **優先度リスナー**      | `AddPriorityListener()`, `RemovePriorityListener()`          | 順序付きコールバック実行                  |
+| **条件付きリスナー**    | `AddConditionalListener()`, `RemoveConditionalListener()`    | ゲート付きコールバック実行                |
+| **永続的リスナー**      | `AddPersistentListener()`, `RemovePersistentListener()`      | シーン非依存のコールバック                |
+| **トリガーイベント**    | `AddTriggerEvent()`, `RemoveTriggerEvent()`, `RemoveAllTriggerEvents()` | 並列イベントチェーン                      |
+| **チェーンイベント**    | `AddChainEvent()`, `RemoveChainEvent()`, `RemoveAllChainEvents()` | 順次イベントチェーン                      |
+| **設定**                | `SetInspectorListenersActive()`                              | ランタイム動作制御                        |

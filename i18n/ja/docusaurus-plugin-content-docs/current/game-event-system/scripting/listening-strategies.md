@@ -1,35 +1,35 @@
 ﻿---
-sidebar_label: 'Listening Strategies'
+sidebar_label: 'リスニング（受信）戦略'
 sidebar_position: 2
 ---
 
-# Listening Strategies
+# リスニング（受信）戦略 (Listening Strategies)
 
-While raising events sends the signal, **Listening** is where the actual game logic happens.
+イベントの発行が「信号の送信」であるのに対し、**リスニング（受信）**こそが実際のゲームロジックが実行される場所です。
 
-The Game Event System provides a tiered listening architecture, allowing you to control not just *what* responds, but *when* and *under what conditions* it responds.
-
----
-
-## 🚦 The Execution Pipeline
-
-When an event is raised, listeners are executed in a strict, deterministic order. Understanding this pipeline is crucial for managing dependencies (e.g., ensuring Data updates before UI).
-
-1.  **Basic Listeners** (Code)
-2.  **Inspector Bindings** (Scene Visuals)
-3.  **Priority Listeners** (Sorted Code)
-4.  **Conditional Listeners** (Filtered Code)
-5.  **Persistent Listeners** (Global/Cross-Scene)
-6.  **Flow Graph** (Triggers & Chains)
+Game Event System は階層化されたリスニングアーキテクチャを提供しており、「何が」反応するかだけでなく、「いつ」「どのような条件下で」反応するかを制御することができます。
 
 ---
 
-## 1. Basic Listeners (Standard)
+## 🚦 実行パイプライン
 
-This is the most common way to bind logic. It behaves exactly like a standard C# Event or `UnityEvent`.
+イベントが発行されると、リスナーは厳密で確定的（デターミニスティック）な順序で実行されます。このパイプラインを理解することは、依存関係の管理（例：UI の前にデータを確実に更新するなど）において非常に重要です。
 
-### Usage
-Use this for standard, non-critical gameplay logic where execution order doesn't matter relative to other listeners.
+1.  **基本リスナー** (コードによる実装)
+2.  **インスペクターバインディング** (シーン上の視覚的な設定)
+3.  **優先度付きリスナー** (ソートされたコード)
+4.  **条件付きリスナー** (フィルタリングされたコード)
+5.  **常駐リスナー** (グローバル/シーンを跨ぐ設定)
+6.  **フローグラフ** (トリガーとチェーン)
+
+---
+
+## 1. 基本リスナー (Standard)
+
+これはロジックをバインドする最も一般的な方法です。標準的な C# イベントや `UnityEvent` と全く同じように動作します。
+
+### 使用例
+他のリスナーとの実行順序を気にする必要がない、標準的で非クリティカルなゲームプレイロジックに使用します。
 
 ```csharp
 public class PlayerHealth : MonoBehaviour
@@ -38,58 +38,58 @@ public class PlayerHealth : MonoBehaviour
 
     private void OnEnable()
     {
-        // Subscribe
+        // 購読 (Subscribe)
         onTakeDamage.AddListener(OnDamageReceived);
     }
 
     private void OnDisable()
     {
-        // Unsubscribe (Critical to prevent memory leaks!)
+        // 購読解除 (Unsubscribe) - メモリリークを防ぐために不可欠です！
         onTakeDamage.RemoveListener(OnDamageReceived);
     }
 
     private void OnDamageReceived(int amount)
     {
-        Debug.Log($"Ouch! Took {amount} damage.");
+        Debug.Log($"痛い！ {amount} ダメージを受けました。");
     }
 }
 ```
 
-:::warning Anonymous Functions (Lambdas)
-Avoid using Lambda expressions (e.g., AddListener(() => DoThing())) unless you are sure you don't need to unsubscribe. You **cannot** remove a specific lambda listener later because the anonymous instance is lost.
+:::warning 匿名関数 (ラムダ式)
+購読解除の必要がないことが確実でない限り、ラムダ式（例：AddListener(() => DoThing())）の使用は避けてください。匿名インスタンスの参照が失われるため、後から特定のラムダリスナーを解除することは**できません**。
 :::
 
 ------
 
-## 2. Priority Listeners (Sorted)
+## 2. 優先度付きリスナー (Sorted)
 
-When multiple scripts listen to the same event, the execution order is normally undefined. **Priority Listeners** solve this by allowing you to inject an integer weight.
+複数のスクリプトが同じイベントをリッスンしている場合、通常、実行順序は不定です。**優先度付きリスナー**は、整数の重み（Weight）を指定することでこの問題を解決します。
 
-### Execution Rule
+### 実行ルール
 
-- **Higher Number** = Executes **Earlier**.
-- **Lower Number** = Executes **Later**.
+- **数値が高い** = **早く**実行される。
+- **数値が低い** = **遅く**実行される。
 
-### Usage
+### 使用例
 
-Perfect for separating **Data Logic** from **View Logic**.
+**データロジック**と**表示（View）ロジック**を分離するのに最適です。
 
 ```csharp
-// 1. Data System (High Priority)
-// Must run first to calculate the new health value.
+// 1. データシステム (高優先度)
+// 新しい体力値を計算するために、最初に実行される必要があります。
 onPlayerHit.AddPriorityListener(CalculateHealth, 100);
 
-// 2. UI System (Low Priority)
-// Runs later. Safe to read the now-updated health value.
+// 2. UI システム (低優先度)
+// 後で実行されます。更新済みの体力値を安全に読み取ることができます。
 onPlayerHit.AddPriorityListener(UpdateHealthBar, 0);
 ```
 
-### Sender & Arguments Support
+### Sender と引数のサポート
 
-Priority listeners fully support generics and sender payloads.
+優先度付きリスナーは、ジェネリック型および Sender ペイロードを完全にサポートしています。
 
 ```csharp
-// Listen with priority, receiving both Sender and Args
+// 優先度を指定してリッスンし、Sender と Args の両方を受け取る
 onCombatEvent.AddPriorityListener(OnCombatLog, 10);
 
 void OnCombatLog(GameObject sender, DamageInfo info) { ... }
@@ -97,29 +97,29 @@ void OnCombatLog(GameObject sender, DamageInfo info) { ... }
 
 ------
 
-## 3. Conditional Listeners (Predicates)
+## 3. 条件付きリスナー (Predicates)
 
-Sometimes you want to listen to an event, but only execute logic if specific criteria are met. Instead of writing if statements inside every callback, you can register a **Predicate**.
+イベントをリッスンしたいが、特定の基準を満たした場合のみロジックを実行したい場合があります。すべてのコールバック内に if 文を書く代わりに、**述語（Predicate）**を登録できます。
 
-### Logic Flow
+### ロジックフロー
 
-1. Event Raised.
-2. System calls your **Condition Function**.
-3. If returns true ➔ Execute Listener.
-4. If returns false ➔ Skip Listener.
+1. イベントが発行される。
+2. システムが登録された**条件関数（Condition Function）**を呼び出す。
+3. true が返された場合 ➔ リスナーを実行。
+4. false が返された場合 ➔ リスナーをスキップ。
 
-### Usage
+### 使用例
 
-Great for filtering noise from high-frequency events.
+高頻度で発生するイベントから不要なノイズをフィルタリングするのに適しています。
 
 ```csharp
-// Only trigger 'Die' logic if health is actually zero
+// 体力が実際に 0 になった時だけ「死亡」ロジックをトリガーする
 onHealthChanged.AddConditionalListener(
     OnDeath, 
     condition: (currentHealth) => currentHealth <= 0
 );
 
-// Only respond if the sender is the Player
+// 送信元（Sender）が Player の場合のみ反応する
 onInteraction.AddConditionalListener(
     OpenMenu, 
     condition: (sender, args) => sender.CompareTag("Player")
@@ -128,13 +128,13 @@ onInteraction.AddConditionalListener(
 
 ------
 
-## 4. Persistent Listeners (Global)
+## 4. 常駐リスナー (Global)
 
-Standard listeners are destroyed when their GameObject is destroyed (e.g., loading a new scene). **Persistent Listeners** are registered to a global manager (DontDestroyOnLoad) and survive scene transitions.
+標準的なリスナーは、その GameObject が破棄される（新しいシーンがロードされるなど）と破棄されます。**常駐リスナー**はグローバルマネージャー（DontDestroyOnLoad）に登録され、シーンの遷移を跨いで生存します。
 
-### Usage
+### 使用例
 
-Ideal for Global Managers like **AudioManagers**, **Analytics**, or **SaveSystems** that persist throughout the game.
+ゲーム全体を通して存在する **AudioManager**、**Analytics**、**SaveSystem** などのグローバルマネージャーに最適です。
 
 ```csharp
 public class AudioManager : MonoBehaviour
@@ -145,11 +145,11 @@ public class AudioManager : MonoBehaviour
     {
         DontDestroyOnLoad(this);
         
-        // This listener will keep working even after scene changes
+        // このリスナーはシーンが変わった後も動作し続けます
         onLevelStart.AddPersistentListener(PlayLevelMusic);
     }
     
-    // Note: You must still manually remove it if this object is actually destroyed
+    // 注意: このオブジェクト自体が実際に破棄される場合は、手動で解除する必要があります
     void OnDestroy()
     {
         onLevelStart.RemovePersistentListener(PlayLevelMusic);
@@ -157,77 +157,77 @@ public class AudioManager : MonoBehaviour
 }
 ```
 
-:::danger Target Safety
-If the target object of a Persistent Listener is destroyed (e.g., a normal enemy), the system will detect the null reference and skip execution, printing a warning. Always unregister persistent listeners in OnDestroy.
+:::danger ターゲットの安全性
+常駐リスナーのターゲットオブジェクト（通常の敵など）が破棄された場合、システムは null 参照を検出し、実行をスキップして警告を表示します。常駐リスナーは必ず OnDestroy で登録を解除してください。
 :::
 
 ------
 
-## 🧹 Safety & Maintenance
+## 🧹 安全性とメンテナンス
 
-### Removing Listeners
+### リスナーの削除
 
-Always pair your Add calls with Remove calls. The API provides symmetrical removal methods for every listener type:
+Add 呼び出しは、必ず Remove 呼び出しとペアにしてください。API は、すべてのリスナータイプに対して対称的な削除メソッドを提供しています。
 
 - RemoveListener(action)
 - RemovePriorityListener(action)
 - RemoveConditionalListener(action)
 - RemovePersistentListener(action)
 
-### The Nuclear Option (RemoveAllListeners)
+### 最終手段 (RemoveAllListeners)
 
-In rare cases (e.g., pooling reset or game shutdown), you might want to wipe an event clean.
+稀なケース（プーリングのリセットやゲームの終了時など）において、イベントを完全にクリアしたい場合に使用します。
 
 ```csharp
-// Clears Basic, Priority, and Conditional listeners.
-// DOES NOT clear Persistent listeners (for safety).
+// 基本、優先度付き、および条件付きリスナーをクリアします。
+// 安全のため、常駐リスナー（Persistent）はクリアされません。
 myEvent.RemoveAllListeners();
 ```
 
 ------
 
-## 🧩 Summary: Which strategy to use?
+## 🧩 まとめ：どの戦略を使うべきか？
 
-| Requirement                                | Strategy        | Why?                                              |
+| 要件 | 戦略 | 理由 |
 | ------------------------------------------ | --------------- | ------------------------------------------------- |
-| **"Just tell me when it happens."**        | **Basic**       | Lowest overhead, standard behavior.               |
-| **"I need to run BEFORE the UI updates."** | **Priority**    | Guarantees execution order (High priority first). |
-| **"Only run if Health < 0."**              | **Conditional** | clean code, filters logic at the source.          |
-| **"Keep listening in the next scene."**    | **Persistent**  | Survives scene loading/unloading.                 |
+| **「起きたことだけ知りたい。」** | **基本 (Basic)** | 最小のオーバーヘッド、標準的な挙動。 |
+| **「UI が更新される『前』に実行したい。」** | **優先度付き (Priority)** | 実行順序を保証（高優先度が先）。 |
+| **「体力が 0 未満の時だけ実行したい。」** | **条件付き (Conditional)** | クリーンなコード。ソース元でロジックをフィルタリング。 |
+| **「次のシーンでも受信し続けたい。」** | **常駐 (Persistent)** | シーンのロード/アンロードを跨いで生存。 |
 
 ---
 
-## 📜 API Summary
+## 📜 API サマリー
 
-| Method Signature                                             | Returns | Description                                                  |
+| メソッドシグネチャ | 戻り値 | 説明 |
 | :----------------------------------------------------------- | :------ | :----------------------------------------------------------- |
-| **Basic Listeners**                                          |         |                                                              |
-| `AddListener(UnityAction call)`                              | `void`  | Adds a basic void listener.                                  |
-| `AddListener(UnityAction<T> call)`                           | `void`  | Adds a basic listener with one argument.                     |
-| `AddListener(UnityAction<TSender, TArgs> call)`              | `void`  | Adds a basic listener with sender and argument.              |
-| `RemoveListener(UnityAction call)`                           | `void`  | Removes a basic void listener.                               |
-| `RemoveListener(UnityAction<T> call)`                        | `void`  | Removes a basic listener with one argument.                  |
-| `RemoveListener(UnityAction<TSender, TArgs> call)`           | `void`  | Removes a basic listener with sender and argument.           |
-| **Priority Listeners**                                       |         |                                                              |
-| `AddPriorityListener(UnityAction call, int priority)`        | `void`  | Adds a void listener with execution priority.                |
-| `AddPriorityListener(UnityAction<T> call, int priority)`     | `void`  | Adds a typed listener with execution priority.               |
-| `AddPriorityListener(UnityAction<TSender, TArgs> call, int priority)` | `void`  | Adds a sender listener with execution priority.              |
-| `RemovePriorityListener(UnityAction call)`                   | `void`  | Removes a void priority listener.                            |
-| `RemovePriorityListener(UnityAction<T> call)`                | `void`  | Removes a typed priority listener.                           |
-| `RemovePriorityListener(UnityAction<TSender, TArgs> call)`   | `void`  | Removes a sender priority listener.                          |
-| **Conditional Listeners**                                    |         |                                                              |
-| `AddConditionalListener(UnityAction call, Func<bool> condition, int priority)` | `void`  | Adds a void listener guarded by a condition.                 |
-| `AddConditionalListener(UnityAction<T> call, Func<T, bool> condition, int priority)` | `void`  | Adds a typed listener guarded by a condition.                |
-| `AddConditionalListener(UnityAction<TSender, TArgs> call, Func<TSender, TArgs, bool> condition, int priority)` | `void`  | Adds a sender listener guarded by a condition.               |
-| `RemoveConditionalListener(UnityAction call)`                | `void`  | Removes a void conditional listener.                         |
-| `RemoveConditionalListener(UnityAction<T> call)`             | `void`  | Removes a typed conditional listener.                        |
-| `RemoveConditionalListener(UnityAction<TSender, TArgs> call)` | `void`  | Removes a sender conditional listener.                       |
-| **Persistent Listeners**                                     |         |                                                              |
-| `AddPersistentListener(UnityAction call, int priority)`      | `void`  | Adds a global void listener (DontDestroyOnLoad).             |
-| `AddPersistentListener(UnityAction<T> call, int priority)`   | `void`  | Adds a global typed listener.                                |
-| `AddPersistentListener(UnityAction<TSender, TArgs> call, int priority)` | `void`  | Adds a global sender listener.                               |
-| `RemovePersistentListener(UnityAction call)`                 | `void`  | Removes a global void listener.                              |
-| `RemovePersistentListener(UnityAction<T> call)`              | `void`  | Removes a global typed listener.                             |
-| `RemovePersistentListener(UnityAction<TSender, TArgs> call)` | `void`  | Removes a global sender listener.                            |
-| **Global Cleanup**                                           |         |                                                              |
-| `RemoveAllListeners()`                                       | `void`  | Clears **Basic**, **Priority**, and **Conditional** listeners. <br/>*(Note: Does NOT clear Persistent listeners for safety).* |
+| **基本リスナー** | | |
+| `AddListener(UnityAction call)` | `void` | 基本的な void リスナーを追加します。 |
+| `AddListener(UnityAction<T> call)` | `void` | 引数を 1 つ持つ基本的なリスナーを追加します。 |
+| `AddListener(UnityAction<TSender, TArgs> call)` | `void` | Sender と引数を持つ基本的なリスナーを追加します。 |
+| `RemoveListener(UnityAction call)` | `void` | 基本的な void リスナーを削除します。 |
+| `RemoveListener(UnityAction<T> call)` | `void` | 引数を 1 つ持つ基本的なリスナーを削除します。 |
+| `RemoveListener(UnityAction<TSender, TArgs> call)` | `void` | Sender と引数を持つ基本的なリスナーを削除します。 |
+| **優先度付きリスナー** | | |
+| `AddPriorityListener(UnityAction call, int priority)` | `void` | 実行優先度を指定して void リスナーを追加します。 |
+| `AddPriorityListener(UnityAction<T> call, int priority)` | `void` | 実行優先度を指定して型付きリスナーを追加します。 |
+| `AddPriorityListener(UnityAction<TSender, TArgs> call, int priority)` | `void` | 実行優先度を指定して Sender リスナーを追加します。 |
+| `RemovePriorityListener(UnityAction call)` | `void` | void の優先度付きリスナーを削除します。 |
+| `RemovePriorityListener(UnityAction<T> call)` | `void` | 型付きの優先度付きリスナーを削除します。 |
+| `RemovePriorityListener(UnityAction<TSender, TArgs> call)` | `void` | Sender の優先度付きリスナーを削除します。 |
+| **条件付きリスナー** | | |
+| `AddConditionalListener(UnityAction call, Func<bool> condition, int priority)` | `void` | 条件によって保護された void リスナーを追加します。 |
+| `AddConditionalListener(UnityAction<T> call, Func<T, bool> condition, int priority)` | `void` | 条件によって保護された型付きリスナーを追加します。 |
+| `AddConditionalListener(UnityAction<TSender, TArgs> call, Func<TSender, TArgs, bool> condition, int priority)` | `void` | 条件によって保護された Sender リスナーを追加します。 |
+| `RemoveConditionalListener(UnityAction call)` | `void` | void の条件付きリスナーを削除します。 |
+| `RemoveConditionalListener(UnityAction<T> call)` | `void` | 型付きの条件付きリスナーを削除します。 |
+| `RemoveConditionalListener(UnityAction<TSender, TArgs> call)` | `void` | Sender の条件付きリスナーを削除します。 |
+| **常駐リスナー** | | |
+| `AddPersistentListener(UnityAction call, int priority)` | `void` | グローバルな void リスナーを追加します (DontDestroyOnLoad)。 |
+| `AddPersistentListener(UnityAction<T> call, int priority)` | `void` | グローバルな型付きリスナーを追加します。 |
+| `AddPersistentListener(UnityAction<TSender, TArgs> call, int priority)` | `void` | グローバルな Sender リスナーを追加します。 |
+| `RemovePersistentListener(UnityAction call)` | `void` | グローバルな void リスナーを削除します。 |
+| `RemovePersistentListener(UnityAction<T> call)` | `void` | グローバルな型付きリスナーを削除します。 |
+| `RemovePersistentListener(UnityAction<TSender, TArgs> call)` | `void` | グローバルな Sender リスナーを削除します。 |
+| **一括クリーンアップ** | | |
+| `RemoveAllListeners()` | `void` | **基本**、**優先度付き**、および**条件付き**リスナーをすべてクリアします。<br/>*(注意: 安全のため常駐リスナーはクリアされません)。* |

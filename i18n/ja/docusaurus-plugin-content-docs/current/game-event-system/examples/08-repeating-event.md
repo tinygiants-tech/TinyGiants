@@ -1,403 +1,352 @@
 ﻿---
-sidebar_label: '08 Repeating Event'
+sidebar_label: '08 リピートイベント'
 sidebar_position: 9
 ---
 
 import VideoGif from '@site/src/components/Video/VideoGif';
 
-# 08 Repeating Event: Automated Loops
+# 08 リピートイベント：自動ループ
 
 <!-- <VideoGif src="/video/game-event-system/08-repeating-event.mp4" /> -->
 
-## 📋 Overview
+## 📋 概要
 
-Normally, creating a repeating pulse (like radar scans or poison damage) requires writing timer loops with `InvokeRepeating` or coroutines in C#. The GameEvent System moves this logic into the **Event Asset** itself—no code loops needed. Configure once in the Editor, then `Raise()` automatically handles the repetition.
+通常、レーダーのスキャンや毒ダメージのような周期的なパルスを作成するには、C# で `InvokeRepeating` やコルーチンを使用してタイマーループを書く必要があります。GameEvent System では、このロジックを**イベントアセット**自体に移行できるため、コードによるループは不要です。エディタで一度設定すれば、`Raise()` を呼び出すだけで自動的にリピートが処理されます。
 
-:::tip 💡 What You'll Learn
-- How to configure repeat intervals and counts in the Behavior Window
-- The difference between finite loops (N times) and infinite loops (forever)
-- How to cancel infinite loops with `.Cancel()`
-- When to use repeating events vs manual triggers
+:::tip 💡 学べること
+- Behavior Window でリピート間隔と回数を設定する方法
+- 有限ループ（N回）と無限ループ（無期限）の違い
+- `.Cancel()` を使用して無限ループを停止する方法
+- リピートイベントと手動トリガーの使い分け
 
 :::
 
 ---
 
-## 🎬 Demo Scene
+## 🎬 デモシーン
 ```
 Assets/TinyGiants/GameEventSystem/Demo/08_RepeatingEvent/08_RepeatingEvent.unity
 ```
 
-### Scene Composition
+### シーン構成
 
-**Visual Elements:**
-- 📡 **SonarBeacon** - Central tower beacon
-  - Black cylindrical tower with grey base
-  - **RotatingCore** - Spinning element at the top (rotation speed indicates active mode)
-  - Emits expanding cyan shockwave rings when pulsing
+**視覚的要素:**
+- 📡 **SonarBeacon** - 中央のタワービーコン
+  - グレーのベースを持つ黒い円筒形のタワー
+  - **RotatingCore** - 上部の回転エレメント（回転速度が現在のモードを示します）
+  - パルス発生時に拡大するシアンの衝撃波リングを放出
   
-- 🎯 **ScanTargets** - Four floating green cubes scattered around the beacon
-  - Display "?" text by default
-  - Change to red material and show "DETECTED" when hit by shockwave
-  - Reset to green after brief highlight
+- 🎯 **ScanTargets** - ビーコンの周囲に配置された4つの浮遊する緑のキューブ
+  - デフォルトでは「?」テキストを表示
+  - 衝撃波が当たると赤色のマテリアルに変化し、「DETECTED（検出）」と表示
+  - 短時間のハイライト後に緑色にリセット
 
-- 🔵 **Cyan Ring** - Large circular boundary line
-  - Indicates maximum scan range (40 units radius)
-  - Visual guide for pulse expansion area
+- 🔵 **Cyan Ring** - 大きな円形の境界線
+  - 最大スキャン範囲（半径40ユニット）を表示
+  - パルスが拡大する範囲の視覚的ガイド
 
-**UI Layer (Canvas):**
-- 🎮 **Three Buttons** - Bottom of the screen
-  - "Activate Beacon" (White) → Triggers `RepeatingEventRaiser.ActivateBeacon()`
-  - "Toggle Mode (Finite[5])" → Triggers `RepeatingEventRaiser.ToggleMode()`
-    - Switches between Finite and Infinite modes
-    - Text updates to show current mode
-  - "StopSignal" (White) → Triggers `RepeatingEventRaiser.StopSignal()`
+**UIレイヤー (Canvas):**
+- 🎮 **3つのボタン** - 画面下部
+  - "Activate Beacon" (白) ➔ `RepeatingEventRaiser.ActivateBeacon()` をトリガー
+  - "Toggle Mode (Finite[5])" ➔ `RepeatingEventRaiser.ToggleMode()` をトリガー
+    - 有限モードと無限モードを切り替え
+    - テキストが現在のモードに合わせて更新
+  - "StopSignal" (白) ➔ `RepeatingEventRaiser.StopSignal()` をトリガー
 
-**Game Logic Layer (Demo Scripts):**
-- 📤 **RepeatingEventRaiser** - GameObject with the raiser script
-  - Manages two events: `onFinitePulseEvent` and `onInfinitePulseEvent`
-  - Switches between modes and controls beacon rotation speed
-  - Calls `.Raise()` once—system handles repetition automatically
+**ゲームロジックレイヤー (デモスクリプト):**
+- 📤 **RepeatingEventRaiser** - 発行側スクリプトを持つGameObject
+  - `onFinitePulseEvent` と `onInfinitePulseEvent` の2つのイベントを管理
+  - モードの切り替えとビーコンの回転速度を制御
+  - `.Raise()` を一度呼び出すだけで、システムが自動的にリピートを処理
 
-- 📥 **RepeatingEventReceiver** - GameObject with the receiver script
-  - Listens to pulse events
-  - Spawns shockwave VFX and sonar audio
-  - Runs physics-based scan routine to detect targets
+- 📥 **RepeatingEventReceiver** - 受信側スクリプトを持つGameObject
+  - パルスイベントをリッスン
+  - 衝撃波VFXの生成とソナー音の再生
+  - 物理ベースのスキャンルーチンを実行してターゲットを検出
 
-**Audio-Visual Feedback:**
-- 💫 **ShockwaveVFX** - Expanding cyan particle ring
-- 🔊 **Sonar Ping** - Audio pulse on each scan
-- 🎵 **Toggle/Stop Sounds** - UI feedback
-
----
-
-## 🎮 How to Interact
-
-### The Two Loop Modes
-
-This demo showcases two distinct looping patterns:
-
-**Finite Mode (5 Pulses):**
-- Interval: 1.5 seconds
-- Count: 5 repetitions
-- **Behavior:** Fires 5 times automatically, then stops
-
-**Infinite Mode (Continuous):**
-- Interval: 1.0 second
-- Count: -1 (Infinite Loop)
-- **Behavior:** Fires forever until manually canceled
+**視聴覚フィードバック:**
+- 💫 **ShockwaveVFX** - 拡大するシアンのパーティクルリング
+- 🔊 **Sonar Ping** - 各スキャン時のオーディオパルス
+- 🎵 **Toggle/Stop Sounds** - UI操作のフィードバック音
 
 ---
 
-### Step 1: Enter Play Mode
+## 🎮 操作方法
 
-Press the **Play** button in Unity. The beacon's core rotates slowly (idle state).
+### 2つのループモード
 
-**UI State:**
-- Mode button shows: "Toggle Mode (Finite[5])"
-- Beacon rotation: ~20°/sec (idle speed)
+このデモでは、2つの異なるループパターンを実演しています。
+
+**有限モード (5回パルス):**
+- 間隔: 1.5秒
+- 回数: 5回リピート
+- **挙動:** 自動的に5回実行された後、停止します。
+
+**無限モード (連続):**
+- 間隔: 1.0秒
+- 回数: -1 (無限ループ)
+- **挙動:** 手動でキャンセルされるまで永遠に実行され続けます。
 
 ---
 
-### Step 2: Test Finite Loop Mode
+### ステップ 1: プレイモードに入る
 
-**Current Mode Check:**
-Ensure the button displays **"Toggle Mode (Finite[5])"** (default mode).
+Unity の **Play** ボタンを押します。ビーコンのコアがゆっくり回転しています（待機状態）。
 
-**Click "Activate Beacon":**
+**UIの状態:**
+- モード切替ボタンの表示: "Toggle Mode (Finite[5])"
+- ビーコンの回転速度: 約20°/秒（待機速度）
 
-**What Happens:**
-1. 🎯 Beacon core rotation **speeds up** to 150°/sec
-2. 📡 **First pulse** fires immediately
-   - Cyan shockwave ring spawns and expands outward
-   - Sonar ping sound plays
-   - Green cubes turn red briefly when ring reaches them
-   - Console: `[Raiser] Beacon Activated. Mode: Finite (5x)`
-   - Console: `[Receiver] Pulse #1 emitted.`
+---
 
-3. ⏱️ **1.5 seconds later** - Second pulse
-   - Console: `[Receiver] Pulse #2 emitted.`
-   - Another shockwave expands
-   - Targets flash red again
+### ステップ 2: 有限ループモードをテストする
 
-4. ⏱️ **Pulses 3, 4, 5** continue at 1.5s intervals
-   - Console counts up to `[Receiver] Pulse #5 emitted.`
+**現在のモードを確認:**
+ボタンに **"Toggle Mode (Finite[5])"** と表示されていることを確認します（デフォルト）。
 
-5. ✅ **After 5th pulse** - Auto-stop
-   - Beacon core rotation **slows down** to 20°/sec (idle)
-   - No more pulses fire
-   - System automatically stopped—no manual intervention
+**"Activate Beacon" をクリック:**
 
-**Timeline:**
+**何が起きるか:**
+1. 🎯 ビーコンのコア回転が 150°/秒 に**加速**します。
+2. 📡 **最初のパルス**が即座に発行されます。
+   - シアンの衝撃波リングが生成され、外側へ拡大します。
+   - ソナーのピング音が再生されます。
+   - リングが到達すると、緑のキューブが一時的に赤くなります。
+   - コンソール: `[Raiser] Beacon Activated. Mode: Finite (5x)`
+   - コンソール: `[Receiver] Pulse #1 emitted.`
+
+3. ⏱️ **1.5秒後** - 2回目のパルス
+   - コンソール: `[Receiver] Pulse #2 emitted.`
+   - 再び衝撃波が拡大し、ターゲットが赤く点滅します。
+
+4. ⏱️ **パルス 3, 4, 5** と、1.5秒間隔で続きます。
+   - コンソールに `[Receiver] Pulse #5 emitted.` までカウントされます。
+
+5. ✅ **5回目のパルス後** - 自動停止
+   - ビーコンのコア回転が 20°/秒（待機速度）に**減速**します。
+   - それ以上のパルスは発行されません。
+   - 手動の操作なしで、システムが自動的に停止しました。
+
+**タイムライン:**
 ```
-🖼️ T+0.0s | Initial
-⚡ Pulse #1 (First Trigger)
+🖼️ T+0.0s | 開始
+⚡ パルス #1 (最初のトリガー)
 │
-┆  (Δ 1.5s Loop)
+┆  (Δ 1.5s ループ)
 ▼
-🖼️ T+1.5s | Repeat 1
-⚡ Pulse #2
+🖼️ T+1.5s | リピート 1
+⚡ パルス #2
 │
-┆  (Δ 1.5s Loop)
+┆  (Δ 1.5s ループ)
 ▼
-🖼️ T+3.0s | Repeat 2
-⚡ Pulse #3
+🖼️ T+3.0s | リピート 2
+⚡ パルス #3
 │
-┆  (Δ 1.5s Loop)
+┆  (Δ 1.5s ループ)
 ▼
-🖼️ T+4.5s | Repeat 3
-⚡ Pulse #4
+🖼️ T+4.5s | リピート 3
+⚡ パルス #4
 │
-┆  (Δ 1.5s Loop)
+┆  (Δ 1.5s ループ)
 ▼
-🖼️ T+6.0s | Repeat 4
-⚡ Pulse #5 (Final)
+🖼️ T+6.0s | リピート 4
+⚡ パルス #5 (最終)
 │
-┆  (Δ 1.5s Gap)
+┆  (Δ 1.5s の隙間)
 ▼
-🛑 T+7.5s | Lifecycle End
-🏁 [ Auto-stopped: No Pulse #6 ]
+🛑 T+7.5s | ライフサイクル終了
+🏁 [ 自動停止: パルス #6 は発生しません ]
 ```
 
-**Result:** ✅ Event repeated exactly 5 times, then terminated automatically.
+**結果:** ✅ イベントは正確に5回リピートされ、その後自動的に終了しました。
 
 ---
 
-### Step 3: Test Infinite Loop Mode
+### ステップ 3: 無限ループモードをテストする
 
-**Click "Toggle Mode":**
-- Button text changes to: "Toggle Mode (Infinite)"
-- Toggle sound plays
-- If beacon was active, it stops first
-- Console: Mode switched
+**"Toggle Mode" をクリック:**
+- ボタンテキストが "Toggle Mode (Infinite)" に変わります。
+- 切り替え音が再生されます。
+- ビーコンが動作中だった場合は、一旦停止します。
 
-**Click "Activate Beacon":**
+**"Activate Beacon" をクリック:**
 
-**What Happens:**
-1. 🎯 Beacon core rotation **speeds up** to 300°/sec (faster than finite mode!)
-2. 📡 **Continuous pulses** begin
-   - First pulse fires immediately
-   - Console: `[Raiser] Beacon Activated. Mode: Infinite`
-   - Console: `[Receiver] Pulse #1 emitted.`
+**何が起きるか:**
+1. 🎯 ビーコンのコア回転が 300°/秒 に**加速**します（有限モードより速い！）。
+2. 📡 **連続パルス**が始まります。
+   - 最初のパルスが即座に発行されます。
+   - コンソール: `[Raiser] Beacon Activated. Mode: Infinite`
+   - コンソール: `[Receiver] Pulse #1 emitted.`
 
-3. ⏱️ **Every 1.0 second** - New pulse
-   - Faster interval than finite mode (1.0s vs 1.5s)
-   - Pulses keep coming: #2, #3, #4, #5...
-   - Counter increments indefinitely
+3. ⏱️ **1.0秒ごと** - 新しいパルス
+   - 有限モードよりも短い間隔（1.5秒 ➔ 1.0秒）。
+   - パルスが次々と発生します: #2, #3, #4, #5...
+   - カウンターが際限なく増加します。
 
-4. ⚠️ **Never stops automatically**
-   - Pulse #10, #20, #100...
-   - Will continue until manually canceled
-   - Beacon spins rapidly throughout
+4. ⚠️ **自動的には停止しません**
+   - パルス #10, #20, #100...
+   - 手動でキャンセルされるまで続行されます。
+   - その間、ビーコンは高速で回転し続けます。
 
-**Observation Period:**
-Let it run for ~10 seconds to see it won't auto-stop. Console shows pulse counts increasing without limit.
+**観察:**
+10秒ほど放置して、自動停止しないことを確認してください。コンソールのパルスカウントが増え続けます。
 
 ---
 
-### Step 4: Manual Cancellation
+### ステップ 4: 手動でのキャンセル
 
-**While Infinite Mode is Running:**
+**無限モードが動作している間に:**
 
-**Click "StopSignal":**
+**"StopSignal" をクリック:**
 
-**What Happens:**
-1. 🛑 Pulses **cease immediately**
-   - Current pulse finishes, but no new pulse is scheduled
-   - Beacon core rotation **slows to idle** (20°/sec)
-   - Console: `[Raiser] Signal Interrupted manually.`
+**何が起きるか:**
+1. 🛑 パルスが**即座に停止**します。
+   - 現在のパルス処理は完了しますが、新しいパルスは予約されません。
+   - ビーコンのコア回転が待機速度（20°/秒）に減速します。
+   - コンソール: `[Raiser] Signal Interrupted manually.（信号が手動で中断されました）`
 
-2. 🔄 System state resets
-   - Pulse counter resets to 0
-   - Power down sound plays
-   - Beacon returns to standby mode
+2. 🔄 システム状態のリセット
+   - パルスカウンターが 0 にリセットされます。
+   - パワーダウン音が再生されます。
+   - ビーコンがスタンバイ状態に戻ります。
 
-**Result:** ✅ Infinite loop successfully canceled via `.Cancel()` API.
+**結果:** ✅ `.Cancel()` API を介して無限ループが正常にキャンセルされました。
 
-:::note 🔑 Key Difference
-- **Finite Mode:** Stops automatically after N repetitions
-- **Infinite Mode:** Requires manual `.Cancel()` to stop
+:::note 🔑 決定的な違い
+- **有限モード:** 指定された回数（N回）の実行後に自動停止。
+- **無限モード:** 停止させるには手動で `.Cancel()` を呼ぶ必要がある。
 
 :::
 
 ---
 
-## 🏗️ Scene Architecture
+## 🏗️ シーンのアーキテクチャ
 
-### The Repeating Event System
+### リピートイベントシステムの仕組み
 
-Unlike delayed events (wait once, execute once), repeating events use a **timer loop**:
+一度待機して一度実行する「遅延イベント」とは異なり、リピートイベントは**タイマーループ**を使用します：
 ```
-🚀 Initiation: Raise()
+🚀 開始: Raise()
 │
-▼ ❮─── Loop Cycle ───┐
-⚡ [ Execute Action ]  │
-│                    │
-⏳ [ Wait Interval ]  │ (Δ Delta Time)
-│                    │
-🔄 [ Repeat Check ] ──┘ (If Remaining > 0)
+▼ ❮━━━ ループサイクル ━━━┐
+⚡ [ アクション実行 ]      │
+│                        │
+⏳ [ 間隔待機 ]            │ (Δ Delta Time)
+│                        │
+🔄 [ リピートチェック ] ━━━┘ (残り回数 > 0 の場合)
 │
-🛑 [ Stop Condition ] ➔ 🏁 Lifecycle Finalized
+🛑 [ 停止条件到達 ] ➔ 🏁 ライフサイクル完了
 ```
 
-**Stop Conditions:**
-1. **Repeat Count Reached:** Finite mode auto-stops after N executions
-2. **Manual Cancel:** `.Cancel()` terminates infinite loops immediately
-3. **Scene Unload:** All pending events are cleaned up
+**停止条件:**
+1. **リピート回数到達:** 有限モードでは N 回の実行後に自動停止。
+2. **手動キャンセル:** `.Cancel()` により無限ループを即座に終了。
+3. **シーンのアンロード:** 保留中のすべてのイベントがクリーンアップされます。
 
-**Internal Scheduling:**
-- GameEventManager maintains a scheduler queue
-- Each repeating event has an internal timer
-- Timer resets after each execution to maintain precise intervals
+**内部スケジューリング:**
+- GameEventManager がスケジューラーキューを維持します。
+- 各リピートイベントは内部タイマーを持っています。
+- 正確な間隔を維持するために、各実行後にタイマーがリセットされます。
 
 ---
 
-### Event Definitions
+### イベント定義 (Event Definitions)
 
 ![Game Event Editor](/img/game-event-system/examples/08-repeating-event/demo-08-editor.png)
 
-| Event Name             | Type               | Repeat Interval | Repeat Count  |
+| イベント名             | 型                 | リピート間隔 | リピート回数 |
 | ---------------------- | ------------------ | --------------- | ------------- |
-| `onFinitePulseEvent`   | `GameEvent` (void) | 1.5 seconds     | 5             |
-| `onInfinitePulseEvent` | `GameEvent` (void) | 1.0 second      | -1 (Infinite) |
+| `onFinitePulseEvent`   | `GameEvent` (void) | 1.5 秒          | 5             |
+| `onInfinitePulseEvent` | `GameEvent` (void) | 1.0 秒          | -1 (無限)     |
 
-**Same Receiver Method:**
-Both events are bound to `RepeatingEventReceiver.OnPulseReceived()`. The receiver doesn't know or care which event triggered it—it just responds to each pulse.
+**同じ受信メソッド:**
+両方のイベントは `RepeatingEventReceiver.OnPulseReceived()` に紐付けられています。受信側はどのイベントがトリガーしたかを気にする必要はなく、各パルスに対して反応するだけです。
 
 ---
 
-### Behavior Configuration Comparison
+### ビヘイビア設定の比較
 
-#### Finite Loop Configuration
+#### 有限ループの設定
 
-Click the **(void)** icon for `onFinitePulseEvent` to open the Behavior Window:
+`onFinitePulseEvent` の **(void)** アイコンをクリックして、Behavior Window を開きます：
 
 ![Finite Behavior](/img/game-event-system/examples/08-repeating-event/demo-08-behavior-finite.png)
 
-**Schedule Configuration:**
-- ⏱️ **Action Delay:** `0` (no initial delay)
-- 🔄 **Repeat Interval:** `1.5` seconds
-  - Time between each pulse execution
-- 🔢 **Repeat Count:** `5`
-  - Total number of pulses
-  - Stops automatically after 5th execution
-
-**Behavior:**
-```
-🖼️ T+0.0s | Initial Raise
-🚀 Raise() ➔ ⚡ Execute #1
-│
-┆  (Δ 1.5s Interval)
-▼
-🖼️ T+1.5s | Repeat 1/4
-⚡ Execute #2
-│
-┆  (Δ 1.5s Interval)
-▼
-🖼️ T+3.0s | Repeat 2/4
-⚡ Execute #3
-│
-┆  (Δ 1.5s Interval)
-▼
-🖼️ T+4.5s | Repeat 3/4
-⚡ Execute #4
-│
-┆  (Δ 1.5s Interval)
-▼
-🖼️ T+6.0s | Repeat 4/4
-⚡ Execute #5 ➔ [Final Execution]
-│
-🏁 T+7.5s | Lifecycle End
-🛑 [ Sequence Terminated: Counter at 0 ]
-```
+**スケジュールの設定:**
+- ⏱️ **アクション遅延 (Action Delay):** `0`（最初の遅延なし）
+- 🔄 **リピート間隔 (Repeat Interval):** `1.5` 秒
+  - 各パルス実行の間の時間。
+- 🔢 **リピート回数 (Repeat Count):** `5`
+  - パルスの合計回数。
+  - 5回目の実行後に自動停止。
 
 ---
 
-#### Infinite Loop Configuration
+#### 無限ループの設定
 
-Click the **(void)** icon for `onInfinitePulseEvent` to open the Behavior Window:
+`onInfinitePulseEvent` の **(void)** アイコンをクリックして、Behavior Window を開きます：
 
 ![Infinite Behavior](/img/game-event-system/examples/08-repeating-event/demo-08-behavior-infinite.png)
 
-**Schedule Configuration:**
-- ⏱️ **Action Delay:** `0`
-- 🔄 **Repeat Interval:** `1` second (faster than finite mode)
-- 🔢 **Repeat Count:** `Infinite Loop` ♾️
-  - Special value: `-1` means unlimited
-  - Will never auto-stop
+**スケジュールの設定:**
+- ⏱️ **アクション遅延 (Action Delay):** `0`
+- 🔄 **リピート間隔 (Repeat Interval):** `1` 秒（有限モードより速い）
+- 🔢 **リピート回数 (Repeat Count):** `Infinite Loop` ♾️
+  - 特殊な値 `-1` は、無制限を意味します。
+  - 自動的に停止することはありません。
 
-**Behavior:**
-```
-🚀 Initiation: Raise()
-│
-▼ ❮━━━━━━━━━  Perpetual Loop  ━━━━━━━━━┓
-⚡ Execute #1 (Initial)                ┃
-│                                      ┃
-⏳ (Wait 1.0s)                         ┃
-│                                      ┃
-⚡ Execute #2 (Repeat)                 ┃
-│                                      ┃
-⏳ (Wait 1.0s)                         ┃
-│                                      ┃
-⚡ Execute #N... (Repeat)              ┛
-│
-│   [ External Intervention Required ]
-└─► 🛠️ Call: .Cancel() 
-    └─► 🛑 Loop Terminated ➔ 🏁 Cleanup
-```
+:::tip ⚙️ 無限ループの設定方法
 
-:::tip ⚙️ Configuring Infinite Loops
-
-To set infinite repetition, click the **Infinite Loop** toggle button (♾️ icon) next to Repeat Count. This automatically sets the value to `-1`.
+無限リピートを設定するには、リピート回数の横にある **Infinite Loop** トグルボタン（♾️ アイコン）をクリックします。これにより、値が自動的に `-1` に設定されます。
 
 :::
 
 ---
 
-### Sender Setup (RepeatingEventRaiser)
+### 発行側の設定 (RepeatingEventRaiser)
 
-Select the **RepeatingEventRaiser** GameObject:
+**RepeatingEventRaiser** GameObject を選択します：
 
 ![RepeatingEventRaiser Inspector](/img/game-event-system/examples/08-repeating-event/demo-08-inspector.png)
 
-**Event Channels:**
+**イベントチャンネル:**
 - `Finite Pulse Event`: `onFinitePulseEvent`
-  - Tooltip: "Interval = 1.0s, Count = 5"
+  - ツールチップ: "Interval = 1.5s, Count = 5"
 - `Infinite Pulse Event`: `onInfinitePulseEvent`
-  - Tooltip: "Interval = 0.5s, Count = -1 (Infinite)"
+  - ツールチップ: "Interval = 1.0s, Count = -1 (Infinite)"
 
-**References:**
-- `Repeating Event Receiver`: RepeatingEventReceiver (for coordination)
+**参照:**
+- `Repeating Event Receiver`: RepeatingEventReceiver (連携用)
 
-**Visual References:**
-- `Rotating Core`: RotatingCore (Transform) - visual indicator of active state
-- `Mode Text`: Text (TMP) (TextMeshProUGUI) - displays current mode
+**視覚的参照:**
+- `Rotating Core`: 動作状態を示すための回転体
+- `Mode Text`: 現在のモードを表示する UI テキスト
 
 ---
 
-### Receiver Setup (RepeatingEventReceiver)
+### 受信側の設定 (RepeatingEventReceiver)
 
-Select the **RepeatingEventReceiver** GameObject:
+**RepeatingEventReceiver** GameObject を選択します：
 
 ![RepeatingEventReceiver Inspector](/img/game-event-system/examples/08-repeating-event/demo-08-receiver.png)
 
-**Configuration:**
-- `Beacon Origin`: SonarBeacon (Transform) - pulse spawn point
+**設定:**
+- `Beacon Origin`: パルスの生成点（SonarBeacon）
 
-**Visual Resources:**
-- `Shockwave Prefab`: ShockwaveVFX (Particle System) - expanding ring effect
-- `Scanned Material`: Prototype_Guide_Red - target highlight material
-- `Default Material`: Prototype_Guide_Default - target normal material
+**視覚的リソース:**
+- `Shockwave Prefab`: 拡大するリングエフェクト（Particle System）
+- `Scanned Material`: ターゲットが強調表示された際のマテリアル
+- `Default Material`: ターゲットの通常時のマテリアル
 
-**Audio:**
-- `Sonar Ping Clip`: SonarPingSFX - pulse sound
-- `Power Down Clip`: PowerDownSFX - stop sound
+**オーディオ:**
+- `Sonar Ping Clip`: パルス音
+- `Power Down Clip`: 停止時の音
 
 ---
 
-## 💻 Code Breakdown
+## 💻 コード解説
 
-### 📤 RepeatingEventRaiser.cs (Sender)
+### 📤 RepeatingEventRaiser.cs (発行側)
 ```csharp
 using UnityEngine;
 using TinyGiants.GameEventSystem.Runtime;
@@ -406,10 +355,10 @@ using TMPro;
 public class RepeatingEventRaiser : MonoBehaviour
 {
     [Header("Event Channels")]
-    [Tooltip("Configured in Editor: Interval = 1.5s, Count = 5.")]
+    [Tooltip("エディタで設定済み: Interval = 1.5s, Count = 5.")]
     [GameEventDropdown] public GameEvent finitePulseEvent;
 
-    [Tooltip("Configured in Editor: Interval = 1.0s, Count = -1 (Infinite).")]
+    [Tooltip("エディタで設定済み: Interval = 1.0s, Count = -1 (Infinite).")]
     [GameEventDropdown] public GameEvent infinitePulseEvent;
 
     [SerializeField] private Transform rotatingCore;
@@ -421,22 +370,22 @@ public class RepeatingEventRaiser : MonoBehaviour
 
     private void Update()
     {
-        // Visual feedback: Rotation speed indicates state
+        // ビジュアルフィードバック: 回転速度で状態を表示
         if (rotatingCore != null)
         {
             float speed = _isActive 
-                ? (_isInfiniteMode ? 300f : 150f)  // Active: fast or medium
-                : 20f;                              // Idle: slow
+                ? (_isInfiniteMode ? 300f : 150f)  // 動作中: 高速または中速
+                : 20f;                              // 待機中: 低速
             rotatingCore.Rotate(Vector3.up, speed * Time.deltaTime);
         }
     }
 
     /// <summary>
-    /// Button Action: Starts the repeating event loop.
+    /// ボタンアクション: リピートイベントループを開始します。
     /// 
-    /// CRITICAL: This calls Raise() only ONCE.
-    /// The Event System's scheduler handles all repetition automatically
-    /// based on the Repeat Interval and Repeat Count configured in the Editor.
+    /// 重要：ここでは Raise() を一度だけ呼び出しています。
+    /// イベントシステムのススケジューラーが、エディタで設定された
+    /// リピート間隔と回数に基づいて、自動的にすべての繰り返しを処理します。
     /// </summary>
     public void ActivateBeacon()
     {
@@ -444,28 +393,27 @@ public class RepeatingEventRaiser : MonoBehaviour
 
         _isActive = true;
         
-        // Select which event to use based on current mode
+        // 現在のモードに基づいて使用するイベントを選択
         _currentEvent = _isInfiniteMode ? infinitePulseEvent : finitePulseEvent;
 
         if (_currentEvent != null)
         {
-            // THE MAGIC: Single Raise() call starts entire loop
-            // System checks event's Repeat Interval & Repeat Count
-            // Automatically schedules all future executions
+            // 魔法の1行: 一度の Raise() 呼び出しでループ全体が始まります。
+            // システムがイベントのリピート設定を確認し、
+            // 将来の実行をすべて自動的にスケジューリングします。
             _currentEvent.Raise();
             
-            Debug.Log($"[Raiser] Beacon Activated. Mode: " +
-                     $"{(_isInfiniteMode ? "Infinite" : "Finite (5x)")}");
+            Debug.Log($"[Raiser] ビーコン起動。モード: " +
+                     $"{(_isInfiniteMode ? "無限" : "有限 (5回)")}");
         }
     }
     
     /// <summary>
-    /// Button Action: Switches between Finite and Infinite modes.
-    /// Stops any active loop before switching.
+    /// ボタンアクション: 有限モードと無限モードを切り替えます。
+    /// 切り替え前に動作中のループがあれば停止させます。
     /// </summary>
     public void ToggleMode()
     {
-        // Must stop before switching modes
         if (_isActive) StopSignal();
 
         _isInfiniteMode = !_isInfiniteMode;
@@ -473,44 +421,44 @@ public class RepeatingEventRaiser : MonoBehaviour
     }
 
     /// <summary>
-    /// Button Action: Manually cancels the active loop.
+    /// ボタンアクション: 動作中のループを手動でキャンセルします。
     /// 
-    /// Essential for Infinite loops - they never auto-stop.
-    /// For Finite loops, this allows early termination.
+    /// 無限ループの場合、自動で止まらないためこの処理が不可欠です。
+    /// 有限ループの場合、途中で強制終了させるために使用できます。
     /// </summary>
     public void StopSignal()
     {
         if (!_isActive || _currentEvent == null) return;
 
-        // THE CRITICAL API: Cancel removes event from scheduler
-        // Stops timer immediately - no more pulses will fire
+        // 重要な API: Cancel によりスケジューラーからイベントを削除します。
+        // タイマーが即座に停止し、それ以上のパルスは発行されません。
         _currentEvent.Cancel();
         
         _isActive = false;
         UpdateUI();
         
-        Debug.Log("[Raiser] Signal Interrupted manually.");
+        Debug.Log("[Raiser] 信号を手動で中断しました。");
     }
 
     private void UpdateUI()
     {
         if (modeText) 
             modeText.text = _isInfiniteMode 
-                ? "Toggle Mode\n<b>(Infinite)</b>" 
-                : "Toggle Mode\n<b>(Finite[5])</b>";
+                ? "モード切替\n<b>(無限)</b>" 
+                : "モード切替\n<b>(有限[5回])</b>";
     }
 }
 ```
 
-**Key Points:**
-- 🎯 **Single Raise()** - Only called once to start entire loop
-- 🔀 **Mode Selection** - Switches between two pre-configured events
-- 🛑 **Cancel API** - Stops infinite loops or terminates finite loops early
-- 🎨 **Visual Feedback** - Rotation speed indicates active state and mode
+**ポイント:**
+- 🎯 **一度の Raise()** - ループ全体を開始するために一度呼ぶだけ。
+- 🔀 **モード選択** - 設定の異なる2つのイベントを使い分け。
+- 🛑 **キャンセルAPI** - 無限ループの停止や有限ループの早期終了。
+- 🎨 **視覚的演出** - 回転速度で動作状態とモードを表現。
 
 ---
 
-### 📥 RepeatingEventReceiver.cs (Listener)
+### 📥 RepeatingEventReceiver.cs (リスナー)
 ```csharp
 using UnityEngine;
 using System.Collections;
@@ -532,28 +480,29 @@ public class RepeatingEventReceiver : MonoBehaviour
     private int _pulseCount = 0;
 
     /// <summary>
-    /// [Event Callback - Repeating Execution]
+    /// [イベントコールバック - リピート実行]
     /// 
-    /// Bound to both 'onFinitePulseEvent' and 'onInfinitePulseEvent'.
+    /// 'onFinitePulseEvent' と 'onInfinitePulseEvent' 両方に紐付け。
     /// 
-    /// This method executes:
-    /// - Immediately when Raise() is called (first pulse)
-    /// - Then repeatedly at each Repeat Interval
-    /// - Until Repeat Count reached (finite) or Cancel() called (infinite)
+    /// このメソッドが実行されるタイミング:
+    /// - Raise() が呼ばれた直後（最初のパルス）
+    /// - その後、設定されたリピート間隔ごと
+    /// - リピート回数に達するまで（有限）、または Cancel() されるまで（無限）
     /// 
-    /// The receiver is STATELESS - it doesn't track pulse numbers or loop status.
-    /// It simply reacts to each trigger.
+    /// 受信側は「ステートレス（状態を持たない）」です。
+    /// 何回目のパルスか、ループがいつ終わるかなどを管理する必要はなく、
+    /// 各トリガーに対して反応するだけで済みます。
     /// </summary>
     public void OnPulseReceived()
     {
         _pulseCount++;
-        Debug.Log($"[Receiver] Pulse #{_pulseCount} emitted.");
+        Debug.Log($"[Receiver] パルス #{_pulseCount} を送信しました。");
 
         Vector3 spawnPos = beaconOrigin != null 
             ? beaconOrigin.position 
             : transform.position;
 
-        // Spawn visual shockwave
+        // 衝撃波VFXの生成
         if (shockwavePrefab != null)
         {
             var vfx = Instantiate(shockwavePrefab, spawnPos, Quaternion.identity);
@@ -561,37 +510,37 @@ public class RepeatingEventReceiver : MonoBehaviour
             Destroy(vfx.gameObject, 2.0f);
         }
 
-        // Play sonar ping with slight pitch variation
+        // ソナー音をピッチを少し変えて再生
         if (sonarPingClip) 
         {
             _audioSource.pitch = Random.Range(0.95f, 1.05f);
             _audioSource.PlayOneShot(sonarPingClip);
         }
 
-        // Start physics-based target scanning
+        // 物理ベースのターゲットスキャンを開始
         StartCoroutine(ScanRoutine(spawnPos));
     }
 
     public void OnPowerDown()
     {
-        _pulseCount = 0;  // Reset counter when system powers down
+        _pulseCount = 0; // システム停止時にカウンターをリセット
     }
 
     /// <summary>
-    /// Expands an invisible sphere from the beacon origin.
-    /// Targets within the expanding wavefront get highlighted.
+    /// ビーコン中心から目に見えない球体を拡大させます。
+    /// 拡大する波面に触れたターゲットをハイライトします。
     /// </summary>
     private IEnumerator ScanRoutine(Vector3 center)
     {
-        float maxRadius = 40f;      // Match cyan ring size
-        float speed = 10f;          // Expansion speed
+        float maxRadius = 40f;      // シアンのリングサイズに合わせる
+        float speed = 10f;          // 拡大速度
         float currentRadius = 0f;
 
         while (currentRadius < maxRadius)
         {
             currentRadius += speed * Time.deltaTime;
             
-            // Physics sphere cast to find targets
+            // 物理演算の球体判定でターゲットを探す
             Collider[] hits = Physics.OverlapSphere(center, currentRadius);
             
             foreach (var hit in hits)
@@ -603,7 +552,7 @@ public class RepeatingEventReceiver : MonoBehaviour
                     {
                         float dist = Vector3.Distance(center, hit.transform.position);
                         
-                        // Only highlight if at wavefront edge (within 1 unit)
+                        // 波面の縁（1ユニット以内）にいる場合のみハイライト
                         if (dist <= currentRadius && dist > currentRadius - 1.0f)
                         {
                             StartCoroutine(HighlightTarget(rend));
@@ -618,7 +567,7 @@ public class RepeatingEventReceiver : MonoBehaviour
 
     private IEnumerator HighlightTarget(Renderer target)
     {
-        // Flash red temporarily
+        // 一時的に赤色に
         target.material = scannedMaterial;
         
         var tmp = target.GetComponentInChildren<TMPro.TextMeshPro>();
@@ -626,74 +575,74 @@ public class RepeatingEventReceiver : MonoBehaviour
 
         yield return new WaitForSeconds(0.4f);
 
-        // Reset to default
+        // デフォルトに戻す
         target.material = defaultMaterial;
         if(tmp) tmp.text = "?";
     }
 }
 ```
 
-**Key Points:**
-- 🎯 **Stateless Receiver** - Doesn't track loop count or timing
-- 📡 **Physics Scanning** - Expanding sphere cast detects targets
-- 🎨 **Wavefront Detection** - Only highlights targets at shockwave edge
-- 🔢 **Pulse Counter** - Tracks total pulses received (cosmetic)
+**ポイント:**
+- 🎯 **ステートレスな受信側** - ループ回数やタイミングを意識しなくて良い。
+- 📡 **物理スキャン** - 拡大する球体判定でターゲットを検出。
+- 🎨 **波面検出** - 衝撃波の縁に合わせてターゲットを光らせる。
+- 🔢 **パルスカウンター** - 受信したパルス数を記録（演出用）。
 
 ---
 
-## 🔑 Key Takeaways
+## 🔑 重要なまとめ
 
-| Concept                   | Implementation                                            |
+| コンセプト              | 実装内容                                                 |
 | ------------------------- | --------------------------------------------------------- |
-| 🔄 **Repeat Interval**     | Time between each execution (configured in Editor)        |
-| 🔢 **Repeat Count**        | Number of repetitions (`N` for finite, `-1` for infinite) |
-| 🎯 **Single Raise()**      | One call starts entire loop—no manual triggers needed     |
-| ✅ **Auto-Stop**           | Finite loops terminate automatically after N executions   |
-| 🛑 **Manual Cancel**       | `.Cancel()` required to stop infinite loops               |
-| 🎨 **Stateless Receivers** | Callbacks don't need to track loop state                  |
+| 🔄 **リピート間隔**       | 実行ごとの待機時間（エディタで設定）                      |
+| 🔢 **リピート回数**       | 繰り返しの回数（`N` で有限、`-1` で無限）                 |
+| 🎯 **一度の Raise()**      | 一度の呼び出しで全ループが開始、手動トリガーは不要          |
+| ✅ **自動停止**           | 有限ループは N 回の実行後に自動的に終了する               |
+| 🛑 **手動キャンセル**     | 無限ループを止めるには `.Cancel()` が必要                 |
+| 🎨 **ステートレスな受信** | コールバック側でループの状態を管理する必要がない           |
 
-:::note 🎓 Design Insight
+:::note 🎓 設計の洞察
 
-Repeating events are perfect for:
+リピートイベントは以下のようなケースに最適です：
 
-- **Periodic abilities** - Poison damage, regeneration, area denial
-- **Environmental effects** - Lava bubbles, steam vents, lighthouse beacons
-- **Spawning systems** - Enemy waves, item drops, particle bursts
-- **Radar/detection** - Sonar pulses, security scans, proximity alerts
-- **Gameplay loops** - Turn timers, checkpoint autosaves, periodic events
+- **周期的なアビリティ** - 毒ダメージ、自動回復、エリア拒否
+- **環境エフェクト** - 溶岩の泡、蒸気の噴出、灯台の光
+- **スポーンシステム** - 敵のウェーブ、アイテムドロップ、パーティクルの間欠放出
+- **レーダー/検出** - ソナーパルス、セキュリティスキャン、近接アラート
+- **ゲームプレイループ** - ターンタイマー、チェックポイントのオートセーブ、周期イベント
 
-Use **Finite** loops when you know exactly how many times something should repeat (e.g., "fire 3 shots"). Use **Infinite** loops for ongoing effects that should continue until a specific condition is met (e.g., "pulse until player leaves area").
+回数が明確に決まっている場合（例：「3発撃つ」）は**有限**ループを。特定の条件を満たすまで続く効果（例：「エリアを出るまでパルスを出す」）には**無限**ループを使用してください。
 
 :::
 
-:::tip 💻 Programmatic API
+:::tip 💻 プログラムからの制御
 
-You can also configure loops purely via code, overriding Inspector settings:
+インスペクターの設定を無視して、完全にコードからループを設定することも可能です：
 
 ```csharp
-// Override Inspector settings temporarily
+// インスペクターの設定を一時的に上書きしてリピート実行
 myEvent.RaiseRepeating(interval: 0.5f, repeatCount: 10);
 
-// Or use default Inspector settings
+// またはインスペクターのデフォルト設定で実行
 myEvent.Raise();
 ```
 
-This allows dynamic adjustment based on runtime conditions (e.g., difficulty modifiers, power-ups).
+これにより、難易度設定やパワーアップ状態に合わせて、ランタイムに動作を動的に調整できます。
 
 :::
 
 ---
 
-## 🎯 What's Next?
+## 🎯 次のステップは？
 
-You've mastered repeating events for automated loops. Now let's explore **persistent events** that survive scene transitions.
+自動ループのためのリピートイベントをマスターしました。次は、シーン遷移を跨いで生存する**常駐イベント**について見ていきましょう。
 
-**Next Chapter**: Learn about cross-scene events in **[09 Persistent Event](./09-persistent-event.md)**
+**次の章**: シーンを跨ぐイベントについて学ぶ **[09 常駐イベント](./09-persistent-event.md)**
 
 ---
 
-## 📚 Related Documentation
+## 📚 関連ドキュメント
 
-- **[Game Event Behavior](../visual-workflow/game-event-behavior.md)** - Complete guide to schedule configuration
-- **[Raising and Scheduling](../scripting/raising-and-scheduling.md)** - API reference for `.Raise()`, `.RaiseRepeating()`, `.Cancel()`
-- **[Best Practices](../scripting/best-practices.md)** - Patterns for periodic gameplay mechanics
+- **[ゲームイベントビヘイビア](../visual-workflow/game-event-behavior.md)** - スケジュール設定の完全ガイド
+- **[イベントの発行と予約](../scripting/raising-and-scheduling.md)** - `.Raise()`, `.RaiseRepeating()`, `.Cancel()` の API リファレンス
+- **[ベストプラクティス](../scripting/best-practices.md)** - 周期的なゲームプレイメカニクスのパターン

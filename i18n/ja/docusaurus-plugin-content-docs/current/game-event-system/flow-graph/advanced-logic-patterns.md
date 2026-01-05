@@ -1,150 +1,150 @@
 ﻿---
-sidebar_label: 'Advanced Logic Patterns'
+sidebar_label: '高度なロジックパターン'
 sidebar_position: 4
 ---
 
-# Advanced Logic Patterns
+# 高度なロジックパターン (Advanced Logic Patterns)
 
-Moving beyond simple connections, this chapter dives into the **Runtime Architecture** of the Flow System.
+単純な接続の枠を超え、この章ではフローシステムの**実行時のアーキテクチャ（Runtime Architecture）**について深く掘り下げます。
 
-Understanding *how* the system executes Triggers versus Chains, and how Node configurations interact with Event configurations, is the key to mastering complex game logic.
+トリガー（Trigger）とチェーン（Chain）がどのように実行されるのか、そしてノードの設定がイベントの設定とどのように相互作用するのかを理解することが、複雑なゲームロジックをマスターするための鍵となります。
 
 ---
 
-## ⚙️ Core Mechanics: Trigger vs. Chain
+## ⚙️ コア・メカニクス：トリガー vs. チェーン
 
-In the Flow Graph, a connection isn't just a line; it's a **Transfer of Control**. The type of the *Target Node* determines how that control is handled.
+フローグラフにおける接続は、単なる「線」ではありません。それは**「制御の移譲（Transfer of Control）」**です。*ターゲットノード（接続先）*のタイプによって、その制御がどのように扱われるかが決まります。
 
-| Feature             | 🟠 Trigger Node                           | 🟢 Chain Node                                          |
+| 機能 | 🟠 トリガーノード (Trigger) | 🟢 チェーンノード (Chain) |
 | :------------------ | :--------------------------------------- | :---------------------------------------------------- |
-| **Execution Mode**  | **Parallel (Fan-Out)**                   | **Serial (Sequence)**                                 |
-| **Blocking?**       | ❌ **Non-Blocking**                       | ✅ **Blocking**                                        |
-| **Technical Impl.** | `Fire-and-Forget`                        | `Coroutine Yield`                                     |
-| **Data Flow**       | Passes data to *all* children instantly. | Passes data to the *next* child only after finishing. |
+| **実行モード** | **並列 (ファンアウト)** | **直列 (シーケンス)** |
+| **ブロッキング？** | ❌ **非ブロッキング** | ✅ **ブロッキング（後続を待機させる）** |
+| **技術的実装** | `Fire-and-Forget`（投げっぱなし） | `Coroutine Yield`（コルーチンによる待機） |
+| **データフロー** | すべての子ノードに即座にデータを渡す。 | 処理完了後、次の子ノードにのみデータを渡す。 |
 
-### 1. The Trigger Mechanism (Parallel)
-When the flow enters a Trigger Node:
-1.  The system calculates the **Priority** of all connected Triggers.
-2.  It executes them one by one in a loop.
-3.  **Crucially**, it **does not wait** for a Trigger to finish its tasks before starting the next one.
-4.  *Result*: To the player, all effects (Sound, UI, Particles) appear to happen simultaneously in the same frame.
+### 1. トリガーの仕組み（並列実行）
+フローがトリガーノードに入ると：
+1. システムは接続されているすべてのトリガーの**優先度（Priority）**を計算します。
+2. ループ処理によって、優先度の高い順に一つずつ実行していきます。
+3. **重要な点**として、システムは一つのトリガーがタスクを完了するのを**待たずに**、次のトリガーを開始します。
+4. *結果*: プレイヤーからは、すべてのエフェクト（音、UI、パーティクル）が同じフレーム内で同時に発生しているように見えます。
 
-### 2. The Chain Mechanism (Sequential)
-The Chain Node has a complex lifecycle designed for pacing. It holds the flow using **Two Layers of Delay**:
+### 2. チェーンの仕組み（直列実行）
+チェーンノードは、演出のテンポを制御するために設計された複雑なライフサイクルを持っています。**「二層の遅延（Two Layers of Delay）」**を使用してフローを保持します。
 
-1.  **Pre-Execution**: Waits for `Start Delay`.
-2.  **Execution**: Raises the event.
-3.  **Post-Execution**: Waits for `Duration` OR `Wait For Completion`.
-4.  **Signal**: Only then does it fire the Next Node.
+1. **実行前**: `Start Delay`（開始遅延）の間待機します。
+2. **実行**: イベントを発行します。
+3. **実行後**: `Duration`（継続時間）または `Wait For Completion`（完了待機）の間待機します。
+4. **シグナル**: これらすべてが終了して初めて、次のノード（Next Node）を起動します。
 
 ---
 
-## ⏱️ The Timeline of Execution
+## ⏱️ 実行のタイムライン
 
-It is vital to understand how **Node Configuration** (Graph) interacts with **Event Configuration** (Inspector).
+**ノード設定（グラフ層）**と**イベント設定（インスペクター層）**がどのように相互作用するかを理解することは極めて重要です。
 
-### The "Double Delay" Rule
-If you configure a delay on the **Node** AND a delay on the **Event**, they are **Additive**.
+### 「ダブルディレイ（二重遅延）」のルール
+**ノード**に遅延を設定し、さらに**イベント**にも遅延を設定した場合、それらは**合算**されます。
 
 ```
-Total Time to Action = Node Start Delay + Event Action Delay
+アクションまでの合計時間 = ノードの開始遅延 + イベントのアクション遅延
 ```
 
-### Visual Timeline
-Here is the millisecond-by-millisecond breakdown of a single Chain Node execution:
+### ビジュアル・タイムライン
+単一のチェーンノードが実行される際の、ミリ秒単位の分解図です：
 
 ```text
-[Flow Enters Node]
+[フローがノードに進入]
       │
-      ├── 1. Node Condition Check (Graph Layer)
-      │      🛑 If False: STOP.
+      ├── 1. ノード条件チェック (グラフ層)
+      │      🛑 False の場合: 停止
       │
-      ├── 2. Node Start Delay (Graph Layer) ⏱️
-      │      ⏳ Waiting...
+      ├── 2. ノードの開始遅延 (グラフ層) ⏱️
+      │      ⏳ 待機中...
       │
-      ├── 3. Event Raised (Core Layer) 🚀
+      ├── 3. イベントの発行 (コア層) 🚀
       │      │
-      │      ├── a. Event Condition Check (Inspector Layer)
-      │      │      🛑 If False: Skip Actions (But flow continues!)
+      │      ├── a. イベント条件チェック (インスペクター層)
+      │      │      🛑 False の場合: アクションをスキップ（ただしフロー自体は継続！）
       │      │
-      │      ├── b. Event Action Delay (Inspector Layer) ⏱️
-      │      │      ⏳ Waiting...
+      │      ├── b. イベントのアクション遅延 (インスペクター層) ⏱️
+      │      │      ⏳ 待機中...
       │      │
-      │      └── c. UnityActions Invoke (Game Logic) 🎬
-      │             (e.g., Play Animation, Subtract Health)
+      │      └── c. UnityActions の起動 (ゲームロジック) 🎬
+      │             (例: アニメーション再生、HPの減算など)
       │
-      ├── 4. Node Duration / Wait (Graph Layer) ⏳
-      │      🛑 Flow is BLOCKED here.
-      │      (Waits for Duration seconds OR Async Completion)
+      ├── 4. ノードの継続時間 / 完了待機 (グラフ層) ⏳
+      │      🛑 ここでフローがブロック（停止）されます。
+      │      (設定された秒数、または非同期処理の完了を待機)
       │
-      └── 5. Signal Next Node ⏭️
+      └── 5. 次のノードへのシグナル送信 ⏭️
 ```
 
-:::warning Architecture Nuance
+:::warning アーキテクチャ上の注意点
 
-- **Event Conditions** only stop the *local side effects* (Action c). They **DO NOT** stop the Flow Graph from proceeding to step 4 and 5.
-- To stop the Flow Graph logic, you must use **Node Conditions** (Step 1).
+- **イベント条件**は、その場の*ローカルな副作用（手順 c）*のみを停止させます。フローグラフが手順 4 および 5 へ進むのを**止めることはありません**。
+- フローグラフのロジック自体を停止させたい場合は、必ず**ノード条件**（手順 1）を使用してください。
 
 :::
 
 ------
 
-## 🛠️ Cookbook: Real-World Design Patterns
+## 🛠️ クックブック：実践的なデザインパターン
 
-Here are the standard architectural patterns for solving common game development problems.
+ゲーム開発でよく遭遇する問題を解決するための、標準的な設計パターンです。
 
-### 1. The "Cinematic" Pattern (Cutscene)
+### 1. 「シネマティック」パターン（カットシーン）
 
-**Goal**: A strictly timed sequence of events.
-**Scenario**: Camera moves -> Door opens -> Character walks in -> Dialog starts.
+**目標**: 厳密にタイミング制御された一連のイベント。
+**シナリオ**: カメラが移動 ➔ ドアが開く ➔ キャラクターが入ってくる ➔ ダイアログが開始。
 
 ![alt text](/img/game-event-system/flow-graph/advanced-logic-patterns/pattern-cinematic.png)
 
-- **Structure**: Root ➔ Chain ➔ Chain ➔ Chain.
-- **Configuration**:
-  - Use **Chain Nodes (🟢)** for every step.
-  - Use **Node Duration (⏳)** to pace the sequence.
-    - *Example*: If "Door Open Anim" takes 2.0s, set the Node Duration to 2.0 to ensure the character doesn't walk through a closed door.
+- **構造**: Root ➔ Chain ➔ Chain ➔ Chain
+- **設定**:
+  - すべてのステップに**チェーンノード (🟢)**を使用します。
+  - **ノードの継続時間 (⏳)**を使用してシーケンスのテンポを制御します。
+    - *例*: 「ドアを開くアニメーション」に2.0秒かかる場合、ノードの継続時間を2.0に設定することで、キャラクターが閉まったドアを通り抜けてしまうのを防ぎます。
 
-### 2. The "Broadcaster" Pattern (Player Death)
+### 2. 「ブロードキャスター」パターン（プレイヤーの死亡）
 
-**Goal**: One state change triggering multiple independent systems.
-**Scenario**: Player dies. You need to: Play Sound, Show Game Over UI, Spawn Ragdoll, Save Game.
+**目標**: 一つの状態変化が、複数の独立したシステムをトリガーする。
+**シナリオ**: プレイヤーが死亡。SEの再生、ゲームオーバーUIの表示、ラグドールの生成、ゲームの保存を同時に行いたい。
 
 ![alt text](/img/game-event-system/flow-graph/advanced-logic-patterns/pattern-broadcaster.png)
 
-- **Structure**: Root ➔ Multiple Triggers.
-- **Configuration**:
-  - **Root**: OnPlayerDeath.
-  - **Children**: 4 separate **Trigger Nodes (🟠)**.
-  - **Why**: If the "Save Game" system hangs or errors out, you don't want it to block the "Game Over UI" from appearing. Parallel execution ensures safety.
+- **構造**: Root ➔ 複数のトリガー
+- **設定**:
+  - **Root**: OnPlayerDeath
+  - **子ノード**: 4つの独立した**トリガーノード (🟠)**
+  - **理由**: もし「ゲームの保存」システムがフリーズしたりエラーを起こしたりしても、それが「ゲームオーバーUI」の表示を妨げてはいけません。並列実行は安全性を確保します。
 
-### 3. The "Hybrid Boss" Pattern (Complex State)
+### 3. 「ハイブリッド・ボス」パターン（複雑な状態遷移）
 
-**Goal**: Complex AI phase transition.
-**Scenario**: Boss enters Phase 2. He roars (animation), AND SIMULTANEOUSLY the music changes and the arena turns red. WHEN the roar finishes, he starts attacking.
+**目標**: 複雑なAIのフェーズ移行。
+**シナリオ**: ボスが第2フェーズに突入。ボスが咆哮（アニメーション）し、同時に音楽が変化してアリーナが赤く染まる。咆哮が終わった瞬間に、ボスが攻撃を開始する。
 
 ![alt text](/img/game-event-system/flow-graph/advanced-logic-patterns/pattern-hybrid.png)
 
-- **Structure**:
-  1. Root (OnHealthThreshold).
-  2. **Chain Node** (BossRoarAnim) with **Wait For Completion** checked (or Duration set to anim length).
-  3. **Trigger Node** (MusicChange) attached to the Root (Parallel to Roar).
-  4. **Trigger Node** (ArenaColorChange) attached to the Root (Parallel to Roar).
-  5. **Chain Node** (StartAttack) attached to the BossRoarAnim node.
-- **Flow**:
-  - Music and Color happen *immediately* alongside the Roar.
-  - The StartAttack waits until the Roar Chain Node is fully finished (Step 4 in Timeline).
+- **構造**:
+  1. Root (OnHealthThreshold)
+  2. **チェーンノード** (BossRoarAnim)：「完了待機（Wait For Completion）」にチェックを入れる（または Duration をアニメーションの長さに設定）。
+  3. **トリガーノード** (MusicChange)：Root に接続（咆哮と並列）。
+  4. **トリガーノード** (ArenaColorChange)：Root に接続（咆哮と並列）。
+  5. **チェーンノード** (StartAttack)：BossRoarAnim ノードに接続。
+- **フロー**:
+  - 音楽の変化と色の変化は、咆哮と*同時*に即座に発生します。
+  - StartAttack は、咆哮のチェーンノードが完全に終了するまで待機します（タイムラインの手順 4）。
 
 ------
 
-## 🎯 Summary: When to use what?
+## 🎯 まとめ：どの場合に何を使うか？
 
-| Requirement                        | Use Node Type        | Why?                                             |
+| 要件 | 使用するノードタイプ | 理由 |
 | ---------------------------------- | -------------------- | ------------------------------------------------ |
-| **"Do X, then do Y"**              | **Chain (🟢)**        | Guarantees order via blocking.                   |
-| **"Do X, Y, and Z all at once"**   | **Trigger (🟠)**      | Fire-and-forget. Parallel execution.             |
-| **"If HP < 0, do X"**              | **Node Condition**   | Stops the flow logic entirely.                   |
-| **"Only play sound if not muted"** | **Event Condition**  | Stops the side effect, keeps flow logic running. |
-| **"Wait before doing X"**          | **Node Start Delay** | Delays the event raise.                          |
-| **"Wait after X before doing Y"**  | **Node Duration**    | (Chain Only) Delays the next node signal.        |
+| **「Xをした後、Yをする」** | **チェーン (🟢)** | ブロッキングにより順序を保証します。 |
+| **「X, Y, Zをすべて同時にする」** | **トリガー (🟠)** | 投げっぱなし。並列実行されます。 |
+| **「もし HP < 0 なら、Xをする」** | **ノード条件** | フローロジック自体を完全に停止させます。 |
+| **「ミュート中でない時のみ音を鳴らす」** | **イベント条件** | フローロジックは継続させつつ、副作用のみを停止します。 |
+| **「Xをする前に待機する」** | **ノードの開始遅延** | イベントの発行を遅らせます。 |
+| **「Xをした後、Yをする前に待機する」** | **ノードの継続時間** | (チェーンのみ) 次のノードへの信号を遅らせます。 |

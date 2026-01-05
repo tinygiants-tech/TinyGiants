@@ -1,190 +1,190 @@
 ﻿---
-sidebar_label: 'Find Game Event'
+sidebar_label: 'ゲームイベントの検索'
 sidebar_position: 7
 ---
 
-# Game Event Finder
+# ゲームイベントファインダー (Game Event Finder)
 
-The **Reference Finder** is a powerful diagnostic tool that scans your entire active scene to locate every GameObject, Script, and Component that is referencing a specific Game Event.
+**リファレンスファインダー (Reference Finder)** は、アクティブなシーン全体をスキャンして、特定のゲームイベントを参照しているすべての GameObject、スクリプト、およびコンポーネントを特定する強力な診断ツールです。
 
-It answers the critical question: ***"If I change this event, who will be affected?"***
+このツールは、***「このイベントを変更した場合、誰に影響が及ぶか？」*** という重要な問いに答えます。
 
-## 🚀 Accessing the Tool
+## 🚀 ツールへのアクセス
 
-You can open the Reference Finder from the  [**Game Event Editor**](./game-event-editor.md)
+リファレンスファインダーは [**Game Event Editor**](./game-event-editor.md) から開くことができます。
 
 ```
-Game Event Editor → Click 🔍 icon on event row
+Game Event Editor → イベント行の 🔍 アイコンをクリック
 ```
 
-The window opens showing all scene references to that event.
+ウィンドウが開き、そのイベントに対するシーン内のすべての参照が表示されます。
 
 ---
 
-## 🖼️ Interface Modes
+## 🖼️ インターフェースモード
 
-The window supports two visualization modes to suit different inspection needs. You can toggle between them using the toolbar buttons.
+ウィンドウは、異なる調査ニーズに合わせて2つの表示モードをサポートしています。ツールバーのボタンを使用して切り替えることができます。
 
-### List Mode (Flat View)
+### リストモード (Flat View)
 
-Displays a straightforward, sortable list of all references.
+すべての参照をシンプルでソート可能なリストとして表示します。
 
-![List Mode View](/img/game-event-system/visual-workflow/game-event-finder/game-event-finder-list.png)
+![リストモード表示](/img/game-event-system/visual-workflow/game-event-finder/game-event-finder-list.png)
 
-**Best for**: Quickly scanning total usage or sorting by path/name.
-
----
-
-### Grouped Mode (Script View)
-
-Groups references by the **Script Component** that is holding them.
-
-![Grouped Mode View](/img/game-event-system/visual-workflow/game-event-finder/game-event-finder-grouped.png)
-
-**Best for**: Understanding which *systems* rely on this event (e.g., seeing that 5 `EnemyAI` scripts and 1 `GameManager` are using it).
-
-**Toggle**: Click the **List** / **Grouped** button in the toolbar to switch between modes.
+**最適な用途**: 全体の使用状況を素早く確認したり、パスや名前でソートしたりする場合。
 
 ---
 
-## 📊 Status Indicators
+### グループモード (Script View)
 
-Each row provides real-time feedback about the state of the referencing object:
+参照を保持している **スクリプトコンポーネント** ごとにグループ化して表示します。
 
-| Icon | Status       | Description                                                  |
+![グループモード表示](/img/game-event-system/visual-workflow/game-event-finder/game-event-finder-grouped.png)
+
+**最適な用途**: どの *システム* がこのイベントに依存しているかを把握する場合（例：5つの `EnemyAI` スクリプトと1つの `GameManager` が使用していることを確認するなど）。
+
+**切り替え**: ツールバーの **List** / **Grouped** ボタンをクリックしてモードを切り替えます。
+
+---
+
+## 📊 ステータスインジケーター
+
+各行は、参照しているオブジェクトの状態についてリアルタイムのフィードバックを提供します。
+
+| アイコン | ステータス | 説明 |
 | :--- | :----------- | :----------------------------------------------------------- |
-| 🟢    | **Active**   | The GameObject is currently active in the hierarchy. The event binding is live. |
-| 🔴    | **Inactive** | The GameObject is disabled. The event binding will not trigger until enabled. |
+| 🟢    | **有効 (Active)**   | GameObject は現在ヒエラルキーでアクティブです。イベントバインディングは有効な状態です。 |
+| 🔴    | **無効 (Inactive)** | GameObject が非アクティブです。有効化されるまで、イベントバインディングはトリガーされません。 |
 
 ---
 
-## 📝 Reference Details
+## 📝 参照の詳細
 
-The columns provide detailed context for every reference:
+各カラムは、すべての参照について詳細なコンテキストを提供します。
 
-| Column             | Description                                                  |
+| カラム | 説明 |
 | ------------------ | ------------------------------------------------------------ |
-| **GameObject**     | The name of the object in the scene                          |
-| **Hierarchy Path** | The full breadcrumb path (e.g., `Environment/Enemies/Grunt_01`) |
-| **Script**         | The name of the C# class referencing the event (e.g., `PlayerHealth`) |
-| **Type**           | The variable name in the code (e.g., `onDeathEvent`)         |
+| **GameObject**     | シーン内のオブジェクト名 |
+| **Hierarchy Path** | フルパス（例：`Environment/Enemies/Grunt_01`） |
+| **Script**         | イベントを参照している C# クラス名（例：`PlayerHealth`） |
+| **Type**           | コード内の変数名（例：`onDeathEvent`） |
 
-:::tip Smart Scanning
-The tool uses **Reflection** to scan all public and private fields on your MonoBehaviours. It finds references even if they are buried in private serialized fields!
+:::tip スマートスキャン
+このツールは **リフレクション (Reflection)** を使用して、MonoBehaviour 上のすべてのパブリックおよびプライベートフィールドをスキャンします。プライベートなシリアライズされたフィールドに隠れている参照も見つけ出すことができます。
 :::
 
 ------
 
-## 🔍 Search & Sort
+## 🔍 検索とソート
 
-**Search Bar**: Type to filter references by GameObject name, hierarchy path, script name, or field name. Supports partial matching.
+**検索バー**: GameObject 名、ヒエラルキーパス、スクリプト名、またはフィールド名で入力して参照をフィルタリングします。部分一致をサポートしています。
 
-**Sortable Columns**: Click any column header to sort by that column. Click again to reverse the sort order.
+**ソート可能なカラム**: カラムヘッダーをクリックしてソートします。もう一度クリックすると昇順/降順が切り替わります。
 
 ---
 
-## ⚡ Quick Actions
+## ⚡ クイックアクション
 
-The **Actions** column on the right provides three powerful navigation tools to jump instantly to the target object.
+右側の **Actions** カラムには、対象のオブジェクトに即座に移動するための3つの強力なナビゲーションツールが用意されています。
 
-| Button    | Icon | Action                 | Use Case                                                     |
+| ボタン | アイコン | アクション | ユースケース |
 | :-------- | :--- | :--------------------- | :----------------------------------------------------------- |
-| **Ping**  | 🔍    | **Ping in Hierarchy**  | Flashes the object in the Hierarchy window to show its location without changing selection |
-| **Focus** | 📋    | **Focus in Inspector** | Selects the object and instantly brings the **Inspector** into focus, allowing you to edit the script immediately |
-| **Frame** | 🎥    | **Frame in Scene**     | Selects the object and moves the **Scene View camera** to frame it perfectly |
+| **Ping**  | 🔍    | **ヒエラルキーで表示** | 選択を切り替えることなく、ヒエラルキーウィンドウでオブジェクトを点滅させて場所を示します |
+| **Focus** | 📋    | **インスペクターでフォーカス** | オブジェクトを選択し、即座に **インスペクター** にフォーカスを合わせます。すぐにスクリプトを編集したい場合に便利です |
+| **Frame** | 🎥    | **シーンでフレーム表示** | オブジェクトを選択し、**シーンビューのカメラ** をそのオブジェクトが画面に収まるように移動させます |
 
 ---
 
-## 🛠️ Toolbar Features
+## 🛠️ ツールバーの機能
 
-The toolbar provides additional controls for managing the reference view:
+ツールバーには、参照ビューを管理するための追加コントロールがあります。
 
-**Refresh Button** (`🔄`): Re-scan the current scene to update the reference list. Useful after making changes to your scene.
+**リフレッシュボタン** (`🔄`): 現在のシーンを再スキャンして参照リストを更新します。シーンに変更を加えた後に有効です。
 
-**Select All Button** (`👁️`): Selects all referenced GameObjects in the Hierarchy at once. Useful for batch operations.
+**すべて選択ボタン** (`👁️`): ヒエラルキー内で参照されているすべての GameObject を一度に選択します。バッチ処理を行う際に便利です。
 
-**List/Grouped Toggle** (`📁` / `📄`): Switch between flat list view and grouped script view.
-
----
-
-## 💡 Practical Use Cases
-
-### Before Refactoring
-
-**Question**: "Which objects will break if I rename or delete this event?"
-
-**Answer**: Open the Finder to see all references before making changes. Update each reference accordingly.
+**List/Grouped 切り替え** (`📁` / `📄`): フラットなリスト表示とスクリプトごとのグループ表示を切り替えます。
 
 ---
 
-### Debugging
+## 💡 具体的なユースケース
 
-**Problem**: "My event isn't firing as expected."
+### リファクタリングの前
 
-**Solution**: Use the Finder to verify that references exist on active GameObjects. Check the status indicators (🟢/🔴) to ensure objects are enabled.
+**問い**: 「このイベントの名前を変更したり削除したりした場合、どのオブジェクトが壊れるだろうか？」
 
----
-
-### Cleanup & Optimization
-
-**Goal**: "Remove unused events to clean up the project."
-
-**Process**: Open the Finder for each event. If it shows "0 References", the event is safe to delete from that scene.
+**答え**: 変更を加える前にファインダーを開いてすべての参照を確認し、それに応じて各参照を更新します。
 
 ---
 
-### Team Documentation
+### デバッグ
 
-**Need**: "Document which systems use specific events for team members."
+**問題**: 「イベントが期待通りに発行されない。」
 
-**Result**: The Finder provides a complete list of event usage that can be screenshotted or documented.
-
----
-
-## ❓ Troubleshooting
-
-### No References Found
-
-**Possible Causes**:
-
-- The event is not used in the current scene
-- References exist in other scenes (Finder only scans active scene)
-- Event is used only through code via `AddListener()` (not detectable by Reflection scan)
-- References exist in prefabs that aren't instantiated in the scene
-
-**Solution**: Check other scenes or use Unity's built-in "Find References in Scene" on the event asset.
+**解決策**: ファインダーを使用して、アクティブな GameObject 上に参照が存在することを確認します。ステータスインジケーター (🟢/🔴) をチェックして、オブジェクトが有効であることを確認してください。
 
 ---
 
-### Inactive References
+### クリーンアップと最適化
 
-**Cause**: GameObject is disabled in the hierarchy.
+**目標**: 「未使用のイベントを削除してプロジェクトを整理したい。」
 
-**Impact**: The event binding exists but won't trigger until the GameObject is enabled.
-
-**Action**: Enable the GameObject or verify this is intentional behavior (e.g., pooled objects).
+**プロセス**: 各イベントについてファインダーを開きます。「0 References」と表示されていれば、そのシーンからそのイベントを安全に削除できます。
 
 ---
 
-### Reference Count Mismatch
+### チームでのドキュメント化
 
-**Common Reasons**:
+**ニーズ**: 「特定のイベントをどのシステムが使用しているかをチームメンバーに共有したい。」
 
-- Each prefab instance counts as a separate reference
-- Multiple fields in the same script each count as individual references
-- Disabled GameObjects are included in the count (check status icons)
+**結果**: ファインダーはイベントの使用状況の完全なリストを提供します。これをスクリーンショットに撮ったり、ドキュメントに記載したりできます。
 
 ---
 
-## 📖 Workflow Example
+## ❓ トラブルシューティング
 
-**Scenario**: You're refactoring the damage system and need to change the `OnPlayerDamaged` event.
+### 参照が見つからない
 
-**Step 1**: Open the Game Event Editor
+**考えられる原因**:
 
-**Step 2**: Find `OnPlayerDamaged` event → Click 🔍 icon
+- そのイベントが現在のシーンで使用されていない
+- 他のシーンに参照が存在する（ファインダーはアクティブなシーンのみをスキャンします）
+- イベントが `AddListener()` などのコード経由でのみ使用されている（リフレクションスキャンでは検出できません）
+- シーン内にインスタンス化されていないプレハブ内に参照が存在する
 
-**Step 3**: Review the Finder results:
+**解決策**: 他のシーンを確認するか、イベントアセットに対して Unity 標準の「Find References in Scene」を使用してください。
+
+---
+
+### 無効な参照 (Inactive References)
+
+**原因**: GameObject がヒエラルキーで非アクティブになっています。
+
+**影響**: イベントバインディングは存在しますが、GameObject が有効になるまでトリガーされません。
+
+**アクション**: GameObject を有効にするか、これが意図した動作（例：オブジェクトプーリングなど）であることを確認してください。
+
+---
+
+### 参照カウントの不一致
+
+**よくある理由**:
+
+- 各プレハブインスタンスは個別の参照としてカウントされます
+- 同じスクリプト内の複数のフィールドは、それぞれ個別の参照としてカウントされます
+- 非アクティブな GameObject もカウントに含まれます（ステータスアイコンを確認してください）
+
+---
+
+## 📖 ワークフローの例
+
+**シナリオ**: ダメージシステムをリファクタリングしており、`OnPlayerDamaged` イベントを変更する必要がある場合。
+
+**ステップ 1**: Game Event Editor を開く
+
+**ステップ 2**: `OnPlayerDamaged` イベントを探し、🔍 アイコンをクリック
+
+**ステップ 3**: ファインダーの結果を確認する:
 
 ```
 3 References Found:
@@ -193,35 +193,35 @@ The toolbar provides additional controls for managing the reference view:
 └─ DeathScreen (Script) - Inactive 🔴
 ```
 
-**Step 4**: Use Quick Actions to navigate to each reference:
+**ステップ 4**: クイックアクションを使用して各参照に移動する:
 
-- Click 🔍 **Ping** to locate in Hierarchy
-- Click 📋 **Focus** to open in Inspector
-- Update each reference as needed
+- 🔍 **Ping** をクリックしてヒエラルキーでの場所を特定
+- 📋 **Focus** をクリックしてインスペクターで開く
+- 必要に応じて各参照を更新
 
-**Step 5**: Safely complete refactoring knowing all usage points
+**ステップ 5**: すべての使用箇所を把握した上で、安全にリファクタリングを完了する
 
 ---
 
-## 🔗 Related Tools
+## 🔗 関連ツール
 
-**Finder vs Editor**:
+**ファインダー vs エディタ**:
 
-| Tool                                            | Scope                   | Best For                        |
+| ツール | スコープ | 最適な用途 |
 | ----------------------------------------------- | ----------------------- | ------------------------------- |
-| **[Game Event Editor](./game-event-editor.md)** | All events in project   | Browse and manage event library |
-| **Game Event Finder** (this tool)               | Single event references | Impact analysis and debugging   |
+| **[Game Event Editor](./game-event-editor.md)** | プロジェクト内の全イベント | イベントライブラリの閲覧と管理 |
+| **Game Event Finder** (本ツール) | 単一イベントの参照 | 影響分析とデバッグ |
 
-:::tip Pro Tip
-Always check the Finder before deleting or renaming an event. Even events showing "0 References" in the current scene might be used in other scenes or through code-based listeners.
+:::tip プロのヒント
+イベントを削除またはリネームする前には、必ずファインダーで確認してください。現在のシーンで「0 References」と表示されていても、他のシーンやコードベースのリスナーで使用されている可能性があります。
 :::
 
-:::info Scope Limitation
-The Finder scans the **active scene only**. To check references across multiple scenes:
+:::info スコープの制限
+ファインダーは **アクティブなシーンのみ** をスキャンします。複数のシーンにわたる参照を確認するには：
 
-1. Open each scene individually
-2. Run the Finder in each one
-3. Compile results manually
+1. 各シーンを個別に開く
+2. それぞれでファインダーを実行する
+3. 結果を手動でまとめる
 
-For true project-wide asset search, use Unity's built-in "Find References in Scene" feature on the event asset itself.
+プロジェクト全体でのアセット検索を行うには、イベントアセット自体に対して Unity 標準の「Find References in Scene」機能を使用してください。
 :::

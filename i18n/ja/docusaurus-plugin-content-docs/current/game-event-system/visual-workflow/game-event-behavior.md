@@ -1,5 +1,5 @@
 ﻿---
-sidebar_label: 'Configure Game Event'
+sidebar_label: 'ゲームイベント構成'
 sidebar_position: 5
 ---
 
@@ -11,69 +11,68 @@ import TabItem from '@theme/TabItem';
 
 # Game Event Behavior
 
-Define **what happens** when an event fires. Unlike traditional events that execute blindly, this system lets you attach conditions, delays, loops, and visual actions directly to the event asset itself.
+イベントが発火したときに**何が起こるか**を定義します。盲目的に実行される従来のイベントとは異なり、このシステムでは、条件、遅延、ループ、およびビジュアルアクションをイベントアセット自体に直接アタッチできます。
 
 ![Game Event Behavior Window](/img/game-event-system/visual-workflow/game-event-behavior/behavior-window-full.png)
 
 ---
 
-## 🚀 Opening the Behavior Window
+## 🚀 Behaviorウィンドウを開く
 
-Access from the **[Game Event Editor](./game-event-editor.md)**:
+**[Game Event Editor](./game-event-editor.md)**からアクセス:
 ```
-Game Event Editor → Click Behavior Button (colored pill) on any event row
+Game Event Editor → 任意のイベント行のBehaviorボタン(カラーピル)をクリック
 ```
 
-**Button Color States**:
+**ボタンの色の状態**:
 
-| Color    | Icon | Meaning                    | Details                                      |
+| 色    | アイコン | 意味                    | 詳細                                      |
 | -------- | ---- | -------------------------- | -------------------------------------------- |
-| 🟢 Green  | ✓    | Configured (Inspector)     | Has UnityEvent actions in Manager            |
-| 🔵 Blue   | ▶    | Runtime Active (Play Mode) | Has code-based listeners via `AddListener()` |
-| 🟡 Orange | ⚠    | Not Configured             | No actions or listeners                      |
+| 🟢 緑  | ✓    | 構成済み(インスペクター)     | ManagerにUnityEventアクションあり            |
+| 🔵 青   | ▶    | 実行時アクティブ(プレイモード) | `AddListener()`を介したコードベースのリスナーあり |
+| 🟡 オレンジ | ⚠    | 未構成             | アクションまたはリスナーなし                      |
 
-**Button Label**: Shows event type signature (e.g., `<void>`, `<int>`, `<GameObject, DamageInfo>`)
+**ボタンラベル**: イベント型シグネチャを表示(例: `<void>`、`<int>`、`<GameObject, DamageInfo>`)
 
 ---
 
-## 📋 Window Overview
+## 📋 ウィンドウ概要
 
-The Behavior Window has four main sections:
+Behaviorウィンドウには4つの主要セクションがあります:
 
-1. **Event Information** - Identity confirmation (name, category, GUID)
-2. **Action Condition** - Visual logic tree (execution gate)
-3. **Event Action** - UnityEvent callbacks (what to execute)
-4. **Schedule Configuration** - Timing controls (delays, loops, persistence)
+1. **Event Information** - 識別確認(名前、カテゴリ、GUID)
+2. **Action Condition** - ビジュアルロジックツリー(実行ゲート)
+3. **Event Action** - UnityEventコールバック(実行内容)
+4. **Schedule Configuration** - タイミングコントロール(遅延、ループ、永続性)
 
 ---
 
 ## 1️⃣ Event Information
 
-Read-only summary confirming you're editing the correct event.
+正しいイベントを編集していることを確認する読み取り専用の要約。
 
 ![Event Information](/img/game-event-system/visual-workflow/game-event-behavior/behavior-info.png)
 
-**Displayed Data**:
-- **Event Name**: Asset name
-- **Category**: Organizational group
-- **GUID**: Unique internal identifier (preserved across renames)
+**表示データ**:
+- **Event Name**: アセット名
+- **Category**: 組織グループ
+- **GUID**: 一意の内部識別子(リネーム間で保持)
 
-:::tip Why GUID Matters
-The GUID ensures references stay intact even if you rename the event. This is why safe renaming works in the Editor!
+:::tip GUIDが重要な理由
+GUIDは、イベントの名前を変更してもリファレンスが無傷のままであることを保証します。これがEditorでの安全なリネーミングが機能する理由です!
 :::
 
 ---
 
-## 2️⃣ Action Condition (Execution Gate)
+## 2️⃣ Action Condition(実行ゲート)
 
-**The Logic Engine**: Actions only execute if these conditions evaluate to `TRUE`.
+**ロジックエンジン**: これらの条件が`TRUE`と評価された場合にのみアクションが実行されます。
 
 ![Action Condition Section](/img/game-event-system/visual-workflow/game-event-behavior/behavior-condition.png)
 
-### What It Does
+### 動作内容
 
-Controls **whether actions execute** based on runtime values:
-
+実行時の値に基づいて**アクションが実行されるかどうか**を制御します:
 ```mermaid
 graph LR
 
@@ -82,234 +81,231 @@ graph LR
     classDef action fill:#334155,stroke:#020617,stroke-width:2px,color:#ffffff
     classDef ignore fill:#020617,stroke:#000000,stroke-width:2px,color:#9ca3af,font-style:italic
 
-    A("Event Raise()"):::event
-    B(🔎 Check Conditions):::condition
+    A("イベントRaise()"):::event
+    B(🔎 条件をチェック):::condition
 
-    C(✅ Execute Actions):::action
-    D(🚫 Ignore / No Execution):::ignore
+    C(✅ アクションを実行):::action
+    D(🚫 無視/実行なし):::ignore
 
     A --> B
     B -->|TRUE| C
     B -->|FALSE| D
-
 ```
 
 
 
-### Visual Logic Tree
+### ビジュアルロジックツリー
 
-Build complex boolean logic **without code** using:
+**コードなし**で複雑なブール論理を構築:
 
-- **Groups**: Combine conditions with AND/OR logic
-- **Comparisons**: Individual checks (e.g., `Health < 20`)
-- **Nesting**: Groups inside groups (unlimited depth)
+- **グループ**: AND/ORロジックで条件を結合
+- **比較**: 個別チェック(例: `Health < 20`)
+- **ネスト**: グループ内のグループ(無制限の深さ)
 
-### Performance
+### パフォーマンス
 
-:::tip Zero Reflection Overhead
-Conditions compile to **Expression Trees** at initialization. They run as fast as hand-written C# code!
+:::tip ゼロリフレクションオーバーヘッド
+条件は初期化時に**Expression Tree**にコンパイルされます。手書きのC#コードと同じ速さで実行されます!
 :::
 
-### Learn More
+### 詳細を学ぶ
 
-The Visual Condition Tree is a powerful system with many features:
+ビジュアル条件ツリーは多くの機能を持つ強力なシステムです:
 
-- **4 Source Types**: Event Argument, Scene Type, Random, Constant
-- **10 Comparison Operators**: Numeric, String, Collection checks
-- **Bool Method Support**: Use custom `bool` methods as conditions
-- **Drag & Drop Reordering**: Organize logic visually
-- **Type Validation**: Auto-detects incompatible comparisons
+- **4つのソースタイプ**: イベント引数、シーン型、ランダム、定数
+- **10の比較演算子**: 数値、文字列、コレクションチェック
+- **Boolメソッドサポート**: カスタム`bool`メソッドを条件として使用
+- **ドラッグ&ドロップ並べ替え**: ロジックを視覚的に整理
+- **型検証**: 互換性のない比較を自動検出
 
-**📖 Complete Guide**: **[Visual Condition Tree](./visual-condition-tree.md)**
+**📖 完全ガイド**: **[Visual Condition Tree](./visual-condition-tree.md)**
 
 ---
 
-## 3️⃣ Event Action (Callback Layer)
+## 3️⃣ Event Action(コールバックレイヤー)
 
-The **Action** defines the Unity callbacks that execute once an event is triggered and all conditions are met.
+**Action**は、イベントがトリガーされ、すべての条件が満たされた後に実行されるUnityコールバックを定義します。
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-behavior/behavior-action.png)
 
-### 🧩 Understanding the UnityEvent Field
+### 🧩 UnityEventフィールドの理解
 
-The system leverages Unity's native **UnityEvent** architecture, ensuring seamless integration with your existing MonoBehaviours and UI components.
+システムはUnityのネイティブ**UnityEvent**アーキテクチャを活用し、既存のMonoBehaviourやUIコンポーネントとのシームレスな統合を保証します。
 
 ------
 
-#### 🔘 For Parameterless Events (`GameEvent`)
+#### 🔘 パラメータなしイベント(`GameEvent`)の場合
 
-*Standard trigger-only logic.*
+*標準トリガーのみのロジック。*
 
-| Type      | Backend Field       | Compatibility                            |
+| タイプ      | バックエンドフィールド       | 互換性                            |
 | --------- | ------------------- | ---------------------------------------- |
-| **Logic** | `UnityEvent (void)` | 🟢 Accepts any **zero-parameter** method. |
+| **ロジック** | `UnityEvent (void)` | 🟢 任意の**ゼロパラメータ**メソッドを受け入れます。 |
 
-**Example:** OnGameStart ➔ AudioManager.PlayBGM(), UI.FadeIn()
+**例:** OnGameStart ➔ AudioManager.PlayBGM()、UI.FadeIn()
 
 ------
 
-#### 🔢 For Single Parameter Events (`GameEvent<T>`)
+#### 🔢 シングルパラメータイベント(`GameEvent<T>`)の場合
 
-*Payload-driven logic. Passes data directly to the listener.*
+*ペイロード駆動ロジック。リスナーにデータを直接渡します。*
 
-| Type      | Backend Field   | Compatibility                                       |
+| タイプ      | バックエンドフィールド   | 互換性                                       |
 | --------- | --------------- | --------------------------------------------------- |
-| **Logic** | `UnityEvent<T>` | 🟡 Accepts methods with **one parameter** of type T. |
+| **ロジック** | `UnityEvent<T>` | 🟡 型Tの**1つのパラメータ**を持つメソッドを受け入れます。 |
 
-**Example:** OnHealthChanged(float) ➔ HealthBar.UpdateFill(float)
+**例:** OnHealthChanged(float) ➔ HealthBar.UpdateFill(float)
 
 ------
 
-#### 👥 For Sender Events (`GameEvent<TSender, TArgs>`)
+#### 👥 Senderイベント(`GameEvent<TSender, TArgs>`)の場合
 
-*Context-aware logic. Passes both the source and the data payload.*
+*コンテキスト認識ロジック。ソースとデータペイロードの両方を渡します。*
 
-| Type      | Backend Field                | Compatibility                              |
+| タイプ      | バックエンドフィールド                | 互換性                              |
 | --------- | ---------------------------- | ------------------------------------------ |
-| **Logic** | `UnityEvent<TSender, TArgs>` | 🔵 Accepts methods with **two parameters**. |
+| **ロジック** | `UnityEvent<TSender, TArgs>` | 🔵 **2つのパラメータ**を持つメソッドを受け入れます。 |
 
-**Example:** OnDamage(GameObject, int) ➔ VFXManager.SpawnAt(GameObject.pos), Popup.Show(int)
+**例:** OnDamage(GameObject, int) ➔ VFXManager.SpawnAt(GameObject.pos)、Popup.Show(int)
 
-:::info **Native Integration**
-Because we use **Native UnityEvents**, you can assign listeners directly in the Inspector or via code using AddListener(). It supports both **Static** and **Dynamic** calls.
+:::info **ネイティブ統合**
+**ネイティブUnityEvents**を使用するため、インスペクターで直接リスナーを割り当てるか、AddListener()を使用してコードで割り当てることができます。**静的**および**動的**呼び出しの両方をサポートします。
 :::
 
-:::tip **Signature Matching**
-The inspector UI will automatically filter the method list to only show functions that match the event's signature, preventing runtime errors.
+:::tip **シグネチャマッチング**
+インスペクターUIは、イベントのシグネチャに一致する関数のみを表示するようにメソッドリストを自動的にフィルタリングし、実行時エラーを防ぎます。
 :::
 
 ------
 
-### ➕ Adding Actions (Workflow)
+### ➕ アクションの追加(ワークフロー)
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-behavior/behavior-action-add.png)
 
-Follow these three simple steps to connect your logic via the Unity Inspector.
+Unityインスペクターを介してロジックを接続するための3つの簡単なステップに従ってください。
 
-#### 1️⃣ Assign Target Object
+#### 1️⃣ ターゲットオブジェクトを割り当て
 
-**Drag and drop** the GameObject or Component that contains your logic into the **Object** slot.
+ロジックを含むGameObjectまたはComponentを**Object**スロットに**ドラッグ&ドロップ**します。
 
-- 🖱️ **Action:** Drag from Hierarchy ➔ Drop into the empty slot.
-- 📦 **Result:** The field now references the specific instance of your script.
+- 🖱️ **アクション:** HierarchyからドラッグしてEmptyスロットにドロップ。
+- 📦 **結果:** フィールドがスクリプトの特定のインスタンスを参照するようになります。
 
-#### 2️⃣ Select Callback Method
+#### 2️⃣ コールバックメソッドを選択
 
-Click the **Function Dropdown** to browse all public methods available on the assigned object.
+**Function Dropdown**をクリックして、割り当てられたオブジェクトで利用可能なすべてのパブリックメソッドを参照します。
 
-- 🔍 **Action:** Click No Function ➔ Navigate to your Script/Component.
-- ⚡ **Tip:** Only methods that match the **Event Signature** (e.g., void, int) will appear at the top for easy selection.
+- 🔍 **アクション:** No Functionをクリック ➔ スクリプト/コンポーネントに移動。
+- ⚡ **ヒント:** **イベントシグネチャ**(例: void、int)に一致するメソッドのみが簡単に選択できるように上部に表示されます。
 
-#### 3️⃣ Define Parameter Mapping
+#### 3️⃣ パラメータマッピングを定義
 
-Decide whether to use the event's live data or a fixed value.
+イベントのライブデータを使用するか、固定値を使用するかを決定します。
 
-- ⚖️ **Dynamic Call:** Uses the **runtime value** sent by the event (e.g., the actual damage dealt).
-- ⚙️ **Static Parameters:** Uses a **fixed value** you define manually in the Inspector.
+- ⚖️ **Dynamic Call:** イベントによって送信される**実行時の値**を使用します(例: 実際に与えられたダメージ)。
+- ⚙️ **Static Parameters:** インスペクターで手動で定義した**固定値**を使用します。
 
 ------
 
-### 💡 Dynamic vs. Static: Which one to choose?
+### 💡 Dynamic vs Static: どちらを選ぶ?
 
-| Mode        | Visual Icon | Best For...                                                  |
+| モード        | ビジュアルアイコン | 最適な用途...                                                  |
 | ----------- | ----------- | ------------------------------------------------------------ |
-| **Dynamic** | 🚀           | Real-time data (e.g., Updating a Health Bar with current HP). |
-| **Static**  | 📌           | Fixed triggers (e.g., Logging "Button Clicked" to the console). |
+| **Dynamic** | 🚀           | リアルタイムデータ(例: 現在のHPでHealth Barを更新)。 |
+| **Static**  | 📌           | 固定トリガー(例: コンソールに「Button Clicked」をログ記録)。 |
 
-:::tip **Pro Tip**
-In the dropdown, **Dynamic** methods are always listed at the **top** of the menu. If you don't see your method there, check if the parameter types match exactly!
+:::tip **プロのヒント**
+ドロップダウンでは、**Dynamic**メソッドは常にメニューの**上部**にリストされます。そこにメソッドが表示されない場合は、パラメータ型が正確に一致しているか確認してください!
 :::
 
 ---
 
-### Dynamic vs Static Functions
+### Dynamic vs Static関数
 
-**Dynamic** (with event data):
+**Dynamic**(イベントデータ付き):
 ```csharp
-// Receives event parameter(s)
+// イベントパラメータを受け取る
 public void TakeDamage(float amount) {
     health -= amount;
 }
 
-// For Sender events
+// Senderイベントの場合
 public void OnDamageReceived(GameObject attacker, DamageInfo info) {
-    // Use both sender and args
+    // senderとargsの両方を使用
 }
 ```
 
-**Static** (ignores event data):
+**Static**(イベントデータを無視):
 ```csharp
-// No parameters needed
+// パラメータ不要
 public void PlaySound() {
     audioSource.Play();
 }
 ```
 
-**When to Use Each**:
+**それぞれを使用するタイミング**:
 
-| Use Dynamic When            | Use Static When        |
+| Dynamicを使用する場合            | Staticを使用する場合        |
 | --------------------------- | ---------------------- |
-| You need the event's data   | Just need notification |
-| Processing float/int values | Playing sounds/effects |
-| Checking sender reference   | Triggering animations  |
-| Data-driven reactions       | State changes          |
+| イベントのデータが必要   | 通知のみが必要 |
+| float/int値の処理 | サウンド/エフェクトの再生 |
+| Sender参照の確認   | アニメーションのトリガー  |
+| データ駆動の反応       | 状態変更          |
 
 ---
 
-### Multiple Actions & Priority
+### 複数のアクション&優先度
 
-**Add Multiple**: Click + repeatedly to add more actions.
+**複数追加**: +を繰り返しクリックしてアクションを追加。
 
-**Execution Order**: Top to bottom.
+**実行順序**: 上から下へ。
 
-**Reordering**: Drag the ☰ handle on the left of each action.
+**並べ替え**: 各アクションの左側にある☰ハンドルをドラッグ。
 
-**Example**:
-
+**例**:
 ```csharp
 📜 LogDamageEvent() ➔ 
-    🥇 First (Metadata/Logging)
+    🥇 最初(メタデータ/ログ記録)
 🎵 PlayHitSound() ➔ 
-    🥈 Second (Audio/VFX Feedback)
+    🥈 2番目(オーディオ/VFXフィードバック)
 📊 UpdateHealthBar(float) ➔ 
-    🥉 Third (UI/Visual Representation)
+    🥉 3番目(UI/ビジュアル表現)
 🏁 CheckDeathCondition() ➔ 
-    🏆 Final (Game State Logic)
+    🏆 最後(ゲーム状態ロジック)
 ```
 
 ---
 
-### Clear All Actions
+### すべてのアクションをクリア
 
-Click **"Clear All"** button (top-right) to remove all actions at once.
+**「Clear All」**ボタン(右上)をクリックして、すべてのアクションを一度に削除。
 
-⚠️ **Shows confirmation**: "Are you sure?"
+⚠️ **確認を表示**: 「本当によろしいですか?」
 
 ---
 
 ## 4️⃣ Schedule Configuration
 
-The **Schedule** layer determines **when** and **how often** your actions are executed after an event is raised.
+**Schedule**レイヤーは、イベントが発火した後、アクションが**いつ**、**どのくらいの頻度で**実行されるかを決定します。
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-behavior/behavior-schedule.png)
 
 <Tabs>
-<TabItem value="delay" label="⏱️ Action Delay" default>
+<TabItem value="delay" label="⏱️ アクション遅延" default>
 
-### Action Delay
+### アクション遅延
 
-**Time Offset.** Introduces a gap between the event trigger and the actual execution.
+**時間オフセット。** イベントトリガーと実際の実行の間にギャップを導入します。
 
-- 🕒 **Value:** float (Seconds)
-- 🎯 **Purpose:** Synchronize with animations, VFX, or delayed game logic.
+- 🕒 **値:** float(秒)
+- 🎯 **目的:** アニメーション、VFX、または遅延ゲームロジックと同期。
 
-**How It Works:**
+**動作方法:**
 
-1. 🔔 **Event Raised** ➔ The signal is received.
-2. ⏳ **Delaying** ➔ System waits for the specified X seconds.
-3. 🔍 **Condition Check** ➔ Re-validates conditions *after* the wait.
-4. 🚀 **Execution** ➔ Actions fire only if conditions still pass.
-
+1. 🔔 **イベント発火** ➔ シグナルが受信されます。
+2. ⏳ **遅延中** ➔ システムが指定されたX秒間待機します。
+3. 🔍 **条件チェック** ➔ 待機*後*に条件を再検証します。
+4. 🚀 **実行** ➔ 条件がまだ満たされている場合にのみアクションが発火します。
 ```mermaid
 graph LR
     classDef event fill:#1e40af,stroke:#0f172a,stroke-width:2px,color:#ffffff,font-weight:bold
@@ -317,52 +313,51 @@ graph LR
     classDef decision fill:#334155,stroke:#020617,stroke-width:2px,color:#ffffff
     classDef action fill:#0f766e,stroke:#042f2e,stroke-width:2px,color:#ffffff
 
-    A(🔔 Event Raise):::event --> B(⏱ Wait: Action Delay):::wait
-    B --> C(🔍 Check Conditions):::decision
-    C -- "Pass" --> D(🚀 Execute Actions):::action
-    C -. "Fail" .-> E((❌))
+    A(🔔 イベントRaise):::event --> B(⏱ 待機: アクション遅延):::wait
+    B --> C(🔍 条件をチェック):::decision
+    C -- "パス" --> D(🚀 アクションを実行):::action
+    C -. "失敗" .-> E((❌))
     style E fill:none,stroke:#475569,color:#475569
 ```
 
 </TabItem>
 
-<TabItem value="interval" label="🔄 Repeat Interval">
+<TabItem value="interval" label="🔄 繰り返し間隔">
 
-### Repeat Interval
+### 繰り返し間隔
 
-**Automatic Looping.** Enables the event to re-fire periodically without manual intervention.
+**自動ループ。** 手動介入なしにイベントを定期的に再発火できるようにします。
 
-- 🕒 **Parameter:** float (Seconds)
-- 🔄 **Logic:** Determines the "tick rate" of the repeat cycle.
+- 🕒 **パラメータ:** float(秒)
+- 🔄 **ロジック:** 繰り返しサイクルの「ティックレート」を決定します。
 
-**Value Mapping:**
+**値のマッピング:**
 
-- 0.0s ➔ 🚫 **Disabled** (Single-shot execution)
-- \> 0s ➔ 🔁 **Active Loop** (Executes every X seconds)
+- 0.0s ➔ 🚫 **無効**(1回のみの実行)
+- \> 0s ➔ 🔁 **アクティブループ**(X秒ごとに実行)
 
-:::info **Interaction with Delay**
-If both **Delay** and **Interval** are set, the first execution respects the Delay, and subsequent repeats follow the Interval.
+:::info **遅延との相互作用**
+**Delay**と**Interval**の両方が設定されている場合、最初の実行はDelayを尊重し、その後の繰り返しはIntervalに従います。
 :::
 
 </TabItem>
 
-<TabItem value="count" label="🔢 Repeat Count">
+<TabItem value="count" label="🔢 繰り返し回数">
 
-### Repeat Count
+### 繰り返し回数
 
-**Lifecycle Control.** Limits the number of times an event can repeat.
+**ライフサイクルコントロール。** イベントが繰り返すことができる回数を制限します。
 
-**Configuration Guide:**
+**構成ガイド:**
 
-| Value | Behavior            | Total Executions        |
+| 値 | 動作            | 総実行回数        |
 | ----- | ------------------- | ----------------------- |
-| 0     | **No Repeats**      | 1 (Initial only)        |
-| N     | **Finite Loop**     | 1 + N                   |
-| -1    | **Infinite Loop** ♾️ | Until stopped/destroyed |
+| 0     | **繰り返しなし**      | 1(初回のみ)        |
+| N     | **有限ループ**     | 1 + N                   |
+| -1    | **無限ループ** ♾️ | 停止/破棄されるまで |
 
-**UI Indicator:**
-When set to -1, a **↺ Reset** button appears. Click it to quickly revert the count back to 1.
-
+**UIインジケーター:**
+-1に設定すると、**↺ Reset**ボタンが表示されます。クリックすると、カウントを1にすばやく戻します。
 ```mermaid
 graph LR
     classDef event fill:#1e40af,stroke:#0f172a,stroke-width:2px,color:#ffffff,font-weight:bold
@@ -371,25 +366,24 @@ graph LR
     classDef decision fill:#334155,stroke:#020617,stroke-width:2px,color:#ffffff
     classDef system fill:#020617,stroke:#000000,stroke-width:2px,color:#ffffff
 
-    A("🔔 Event Raise()"):::event --> B(🚀 Execute Actions):::action
-    B --> C([⏱ Wait: Repeat Interval]):::wait
-    C --> D(🔄 Repeat?):::decision
+    A("🔔 イベントRaise()"):::event --> B(🚀 アクションを実行):::action
+    B --> C([⏱ 待機: 繰り返し間隔]):::wait
+    C --> D(🔄 繰り返し?):::decision
     
-    D -- "Count > 0 <br/> or -1" --> B
-    D -- "Count == 0" --> E(🏁 Done):::system
+    D -- "Count > 0 <br/> または -1" --> B
+    D -- "Count == 0" --> E(🏁 完了):::system
     linkStyle 3 stroke:#f59e0b,stroke-width:2px,stroke-dasharray: 5 5
 ```
 
 </TabItem>
 
-<TabItem value="persistent" label="🛡️ Persistent Event">
+<TabItem value="persistent" label="🛡️ 永続イベント">
 
-### Persistent Event
+### 永続イベント
 
-**Scene Survival.** Determines if the event object survives when a new Unity scene is loaded.
+**シーン生存。** 新しいUnityシーンがロードされたときにイベントオブジェクトが生き残るかどうかを決定します。
 
-🔳 **Unchecked (Default):** Event is destroyed on scene load (Standard behavior).
-
+🔳 **未チェック(デフォルト):** イベントはシーンロード時に破棄されます(標準動作)。
 ```mermaid
 graph LR
 
@@ -398,25 +392,24 @@ graph LR
     classDef transition fill:#7c2d12,stroke:#431407,stroke-width:2px,color:#ffffff
     classDef cleanup fill:#020617,stroke:#000000,stroke-width:2px,color:#ffffff
 
-    subgraph Scene_A [Region: Scene A Active]
+    subgraph Scene_A [領域: シーンAアクティブ]
         direction LR
-        A(🖼️ Scene A):::sceneA --> B(🔔 Event Raise):::sceneA
-        B --> C(🚀 Execute Actions):::action
+        A(🖼️ シーンA):::sceneA --> B(🔔 イベントRaise):::sceneA
+        B --> C(🚀 アクションを実行):::action
     end
     style Scene_A fill:none,stroke:#1e40af,stroke-dasharray: 5 5
 
-    C -- "🚚 Scene Transition" --> D(🔄 Load Scene B):::transition
+    C -- "🚚 シーン遷移" --> D(🔄 シーンBをロード):::transition
 
-    subgraph Scene_B [Region: Scene B / Cleanup]
+    subgraph Scene_B [領域: シーンB/クリーンアップ]
         direction LR
-        D --> E(♻️ Event Unloaded):::cleanup
-        E --> F(🧹 Listeners Removed):::cleanup
+        D --> E(♻️ イベントアンロード):::cleanup
+        E --> F(🧹 リスナー削除):::cleanup
     end
     style Scene_B fill:none,stroke:#475569,stroke-dasharray: 5 5
 ```
 
-☑️ **Checked:** Behaves like DontDestroyOnLoad.
-
+☑️ **チェック:** DontDestroyOnLoadのように動作します。
 ```mermaid
 graph LR
 
@@ -426,35 +419,35 @@ graph LR
     classDef persistence fill:#b45309,stroke:#020617,stroke-width:2px,color:#ffffff,font-weight:bold
     classDef success fill:#0f766e,stroke:#042f2e,stroke-width:2px,color:#ffffff
 
-    subgraph Scene_A [Region: Scene A Active]
+    subgraph Scene_A [領域: シーンAアクティブ]
         direction LR
-        A(🖼️ Scene A):::sceneA --> B(🔔 Event Raise):::sceneA
-        B --> C(🚀 Execute Actions):::action
+        A(🖼️ シーンA):::sceneA --> B(🔔 イベントRaise):::sceneA
+        B --> C(🚀 アクションを実行):::action
     end
     style Scene_A fill:none,stroke:#1e40af,stroke-dasharray: 5 5
 
-    C -- "✨ DontDestroyOnLoad" --> D(🚚 Loading Scene B):::transition
+    C -- "✨ DontDestroyOnLoad" --> D(🚚 シーンBをロード中):::transition
 
-    subgraph Scene_B [Region: Scene B - Still Alive]
+    subgraph Scene_B [領域: シーンB - まだ生きている]
         direction LR
-        D --> E(🛡️ Event Persisted):::persistence
-        E --> F(💎 Listeners Remain):::persistence
-        F --> G(🔥 Ready to Raise):::success
+        D --> E(🛡️ イベント永続化):::persistence
+        E --> F(💎 リスナー残存):::persistence
+        F --> G(🔥 Raise準備完了):::success
     end
     style Scene_B fill:none,stroke:#0f766e,stroke-dasharray: 5 5
 ```
 
-**Best Use Cases:**
+**最適な使用例:**
 
-| ✅ Use Persistent For       | ❌ Don't Use For             |
+| ✅ 永続を使用する場合       | ❌ 使用しない場合             |
 | -------------------------- | --------------------------- |
-| 🎵 **Global BGM Manager**   | 🏰 Level-Specific Puzzles    |
-| 💾 **Save/Load System**     | 👾 Scene-Specific AI Pathing |
-| 🏆 **Achievement Trackers** | 🖼️ Local Menu Animations     |
-| 🌐 **Multiplayer State**    | 🔦 Temporary Room Lighting   |
+| 🎵 **グローバルBGMマネージャー**   | 🏰 レベル固有のパズル    |
+| 💾 **セーブ/ロードシステム**     | 👾 シーン固有のAIパス |
+| 🏆 **実績トラッカー** | 🖼️ ローカルメニューアニメーション     |
+| 🌐 **マルチプレイヤー状態**    | 🔦 一時的な部屋の照明   |
 
-:::warning **⚠️ Critical: Dependency Injection**
-Persistent events **cannot** maintain references to scene-specific objects after a transition. You must re-bind new scene objects to the persistent event via **Dependency Injection** or a **Service Locator** after OnSceneLoaded.
+:::warning **⚠️ 重要: 依存性注入**
+永続イベントは、遷移後にシーン固有のオブジェクトへの参照を維持**できません**。OnSceneLoaded後に**依存性注入**または**サービスロケーター**を介して、新しいシーンオブジェクトを永続イベントに再バインドする必要があります。
 :::
 
 </TabItem>
@@ -462,91 +455,91 @@ Persistent events **cannot** maintain references to scene-specific objects after
 
 ---
 
-## ❓ Troubleshooting
+## ❓ トラブルシューティング
 
-### Actions Not Executing
+### アクションが実行されない
 
-**Problem**: Event fires but nothing happens.
+**問題**: イベントが発火するが何も起こらない。
 
-**Checklist**:
+**チェックリスト**:
 
-✅ **Check Conditions**:
+✅ **条件を確認**:
 ```
-1. Are conditions enabled? (toggle in condition section)
-2. Do conditions evaluate to TRUE?
-3. Test condition logic - see Visual Condition Tree guide
-4. Add Debug.Log() to verify values
-```
-
-✅ **Check Actions**:
-```
-1. Is UnityEvent field empty? Add actions!
-2. Is target GameObject destroyed?
-3. Is target Component disabled?
-4. Check Console for errors
+1. 条件が有効になっているか?(条件セクションで切り替え)
+2. 条件がTRUEと評価されるか?
+3. 条件ロジックをテスト - Visual Condition Treeガイドを参照
+4. Debug.Log()を追加して値を確認
 ```
 
-✅ **Check Schedule**:
+✅ **アクションを確認**:
 ```
-1. Is Action Delay too long?
-2. Is Repeat Interval causing confusion?
-3. Is event Persistent when it shouldn't be?
+1. UnityEventフィールドが空か?アクションを追加!
+2. ターゲットGameObjectが破棄されているか?
+3. ターゲットComponentが無効になっているか?
+4. エラーについてコンソールを確認
+```
+
+✅ **スケジュールを確認**:
+```
+1. アクション遅延が長すぎるか?
+2. 繰り返し間隔が混乱を引き起こしているか?
+3. イベントが不適切に永続化されているか?
 ```
 
 ---
 
-### "Field Not Found" Warning
+### 「Field Not Found」警告
 
-**Problem**: `Field 'IntGameEventAction' not found.`
+**問題**: `Field 'IntGameEventAction' not found.`
 
-**Cause**: Event type missing its binding code.
+**原因**: イベント型がバインディングコードを欠いている。
 
-**Solution**:
+**解決策**:
 
-Click **"Force Rebuild All (Fix Missing Bindings)"** button.
+**「Force Rebuild All (Fix Missing Bindings)」**ボタンをクリック。
 
-This regenerates all binding fields:
+これによりすべてのバインディングフィールドが再生成されます:
 ```
 Assets/TinyGiantsData/GameEventSystem/CodeGen/Basic/
-└─ IntGameEvent.cs (regenerated with binding field)
+└─ IntGameEvent.cs (バインディングフィールド付きで再生成)
 ```
 
-**After Compilation**: Reopen Behavior Window.
+**コンパイル後**: Behaviorウィンドウを再度開く。
 
 ---
 
-### Actions Fire Multiple Times
+### アクションが複数回発火する
 
-**Problem**: Actions execute more than expected.
+**問題**: アクションが予想以上に実行される。
 
-**Common Causes**:
+**一般的な原因**:
 
-**Cause 1: Repeat Settings**
+**原因1: 繰り返し設定**
 ```
-Check:
-- Repeat Interval > 0?
-- Repeat Count > 0?
+確認:
+- 繰り返し間隔 > 0?
+- 繰り返し回数 > 0?
 
-If yes, event is looping (intentional or accidental)
-```
-
-**Cause 2: Multiple Event Raises**
-```
-Event fires multiple times in code:
-  OnHealthChanged.Raise(newHealth);  ← Called repeatedly
-
-Solution: Ensure event only raises when needed
+はいの場合、イベントはループしています(意図的または偶発的)
 ```
 
-**Cause 3: Multiple Listeners**
+**原因2: 複数のイベントRaise**
 ```
-Same action added multiple times in UnityEvent
+イベントがコード内で複数回発火:
+  OnHealthChanged.Raise(newHealth);  ← 繰り返し呼び出される
 
-Solution: Check action list, remove duplicates
+解決策: イベントが必要なときにのみ発火することを確認
+```
+
+**原因3: 複数のリスナー**
+```
+UnityEventに同じアクションが複数回追加されている
+
+解決策: アクションリストを確認し、重複を削除
 ```
 
 ---
 
-:::tip Next Steps
-Now that you understand event behaviors, explore the **[Visual Condition Tree](./visual-condition-tree.md)** to master advanced conditional logic. Or jump to **[Flow Editor](../flow-graph/game-event-node-editor.md)** to build event orchestrations!
+:::tip 次のステップ
+イベントビヘイビアを理解したので、**[Visual Condition Tree](./visual-condition-tree.md)**を探索して高度な条件ロジックをマスターしてください。または**[Flow Editor](../flow-graph/game-event-node-editor.md)**にジャンプしてイベントオーケストレーションを構築しましょう!
 :::

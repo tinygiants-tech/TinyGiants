@@ -1,110 +1,110 @@
 ﻿---
-sidebar_label: 'Community & Support'
+sidebar_label: '커뮤니티 및 지원'
 sidebar_position: 3
 ---
 
-# Community & Support
+# 커뮤니티 및 지원 (Community & Support)
 
-## 💌 A Note from the Developer
+## 💌 개발자의 메시지
 
-Hello! I'm the creator behind **TinyGiants**, and I want to share the heart behind this tool.
+안녕하세요! **TinyGiants**의 개발자입니다. 이 도구에 담긴 진심을 여러분과 나누고 싶습니다.
 
-As an indie developer, I learned that the Event System is the **nervous system of any game**—it touches everything. Early in my career, I battled endless "spaghetti code": events scattered across dozens of scripts, mysterious sound triggers, and UI windows that opened for reasons I couldn't trace.
+인디 개발자로서 저는 이벤트 시스템이 **모든 게임의 신경계**와 같아서 모든 요소에 관여한다는 것을 배웠습니다. 경력 초기에는 끝없는 '스파게티 코드'와 싸워야 했습니다. 수십 개의 스크립트에 흩어져 있는 이벤트들, 출처를 알 수 없는 사운드 트리거, 이유도 모른 채 열리는 UI 창들 때문에 고생하곤 했죠.
 
-I tried existing solutions, but each had compromises:
-- **Visual-only tools** were great for organization but lacked coding flexibility.
-- **Code-heavy frameworks** offered power but became impossible to visualize.
-- **Performance** was often sacrificed for convenience.
+기존의 해결책들을 시도해 보았지만, 각각 한계가 있었습니다.
+- **시각적 전용 도구**는 정리에 좋았지만 코딩의 유연성이 부족했습니다.
+- **코드 중심의 프레임워크**는 강력했지만 시각화가 불가능했습니다.
+- **성능**은 편의를 위해 희생되는 경우가 많았습니다.
 
-### The Solution I Built
-I created the tool I always wished existed—one that delivers:
+### 제가 구축한 해결책
+저는 제가 항상 존재하기를 바랐던 도구를 직접 만들었습니다. 다음을 제공하는 도구입니다:
 
-| 🎨 Visual Management               | ⚡ Code Control                     | 🚀 Zero Overhead              |
+| 🎨 시각적 관리               | ⚡ 코드 제어                     | 🚀 오버헤드 제로              |
 | --------------------------------- | ---------------------------------- | ---------------------------- |
-| Organization and flow at a glance | Complex logic and full flexibility | Production-ready performance |
+| 조직화 및 흐름을 한눈에 파악 | 복잡한 로직과 완벽한 유연성 | 상용화 수준의 성능 보장 |
 
-### The TinyGiants Vision
-**TinyGiants** represents my commitment to creating professional-grade tools for the Unity community. The Game Event System is my flagship product—the first of many high-quality solutions designed to empower developers.
+### TinyGiants의 비전
+**TinyGiants**는 유니티 커뮤니티를 위해 전문가급 도구를 만들겠다는 저의 약속을 상징합니다. 게임 이벤트 시스템(Game Event System)은 저의 플래그십 제품이며, 개발자들에게 힘을 실어주기 위해 설계된 고품질 솔루션 중 첫 번째 결과물입니다.
 
-When you choose this tool, you're not just purchasing a plugin; you're joining a journey of continuous improvement. I'm here to support your project as if it were my own.
+이 도구를 선택하는 것은 단순한 플러그인 구매가 아닙니다. 지속적인 개선의 여정에 동참하는 것입니다. 저는 여러분의 프로젝트를 저의 프로젝트처럼 생각하며 지원하겠습니다.
 
-*Happy coding,*
+*즐거운 코딩 되세요,*
 **[Tiny Giants]**
 
 ------
 
-## 🤝 Get Support
+## 🤝 지원 받기
 
-I'm here to ensure your success. Whether you've hit a bug, need architecture advice, or just want to discuss implementation patterns, there are multiple ways to connect.
+여러분의 성공을 돕기 위해 최선을 다하겠습니다. 버그를 발견했거나, 아키텍처 조언이 필요하거나, 구현 패턴에 대해 논의하고 싶을 때 언제든지 연락할 수 있는 여러 방법이 있습니다.
 
-### 💬 Discord Community (Recommended)
+### 💬 디스코드 커뮤니티 (권장)
 
-The **fastest way** to get help and connect with other developers.
+도움을 받고 다른 개발자들과 소통할 수 있는 **가장 빠른 방법**입니다.
 
-**Why join?**
+**참여해야 하는 이유:**
 
-- Real-time answers from myself and experienced community members
-- Early access to roadmap updates and beta features
-- 24/7 community support across global timezones
-- Share screenshots, debug together, and learn best practices
+- 개발자 본인 및 경험 많은 커뮤니티 멤버들의 실시간 답변
+- 로드맵 업데이트 및 베타 기능에 대한 조기 액세스
+- 전 세계 시간대를 아우르는 24/7 커뮤니티 지원
+- 스크린샷 공유, 공동 디버깅 및 베스트 프랙티스 학습
 
-**[👉 Join Discord Server](https://discord.tinygiants.tech)**
-
-------
-
-### 📧 Email Support
-
-For private inquiries, business discussions, or sensitive bug reports.
-
-- **Contact**: [support@tinygiants.tech](mailto:support@tinygiants.tech)
-- **Response Time**: Within 24-48 hours
+**[👉 디스코드 서버 참여하기](https://discord.tinygiants.tech)**
 
 ------
 
-### 🎮 Unity Forum
+### 📧 이메일 지원
 
-Join the conversation in my official Unity Forum thread.
+비공개 문의, 비즈니스 논의 또는 민감한 버그 보고가 필요한 경우 이용해 주세요.
 
-**[👉 Visit Forum Thread](https://forum.unity.com/your-thread-link)**
+- **연락처**: [support@tinygiants.tech](mailto:support@tinygiants.tech)
+- **응답 시간**: 24-48시간 이내
 
 ------
 
-## 🗺️ Roadmap & Your Voice Matters
+### 🎮 유니티 포럼 (Unity Forum)
 
-This is a **living plugin**—your feedback directly shapes future development.
+공식 유니티 포럼 스레드에서 대화에 참여하세요.
 
-### Share Your Ideas
+**[👉 포럼 스레드 방문하기](https://forum.unity.com/your-thread-link)**
 
-Have a feature request or improvement suggestion? I want to hear it!
+------
 
-- Post in the #ges-features channel on Discord
-- Vote on upcoming features in community polls
-- Participate in priority discussions
+## 🗺️ 로드맵 및 사용자 피드백의 중요성
 
-### What's Coming Next
+이것은 **살아있는 플러그인**입니다. 여러분의 피드백이 향후 개발 방향을 직접 결정합니다.
 
-I publish the development roadmap and run feature polls exclusively on Discord. Join to see what's in the pipeline and influence what gets built next.
+### 아이디어 공유
 
-:::tip Lifetime License Guarantee 
+기능 요청이나 개선 제안이 있으신가요? 여러분의 의견을 듣고 싶습니다!
 
-Your purchase includes **lifetime updates** to the Game Event System. All future versions, improvements, and new features are **completely free**—no subscriptions again.
+- 디스코드의 #ges-features 채널에 게시해 주세요.
+- 커뮤니티 투표를 통해 예정된 기능에 투표해 주세요.
+- 우선순위 논의에 참여해 주세요.
+
+### 향후 계획
+
+개발 로드맵을 게시하고 기능 투표를 진행하는 것은 디스코드에서만 독점적으로 이루어집니다. 진행 상황을 확인하고 다음에 무엇이 만들어질지에 영향을 주려면 참여해 보세요.
+
+:::tip 평생 라이선스 보장 
+
+구매 시 게임 이벤트 시스템(Game Event System)의 **평생 업데이트**가 포함됩니다. 향후 모든 버전, 개선 사항 및 신기능은 **완전 무료**이며, 추가 구독료는 전혀 없습니다.
 
 :::
 
 ------
 
-## ❤️ Enjoying the Plugin?
+## ❤️ 플러그인이 마음에 드시나요?
 
-If the Game Event System has saved you time, cleaned up your codebase, or made your project more maintainable, please consider sharing your experience.
+게임 이벤트 시스템이 여러분의 시간을 절약해 주었거나, 코드베이스를 정리해 주었거나, 프로젝트의 유지보수성을 높여주었다면 여러분의 경험을 공유해 주세요.
 
-### Leave a Review
+### 리뷰 남기기
 
-As a solo developer, **reviews are essential** to the plugin's growth. A 5-star rating helps other developers discover the tool and allows me to dedicate more resources to updates and innovation.
+1인 개발자로서 **리뷰는 플러그인 성장에 필수적**입니다. 별 5개 평점은 다른 개발자들이 이 도구를 발견하는 데 도움을 주며, 제가 업데이트와 혁신에 더 많은 리소스를 투자할 수 있게 해줍니다.
 
-**[🌟 Rate on Asset Store](https://assetstore.unity.com/packages/slug/your-package-id)**
+**[🌟 에셋 스토어에서 평가하기](https://assetstore.unity.com/packages/slug/your-package-id)**
 
 ------
 
-**Thank you for being part of the TinyGiants journey!**
+**TinyGiants의 여정에 함께해 주셔서 감사합니다!**
 
-*Together, I'm building better tools for better games.*
+*더 나은 게임을 위한 더 나은 도구를 함께 만들어 갑시다.*

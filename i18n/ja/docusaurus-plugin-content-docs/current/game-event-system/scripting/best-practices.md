@@ -1,130 +1,130 @@
 ﻿---
-sidebar_label: 'Execute & Practices'
+sidebar_label: '実行順序とベストプラクティス'
 
 sidebar_position: 4
 ---
 
 import Tabs from '@theme/Tabs'; import TabItem from '@theme/TabItem';
 
-# Execution Order & Best Practices
+# 実行順序とベストプラクティス (Execution Order & Best Practices)
 
-Understanding how GameEvent executes callbacks and manages event flow is crucial for building reliable, performant event-driven systems. This guide covers execution order, common patterns, pitfalls, and optimization strategies.
+GameEventがどのようにコールバックを実行し、イベントフローを管理するかを理解することは、信頼性が高くパフォーマンスの良いイベント駆動型システムを構築するために不可欠です。このガイドでは、実行順序、一般的なパターン、注意点、および最適化戦略について説明します。
 
 ------
 
-## 🎯 Execution Order
+## 🎯 実行順序
 
-### Visual Timeline
+### ビジュアルタイムライン
 
-When `myEvent.Raise()` is called, execution follows this precise order:
+`myEvent.Raise()` が呼び出されると、実行は以下の厳密な順序に従います：
 
 ```text
 myEvent.Raise() 🚀
       │
-      ├── 1️⃣ Basic Listeners (FIFO Order)
+      ├── 1️⃣ 基本リスナー (FIFO順: 先入れ先出し)
       │      │
       │      ├─► OnUpdate() 📝
-      │      │      ✓ Executed
+      │      │      ✓ 実行済み
       │      │
       │      └─► OnRender() 🎨
-      │             ✓ Executed
+      │             ✓ 実行済み
       │
-      ├── 2️⃣ Priority Listeners (High → Low)
+      ├── 2️⃣ 優先度付きリスナー (高 → 低)
       │      │
       │      ├─► [Priority 100] Critical() ⚡
-      │      │      ✓ Executed First
+      │      │      ✓ 最初に実行
       │      │
       │      ├─► [Priority 50] Normal() 📊
-      │      │      ✓ Executed Second
+      │      │      ✓ 二番目に実行
       │      │
       │      └─► [Priority 0] LowPriority() 📌
-      │             ✓ Executed Last
+      │             ✓ 最後に実行
       │
-      ├── 3️⃣ Conditional Listeners (Priority + Condition)
+      ├── 3️⃣ 条件付きリスナー (優先度 + 条件)
       │      │
       │      └─► [Priority 10] IfHealthLow() 💊
       │             │
-      │             ├─► Condition Check: health < 20?
-      │             │      ├─► ✅ True → Execute Listener
-      │             │      └─► ❌ False → Skip Listener
+      │             ├─► 条件チェック: health < 20?
+      │             │      ├─► ✅ True → リスナーを実行
+      │             │      └─► ❌ False → リスナーをスキップ
       │             │
-      │             └─► (Next conditional checked...)
+      │             └─► (次の条件付きリスナーをチェック...)
       │
-      ├── 4️⃣ Persistent Listeners (Cross-Scene)
+      ├── 4️⃣ 常駐リスナー (シーンを跨ぐ)
       │      │
       │      └─► GlobalLogger() 📋
-      │             ✓ Always Executes (DontDestroyOnLoad)
+      │             ✓ 常に実行 (DontDestroyOnLoad)
       │
-      ├── 5️⃣ Trigger Events (Parallel - Fan Out) 🌟
+      ├── 5️⃣ トリガーイベント (並列 - ファンアウト) 🌟
       │      │
       │      ├─────► lightOnEvent.Raise() 💡
-      │      │          (Executes independently)
+      │      │          (独立して実行)
       │      │
       │      ├─────► soundEvent.Raise() 🔊
-      │      │          (Executes independently)
+      │      │          (独立して実行)
       │      │
       │      └─────► particleEvent.Raise() ✨
-      │                 (Executes independently)
+      │                 (独立して実行)
       │
-      │      ⚠️ If one fails, others still execute
+      │      ⚠️ 1つが失敗しても、他は実行されます
       │
-      └── 6️⃣ Chain Events (Sequential - Strict Order) 🔗
+      └── 6️⃣ チェーンイベント (直列 - 厳格な順序) 🔗
              │
              └─► fadeOutEvent.Raise() 🌑
-                    ✓ Success
+                    ✓ 成功
                     │
-                    ├─► ⏱️ Wait (duration/delay)
+                    ├─► ⏱️ 待機 (期間/遅延)
                     │
                     └─► loadSceneEvent.Raise() 🗺️
-                           ✓ Success
+                           ✓ 成功
                            │
-                           ├─► ⏱️ Wait (duration/delay)
+                           ├─► ⏱️ 待機 (期間/遅延)
                            │
                            └─► fadeInEvent.Raise() 🌕
-                                  ✓ Success
+                                  ✓ 成功
                                   
-                                  🛑 If ANY step fails → Chain STOPS
+                                  🛑 いずれかのステップが失敗 → チェーン停止
 ```
 
 ------
 
-### Execution Characteristics
+### 実行特性
 
-| Stage                     | Pattern               | Timing                  | Failure Behavior        | Use Case                    |
+| ステージ | パターン | タイミング | 失敗時の挙動 | ユースケース |
 | ------------------------- | --------------------- | ----------------------- | ----------------------- | --------------------------- |
-| **Basic Listeners**       | Sequential            | Same frame, synchronous | Continue to next        | Standard callbacks          |
-| **Priority Listeners**    | Sequential (sorted)   | Same frame, synchronous | Continue to next        | Ordered processing          |
-| **Conditional Listeners** | Sequential (filtered) | Same frame, synchronous | Skip if false, continue | State-dependent logic       |
-| **Persistent Listeners**  | Sequential            | Same frame, synchronous | Continue to next        | Cross-scene systems         |
-| **Trigger Events**        | **Parallel**          | Same frame, independent | Others unaffected       | Side effects, notifications |
-| **Chain Events**          | **Sequential**        | Multi-frame, blocking   | **Chain stops**         | Cutscenes, sequences        |
+| **基本リスナー** | 直列 | 同フレーム、同期 | 次へ進む | 標準的なコールバック |
+| **優先度付きリスナー** | 直列 (ソート済み) | 同フレーム、同期 | 次へ進む | 順序指定が必要な処理 |
+| **条件付きリスナー** | 直列 (フィルタ済み) | 同フレーム、同期 | Falseならスキップし次へ | 状態依存のロジック |
+| **常駐リスナー** | 直列 | 同フレーム、同期 | 次へ進む | シーンを跨ぐシステム |
+| **トリガーイベント** | **並列** | 同フレーム、独立 | 他には影響しない | 副作用、通知 |
+| **チェーンイベント** | **直列** | 複数フレーム、ブロッキング | **チェーン停止** | カットシーン、シーケンス |
 
 ------
 
-### Key Differences Explained
+### 主な違いの解説
 
-<Tabs> <TabItem value="listeners" label="Listeners (1-4)" default>
+<Tabs> <TabItem value="listeners" label="リスナー (1-4)" default>
 
-**Characteristics:**
+**特性:**
 
-- Execute **synchronously** in the current frame
-- Run one after another in defined order
-- Each listener is independent
-- Failure in one listener doesn't stop others
+- 現在のフレームで **同期的に** 実行される
+- 定義された順序で次々と実行される
+- 各リスナーは独立している
+- 1つのリスナーで失敗（例外）が発生しても、他は停止しない
 
-**Example:**
+**例:**
 
 ```csharp
-healthEvent.AddListener(UpdateUI);           // Runs 1st
-healthEvent.AddPriorityListener(SaveGame, 100); // Runs 2nd (higher priority)
+healthEvent.AddListener(UpdateUI);           // 1番目に実行
+healthEvent.AddPriorityListener(SaveGame, 100); // 2番目に実行 (高優先度)
 healthEvent.AddConditionalListener(ShowWarning, 
-    health => health < 20);                  // Runs 3rd (if condition true)
+    health => health < 20);                  // 3番目に実行 (条件がTrueの場合)
 
 healthEvent.Raise(15f);
-// Order: SaveGame() → UpdateUI() → ShowWarning() (if health < 20)
+// 順序: SaveGame() → UpdateUI() → ShowWarning() (health < 20 の場合)
 ```
 
-**Timeline:**
+**タイムライン:**
 
 ```
 🖼️ Frame 1024
@@ -134,22 +134,22 @@ healthEvent.Raise(15f);
 ├─► 🖥️ UpdateUI()          ⏱️ 0.3ms
 └─► ⚠️ ShowWarning()       ⏱️ 0.2ms
 │
-📊 Total Cost: 0.6ms | ⚡ Status: Synchronous (Same Frame)
+📊 合計コスト: 0.6ms | ⚡ ステータス: 同期 (同フレーム)
 ```
 
-</TabItem> <TabItem value="triggers" label="Triggers (5)">
+</TabItem> <TabItem value="triggers" label="トリガー (5)">
 
-**Characteristics:**
+**特性:**
 
-- Execute in **parallel** (fan-out pattern)
-- All triggers fire independently
-- One trigger's failure doesn't affect others
-- Still synchronous, but logically parallel
+- **並列**（ファンアウトパターン）で実行される
+- すべてのトリガーが独立して発行される
+- 1つのトリガーが失敗しても他に影響しない
+- 内部的には同期実行だが、論理的には並列
 
-**Example:**
+**例:**
 
 ```csharp
-// When boss dies, trigger multiple independent events
+// ボス撃破時、複数の独立したイベントをトリガーする
 bossDefeatedEvent.AddTriggerEvent(stopBossMusicEvent, priority: 100);
 bossDefeatedEvent.AddTriggerEvent(playVictoryMusicEvent, priority: 90);
 bossDefeatedEvent.AddTriggerEvent(spawnLootEvent, priority: 50);
@@ -157,119 +157,119 @@ bossDefeatedEvent.AddTriggerEvent(showVictoryUIEvent, priority: 40);
 bossDefeatedEvent.AddTriggerEvent(saveCheckpointEvent, priority: 10);
 
 bossDefeatedEvent.Raise();
-// All 5 events fire, sorted by priority, but independently
-// If spawnLootEvent fails, others still execute
+// 優先度順に5つのイベントがすべて発行されるが、それぞれは独立している
+// もし spawnLootEvent が失敗しても、他は実行される
 ```
 
-**Timeline:**
+**タイムライン:**
 
 ```
 🖼️ Frame 2048
 🚀 bossDefeatedEvent.Raise()
 │
-├─► 🚀 stopBossMusicEvent.Raise()     ✅ Success
-├─► 🚀 playVictoryMusicEvent.Raise()  ✅ Success
-├─► 🚀 spawnLootEvent.Raise()         ❌ Failed! (Exception Isolated)
-├─► 🚀 showVictoryUIEvent.Raise()     ✅ Executed (Resilient)
-└─► 🚀 saveCheckpointEvent.Raise()    ✅ Executed (Resilient)
+├─► 🚀 stopBossMusicEvent.Raise()     ✅ 成功
+├─► 🚀 playVictoryMusicEvent.Raise()  ✅ 成功
+├─► 🚀 spawnLootEvent.Raise()         ❌ 失敗! (例外は分離)
+├─► 🚀 showVictoryUIEvent.Raise()     ✅ 実行済み (耐障害性)
+└─► 🚀 saveCheckpointEvent.Raise()    ✅ 実行済み (耐障害性)
 │
-📊 Result: 4/5 Success | 🛡️ Status: Fault-Tolerant (Isolated Failure)
+📊 結果: 4/5 成功 | 🛡️ ステータス: 耐障害性 (失敗の分離)
 ```
 
-</TabItem> <TabItem value="chains" label="Chains (6)">
+</TabItem> <TabItem value="chains" label="チェーン (6)">
 
-**Characteristics:**
+**特性:**
 
-- Execute **sequentially** with blocking
-- Strict order: A → B → C
-- Supports delays between steps
-- **Entire chain stops** if any step fails
+- ブロッキングを伴う **直列** 実行
+- 厳格な順序: A → B → C
+- ステップ間の遅延をサポート
+- いずれかのステップが失敗すると、**チェーン全体が停止** する
 
-**Example:**
+**例:**
 
 ```csharp
-// Cutscene sequence
+// カットシーンのシーケンス
 cutsceneStartEvent.AddChainEvent(fadeOutEvent, delay: 0f, duration: 1f);
 cutsceneStartEvent.AddChainEvent(hideUIEvent, delay: 0f, duration: 0.5f);
 cutsceneStartEvent.AddChainEvent(playCutsceneEvent, delay: 0f, duration: 5f);
 cutsceneStartEvent.AddChainEvent(fadeInEvent, delay: 0f, duration: 1f);
 cutsceneStartEvent.AddChainEvent(showUIEvent, delay: 0f, duration: 0f);
 
-// Execute the chain
+// チェーンを実行
 cutsceneStartEvent.Raise();
 ```
 
-**Timeline:**
+**タイムライン:**
 
 ```
 🖼️ T+0.0s | Frame 0
 🚀 cutsceneStartEvent.Raise()
-└─► 🎬 fadeOutEvent.Raise()             ✅ Initiated
+└─► 🎬 fadeOutEvent.Raise()             ✅ 開始
 
-        ┆  (Δ 1.0s Delay)
+        ┆  (Δ 1.0s 待機)
         ▼
 🖼️ T+1.0s | Frame 60
-└─► 🖥️ hideUIEvent.Raise()              ✅ Executed
+└─► 🖥️ hideUIEvent.Raise()              ✅ 実行済み
 
-        ┆  (Δ 0.5s Delay)
+        ┆  (Δ 0.5s 待機)
         ▼
 🖼️ T+1.5s | Frame 90
-└─► 🎞️ playCutsceneEvent.Raise()         ✅ Executed
+└─► 🎞️ playCutsceneEvent.Raise()         ✅ 実行済み
 
-        ┆  (Δ 5.0s Delay)
+        ┆  (Δ 5.0s 待機)
         ▼
 🖼️ T+6.5s | Frame 390
-└─► 🎬 fadeInEvent.Raise()              ✅ Executed
+└─► 🎬 fadeInEvent.Raise()              ✅ 実行済み
 
-        ┆  (Δ 1.0s Delay)
+        ┆  (Δ 1.0s 待機)
         ▼
 🖼️ T+7.5s | Frame 450
-└─► 🖥️ showUIEvent.Raise()              ✅ Finalized
+└─► 🖥️ showUIEvent.Raise()              ✅ 完了
 
-📊 Total Timeline: ~7.5s | 🎞️ Total Span: 450 Frames
+📊 合計タイムライン: ~7.5s | 🎞️ 合計期間: 450フレーム
 ```
 
-**Failure Scenario:**
+**失敗シナリオ:**
 
 ```csharp
 🖼️ T+0.0s | Frame 0
-🚀 cutsceneStartEvent.Raise()           ✅ Initiated
+🚀 cutsceneStartEvent.Raise()           ✅ 開始
 
         ┆  (Δ 1.0s)
         ▼
 🖼️ T+1.0s | Frame 60
-🚀 fadeOutEvent.Raise()                 ✅ Executed
+🚀 fadeOutEvent.Raise()                 ✅ 実行済み
 
         ┆  (Δ 0.5s)
         ▼
 🖼️ T+1.5s | Frame 90
-🚀 hideUIEvent.Raise()                  ✅ Executed
+🚀 hideUIEvent.Raise()                  ✅ 実行済み
 
         ┆  (Δ 5.0s)
         ▼
 🖼️ T+6.5s | Frame 390
-🚀 playCutsceneEvent.Raise()            ❌ CRITICAL FAILURE!
+🚀 playCutsceneEvent.Raise()            ❌ 致命的な失敗!
                                         
-        🛑 [ CIRCUIT BREAKER ACTIVE ]
-        ⚠️ Logical chain halted to prevent state desync.
+        🛑 [ サーキットブレーカー作動 ]
+        ⚠️ 状態の同期ズレを防ぐため、論理チェーンが停止しました。
 
-        ⏩ fadeInEvent.Raise()          🚫 NEVER EXECUTED
-        ⏩ showUIEvent.Raise()          🚫 NEVER EXECUTED
+        ⏩ fadeInEvent.Raise()          🚫 実行されません
+        ⏩ showUIEvent.Raise()          🚫 実行されません
 ```
 
 </TabItem> </Tabs>
 
 ------
 
-## 💡 Best Practices
+## 💡 ベストプラクティス
 
-### 1. Listener Management
+### 1. リスナーの管理
 
-#### Always Unsubscribe
+#### 必ず購読を解除する
 
-Memory leaks are the #1 issue with event systems. Always clean up listeners.
+メモリリークは、イベントシステムにおける最大の問題です。必ずリスナーをクリーンアップしてください。
 
-<Tabs> <TabItem value="bad" label="❌ Bad">
+<Tabs> <TabItem value="bad" label="❌ 悪い例">
 
 ```csharp
 public class PlayerController : MonoBehaviour
@@ -281,12 +281,12 @@ public class PlayerController : MonoBehaviour
         onPlayerDeath.AddListener(HandleDeath);
     }
     
-    // Object destroyed but listener remains in memory!
-    // This causes memory leaks and potential crashes
+    // オブジェクトが破棄されても、リスナーがメモリに残る！
+    // これはメモリリークや、潜在的なクラッシュの原因になります
 }
 ```
 
-</TabItem> <TabItem value="good" label="✅ Good">
+</TabItem> <TabItem value="good" label="✅ 良い例">
 
 ```csharp
 public class PlayerController : MonoBehaviour
@@ -300,7 +300,7 @@ public class PlayerController : MonoBehaviour
     
     void OnDisable()
     {
-        // Always unsubscribe to prevent memory leaks
+        // メモリリークを防ぐため、必ず購読を解除する
         onPlayerDeath.RemoveListener(HandleDeath);
     }
     
@@ -315,9 +315,9 @@ public class PlayerController : MonoBehaviour
 
 ------
 
-#### Use OnEnable/OnDisable Pattern
+#### OnEnable/OnDisable パターンの使用
 
-The OnEnable/OnDisable pattern is the recommended approach for Unity.
+Unityでは、OnEnable/OnDisable パターンが推奨されるアプローチです。
 
 ```csharp
 public class HealthUI : MonoBehaviour
@@ -326,58 +326,58 @@ public class HealthUI : MonoBehaviour
     
     void OnEnable()
     {
-        // Subscribe when active
+        // アクティブ時に購読
         healthChangedEvent.AddListener(OnHealthChanged);
     }
     
     void OnDisable()
     {
-        // Unsubscribe when inactive
+        // 非アクティブ時に購読解除
         healthChangedEvent.RemoveListener(OnHealthChanged);
     }
     
     void OnHealthChanged(float newHealth)
     {
-        // Update UI
+        // UIを更新
     }
 }
 ```
 
-**Benefits:**
+**メリット:**
 
-- Automatic cleanup when object is disabled/destroyed
-- Listeners only active when needed
-- Prevents duplicate subscriptions
-- Works with object pooling
+- オブジェクトが無効化/破棄された際に自動的にクリーンアップされる
+- リスナーが必要な時だけアクティブになる
+- 重複した購読を防げる
+- オブジェクトプーリングに対応しやすい
 
 ------
 
-### 2. Schedule Management
+### 2. スケジュール（予約実行）の管理
 
-#### Store Handles for Cancellation
+#### キャンセルのためにハンドルを保存する
 
-Always store `ScheduleHandle` if you need to cancel later.
+後でキャンセルする必要がある場合は、必ず `ScheduleHandle` を保存してください。
 
-<Tabs> <TabItem value="bad" label="❌ Bad">
+<Tabs> <TabItem value="bad" label="❌ 悪い例">
 
 ```csharp
 public class PoisonEffect : MonoBehaviour
 {
     void ApplyPoison()
     {
-        // Can't cancel this later!
+        // 後でこれをキャンセルできない！
         poisonEvent.RaiseRepeating(damagePerTick, 1f, repeatCount: 10);
     }
     
     void CurePoison()
     {
-        // No way to stop the poison!
-        // It will keep ticking for all 10 times
+        // 毒を止める方法がない！
+        // 10回すべてのティックが実行され続けてしまう
     }
 }
 ```
 
-</TabItem> <TabItem value="good" label="✅ Good">
+</TabItem> <TabItem value="good" label="✅ 良い例">
 
 ```csharp
 public class PoisonEffect : MonoBehaviour
@@ -386,7 +386,7 @@ public class PoisonEffect : MonoBehaviour
     
     void ApplyPoison()
     {
-        // Store the handle
+        // ハンドルを保存する
         _poisonHandle = poisonEvent.RaiseRepeating(
             damagePerTick, 
             1f, 
@@ -396,7 +396,7 @@ public class PoisonEffect : MonoBehaviour
     
     void CurePoison()
     {
-        // Can cancel the poison effect
+        // 毒のエフェクトをキャンセルできる
         if (poisonEvent.CancelRepeating(_poisonHandle))
         {
             Debug.Log("Poison cured!");
@@ -405,7 +405,7 @@ public class PoisonEffect : MonoBehaviour
     
     void OnDisable()
     {
-        // Clean up on disable
+        // 無効化時にクリーンアップ
         poisonEvent.CancelRepeating(_poisonHandle);
     }
 }
@@ -415,9 +415,9 @@ public class PoisonEffect : MonoBehaviour
 
 ------
 
-#### Multiple Schedules Pattern
+#### 複数スケジュールのパターン
 
-When managing multiple schedules, use a collection.
+複数のスケジュールを管理する場合は、コレクションを使用します。
 
 ```csharp
 public class BuffManager : MonoBehaviour
@@ -428,13 +428,13 @@ public class BuffManager : MonoBehaviour
     
     public void ApplyBuff(string buffName, float interval, int duration)
     {
-        // Cancel existing buff if any
+        // 既存のバフがあればキャンセル
         if (_activeBuffs.TryGetValue(buffName, out var existingHandle))
         {
             buffTickEvent.CancelRepeating(existingHandle);
         }
         
-        // Apply new buff
+        // 新しいバフを適用
         var handle = buffTickEvent.RaiseRepeating(
             buffName, 
             interval, 
@@ -455,7 +455,7 @@ public class BuffManager : MonoBehaviour
     
     void OnDisable()
     {
-        // Cancel all buffs
+        // すべてのバフをキャンセル
         foreach (var handle in _activeBuffs.Values)
         {
             buffTickEvent.CancelRepeating(handle);
@@ -467,13 +467,13 @@ public class BuffManager : MonoBehaviour
 
 ------
 
-### 3. Trigger and Chain Management
+### 3. トリガーとチェーンの管理
 
-#### Use Handles for Safe Removal
+#### 安全な削除のためにハンドルを使用する
 
-Always use handles to avoid removing other systems' triggers/chains.
+他システムのトリガーやチェーンを誤って削除しないよう、常にハンドルを使用してください。
 
-<Tabs> <TabItem value="bad" label="❌ Risky">
+<Tabs> <TabItem value="bad" label="❌ リスクあり">
 
 ```csharp
 public class DoorSystem : MonoBehaviour
@@ -485,14 +485,14 @@ public class DoorSystem : MonoBehaviour
     
     void Cleanup()
     {
-        // DANGER: Removes ALL triggers to lightOnEvent
-        // Even those registered by other systems!
+        // 危険: lightOnEvent への「すべての」トリガーを削除してしまう
+        // 他のシステムによって登録されたものまで削除される！
         doorOpenEvent.RemoveTriggerEvent(lightOnEvent);
     }
 }
 ```
 
-</TabItem> <TabItem value="good" label="✅ Safe">
+</TabItem> <TabItem value="good" label="✅ 安全">
 
 ```csharp
 public class DoorSystem : MonoBehaviour
@@ -501,13 +501,13 @@ public class DoorSystem : MonoBehaviour
     
     void SetupDoor()
     {
-        // Store the handle
+        // ハンドルを保存
         _lightTriggerHandle = doorOpenEvent.AddTriggerEvent(lightOnEvent);
     }
     
     void Cleanup()
     {
-        // Only removes YOUR specific trigger
+        // 自分自身の特定のトリガーのみを削除する
         doorOpenEvent.RemoveTriggerEvent(_lightTriggerHandle);
     }
 }
@@ -517,20 +517,20 @@ public class DoorSystem : MonoBehaviour
 
 ------
 
-#### Organizing Multiple Triggers/Chains
+#### 複数のトリガー/チェーンの整理
 
-Use a structured approach for complex systems.
+複雑なシステムでは、構造化されたアプローチをとります。
 
 ```csharp
 public class CutsceneManager : MonoBehaviour
 {
-    // Store all handles for cleanup
+    // クリーンアップ用にすべてのハンドルを保持
     private readonly List<ChainHandle> _cutsceneChains = new();
     private readonly List<TriggerHandle> _cutsceneTriggers = new();
     
     void SetupCutscene()
     {
-        // Build cutscene sequence
+        // カットシーンのシーケンスを構築
         var chain1 = startEvent.AddChainEvent(fadeOutEvent, duration: 1f);
         var chain2 = startEvent.AddChainEvent(playVideoEvent, duration: 5f);
         var chain3 = startEvent.AddChainEvent(fadeInEvent, duration: 1f);
@@ -539,7 +539,7 @@ public class CutsceneManager : MonoBehaviour
         _cutsceneChains.Add(chain2);
         _cutsceneChains.Add(chain3);
         
-        // Add parallel triggers for effects
+        // エフェクト用の並列トリガーを追加
         var trigger1 = startEvent.AddTriggerEvent(stopGameplayMusicEvent);
         var trigger2 = startEvent.AddTriggerEvent(hideCrosshairEvent);
         
@@ -549,14 +549,14 @@ public class CutsceneManager : MonoBehaviour
     
     void SkipCutscene()
     {
-        // Clean up all chains
+        // すべてのチェーンをクリーンアップ
         foreach (var chain in _cutsceneChains)
         {
             startEvent.RemoveChainEvent(chain);
         }
         _cutsceneChains.Clear();
         
-        // Clean up all triggers
+        // すべてのトリガーをクリーンアップ
         foreach (var trigger in _cutsceneTriggers)
         {
             startEvent.RemoveTriggerEvent(trigger);
@@ -568,24 +568,24 @@ public class CutsceneManager : MonoBehaviour
 
 ------
 
-### 4. Priority Usage
+### 4. 優先度の使用方法
 
-#### Guidelines for Priority Values
+#### 優先度の値に関するガイドライン
 
-Use a consistent priority scale across your project.
+プロジェクト全体で一貫した優先度スケールを使用してください。
 
 ```csharp
-// Define priority constants
+// 優先度の定数を定義
 public static class EventPriority
 {
-    public const int CRITICAL = 1000;    // Absolutely must run first
-    public const int HIGH = 100;         // Important systems
-    public const int NORMAL = 0;         // Default priority
-    public const int LOW = -100;         // Can run later
-    public const int CLEANUP = -1000;    // Final cleanup tasks
+    public const int CRITICAL = 1000;    // 絶対に最初に実行すべき
+    public const int HIGH = 100;         // 重要なシステム
+    public const int NORMAL = 0;         // デフォルト
+    public const int LOW = -100;         // 後で実行してもよい
+    public const int CLEANUP = -1000;    // 最終的なクリーンアップ
 }
 
-// Usage
+// 使用例
 healthEvent.AddPriorityListener(SavePlayerData, EventPriority.CRITICAL);
 healthEvent.AddPriorityListener(UpdateHealthBar, EventPriority.HIGH);
 healthEvent.AddPriorityListener(PlayDamageSound, EventPriority.NORMAL);
@@ -594,31 +594,31 @@ healthEvent.AddPriorityListener(UpdateStatistics, EventPriority.LOW);
 
 ------
 
-#### Priority Anti-Patterns
+#### 優先度のアンチパターン
 
-<Tabs> <TabItem value="bad" label="❌ Avoid">
+<Tabs> <TabItem value="bad" label="❌ 避けるべき">
 
 ```csharp
-// Don't use random or inconsistent priorities
+// ランダムまたは一貫性のない優先度を使用しない
 healthEvent.AddPriorityListener(SystemA, 523);
 healthEvent.AddPriorityListener(SystemB, 891);
 healthEvent.AddPriorityListener(SystemC, 7);
 
-// Don't overuse priority when order doesn't matter
+// 順序が重要でない場合に優先度を使いすぎない
 uiClickEvent.AddPriorityListener(PlaySound, 50);
 uiClickEvent.AddPriorityListener(PlayParticle, 49);
-// These don't need priority, use basic listeners!
+// これらは優先度は不要です、基本リスナーを使用してください！
 ```
 
-</TabItem> <TabItem value="good" label="✅ Best Practice">
+</TabItem> <TabItem value="good" label="✅ ベストプラクティス">
 
 ```csharp
-// Use priorities only when order matters
-saveGameEvent.AddPriorityListener(ValidateData, 100);   // Must validate first
-saveGameEvent.AddPriorityListener(SerializeData, 50);   // Then serialize
-saveGameEvent.AddPriorityListener(WriteToFile, 0);      // Finally write
+// 順序が重要な時のみ優先度を使用する
+saveGameEvent.AddPriorityListener(ValidateData, 100);   // 最初にバリデーションが必要
+saveGameEvent.AddPriorityListener(SerializeData, 50);   // 次にシリアライズ
+saveGameEvent.AddPriorityListener(WriteToFile, 0);      // 最後に書き込み
 
-// Use basic listeners when order doesn't matter
+// 順序が重要でない場合は基本リスナーを使用する
 buttonClickEvent.AddListener(PlaySound);
 buttonClickEvent.AddListener(ShowFeedback);
 buttonClickEvent.AddListener(LogAnalytics);
@@ -628,20 +628,20 @@ buttonClickEvent.AddListener(LogAnalytics);
 
 ------
 
-### 5. Conditional Listeners
+### 5. 条件付きリスナー
 
-#### Effective Condition Design
+#### 効果的な条件設計
 
-Keep conditions simple and fast.
+条件はシンプルかつ高速に保ってください。
 
-<Tabs> <TabItem value="bad" label="❌ Expensive">
+<Tabs> <TabItem value="bad" label="❌ 重い処理">
 
 ```csharp
-// Don't do expensive operations in conditions
+// 条件の中で重い操作を行わない
 enemySpawnEvent.AddConditionalListener(
     SpawnBoss,
     () => {
-        // Bad: Complex calculations in condition
+        // 悪い例: 条件の中で複雑な計算を行う
         var enemies = FindObjectsOfType<Enemy>();
         var totalHealth = enemies.Sum(e => e.Health);
         var averageLevel = enemies.Average(e => e.Level);
@@ -650,22 +650,22 @@ enemySpawnEvent.AddConditionalListener(
 );
 ```
 
-</TabItem> <TabItem value="good" label="✅ Efficient">
+</TabItem> <TabItem value="good" label="✅ 効率的">
 
 ```csharp
-// Cache state, make conditions simple checks
+// 状態をキャッシュし、条件をシンプルなチェックにする
 private bool _shouldSpawnBoss = false;
 
 void UpdateGameState()
 {
-    // Update cached state occasionally, not every frame
+    // 状態のキャッシュは、毎フレームではなく時々更新する
     _shouldSpawnBoss = enemyManager.TotalHealth < 100 
                     && enemyManager.AverageLevel > 5;
 }
 
 void Setup()
 {
-    // Simple, fast condition check
+    // シンプルで高速な条件チェック
     enemySpawnEvent.AddConditionalListener(
         SpawnBoss,
         () => _shouldSpawnBoss
@@ -677,39 +677,39 @@ void Setup()
 
 ------
 
-## ⚠️ Common Pitfalls
+## ⚠️ よくある落とし穴
 
-### 1. Memory Leaks
+### 1. メモリリーク
 
-**Problem:** Not unsubscribing listeners when objects are destroyed.
+**問題:** オブジェクトが破棄される時に、リスナーの購読を解除していない。
 
-**Symptoms:**
+**症状:**
 
-- Increasing memory usage over time
-- Errors about destroyed objects
-- Callbacks executing on null references
+- 時間経過とともにメモリ使用量が増加する
+- 破棄されたオブジェクトに関するエラーが発生する
+- null参照のオブジェクトに対してコールバックが実行される
 
-**Solution:**
+**解決策:**
 
 ```csharp
-// Always use OnEnable/OnDisable pattern
+// 常に OnEnable/OnDisable パターンを使用する
 void OnEnable() => myEvent.AddListener(OnCallback);
 void OnDisable() => myEvent.RemoveListener(OnCallback);
 ```
 
 ------
 
-### 2. Lost Schedule Handles
+### 2. スケジュールハンドルの紛失
 
-**Problem:** Creating schedules without storing handles.
+**問題:** ハンドルを保存せずにスケジュールを作成している。
 
-**Symptoms:**
+**症状:**
 
-- Cannot cancel repeating events
-- Events continue after object is destroyed
-- Resource waste from unneeded executions
+- 繰り返しイベントをキャンセルできない
+- オブジェクトが破棄された後もイベントが継続する
+- 不要な実行によるリソースの無駄
 
-**Solution:**
+**解決策:**
 
 ```csharp
 private ScheduleHandle _handle;
@@ -727,20 +727,20 @@ void StopTimer()
 
 ------
 
-### 3. Broad Removal Impact
+### 3. 広範囲に及ぶ削除の影響
 
-**Problem:** Using target-based removal instead of handle-based removal.
+**問題:** ハンドルベースの削除ではなく、ターゲットベースの削除（RemoveTriggerEvent(event)など）を使用している。
 
-**Symptoms:**
+**症状:**
 
-- Other systems' triggers/chains get removed unexpectedly
-- Hard-to-debug issues where events stop firing
-- Cross-system coupling and fragility
+- 他のシステムのトリガー/チェーンが予期せず削除される
+- イベントが発行されなくなるという、デバッグが困難な問題
+- システム間の不必要な結合と脆弱性
 
-**Solution:**
+**解決策:**
 
 ```csharp
-// Store handles, remove precisely
+// ハンドルを保存し、ピンポイントで削除する
 private TriggerHandle _myTrigger;
 
 void Setup()
@@ -750,26 +750,26 @@ void Setup()
 
 void Cleanup()
 {
-    eventA.RemoveTriggerEvent(_myTrigger);  // Safe!
+    eventA.RemoveTriggerEvent(_myTrigger);  // 安全！
 }
 ```
 
 ------
 
-### 4. Recursive Event Raises
+### 4. 再帰的なイベント発行
 
-**Problem:** Event listener raises the same event, causing infinite loop.
+**問題:** イベントリスナーが同じイベントを発行し、無限ループを引き起こす。
 
-**Symptoms:**
+**症状:**
 
-- Stack overflow exceptions
-- Unity freezes
-- Exponential execution growth
+- スタックオーバーフロー例外
+- Unityのフリーズ
+- 実行回数の指数関数的な増大
 
-**Example:**
+**例:**
 
 ```csharp
-// ❌ DANGER: Infinite recursion!
+// ❌ 危険: 無限再帰！
 void Setup()
 {
     healthEvent.AddListener(OnHealthChanged);
@@ -777,24 +777,24 @@ void Setup()
 
 void OnHealthChanged(float health)
 {
-    // This triggers OnHealthChanged again!
-    healthEvent.Raise(health - 1);  // ← INFINITE LOOP
+    // これが再び OnHealthChanged をトリガーする！
+    healthEvent.Raise(health - 1);  // ← 無限ループ
 }
 ```
 
-**Solution:**
+**解決策:**
 
 ```csharp
-// ✅ Use a flag to prevent recursion
+// ✅ フラグを使用して再帰を防ぐ
 private bool _isProcessingHealthChange = false;
 
 void OnHealthChanged(float health)
 {
-    if (_isProcessingHealthChange) return;  // Prevent recursion
+    if (_isProcessingHealthChange) return;  // 再帰を防止
     
     _isProcessingHealthChange = true;
     
-    // Safe to raise here now
+    // ここなら安全に発行できる
     if (health <= 0)
     {
         deathEvent.Raise();
@@ -806,31 +806,31 @@ void OnHealthChanged(float health)
 
 ------
 
-## 🚀 Performance Optimization
+## 🚀 パフォーマンスの最適化
 
-### 1. Minimize Listener Count
+### 1. リスナー数を最小限に抑える
 
-Even though the code has been highly optimized, there will still be some overhead for each listener. Consolidate when possible.
+コードは高度に最適化されていますが、各リスナーにはわずかなオーバーヘッドがあります。可能な限りまとめましょう。
 
-<Tabs> <TabItem value="bad" label="❌ Inefficient">
+<Tabs> <TabItem value="bad" label="❌ 非効率">
 
 ```csharp
-// Multiple listeners for related operations
+// 関連する操作に対して複数のリスナーを設定
 healthEvent.AddListener(UpdateHealthBar);
 healthEvent.AddListener(UpdateHealthText);
 healthEvent.AddListener(UpdateHealthIcon);
 healthEvent.AddListener(UpdateHealthColor);
 ```
 
-</TabItem> <TabItem value="good" label="✅ Optimized">
+</TabItem> <TabItem value="good" label="✅ 最適化済み">
 
 ```csharp
-// Single listener handles all UI updates
+// 単一のリスナーですべてのUI更新を処理
 healthEvent.AddListener(UpdateHealthUI);
 
 void UpdateHealthUI(float health)
 {
-    // Batch all UI updates together
+    // すべてのUI更新を一括で行う
     healthBar.value = health / maxHealth;
     healthText.text = $"{health:F0}";
     healthIcon.sprite = GetHealthIcon(health);
@@ -842,42 +842,42 @@ void UpdateHealthUI(float health)
 
 ------
 
-### 2. Avoid Heavy Operations in Listeners
+### 2. リスナー内での重い処理を避ける
 
-Keep listeners lightweight. Move heavy work to coroutines/async.
+リスナーは軽量に保ってください。重い処理はコルーチンや非同期（async）に移動させます。
 
-<Tabs> <TabItem value="bad" label="❌ Blocking">
+<Tabs> <TabItem value="bad" label="❌ ブロッキング">
 
 ```csharp
 void OnDataLoaded(string data)
 {
-    // Bad: Blocks execution for all subsequent listeners
+    // 悪い例: 後続のすべてのリスナーの実行をブロックする
     var parsed = JsonUtility.FromJson<LargeData>(data);
-    ProcessComplexData(parsed);  // Takes 50ms
-    SaveToDatabase(parsed);      // Takes 100ms
+    ProcessComplexData(parsed);  // 50ms かかる
+    SaveToDatabase(parsed);      // 100ms かかる
 }
 ```
 
-</TabItem> <TabItem value="good" label="✅ Async">
+</TabItem> <TabItem value="good" label="✅ 非同期">
 
 ```csharp
 void OnDataLoaded(string data)
 {
-    // Good: Start async processing, don't block
+    // 良い例: 非同期処理を開始し、ブロックしない
     StartCoroutine(ProcessDataAsync(data));
 }
 
 IEnumerator ProcessDataAsync(string data)
 {
-    // Parse
+    // パース
     var parsed = JsonUtility.FromJson<LargeData>(data);
     yield return null;
     
-    // Process
+    // 処理
     ProcessComplexData(parsed);
     yield return null;
     
-    // Save
+    // 保存
     SaveToDatabase(parsed);
 }
 ```
@@ -886,32 +886,32 @@ IEnumerator ProcessDataAsync(string data)
 
 ------
 
-### 3. Cache Delegate Allocations
+### 3. デリゲートの割り当てをキャッシュする
 
-Avoid creating new delegate allocations every frame.
+毎フレーム、新しいデリゲートの割り当てが発生するのを避けます。
 
-<Tabs> <TabItem value="bad" label="❌ Allocations">
+<Tabs> <TabItem value="bad" label="❌ メモリ割り当て">
 
 ```csharp
 void OnEnable()
 {
-    // Creates new delegate allocation every time
+    // 毎回新しいデリゲートが割り当てられる
     updateEvent.AddListener(() => UpdateHealth());
 }
 ```
 
-</TabItem> <TabItem value="good" label="✅ Cached">
+</TabItem> <TabItem value="good" label="✅ キャッシュ済み">
 
 ```csharp
 void OnEnable()
 {
-    // Reuses same method reference, no allocation
+    // 同じメソッド参照を再利用するため、割り当てが発生しない
     updateEvent.AddListener(UpdateHealth);
 }
 
 void UpdateHealth()
 {
-    // Implementation
+    // 実装
 }
 ```
 
@@ -919,44 +919,41 @@ void UpdateHealth()
 
 ------
 
-## 📊 Summary Checklist
+## 📊 概要チェックリスト
 
-Use this checklist when working with `GameEvent`:
+`GameEvent` を使用する際のチェックリストとして活用してください：
 
-### Listener Management
+### リスナーの管理
 
-- Always unsubscribe in OnDisable
-- Use OnEnable/OnDisable pattern
-- Cache delegate references when possible
-- Keep listeners lightweight
+- 必ず OnDisable で購読を解除しているか
+- OnEnable/OnDisable パターンを使用しているか
+- 可能な限りデリゲート参照をキャッシュしているか
+- リスナーを軽量に保っているか
 
-### Schedule Management
+### スケジュール管理
 
-- Store ScheduleHandle when you need cancellation
-- Cancel schedules in OnDisable
-- Use collections for multiple schedules
-- Clean up on object destruction
+- キャンセルが必要な時に ScheduleHandle を保存しているか
+- OnDisable でスケジュールをキャンセルしているか
+- 複数のスケジュールにはコレクションを使用しているか
+- オブジェクト破棄時にクリーンアップしているか
 
-### Trigger/Chain Management
+### トリガー/チェーン管理
 
-- Use handles for safe removal
-- Store handles in collections for cleanup
-- Choose triggers for parallel, chains for sequential
-- Remember to call ExecuteChainEvents() for chains
+- 安全な削除のためにハンドルを使用しているか
+- クリーンアップ用にハンドルをコレクションに保存しているか
+- 並列にはトリガー、直列にはチェーンを正しく選択しているか
+- チェーンの場合、ExecuteChainEvents() を呼び出すことを忘れていないか
 
-### Performance
+### パフォーマンス
 
-- Consolidate related listeners
-- Move heavy work to coroutines/async
-- Use simple, fast conditions
-- Avoid recursive event raises
+- 関連するリスナーを統合しているか
+- 重い処理をコルーチン/非同期に逃がしているか
+- 条件はシンプルで高速か
+- 再帰的なイベント発行を避けているか
 
-### Priority & Conditions
+### 優先度と条件
 
-- Use consistent priority scale
-- Only use priority when order matters
-- Keep conditions simple and cached
-- Document priority dependencies
-
-
-
+- 一貫した優先度スケールを使用しているか
+- 順序が重要な時のみ優先度を使用しているか
+- 条件をシンプルに保ち、キャッシュしているか
+- 優先度の依存関係をドキュメント化しているか

@@ -1,30 +1,30 @@
 {
   "version.label": {
-    "message": "Next",
+    "message": "차기 버전",
     "description": "The label for version current"
   },
   "sidebar.tutorialSidebar.category.🏠 Introduction": {
-    "message": "🏠 Introduction",
+    "message": "🏠 소개",
     "description": "The label for category '🏠 Introduction' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.💎 Visual Workflow": {
-    "message": "💎 Visual Workflow",
+    "message": "💎 비주얼 워크플로",
     "description": "The label for category '💎 Visual Workflow' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.🕸️ Flow Orchestration": {
-    "message": "🕸️ Flow Orchestration",
+    "message": "🕸️ 플로우 오케스트레이션",
     "description": "The label for category '🕸️ Flow Orchestration' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.💻 Runtime API": {
-    "message": "💻 Runtime API",
+    "message": "💻 런타임 API",
     "description": "The label for category '💻 Runtime API' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.🛠 Tools & Support": {
-    "message": "🛠 Tools & Support",
+    "message": "🛠 도구 및 지원",
     "description": "The label for category '🛠 Tools & Support' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.📚 Examples": {
-    "message": "📚 Examples",
+    "message": "📚 예제",
     "description": "The label for category '📚 Examples' in sidebar 'tutorialSidebar'"
   }
 }

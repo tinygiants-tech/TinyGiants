@@ -1,134 +1,134 @@
 ﻿---
-sidebar_label: '04 Custom Sender Event'
+sidebar_label: '04 커스텀 Sender 이벤트'
 sidebar_position: 5
 ---
 
 import VideoGif from '@site/src/components/Video/VideoGif';
 
-# 04 Custom Sender Event: Context-Aware Events
+# 04 커스텀 Sender 이벤트: 컨텍스트 인식 이벤트
 
 <!-- <VideoGif src="/video/game-event-system/04-custom-sender-event.mp4" /> -->
 
-## 📋 Overview
+## 📋 개요
 
-In previous demos, events carried data but were anonymous. In complex games, **context matters**. This demo introduces **Sender-Aware Events** (`GameEvent<TSender, TArgs>`), allowing receivers to know **WHO** triggered the event, enabling context-sensitive logic like "Face the Attacker" or "Display Attacker Profile".
+이전 데모에서 이벤트는 데이터를 전달했지만 익명이었습니다. 복잡한 게임에서는 **컨텍스트가 중요합니다**. 이 데모는 **Sender 인식 이벤트** (`GameEvent<TSender, TArgs>`)를 소개하여 receiver가 **누가** 이벤트를 트리거했는지 알 수 있게 하고, "공격자를 향해 보기" 또는 "공격자 프로필 표시"와 같은 컨텍스트 민감 로직을 가능하게 합니다.
 
-:::tip 💡 What You'll Learn
-- How to create dual-generic events with sender information
-- The difference between GameObject senders and pure C# class senders
-- How receivers can use sender context for spatial and logical reactions
-- When to use sender-aware events vs simple events
+:::tip 💡 배울 내용
+- sender 정보가 있는 이중 제네릭 이벤트를 생성하는 방법
+- GameObject sender와 순수 C# 클래스 sender의 차이점
+- receiver가 공간적 및 논리적 반응을 위해 sender 컨텍스트를 사용하는 방법
+- sender 인식 이벤트 vs 단순 이벤트를 사용해야 할 때
 
 :::
 
 ---
 
-## 🎬 Demo Scene
+## 🎬 데모 씬
 ```
 Assets/TinyGiants/GameEventSystem/Demo/04_CustomSenderTypeEvent/04_CustomSenderTypeEvent.unity
 ```
 
-### Scene Composition
+### 씬 구성
 
-**UI Layer (Canvas):**
-- 🎮 **Three Attack Buttons** - Located at the bottom of the screen
-  - "Raise (Turret Damage)" → Triggers `CustomSenderTypeEventRaiser.RaiseTurretDamage()`
-  - "Raise (Turret2 Damage)" → Triggers `CustomSenderTypeEventRaiser.RaiseTurret2Damage()`
-  - "Raise (System Damage)" → Triggers `CustomSenderTypeEventRaiser.RaiseSystemDamage()`
+**UI 레이어 (Canvas):**
+- 🎮 **세 개의 공격 버튼** - 화면 하단에 위치
+  - "Raise (Turret Damage)" → `CustomSenderTypeEventRaiser.RaiseTurretDamage()` 트리거
+  - "Raise (Turret2 Damage)" → `CustomSenderTypeEventRaiser.RaiseTurret2Damage()` 트리거
+  - "Raise (System Damage)" → `CustomSenderTypeEventRaiser.RaiseSystemDamage()` 트리거
 
-**Game Logic Layer (Demo Scripts):**
-- 📤 **CustomSenderTypeEventRaiser** - GameObject with the raiser script
-  - Manages two physical turrets (Red and Blue) with `GameEvent<GameObject, DamageInfo>`
-  - Handles system-level attacks with `GameEvent<PlayerStats, DamageInfo>`
-  - Controls turret aiming, projectile firing, and event raising
+**게임 로직 레이어 (Demo Scripts):**
+- 📤 **CustomSenderTypeEventRaiser** - raiser 스크립트가 있는 GameObject
+  - `GameEvent<GameObject, DamageInfo>`로 두 개의 물리적 포탑(빨강과 파랑) 관리
+  - `GameEvent<PlayerStats, DamageInfo>`로 시스템 레벨 공격 처리
+  - 포탑 조준, 발사체 발사 및 이벤트 발동 제어
 
-- 📥 **CustomSenderTypeEventReceiver** - GameObject with the receiver script
-  - Listens to both turret and system events through visual binding
-  - Implements sender-aware logic: rotation toward physical senders, profile display for logical senders
+- 📥 **CustomSenderTypeEventReceiver** - receiver 스크립트가 있는 GameObject
+  - 시각적 바인딩을 통해 포탑 및 시스템 이벤트 모두 리스닝
+  - sender 인식 로직 구현: 물리적 sender를 향한 회전, 논리적 sender의 프로필 표시
 
-**Visual Feedback Layer (Demo Objects):**
-- 🎯 **TargetDummy** - The victim capsule in the center
-  - Has a green "visor" indicating its facing direction
-  - Contains Rigidbody for knockback physics
-  - Displays attacker name/info above via TextMeshPro
-- 🔴 **SentryTurret_Red** - Physical attacker on the left
-  - Consists of Head (rotates to aim) and MuzzlePoint (projectile spawn)
-- 🔵 **SentryTurret_Blue** - Physical attacker on the right
-  - Independent aiming and firing system
-- 🔥 **Projectile System** - Visual projectiles with explosion effects
-- 🏠 **Plane** - Ground surface for scene context
-
----
-
-## 🎮 How to Interact
-
-### Step 1: Enter Play Mode
-
-Press the **Play** button in Unity.
-
-### Step 2: Test Different Attack Sources
-
-**Click "Raise (Turret Damage)":**
-- 🎯 Red turret quickly aims at the dummy
-- 🚀 Projectile fires and travels toward target
-- 💥 On impact: 
-  - Dummy **rotates to face the Red turret**
-  - Info text shows: "SenderName: SentryTurret_Red"
-  - Yellow floating text "15" appears
-  - Physics knockback applied
-- 📝 Console logs: `[Sender1] Target acquired. Aiming...` → `[Receiver] Ouch! Hit by SentryTurret_Red.`
-
-**Click "Raise (Turret2 Damage)":**
-- 🎯 Blue turret quickly aims at the dummy
-- 🚀 Projectile fires from the right side
-- 💥 On impact:
-  - Dummy **rotates to face the Blue turret**
-  - Info text shows: "SenderName: SentryTurret_Blue"
-  - Yellow floating text "15" appears
-- 📝 The dummy clearly tracks which turret attacked
-
-**Click "Raise (System Damage)":**
-- 💥 Instant damage (no projectile)
-- 🎯 Dummy **does NOT rotate** (no physical sender to face)
-- Info text shows: "SenderName: DragonSlayer_99"
-  - This is from the `PlayerStats` class, not a GameObject
-- 🟣 Magenta floating text "50!" appears
-- 📹 Camera shake effect (critical damage)
-- 📝 Console logs: `[Receiver] Logical attack received from DragonSlayer_99. FactionID: 1`
+**시각적 피드백 레이어 (Demo Objects):**
+- 🎯 **TargetDummy** - 중앙의 피해자 캡슐
+  - 향하는 방향을 나타내는 녹색 "바이저" 보유
+  - 넉백 물리를 위한 Rigidbody 포함
+  - TextMeshPro를 통해 위에 공격자 이름/정보 표시
+- 🔴 **SentryTurret_Red** - 왼쪽의 물리적 공격자
+  - Head(조준을 위해 회전)와 MuzzlePoint(발사체 생성)로 구성
+- 🔵 **SentryTurret_Blue** - 오른쪽의 물리적 공격자
+  - 독립적인 조준 및 발사 시스템
+- 🔥 **Projectile System** - 폭발 효과가 있는 시각적 발사체
+- 🏠 **Plane** - 씬 컨텍스트를 위한 지면 표면
 
 ---
 
-## 🏗️ Scene Architecture
+## 🎮 상호작용 방법
 
-### Two Types of Sender-Aware Events
+### 1단계: 플레이 모드 진입
 
-This demo showcases the flexibility of the sender system with two distinct scenarios:
+Unity에서 **Play** 버튼을 누릅니다.
 
-#### Scenario A: Physical Sender (GameObject)
+### 2단계: 다양한 공격 소스 테스트
+
+**"Raise (Turret Damage)" 클릭:**
+- 🎯 빨간 포탑이 더미를 빠르게 조준
+- 🚀 발사체가 발사되어 목표를 향해 이동
+- 💥 충돌 시: 
+  - 더미가 **빨간 포탑을 향해 회전**
+  - 정보 텍스트 표시: "SenderName: SentryTurret_Red"
+  - 노란색 떠다니는 텍스트 "15" 표시
+  - 물리 넉백 적용
+- 📝 콘솔 로그: `[Sender1] Target acquired. Aiming...` → `[Receiver] Ouch! Hit by SentryTurret_Red.`
+
+**"Raise (Turret2 Damage)" 클릭:**
+- 🎯 파란 포탑이 더미를 빠르게 조준
+- 🚀 오른쪽에서 발사체 발사
+- 💥 충돌 시:
+  - 더미가 **파란 포탑을 향해 회전**
+  - 정보 텍스트 표시: "SenderName: SentryTurret_Blue"
+  - 노란색 떠다니는 텍스트 "15" 표시
+- 📝 더미가 어떤 포탑이 공격했는지 명확히 추적
+
+**"Raise (System Damage)" 클릭:**
+- 💥 즉시 데미지(발사체 없음)
+- 🎯 더미가 **회전하지 않음**(향할 물리적 sender 없음)
+- 정보 텍스트 표시: "SenderName: DragonSlayer_99"
+  - 이것은 GameObject가 아닌 `PlayerStats` 클래스에서 옴
+- 🟣 마젠타색 떠다니는 텍스트 "50!" 표시
+- 📹 카메라 흔들림 효과(치명적 데미지)
+- 📝 콘솔 로그: `[Receiver] Logical attack received from DragonSlayer_99. FactionID: 1`
+
+---
+
+## 🏗️ 씬 아키텍처
+
+### 두 가지 타입의 Sender 인식 이벤트
+
+이 데모는 두 가지 뚜렷한 시나리오로 sender 시스템의 유연성을 보여줍니다:
+
+#### 시나리오 A: 물리적 Sender (GameObject)
 ```csharp
 GameEvent<GameObject, DamageInfo>
 ```
 
-**Use Case:** When the sender has a physical presence in the scene
-- **Sender Type:** Unity `GameObject` (The Turret)
-- **Context Available:** Transform, position, rotation, components
-- **Receiver Logic:** Spatial reactions (look at, move toward, draw trajectory line)
+**사용 사례:** sender가 씬에서 물리적 존재를 가질 때
+- **Sender 타입:** Unity `GameObject` (포탑)
+- **사용 가능한 컨텍스트:** Transform, position, rotation, 컴포넌트
+- **Receiver 로직:** 공간적 반응(보기, 이동, 궤적선 그리기)
 
-#### Scenario B: Logical Sender (Pure C# Class)
+#### 시나리오 B: 논리적 Sender (순수 C# 클래스)
 ```csharp
 GameEvent<PlayerStats, DamageInfo>
 ```
 
-**Use Case:** When the sender is a data object without scene representation
-- **Sender Type:** Custom C# class `PlayerStats`
-- **Context Available:** Player name, level, faction ID, custom properties
-- **Receiver Logic:** Data-driven reactions (display profile, check faction, apply modifiers)
+**사용 사례:** sender가 씬 표현 없이 데이터 객체일 때
+- **Sender 타입:** 커스텀 C# 클래스 `PlayerStats`
+- **사용 가능한 컨텍스트:** 플레이어 이름, 레벨, 파벌 ID, 커스텀 속성
+- **Receiver 로직:** 데이터 기반 반응(프로필 표시, 파벌 확인, 수정자 적용)
 
 ---
 
-### The PlayerStats Class
+### PlayerStats 클래스
 
-A pure C# class demonstrating that senders don't need to inherit from `MonoBehaviour`:
+sender가 `MonoBehaviour`를 상속할 필요가 없음을 보여주는 순수 C# 클래스:
 ```csharp
 [System.Serializable]
 public class PlayerStats
@@ -146,109 +146,109 @@ public class PlayerStats
 }
 ```
 
-**Key Point:** This proves the event system works with **any serializable type**, not just Unity objects.
+**핵심 포인트:** 이것은 이벤트 시스템이 Unity 객체뿐만 아니라 **모든 직렬화 가능한 타입**과 함께 작동함을 증명합니다.
 
 ---
 
-### Event Definitions
+### 이벤트 정의
 
-Open the **Game Event Editor** window to see the dual-generic events:
+**Game Event Editor** 창을 열어 이중 제네릭 이벤트를 확인하세요:
 
 ![Game Event Editor](/img/game-event-system/examples/04-custom-sender-event/demo-04-editor.png)
 
-**Events in Database:**
+**데이터베이스의 이벤트:**
 
-| Event Name                 | Type                                 | Purpose                      |
+| 이벤트 이름                | 타입                                 | 목적                         |
 | -------------------------- | ------------------------------------ | ---------------------------- |
-| `OnGameObjectDamageInfo`   | `GameEvent<GameObject, DamageInfo>`  | Red turret physical attacks  |
-| `OnGameObjectDamageInfo_1` | `GameEvent<GameObject, DamageInfo>`  | Blue turret physical attacks |
-| `OnPlayerStatsDamageInfo`  | `GameEvent<PlayerStats, DamageInfo>` | System-level logical damage  |
+| `OnGameObjectDamageInfo`   | `GameEvent<GameObject, DamageInfo>`  | 빨간 포탑 물리적 공격        |
+| `OnGameObjectDamageInfo_1` | `GameEvent<GameObject, DamageInfo>`  | 파란 포탑 물리적 공격        |
+| `OnPlayerStatsDamageInfo`  | `GameEvent<PlayerStats, DamageInfo>` | 시스템 레벨 논리적 데미지    |
 
-**Notice the Behavior Column:**
-- First two events show **(GameObject,DamageInfo)** - for physical senders
-- Third event shows **(PlayerStats,DamageInfo)** - for logical senders
+**Behavior 열 주목:**
+- 처음 두 이벤트는 **(GameObject,DamageInfo)** 표시 - 물리적 sender용
+- 세 번째 이벤트는 **(PlayerStats,DamageInfo)** 표시 - 논리적 sender용
 
-These complex generic classes were **automatically generated** by the plugin when creating sender-aware events.
+이러한 복잡한 제네릭 클래스는 sender 인식 이벤트를 생성할 때 플러그인에 의해 **자동으로 생성**되었습니다.
 
-:::note 🔧 Creating Sender Events
+:::note 🔧 Sender 이벤트 생성
 
-When creating events in the Game Event Creator:
+Game Event Creator에서 이벤트를 생성할 때:
 
-1. Set **Event Mode** to **"With Sender"**
-2. **Sender Type**: Choose `GameObject` for physical objects or search for custom classes like `PlayerStats`
-3. **Argument Type**: Select the data payload type (e.g., `DamageInfo`)
-4. The system generates the complete `GameEvent<TSender, TArgs>` class automatically
+1. **Event Mode**를 **"With Sender"**로 설정
+2. **Sender Type**: 물리적 객체의 경우 `GameObject`를 선택하거나 `PlayerStats`와 같은 커스텀 클래스를 검색
+3. **Argument Type**: 데이터 페이로드 타입 선택(예: `DamageInfo`)
+4. 시스템이 완전한 `GameEvent<TSender, TArgs>` 클래스를 자동으로 생성
 
 :::
 
 ---
 
-### Sender Setup (CustomSenderTypeEventRaiser)
+### Sender 설정 (CustomSenderTypeEventRaiser)
 
-Select the **CustomSenderTypeEventRaiser** GameObject in the Hierarchy:
+Hierarchy에서 **CustomSenderTypeEventRaiser** GameObject를 선택하세요:
 
 ![CustomSenderTypeEventRaiser Inspector](/img/game-event-system/examples/04-custom-sender-event/demo-04-inspector.png)
 
-**Turret Configurations:**
+**포탑 구성:**
 
-**Turret 1 (Red):**
+**Turret 1 (빨강):**
 - `Name`: "Sender1"
 - `Attack Event`: `OnGameObjectDamageInfo` (GameObject sender)
-- `Head`: SentryTurret_Red/Head (Transform for aiming)
-- `Muzzle Position`: Head/MuzzlePoint (Transform for projectile spawn)
+- `Head`: SentryTurret_Red/Head (조준용 Transform)
+- `Muzzle Position`: Head/MuzzlePoint (발사체 생성용 Transform)
 
-**Turret 2 (Blue):**
+**Turret 2 (파랑):**
 - `Name`: "Sender2"
 - `Attack Event`: `OnGameObjectDamageInfo_1` (GameObject sender)
 - `Head`: SentryTurret_Blue/Head
 - `Muzzle Position`: Head/MuzzlePoint
 
-**Global System Event:**
+**글로벌 시스템 이벤트:**
 - `Global System Event`: `OnPlayerStatsDamageInfo` (PlayerStats sender)
 
-**Shared Resources:**
+**공유 리소스:**
 - `Hit Target`: TargetDummy (Transform)
-- `Projectile Prefab`: Projectile prefab for visual effect
-- `Muzzle Flash VFX`: Particle system for firing effect
+- `Projectile Prefab`: 시각 효과용 발사체 프리팹
+- `Muzzle Flash VFX`: 발사 효과용 파티클 시스템
 
-**How It Works:**
-1. Button click initiates turret attack sequence
-2. Turret rotates toward target (smooth tracking)
-3. When aligned, projectile spawns and travels
-4. On impact, event is raised with **turret GameObject as sender** and DamageInfo as data
-5. For system damage, a `PlayerStats` instance is created and used as sender
+**작동 방식:**
+1. 버튼 클릭이 포탑 공격 시퀀스 시작
+2. 포탑이 목표를 향해 회전(부드러운 추적)
+3. 정렬되면 발사체가 생성되어 이동
+4. 충돌 시 **포탑 GameObject를 sender로**, DamageInfo를 데이터로 하여 이벤트 발동
+5. 시스템 데미지의 경우 `PlayerStats` 인스턴스가 생성되어 sender로 사용됨
 
 ---
 
-### Receiver Setup (CustomSenderTypeEventReceiver)
+### Receiver 설정 (CustomSenderTypeEventReceiver)
 
-Select the **CustomSenderTypeEventReceiver** GameObject in the Hierarchy:
+Hierarchy에서 **CustomSenderTypeEventReceiver** GameObject를 선택하세요:
 
 ![CustomSenderTypeEventReceiver Inspector](/img/game-event-system/examples/04-custom-sender-event/demo-04-receiver.png)
 
-**Reference Configuration:**
+**참조 구성:**
 - `Floating Text Prefab`: DamageFloatingText (Text Mesh Pro)
-- `Target Renderer`: TargetDummy (Mesh Renderer for flash effect)
-- `Target Rigidbody`: TargetDummy (Rigidbody for physics)
-- `Attacker Info Text`: LogText (Text Mesh Pro for displaying sender name)
+- `Target Renderer`: TargetDummy (플래시 효과용 Mesh Renderer)
+- `Target Rigidbody`: TargetDummy (물리용 Rigidbody)
+- `Attacker Info Text`: LogText (sender 이름 표시용 Text Mesh Pro)
 
-**Behavior Binding:**
+**Behavior 바인딩:**
 
-Two separate receiver methods handle different sender types:
+두 개의 별도 receiver 메서드가 다른 sender 타입을 처리합니다:
 
-| Event                      | Bound Method             | Signature                                    |
+| 이벤트                     | 바인딩된 메서드          | 시그니처                                     |
 | -------------------------- | ------------------------ | -------------------------------------------- |
 | `OnGameObjectDamageInfo`   | `OnTurretAttackReceived` | `void (GameObject sender, DamageInfo args)`  |
 | `OnGameObjectDamageInfo_1` | `OnTurretAttackReceived` | `void (GameObject sender, DamageInfo args)`  |
 | `OnPlayerStatsDamageInfo`  | `OnSystemAttackReceived` | `void (PlayerStats sender, DamageInfo args)` |
 
-**Context-Aware Logic:**
-- **Physical sender:** Uses `sender.transform.position` for spatial rotation
-- **Logical sender:** Uses `sender.playerName` and `sender.level` for display
+**컨텍스트 인식 로직:**
+- **물리적 sender:** 공간적 회전을 위해 `sender.transform.position` 사용
+- **논리적 sender:** 표시를 위해 `sender.playerName`과 `sender.level` 사용
 
 ---
 
-## 💻 Code Breakdown
+## 💻 코드 분석
 
 ### 📤 CustomSenderTypeEventRaiser.cs (Sender)
 ```csharp
@@ -278,13 +278,13 @@ public class CustomSenderTypeEventRaiser : MonoBehaviour
 
     private void Start()
     {
-        // Create a logical sender (no GameObject representation)
+        // 논리적 sender 생성(GameObject 표현 없음)
         _localPlayerStats = new PlayerStats("DragonSlayer_99", 99, 1);
     }
 
     /// <summary>
-    /// Called by Turret Damage button.
-    /// Initiates attack sequence: Aim → Fire → Hit → Raise Event with GameObject sender
+    /// Turret Damage 버튼에 의해 호출됨.
+    /// 공격 시퀀스 시작: Aim → Fire → Hit → GameObject sender로 이벤트 발동
     /// </summary>
     public void RaiseTurretDamage()
     {
@@ -292,7 +292,7 @@ public class CustomSenderTypeEventRaiser : MonoBehaviour
     }
 
     /// <summary>
-    /// Called by Turret2 Damage button.
+    /// Turret2 Damage 버튼에 의해 호출됨.
     /// </summary>
     public void RaiseTurret2Damage()
     {
@@ -314,7 +314,7 @@ public class CustomSenderTypeEventRaiser : MonoBehaviour
         Vector3 hitPos = hitTarget.position;
         DamageInfo info = new DamageInfo(15f, false, DamageType.Physical, hitPos, "Sentry Turret");
 
-        // KEY: Pass the turret's GameObject as sender
+        // 핵심: 포탑의 GameObject를 sender로 전달
         GameObject turretRoot = turret.head.parent.gameObject;
         turret.attackEvent.Raise(turretRoot, info);
         
@@ -322,7 +322,7 @@ public class CustomSenderTypeEventRaiser : MonoBehaviour
     }
 
     /// <summary>
-    /// Simulates a system-level attack from a logical entity.
+    /// 논리적 엔티티로부터의 시스템 레벨 공격을 시뮬레이션.
     /// </summary>
     public void RaiseSystemDamage()
     {
@@ -331,7 +331,7 @@ public class CustomSenderTypeEventRaiser : MonoBehaviour
         Vector3 hitPos = hitTarget != null ? hitTarget.position : Vector3.zero;
         DamageInfo info = new DamageInfo(50f, true, DamageType.Void, hitPos, "GameMaster");
         
-        // KEY: Pass the PlayerStats instance as sender (not a GameObject)
+        // 핵심: PlayerStats 인스턴스를 sender로 전달(GameObject 아님)
         globalSystemEvent.Raise(_localPlayerStats, info);
         
         Debug.Log("[GameMaster] Global system damage event raised.");
@@ -339,12 +339,12 @@ public class CustomSenderTypeEventRaiser : MonoBehaviour
 }
 ```
 
-**Key Points:**
-- 🎯 **Dual-Generic Syntax** - `GameEvent<TSender, TArgs>` requires two type parameters
-- 🏗️ **Sender Flexibility** - Can pass `GameObject` OR custom C# classes
-- 📦 **`.Raise(sender, data)`** - Two-parameter method provides both context and payload
-- 🎮 **Physical Senders** - Use actual scene GameObjects for spatial context
-- 💡 **Logical Senders** - Use data classes for non-spatial context
+**핵심 포인트:**
+- 🎯 **이중 제네릭 구문** - `GameEvent<TSender, TArgs>`는 두 개의 타입 매개변수 필요
+- 🏗️ **Sender 유연성** - `GameObject` 또는 커스텀 C# 클래스를 전달 가능
+- 📦 **`.Raise(sender, data)`** - 두 매개변수 메서드가 컨텍스트와 페이로드 모두 제공
+- 🎮 **물리적 Sender** - 공간적 컨텍스트를 위해 실제 씬 GameObject 사용
+- 💡 **논리적 Sender** - 비공간적 컨텍스트를 위해 데이터 클래스 사용
 
 ---
 
@@ -362,40 +362,40 @@ public class CustomSenderTypeEventReceiver : MonoBehaviour
     [SerializeField] private TextMeshPro attackerInfoText;
 
     /// <summary>
-    /// Bound to: GameEvent<GameObject, DamageInfo>
-    /// Handles physical attackers with scene presence.
+    /// 바인딩 대상: GameEvent<GameObject, DamageInfo>
+    /// 씬 존재가 있는 물리적 공격자를 처리.
     /// </summary>
-    /// <param name="sender">The GameObject that attacked (the Turret)</param>
-    /// <param name="args">The damage details</param>
+    /// <param name="sender">공격한 GameObject (포탑)</param>
+    /// <param name="args">데미지 세부정보</param>
     public void OnTurretAttackReceived(GameObject sender, DamageInfo args)
     {
-        // Use sender's Transform for spatial logic
+        // 공간적 로직을 위해 sender의 Transform 사용
         if (sender != null)
         {
-            // Smoothly rotate to face the attacker
+            // 공격자를 향해 부드럽게 회전
             StartCoroutine(SmoothLookAtRoutine(sender.transform.position));
             Debug.Log($"[Receiver] Ouch! Hit by {sender.name}.");
         }
 
-        // Display the sender's GameObject name
+        // sender의 GameObject 이름 표시
         if (attackerInfoText != null)
         {
             attackerInfoText.text = $"SenderName : <color=yellow>{sender.name}</color>";
         }
 
-        // Common feedback: floating text, flash, knockback
+        // 공통 피드백: 떠다니는 텍스트, 플래시, 넉백
         ProcessCommonFeedback(args, Color.yellow);
     }
 
     /// <summary>
-    /// Bound to: GameEvent<PlayerStats, DamageInfo>
-    /// Handles logical attackers without scene representation.
+    /// 바인딩 대상: GameEvent<PlayerStats, DamageInfo>
+    /// 씬 표현 없이 논리적 공격자를 처리.
     /// </summary>
-    /// <param name="sender">The PlayerStats object with profile data</param>
-    /// <param name="args">The damage details</param>
+    /// <param name="sender">프로필 데이터가 있는 PlayerStats 객체</param>
+    /// <param name="args">데미지 세부정보</param>
     public void OnSystemAttackReceived(PlayerStats sender, DamageInfo args)
     {
-        // Use sender's properties for data-driven logic
+        // 데이터 기반 로직을 위해 sender의 속성 사용
         if (attackerInfoText != null)
         {
             attackerInfoText.text = $"SenderName : <color=yellow>{sender.playerName}</color>";
@@ -404,26 +404,26 @@ public class CustomSenderTypeEventReceiver : MonoBehaviour
         Debug.Log($"[Receiver] Logical attack from {sender.playerName}. " +
                   $"FactionID: {sender.factionId}");
         
-        // Common feedback with different color for system damage
+        // 시스템 데미지를 위한 다른 색상의 공통 피드백
         ProcessCommonFeedback(args, Color.magenta);
     }
     
     private void ProcessCommonFeedback(DamageInfo args, Color color)
     {
-        // Floating damage text
+        // 떠다니는 데미지 텍스트
         if (floatingTextPrefab)
         {
             string text = args.isCritical ? $"{args.amount}!" : args.amount.ToString();
             ShowFloatingText(text, color, args.hitPoint);
         }
         
-        // Color flash
+        // 색상 플래시
         StartCoroutine(FlashColorRoutine(Color.red));
 
-        // Physics knockback (stronger for crits)
+        // 물리 넉백(크리티컬에 더 강함)
         ApplyPhysicsKnockback(args);
         
-        // Camera shake for critical hits
+        // 크리티컬 히트의 카메라 흔들림
         if (args.isCritical)
         {
             StartCoroutine(ShakeCameraRoutine(0.2f, 0.4f));
@@ -441,7 +441,7 @@ public class CustomSenderTypeEventReceiver : MonoBehaviour
             float time = 0f;
             Quaternion startRot = transform.rotation;
             
-            // Smooth rotation over time
+            // 시간에 따른 부드러운 회전
             while(time < 1f)
             {
                 time += Time.deltaTime * 5f;
@@ -453,44 +453,44 @@ public class CustomSenderTypeEventReceiver : MonoBehaviour
 }
 ```
 
-**Key Points:**
-- 🎯 **Signature Matching** - Each method signature must match its event's generic types
-- 🧭 **Spatial Logic** - `GameObject` senders enable position-based reactions (rotation, distance checks)
-- 📊 **Data Logic** - `PlayerStats` senders enable profile-based reactions (name display, faction checks)
-- 🔀 **Unified Feedback** - Common effects (flash, knockback) apply to both sender types
-- 🎨 **Context-Specific Behavior** - Rotation only happens for physical senders
+**핵심 포인트:**
+- 🎯 **시그니처 매칭** - 각 메서드 시그니처는 이벤트의 제네릭 타입과 일치해야 함
+- 🧭 **공간적 로직** - `GameObject` sender가 위치 기반 반응 가능(회전, 거리 확인)
+- 📊 **데이터 로직** - `PlayerStats` sender가 프로필 기반 반응 가능(이름 표시, 파벌 확인)
+- 🔀 **통합 피드백** - 공통 효과(플래시, 넉백)가 두 sender 타입에 모두 적용됨
+- 🎨 **컨텍스트별 동작** - 회전은 물리적 sender에만 발생
 
 ---
 
-## 🔑 Key Takeaways
+## 🔑 핵심 요점
 
-| Concept                   | Implementation                                               |
+| 개념                      | 구현                                                         |
 | ------------------------- | ------------------------------------------------------------ |
-| 🎯 **Dual-Generic Events** | `GameEvent<TSender, TArgs>` provides both sender context and data payload |
-| 🏗️ **Sender Flexibility**  | Supports both Unity GameObjects and pure C# classes          |
-| 🧭 **Spatial Context**     | GameObject senders enable position/rotation-based logic      |
-| 📊 **Data Context**        | Custom class senders enable profile/property-based logic     |
-| 🔀 **Unified Handling**    | One receiver can handle multiple sender types intelligently  |
+| 🎯 **이중 제네릭 이벤트**  | `GameEvent<TSender, TArgs>`가 sender 컨텍스트와 데이터 페이로드 모두 제공 |
+| 🏗️ **Sender 유연성**      | Unity GameObject와 순수 C# 클래스 모두 지원                  |
+| 🧭 **공간적 컨텍스트**     | GameObject sender가 위치/회전 기반 로직 가능                 |
+| 📊 **데이터 컨텍스트**     | 커스텀 클래스 sender가 프로필/속성 기반 로직 가능            |
+| 🔀 **통합 처리**           | 하나의 receiver가 여러 sender 타입을 지능적으로 처리 가능    |
 
-:::note 🎓 Design Insight
+:::note 🎓 설계 인사이트
 
-Sender-aware events are perfect when **who triggered the event** matters as much as **what happened**. Use GameObject senders for spatial reactions (facing, targeting, distance) and custom class senders for data-driven logic (profiles, factions, stats). This pattern is ideal for combat systems, AI reactions, and multiplayer attribution!
+Sender 인식 이벤트는 **누가 이벤트를 트리거했는지**가 **무슨 일이 일어났는지**만큼 중요할 때 완벽합니다. 공간적 반응(향하기, 타겟팅, 거리)에는 GameObject sender를 사용하고 데이터 기반 로직(프로필, 파벌, 스탯)에는 커스텀 클래스 sender를 사용하세요. 이 패턴은 전투 시스템, AI 반응 및 멀티플레이어 귀속에 이상적입니다!
 
 :::
 
 ---
 
-## 🎯 What's Next?
+## 🎯 다음 단계
 
-You've mastered sender-aware events. Now let's explore how to **control event execution order** with priority systems.
+sender 인식 이벤트를 마스터했습니다. 이제 우선순위 시스템으로 **이벤트 실행 순서를 제어**하는 방법을 탐색해 봅시다.
 
-**Next Chapter**: Learn about event priorities in **[05 Priority Event](./05-priority-event.md)**
+**다음 챕터**: **[05 Priority Event](./05-priority-event.md)**에서 이벤트 우선순위에 대해 배우기
 
 ---
 
-## 📚 Related Documentation
+## 📚 관련 문서
 
-- **[Game Event Creator](../visual-workflow/game-event-creator.md)** - How to create sender-aware events
-- **[Raising Events](../scripting/raising-and-scheduling.md)** - API for `.Raise(sender, args)`
-- **[Listening Strategies](../scripting/listening-strategies.md)** - Advanced callback patterns
-- **[API Reference](../scripting/api-reference.md)** - Complete dual-generic event API
+- **[Game Event Creator](../visual-workflow/game-event-creator.md)** - sender 인식 이벤트를 생성하는 방법
+- **[Raising Events](../scripting/raising-and-scheduling.md)** - `.Raise(sender, args)`에 대한 API
+- **[Listening Strategies](../scripting/listening-strategies.md)** - 고급 콜백 패턴
+- **[API Reference](../scripting/api-reference.md)** - 완전한 이중 제네릭 이벤트 API

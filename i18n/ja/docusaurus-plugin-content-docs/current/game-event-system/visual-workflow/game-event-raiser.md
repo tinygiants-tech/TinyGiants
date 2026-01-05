@@ -1,29 +1,28 @@
 ﻿---
-sidebar_label: 'Raise Game Event'
+sidebar_label: 'ゲームイベント発火'
 sidebar_position: 6
 ---
 
 # Raising Game Event
 
-After creating and configuring events, the final step is **triggering them in your game logic**. This page shows how Game Events work and how to raise them in your scripts.
+イベントを作成し構成した後、最後のステップは**ゲームロジックでそれらをトリガーする**ことです。このページでは、ゲームイベントがどのように機能するか、スクリプトでそれらを発火する方法を示します。
 
-:::tip Complete the Visual Workflow
+:::tip ビジュアルワークフローを完了
 
-1. ✅ Create events → **[Game Event Creator](./game-event-creator.md)**
-2. ✅ Configure actions → **[Game Event Behavior](./game-event-behavior.md)**
-3. ✅ **Raise events** ← You are here
+1. ✅ イベントを作成 → **[Game Event Creator](./game-event-creator.md)**
+2. ✅ アクションを構成 → **[Game Event Behavior](./game-event-behavior.md)**
+3. ✅ **イベントを発火** ← 現在地
    :::
 
 ---
 
-## 🎯 How Game Events Work
+## 🎯 ゲームイベントの仕組み
 
-Game Events decouple **event raising** from **action execution**:
+ゲームイベントは**イベント発火**と**アクション実行**を分離します:
 
-**Traditional Approach**:
-
+**従来のアプローチ**:
 ```csharp
-// ❌ Tightly coupled - door logic knows about sound, animation, etc.
+// ❌ 密結合 - ドアのロジックがサウンド、アニメーションなどを知っている
 public class Door : MonoBehaviour
 {
     public AudioSource audioSource;
@@ -35,15 +34,14 @@ public class Door : MonoBehaviour
         audioSource.Play();
         animator.SetTrigger("Open");
         uiManager.ShowNotification("Door opened");
-        // Logic scattered across multiple dependencies
+        // ロジックが複数の依存関係に分散
     }
 }
 ```
 
-**Game Event Approach**:
-
+**ゲームイベントアプローチ**:
 ```csharp
-// ✅ Decoupled - door only knows "something happened"
+// ✅ 疎結合 - ドアは「何かが起こった」ことだけを知る
 public class Door : MonoBehaviour
 {
     [GameEventDropdown]
@@ -51,26 +49,25 @@ public class Door : MonoBehaviour
     
     public void Open()
     {
-        onDoorOpened.Raise();  // Actions configured in Inspector
+        onDoorOpened.Raise();  // アクションはインスペクターで構成
     }
 }
 ```
 
-**Key Difference**: Actions (sound, animation, UI) are configured **visually in Event Behavior**, not hardcoded in scripts.
+**主な違い**: アクション(サウンド、アニメーション、UI)は、スクリプトにハードコードされるのではなく、**Event Behaviorで視覚的に構成**されます。
 
 ---
 
-## 📝 Basic Usage: Raising Events
+## 📝 基本的な使用法: イベントの発火
 
-### Step 1: Reference the Event in Your Script
-
+### ステップ1: スクリプトでイベントを参照
 ```csharp
 using TinyGiants.GameEventSystem.Runtime;
 using UnityEngine;
 
 public class DoorController : MonoBehaviour
 {
-    [GameEventDropdown]  // Smart Inspector picker
+    [GameEventDropdown]  // スマートインスペクターピッカー
     public GameEvent onDoorOpened;
     
     [GameEventDropdown]
@@ -78,13 +75,13 @@ public class DoorController : MonoBehaviour
     
     public void OpenDoor()
     {
-        // Your door logic here
-        onDoorOpened.Raise();  // Trigger the event
+        // ドアのロジックをここに
+        onDoorOpened.Raise();  // イベントをトリガー
     }
     
     public void CloseDoor()
     {
-        // Your door logic here
+        // ドアのロジックをここに
         onDoorClosed.Raise();
     }
 }
@@ -92,62 +89,59 @@ public class DoorController : MonoBehaviour
 
 ---
 
-### Step 2: Assign Event in Inspector
+### ステップ2: インスペクターでイベントを割り当て
 
-The **[GameEventDropdown]** attribute provides a **type-safe searchable dropdown**:
+**[GameEventDropdown]**属性は**型安全な検索可能ドロップダウン**を提供します:
 
 ![GameEvent Dropdown](/img/game-event-system/visual-workflow/game-event-raiser/raiser-dropdown.png)
 
-**Features**:
+**機能**:
 
-- 🔍 **Fuzzy Search**: Type to filter events by name
-- 📁 **Categorized**: Events grouped by database and category
-- 🔒 **Type Safety**: Only shows compatible event types
-- ⚡ **Quick Access**: No manual asset dragging needed
+- 🔍 **ファジー検索**: 入力して名前でイベントをフィルタリング
+- 📁 **カテゴリ分け**: データベースとカテゴリ別にグループ化されたイベント
+- 🔒 **型安全性**: 互換性のあるイベント型のみを表示
+- ⚡ **クイックアクセス**: 手動でアセットをドラッグする必要なし
 
 ---
 
-### Alternative: Without [GameEventDropdown]
+### 代替: [GameEventDropdown]なし
 
-You can also use a standard public field:
-
+標準のpublicフィールドを使用することもできます:
 ```csharp
-public GameEvent onDoorOpened;  // Standard ScriptableObject field
+public GameEvent onDoorOpened;  // 標準のScriptableObjectフィールド
 ```
 
-**Inspector View**:
+**インスペクタービュー**:
 
 ![Standard Object Field](/img/game-event-system/visual-workflow/game-event-raiser/raiser-so.png)
 
-**Workflow**:
+**ワークフロー**:
 
-1. Locate event asset in Project window (Event Database)
-2. Drag & drop into Inspector field
+1. Projectウィンドウでイベントアセットを見つける(Event Database)
+2. インスペクターフィールドにドラッグ&ドロップ
 
-**Recommendation**: Use **[GameEventDropdown]** for better workflow—it's faster and type-safe.
+**推奨事項**: より良いワークフローのために**[GameEventDropdown]**を使用してください—より速く、型安全です。
 
 ---
 
-## 🎨 Typed Events (With Arguments)
+## 🎨 型付きイベント(引数付き)
 
-Events can carry data to actions.
+イベントはアクションにデータを運ぶことができます。
 
-### Void Events (No Data)
-
+### Voidイベント(データなし)
 ```csharp
 [GameEventDropdown]
 public GameEvent onGameStart;
 
 void Start()
 {
-    onGameStart.Raise();  // No arguments
+    onGameStart.Raise();  // 引数なし
 }
 ```
 
 ---
 
-### Single Argument Events
-
+### 単一引数イベント
 ```csharp
 [GameEventDropdown]
 public GameEvent<float> onHealthChanged;
@@ -157,100 +151,95 @@ private float health = 100f;
 public void TakeDamage(float damage)
 {
     health -= damage;
-    onHealthChanged.Raise(health);  // Pass current health value
+    onHealthChanged.Raise(health);  // 現在のヘルス値を渡す
 }
 ```
 
-**Type Safety**: Dropdown only shows `GameEvent<float>` events, preventing type mismatches.
+**型安全性**: ドロップダウンは`GameEvent<float>`イベントのみを表示し、型の不一致を防ぎます。
 
 ---
 
-### Sender + Argument Events
-
+### Sender + 引数イベント
 ```csharp
 [GameEventDropdown]
 public GameEvent<GameObject, DamageInfo> onPlayerDamaged;
 
 public void ApplyDamage(DamageInfo damageInfo)
 {
-    // Sender = this GameObject, Args = damage info
+    // Sender = このGameObject、Args = ダメージ情報
     onPlayerDamaged.Raise(this.gameObject, damageInfo);
 }
 ```
 
-**Use Case**: Actions need to know **who** triggered the event and **what** data to process.
+**使用例**: アクションは**誰が**イベントをトリガーしたか、**どの**データを処理するかを知る必要があります。
 
 ---
 
-## 🔒 Type Safety in Action
+## 🔒 実行中の型安全性
 
-The dropdown **automatically filters** events based on field type:
-
+ドロップダウンは、フィールド型に基づいてイベントを**自動的にフィルタリング**します:
 ```csharp
 public class ScoreManager : MonoBehaviour
 {
     [GameEventDropdown]
-    public GameEvent<int> onScoreChanged;  // Only shows GameEvent<int>
+    public GameEvent<int> onScoreChanged;  // GameEvent<int>のみを表示
     
     [GameEventDropdown]
-    public GameEvent<int> onLevelUp;       // Only shows GameEvent<int>
+    public GameEvent<int> onLevelUp;       // GameEvent<int>のみを表示
     
     private int score = 0;
     
     public void AddScore(int points)
     {
         score += points;
-        onScoreChanged.Raise(score);  // Pass integer score
+        onScoreChanged.Raise(score);  // 整数スコアを渡す
     }
 }
 ```
 
-**Dropdown Filtering**:
-
+**ドロップダウンフィルタリング**:
 ```
-Available Events for GameEvent<int>:
+GameEvent<int>の利用可能なイベント:
   ✅ OnScoreChanged (int)
   ✅ OnLevelUp (int)
   ✅ OnComboMultiplier (int)
-  ❌ OnPlayerDeath (void) — Filtered out (wrong type)
-  ❌ OnDamage (float) — Filtered out (wrong type)
+  ❌ OnPlayerDeath (void) — フィルタリングされた(誤った型)
+  ❌ OnDamage (float) — フィルタリングされた(誤った型)
 ```
 
-**Why This Matters**: Catches type errors at **edit time**, not runtime.
+**なぜこれが重要か**: **編集時**に型エラーをキャッチし、実行時ではありません。
 
 ---
 
-## 🔄 Canceling Scheduled Events
+## 🔄 スケジュールされたイベントのキャンセル
 
-If your event uses **delay** or **repeat** settings (configured in **[Game Event Behavior](./game-event-behavior.md)**), you can cancel execution:
-
+イベントが**遅延**または**繰り返し**設定を使用している場合(**[Game Event Behavior](./game-event-behavior.md)**で構成)、実行をキャンセルできます:
 ```csharp
 [GameEventDropdown]
 public GameEvent repeatingSoundEvent;
 
 void StartAmbientSound()
 {
-    repeatingSoundEvent.Raise();  // Starts repeating (based on Behavior config)
+    repeatingSoundEvent.Raise();  // 繰り返しを開始(Behavior構成に基づく)
 }
 
 void StopAmbientSound()
 {
-    repeatingSoundEvent.Cancel();  // Stops scheduled execution
+    repeatingSoundEvent.Cancel();  // スケジュールされた実行を停止
 }
 ```
 
-**Use Cases**:
+**使用例**:
 
-- Player leaves trigger zone → Cancel ambient sounds
-- Game paused → Cancel timed events
-- Object destroyed → Cleanup scheduled actions
+- プレイヤーがトリガーゾーンを離れる → アンビエントサウンドをキャンセル
+- ゲームが一時停止 → タイミングイベントをキャンセル
+- オブジェクトが破棄される → スケジュールされたアクションをクリーンアップ
 
 ---
 
-## 🔧 Advanced: Inspector Listener Control
+## 🔧 高度: インスペクターリスナーコントロール
 
-Rarely needed, but you can disable Inspector-configured actions at runtime:
-
+めったに必要ありませんが、実行時にインスペクター構成アクションを無効にできます:
 ```csharp
 [GameEventDropdown]
 public GameEvent myEvent;
@@ -258,59 +247,58 @@ public GameEvent myEvent;
 void DisableCutsceneUI()
 {
     myEvent.SetInspectorListenersActive(false);
-    // Inspector actions won't fire, only code listeners
+    // インスペクターアクションは発火しない、コードリスナーのみ
 }
 
 void EnableCutsceneUI()
 {
     myEvent.SetInspectorListenersActive(true);
-    // Inspector actions fire again
+    // インスペクターアクションが再び発火
 }
 ```
 
-**Use Cases**:
+**使用例**:
 
-- Temporarily disable UI updates during cutscenes
-- Switch between action sets based on game state
+- カットシーン中にUI更新を一時的に無効化
+- ゲーム状態に基づいてアクションセット間を切り替え
 
 ------
 
-## 💡 Complete Workflow Example
+## 💡 完全なワークフロー例
 
-Let's build a complete door system using the visual workflow.
+ビジュアルワークフローを使用して完全なドアシステムを構築しましょう。
 
-### Step 1: Create Events
+### ステップ1: イベントを作成
 
-In **[Game Event Creator](./game-event-creator.md)**:
+**[Game Event Creator](./game-event-creator.md)**で:
 
 ![Event Editor Create](/img/game-event-system/visual-workflow/game-event-raiser/raiser-example-editor.png)
 
-- Create `OnDoorOpened` (void event)
-- Create `OnDoorClosed` (void event)
+- `OnDoorOpened`(voidイベント)を作成
+- `OnDoorClosed`(voidイベント)を作成
 
 ---
 
-### Step 2: Configure Actions
+### ステップ2: アクションを構成
 
-In **[Game Event Behavior](./game-event-behavior.md)**:
+**[Game Event Behavior](./game-event-behavior.md)**で:
 
 ![Event Behavior Configure](/img/game-event-system/visual-workflow/game-event-raiser/raiser-example-behavior.png)
 
-**OnDoorOpened Event**:
+**OnDoorOpenedイベント**:
 
-- Action: `AudioSource.PlayOneShot(doorOpenSound)`
-- Action: `Animator.SetTrigger("Open")`
-- Action: `ParticleSystem.Play()` (dust effect)
+- アクション: `AudioSource.PlayOneShot(doorOpenSound)`
+- アクション: `Animator.SetTrigger("Open")`
+- アクション: `ParticleSystem.Play()`(ダストエフェクト)
 
-**OnDoorClosed Event**:
+**OnDoorClosedイベント**:
 
-- Action: `AudioSource.PlayOneShot(doorCloseSound)`
-- Action: `Animator.SetTrigger("Close")`
+- アクション: `AudioSource.PlayOneShot(doorCloseSound)`
+- アクション: `Animator.SetTrigger("Close")`
 
 ---
 
-### Step 3: Write the Script
-
+### ステップ3: スクリプトを書く
 ```csharp
 using TinyGiants.GameEventSystem.Runtime;
 using UnityEngine;
@@ -330,74 +318,72 @@ public class DoorController : MonoBehaviour
         if (isOpen)
         {
             isOpen = false;
-            onDoorClosed.Raise();  // All actions fire automatically
+            onDoorClosed.Raise();  // すべてのアクションが自動的に発火
         }
         else
         {
             isOpen = true;
-            onDoorOpened.Raise();  // All actions fire automatically
+            onDoorOpened.Raise();  // すべてのアクションが自動的に発火
         }
     }
     
-    // This method can be called from:
-    // - Button OnClick in Inspector
-    // - Collision/Trigger detection
-    // - Other game systems
+    // このメソッドは以下から呼び出すことができます:
+    // - インスペクターのボタンOnClick
+    // - Collision/Trigger検出
+    // - 他のゲームシステム
 }
 ```
 
 ---
 
-### Step 4: Assign Events in Inspector
+### ステップ4: インスペクターでイベントを割り当て
 
 ![Door Inspector Setup](/img/game-event-system/visual-workflow/game-event-raiser/raiser-example-dropdown.png)
 
-1. Select `DoorController` GameObject
-2. Use dropdown to assign `OnDoorOpened` event
-3. Use dropdown to assign `OnDoorClosed` event
+1. `DoorController` GameObjectを選択
+2. ドロップダウンを使用して`OnDoorOpened`イベントを割り当て
+3. ドロップダウンを使用して`OnDoorClosed`イベントを割り当て
 
-**Done!** No sound, animation, or VFX references in script—all configured visually.
+**完了!** スクリプトにサウンド、アニメーション、VFX参照なし—すべて視覚的に構成。
 
 ---
 
-## 🆚 Why Better Than UnityEvents?
+## 🆚 なぜUnityEventsより優れているか?
 
-Traditional UnityEvent approach has limitations that Game Events solve:
+従来のUnityEventアプローチには、ゲームイベントが解決する制限があります:
 
-### Traditional UnityEvent Limitations
-
+### 従来のUnityEventの制限
 ```csharp
-// ❌ Problem 1: Configuration scattered across many GameObjects
+// ❌ 問題1: 多くのGameObjectにわたって分散された構成
 public class Button1 : MonoBehaviour
 {
-    public UnityEvent onClick;  // Configured in Button1's Inspector
+    public UnityEvent onClick;  // Button1のインスペクターで構成
 }
 
 public class Button2 : MonoBehaviour
 {
-    public UnityEvent onClick;  // Configured in Button2's Inspector
+    public UnityEvent onClick;  // Button2のインスペクターで構成
 }
 
-// ❌ Problem 2: Hard to find all usages
-// Need to manually search every GameObject in scene
+// ❌ 問題2: すべての使用箇所を見つけるのが難しい
+// シーン内のすべてのGameObjectを手動で検索する必要がある
 
-// ❌ Problem 3: No central control
-// Can't globally enable/disable button sounds
+// ❌ 問題3: 中央制御なし
+// ボタンサウンドをグローバルに有効/無効化できない
 
-// ❌ Problem 4: Duplication
-// Same sound/VFX setup repeated in 50 buttons
+// ❌ 問題4: 重複
+// 50個のボタンで同じサウンド/VFXセットアップが繰り返される
 ```
 
 ---
 
-### Game Event Advantages
-
+### ゲームイベントの利点
 ```csharp
-// ✅ Solution: All buttons raise the same event
+// ✅ 解決策: すべてのボタンが同じイベントを発火
 public class ButtonController : MonoBehaviour
 {
     [GameEventDropdown]
-    public GameEvent onButtonClick;  // Same event for all buttons
+    public GameEvent onButtonClick;  // すべてのボタンで同じイベント
     
     public void OnClick()
     {
@@ -406,109 +392,108 @@ public class ButtonController : MonoBehaviour
 }
 ```
 
-**Benefits**:
+**利点**:
 
-| Feature                | UnityEvent          | Game Event                               |
+| 機能                | UnityEvent          | ゲームイベント                               |
 | ---------------------- | ------------------- | ---------------------------------------- |
-| **Centralized Config** | ❌ Per GameObject    | ✅ One Event Behavior                     |
-| **Find All Usage**     | ❌ Manual search     | ✅ [Event Finder](./game-event-finder.md) |
-| **Global Control**     | ❌ Change 50 objects | ✅ Change one event                       |
-| **Reusability**        | ❌ Copy-paste        | ✅ Reference same asset                   |
-| **Conditional Logic**  | ❌ Code required     | ✅ Visual condition tree                  |
-| **Debugging**          | ❌ Inspector only    | ✅ Flow Graph visualization               |
+| **集中構成** | ❌ GameObjectごと    | ✅ 1つのEvent Behavior                     |
+| **すべての使用箇所を検索**     | ❌ 手動検索     | ✅ [Event Finder](./game-event-finder.md) |
+| **グローバルコントロール**     | ❌ 50個のオブジェクトを変更 | ✅ 1つのイベントを変更                       |
+| **再利用性**        | ❌ コピー&ペースト        | ✅ 同じアセットを参照                   |
+| **条件ロジック**  | ❌ コードが必要     | ✅ ビジュアル条件ツリー                  |
+| **デバッグ**          | ❌ インスペクターのみ    | ✅ フローグラフ視覚化               |
 
 ---
 
-### When to Use Each
+### それぞれを使用するタイミング
 
-**Use UnityEvents**:
+**UnityEventsを使用**:
 
-- Simple one-off callbacks (e.g., tutorial button)
-- Component-specific logic (e.g., slider updates its own label)
-- No need for reusability
+- シンプルな一回限りのコールバック(例: チュートリアルボタン)
+- コンポーネント固有のロジック(例: スライダーが独自のラベルを更新)
+- 再利用性が不要
 
-**Use Game Events**:
+**ゲームイベントを使用**:
 
-- Reusable logic (e.g., all button clicks play same sound)
-- Complex sequences (e.g., cutscenes, door puzzles)
-- Need central control (e.g., mute all UI sounds)
-- Want visual debugging (Flow Graph)
+- 再利用可能なロジック(例: すべてのボタンクリックが同じサウンドを再生)
+- 複雑なシーケンス(例: カットシーン、ドアパズル)
+- 中央制御が必要(例: すべてのUIサウンドをミュート)
+- ビジュアルデバッグが必要(フローグラフ)
 
 ------
 
-## ❓ Troubleshooting
+## ❓ トラブルシューティング
 
-### Dropdown Shows "Manager Missing"
+### ドロップダウンに「Manager Missing」と表示
 
-**Cause**: No `GameEventManager` in scene.
+**原因**: シーンに`GameEventManager`がありません。
 
-**Solution**: 
+**解決策**: 
 
-Open Game Event System via the Unity toolbar:
-
+Unityツールバーから Game Event System を開きます:
 ```csharp
 Tools > TinyGiants > Game Event System
 ```
 
-Click the **"Initialize Event System"** button, creating a **Game Event Manager** GameObject (Singleton) in your scene.
+**「Initialize Event System」**ボタンをクリックすると、シーンに**Game Event Manager** GameObject(シングルトン)が作成されます。
 
 ---
 
-### Dropdown Shows "No Active Databases"
+### ドロップダウンに「No Active Databases」と表示
 
-**Cause**: No databases assigned in `GameEventManager`.
+**原因**: `GameEventManager`にデータベースが割り当てられていません。
 
-**Solution**:
-1. Select `GameEventManager` in scene
-2. Inspector → Databases section
-3. Add your event databases
+**解決策**:
+1. シーンで`GameEventManager`を選択
+2. インスペクター → Databasesセクション
+3. イベントデータベースを追加
 
 ---
 
-### Dropdown Shows "No Matching Events"
+### ドロップダウンに「No Matching Events」と表示
 
-**Cause**: No events match the field type.
+**原因**: フィールド型に一致するイベントがありません。
 
-**Example**:
+**例**:
 ```csharp
 [GameEventDropdown]
-public GameEvent<string> textEvent;  // Needs GameEvent<string>
+public GameEvent<string> textEvent;  // GameEvent<string>が必要
 
-// But your databases only have:
+// しかし、データベースには以下のみがあります:
 // - GameEvent (void)
 // - GameEvent<int>
 // - GameEvent<float>
 
-Result: No matching events!
+結果: 一致するイベントなし!
 ```
 
-**Solution**: Create events of the correct type using [Game Event Creator](./game-event-creator.md).
+**解決策**: [Game Event Creator](./game-event-creator.md)を使用して正しい型のイベントを作成します。
 
 ---
 
-### Event Doesn't Fire
+### イベントが発火しない
 
-**Checklist**:
-1. ✅ Is event asset assigned in Inspector?
-2. ✅ Is `Raise()` being called? (add Debug.Log to verify)
-3. ✅ Are actions configured in [Game Event Behavior](./game-event-behavior.md)?
-4. ✅ Are conditions passing? (check condition tree)
-5. ✅ Is GameEventManager in scene?
+**チェックリスト**:
+1. ✅ イベントアセットがインスペクターで割り当てられているか?
+2. ✅ `Raise()`が呼び出されているか?(Debug.Logを追加して確認)
+3. ✅ アクションが[Game Event Behavior](./game-event-behavior.md)で構成されているか?
+4. ✅ 条件が満たされているか?(条件ツリーを確認)
+5. ✅ GameEventManagerがシーンにあるか?
 
-:::tip Visual Workflow Complete!
+:::tip ビジュアルワークフロー完了!
 
-You've now learned the complete visual workflow:
+これで完全なビジュアルワークフローを学びました:
 
-1. ✅ **Create** events in Event Creator
-2. ✅ **Configure** actions in Event Behavior
-3. ✅ **Raise** events with UnityEvents or `GameEventDropdown`
+1. ✅ Event Creatorでイベントを**作成**
+2. ✅ Event Behaviorでアクションを**構成**
+3. ✅ UnityEventsまたは`GameEventDropdown`でイベントを**発火**
 
-**Result**: Decoupled, maintainable, designer-friendly game logic!
+**結果**: 疎結合で、保守可能な、デザイナーフレンドリーなゲームロジック!
 
 :::
 
-:::info From Visual to Code
+:::info ビジュアルからコードへ
 
-This page covers **visual workflow** (raising events in scripts with Inspector assignment). For **advanced code techniques** (runtime listeners, conditional triggers, event chains), see **[Runtime API](../scripting/raising-and-scheduling.md)**.
+このページは**ビジュアルワークフロー**(インスペクター割り当てでスクリプト内のイベントを発火)をカバーしています。**高度なコード技術**(実行時リスナー、条件トリガー、イベントチェーン)については、**[Runtime API](../scripting/raising-and-scheduling.md)**を参照してください。
 
 :::

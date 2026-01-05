@@ -1,23 +1,22 @@
 ﻿---
-sidebar_label: 'Raising & Scheduling'
+sidebar_label: '발동 및 스케줄링'
 sidebar_position: 1
 ---
 
-# Raising & Scheduling
+# 발동 및 스케줄링
 
-At its core, the Game Event System is about sending signals. While the Inspector handles visual bindings, the **Runtime API** gives programmers precise control over *when* and *how* these signals are fired.
+Game Event System의 핵심은 신호를 전송하는 것입니다. Inspector가 시각적 바인딩을 처리하는 반면, **Runtime API**는 프로그래머에게 이러한 신호가 *언제* 그리고 *어떻게* 발동되는지에 대한 정밀한 제어를 제공합니다.
 
-This guide covers immediate execution, time-based scheduling, and the cancellation of pending events.
+이 가이드에서는 즉시 실행, 시간 기반 스케줄링 및 대기 중인 이벤트의 취소에 대해 다룹니다.
 
 ---
 
-## 🚀 Immediate Execution (`Raise`)
+## 🚀 즉시 실행 (`Raise`)
 
-The `Raise()` method is the standard way to fire an event. It executes all listeners (Inspector, Code, Flow Graph) synchronously in the current frame.
+`Raise()` 메서드는 이벤트를 발동하는 표준 방법입니다. 현재 프레임에서 모든 리스너(Inspector, Code, Flow Graph)를 동기적으로 실행합니다.
 
-### 1. Void Events
-Events with no arguments.
-
+### 1. Void 이벤트
+인수가 없는 이벤트입니다.
 ```csharp
 [GameEventDropdown] public GameEvent onPlayerJump;
 
@@ -25,16 +24,15 @@ void Update()
 {
     if (Input.GetButtonDown("Jump"))
     {
-        // Fires immediately
+        // 즉시 발동
         onPlayerJump.Raise();
     }
 }
 ```
 
-### 2. Single Argument Events
+### 2. 단일 인수 이벤트
 
-Events that carry a specific data payload (T).
-
+특정 데이터 페이로드(T)를 전달하는 이벤트입니다.
 ```csharp
 [GameEventDropdown] public GameEvent<float> onHealthChanged;
 
@@ -42,180 +40,172 @@ public void TakeDamage(float damage)
 {
     currentHealth -= damage;
     
-    // Type-safe invocation
+    // 타입 안전 호출
     onHealthChanged.Raise(currentHealth);
 }
 ```
 
-### 3. Sender + Argument Events
+### 3. Sender + Argument 이벤트
 
-Events that verify the **Source** of the event (TSender) and carry data (TArgs).
-
+이벤트의 **출처**(TSender)를 검증하고 데이터(TArgs)를 전달하는 이벤트입니다.
 ```csharp
-// Define types: Sender is GameObject, Arg is DamageInfo
+// 타입 정의: Sender는 GameObject, Arg는 DamageInfo
 [GameEventDropdown] public GameEvent<GameObject, DamageInfo> onActorDamaged;
 
 public void Hit()
 {
     var info = new DamageInfo { amount = 50, type = DamageType.Fire };
     
-    // Passes 'this.gameObject' as the sender
+    // 'this.gameObject'를 sender로 전달
     onActorDamaged.Raise(this.gameObject, info);
 }
 ```
 
-:::warning Auto-Scheduling Logic
-If you have configured **Action Delay** or **Repeat** settings in the Inspector for a specific event asset, calling Raise() will automatically respect those settings (e.g., it might wait 2 seconds before actually firing).
-See [Inspector Integration](#-inspector-integration) below.
+:::warning 자동 스케줄링 로직
+특정 이벤트 에셋의 Inspector에서 **Action Delay** 또는 **Repeat** 설정을 구성한 경우, Raise() 호출 시 자동으로 해당 설정이 적용됩니다(예: 실제 발동 전 2초 대기).
+아래의 [Inspector 통합](#-inspector-통합)을 참조하세요.
 :::
 
 ------
 
-## ⏱️ Delayed Execution (RaiseDelayed)
+## ⏱️ 지연 실행 (RaiseDelayed)
 
-Sometimes you want to schedule an event for the future without using a Coroutine. The system provides a built-in scheduler.
+때로는 코루틴을 사용하지 않고 미래의 특정 시점에 이벤트를 예약하고 싶을 수 있습니다. 시스템은 내장 스케줄러를 제공합니다.
 
-All scheduling methods return a `ScheduleHandle`, which is crucial if you need to cancel the event before it fires.
-
+모든 스케줄링 메서드는 `ScheduleHandle`을 반환하며, 이벤트가 발동되기 전에 취소해야 하는 경우 이것이 중요합니다.
 ```csharp
 [GameEventDropdown] public GameEvent onBombExplode;
 
 public void PlantBomb()
 {
-    Debug.Log("Bomb Planted...");
+    Debug.Log("폭탄 설치됨...");
     
-    // Fire event after 5.0 seconds
+    // 5.0초 후 이벤트 발동
     ScheduleHandle handle = onBombExplode.RaiseDelayed(5.0f);
 }
 ```
 
-### Passing Arguments with Delay
+### 지연과 함께 인수 전달
 
-The API fully supports generics for delayed calls.
-
+API는 지연 호출에 대한 제네릭을 완벽하게 지원합니다.
 ```csharp
-// Wait 1.5s, then send the float value '100f'
+// 1.5초 대기 후 float 값 '100f' 전송
 onScoreAdded.RaiseDelayed(100f, 1.5f);
 
-// Wait 0.5s, then pass Sender and Args
+// 0.5초 대기 후 Sender와 Args 전달
 onItemPickup.RaiseDelayed(this, itemData, 0.5f);
 ```
 
 ------
 
-## 🔄 Repeating Execution (RaiseRepeating)
+## 🔄 반복 실행 (RaiseRepeating)
 
-Use this to create loops, timers, or polling mechanisms entirely within the event system.
+이것을 사용하여 이벤트 시스템 내에서 완전히 루프, 타이머 또는 폴링 메커니즘을 생성할 수 있습니다.
 
-| Parameter   | Description                                         |
-| ----------- | --------------------------------------------------- |
-| interval    | Time (seconds) between each fire.                   |
-| repeatCount | How many times to fire? Set to -1 for **Infinite**. |
+| 매개변수    | 설명                                      |
+| ----------- | ----------------------------------------- |
+| interval    | 각 발동 사이의 시간(초).                  |
+| repeatCount | 몇 번 발동할 것인가? **무한**은 -1로 설정. |
 
-### Example: Poison Effect
+### 예시: 중독 효과
 
-Damage the player every 1 second, for 5 ticks.
-
+1초마다 플레이어에게 5회 동안 데미지를 줍니다.
 ```csharp
 [GameEventDropdown] public GameEvent<int> onTakeDamage;
 
 private void ApplyPoison()
 {
-    // Fire immediately (optional), then repeat 5 times every 1s
-    // Note: RaiseRepeating waits for the interval before the FIRST fire by default
+    // 즉시 발동(선택 사항) 후 1초마다 5회 반복
+    // 참고: RaiseRepeating은 기본적으로 첫 번째 발동 전에 interval을 대기합니다
     onTakeDamage.RaiseRepeating(10, interval: 1.0f, repeatCount: 5);
 }
 ```
 
-### Example: Radar Scan (Infinite)
+### 예시: 레이더 스캔 (무한)
 
-Ping a radar event every 2 seconds forever.
-
+2초마다 영구적으로 레이더 이벤트를 발동합니다.
 ```csharp
 private ScheduleHandle _radarHandle;
 
 void Start()
 {
-    // -1 means execute forever until cancelled
+    // -1은 취소될 때까지 영원히 실행됨을 의미
     _radarHandle = onRadarPing.RaiseRepeating(2.0f, repeatCount: -1);
 }
 ```
 
 ------
 
-## 🔔 Monitoring & Lifecycle Callbacks
+## 🔔 모니터링 및 생명주기 콜백
 
-The `ScheduleHandle` is not just for cancellation. It provides three built-in callbacks that allow you to monitor the state of a scheduled task, this is essential for updating UI progress bars, triggering follow-up logic, or cleaning up resources.
-
+`ScheduleHandle`은 단순히 취소를 위한 것이 아닙니다. 예약된 작업의 상태를 모니터링할 수 있는 세 가지 내장 콜백을 제공하며, 이는 UI 진행 표시줄 업데이트, 후속 로직 트리거 또는 리소스 정리에 필수적입니다.
 ```csharp
 [GameEventDropdown] public GameEvent onStatusUpdate;
 
 private void StartTrackedLoop()
 {
-    // Start a task that repeats 5 times every 1 second
+    // 1초마다 5회 반복하는 작업 시작
     ScheduleHandle handle = onStatusUpdate.RaiseRepeating(interval: 1.0f, repeatCount: 5);
 
-    // 1. Triggered on every tick (Step)
+    // 1. 각 틱(Step)마다 트리거됨
     handle.OnStep += (remainingCount) => 
     {
-        Debug.Log($"[Schedule] Execution step! Cycles remaining: {remainingCount}");
+        Debug.Log($"[Schedule] 실행 단계! 남은 사이클: {remainingCount}");
     };
 
-    // 2. Triggered when the task finishes naturally
+    // 2. 작업이 자연스럽게 완료될 때 트리거됨
     handle.OnCompleted += () => 
     {
-        Debug.Log("[Schedule] Task finished successfully.");
+        Debug.Log("[Schedule] 작업이 성공적으로 완료되었습니다.");
     };
 
-    // 3. Triggered if the task is stopped manually via code
+    // 3. 작업이 코드를 통해 수동으로 중지될 때 트리거됨
     handle.OnCancelled += () => 
     {
-        Debug.Log("[Schedule] Task was cancelled by the user.");
+        Debug.Log("[Schedule] 작업이 사용자에 의해 취소되었습니다.");
     };
 }
 ```
 
-### Callback Definitions
+### 콜백 정의
 
-| Callback        | Invocation Timing                                            | Typical Use Case                                             |
-| --------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| **OnStep**      | Fires immediately after each event execution. Pass the remaining repeatCount. | Updating countdown timers or "progress" UI.                  |
-| **OnCompleted** | Fires when the task reaches its repeatCount and finishes naturally. | Triggering a "Cooldown Finished" or "Combo Ended" logic.     |
-| **OnCancelled** | Fires specifically when CancelDelayed or CancelRepeating is called. | Stopping associated VFX/SFX or resetting a character's state. |
+| 콜백            | 호출 시점                                                    | 일반적인 사용 사례                                   |
+| --------------- | ------------------------------------------------------------ | ---------------------------------------------------- |
+| **OnStep**      | 각 이벤트 실행 직후에 발동됨. 남은 repeatCount를 전달.       | 카운트다운 타이머 또는 "진행 상황" UI 업데이트.      |
+| **OnCompleted** | 작업이 repeatCount에 도달하여 자연스럽게 완료될 때 발동됨.   | "쿨다운 종료" 또는 "콤보 종료" 로직 트리거.          |
+| **OnCancelled** | CancelDelayed 또는 CancelRepeating이 호출될 때 특별히 발동됨. | 관련 VFX/SFX 중지 또는 캐릭터 상태 재설정.           |
 
-:::tip Handle Disposal
-You don't need to manually unsubscribe from these callbacks. The ScheduleHandle is automatically cleaned up by the internal scheduler once the task reaches a terminal state (Completed or Cancelled).
+:::tip Handle 해제
+이러한 콜백을 수동으로 구독 해제할 필요가 없습니다. ScheduleHandle은 작업이 종료 상태(Completed 또는 Cancelled)에 도달하면 내부 스케줄러에 의해 자동으로 정리됩니다.
 :::
 
 ------
 
-## 🛑 Cancellation
+## 🛑 취소
 
-Stopping pending events is just as important as starting them. There are two distinct ways to cancel events, depending on how they were started.
+대기 중인 이벤트를 중지하는 것은 시작하는 것만큼 중요합니다. 이벤트가 시작된 방식에 따라 두 가지 뚜렷한 취소 방법이 있습니다.
 
-### 1. Canceling Manual Schedules
-If you used `RaiseDelayed` or `RaiseRepeating`, you received a **ScheduleHandle**. You must use this handle to stop that specific task.
+### 1. 수동 스케줄 취소
+`RaiseDelayed` 또는 `RaiseRepeating`을 사용한 경우 **ScheduleHandle**을 받았습니다. 해당 특정 작업을 중지하려면 이 핸들을 사용해야 합니다.
 
-#### Canceling a Delayed Call
-
+#### 지연 호출 취소
 ```csharp
 public void DefuseBomb()
 {
-    // Stop the pending delayed execution
+    // 대기 중인 지연 실행 중지
     if (_bombHandle != null)
     {
-        // Returns true if successfully cancelled
+        // 성공적으로 취소되면 true 반환
         bool success = onBombExplode.CancelDelayed(_bombHandle); 
     }
 }
 ```
 
-#### Canceling a Repeating Loop
-
+#### 반복 루프 취소
 ```csharp
 public void StopRadar()
 {
-    // Stop the manual loop
+    // 수동 루프 중지
     if (_radarHandle != null)
     {
         onRadarPing.CancelRepeating(_radarHandle);
@@ -223,101 +213,98 @@ public void StopRadar()
 }
 ```
 
-### 2. Canceling Automatic (Inspector) Schedules
+### 2. 자동(Inspector) 스케줄 취소
 
-If an event is looping or delaying because of its **Inspector Configuration** (Behavior Window), use the parameterless Cancel() method.
+이벤트가 **Inspector 구성**(Behavior Window) 때문에 루프하거나 지연되고 있는 경우, 매개변수 없는 Cancel() 메서드를 사용하세요.
 
-- **Target**: Stops the **active** auto-sequence (Delay or Loop) on this event asset.
-- **Safety**: Raise() automatically calls Cancel() internally before starting a new auto-sequence to prevent overlapping loops.
-
+- **대상**: 이 이벤트 에셋에서 **활성** 자동 시퀀스(Delay 또는 Loop)를 중지합니다.
+- **안전성**: Raise()는 중복되는 루프를 방지하기 위해 새로운 자동 시퀀스를 시작하기 전에 내부적으로 Cancel()을 자동으로 호출합니다.
 ```csharp
-// Stops the "Action Delay" or "Repeat" logic currently running 
-// that was triggered by a previous .Raise() call
+// 이전 .Raise() 호출에 의해 트리거된 현재 실행 중인
+// "Action Delay" 또는 "Repeat" 로직을 중지합니다
 onEvent.Cancel();
 ```
 
-:::danger Important Distinction
-**Cancel() does NOT remove listeners.**
+:::danger 중요한 구분
+**Cancel()은 리스너를 제거하지 않습니다.**
 
-- **Cancel()**: Stops time-based execution (Pending timers/loops). The event acts as if it was never fired.
-- **RemoveAllListeners()**: Unsubscribes all scripts so they no longer receive future events.
+- **Cancel()**: 시간 기반 실행(대기 중인 타이머/루프)을 중지합니다. 이벤트는 발동되지 않은 것처럼 동작합니다.
+- **RemoveAllListeners()**: 모든 스크립트의 구독을 해제하여 향후 이벤트를 더 이상 받지 않도록 합니다.
   :::
 
 ------
 
-## 🔌 Inspector Integration
+## 🔌 Inspector 통합
 
-It is vital to understand how code interacts with the **Visual Behavior Configuration**.
+코드가 **시각적 동작 구성**과 어떻게 상호작용하는지 이해하는 것이 중요합니다.
 
-When you call Raise() in code, the system checks the **Schedule Configuration** defined in the [Game Event Behavior Window](../visual-workflow/game-event-behavior.md):
+코드에서 Raise()를 호출하면 시스템은 [Game Event Behavior Window](../visual-workflow/game-event-behavior.md)에 정의된 **스케줄 구성**을 확인합니다:
 
-1. **Code**: myEvent.Raise() called.
-2. **System Check**: Does this event have Action Delay > 0 in Inspector?
-   - **Yes**: The system implicitly converts this to a RaiseDelayed.
-   - **No**: It fires immediately.
-3. **System Check**: Does this event have Repeat Interval > 0?
-   - **Yes**: The system starts a loop automatically.
+1. **코드**: myEvent.Raise() 호출됨.
+2. **시스템 확인**: 이 이벤트가 Inspector에서 Action Delay > 0을 가지고 있는가?
+   - **예**: 시스템이 암시적으로 이것을 RaiseDelayed로 변환합니다.
+   - **아니오**: 즉시 발동됩니다.
+3. **시스템 확인**: 이 이벤트가 Repeat Interval > 0을 가지고 있는가?
+   - **예**: 시스템이 자동으로 루프를 시작합니다.
 
-:::tip Best Practice
-If you want **pure code control**, leave the Schedule settings in the Inspector at 0.
-If you want **designers to tune timing**, use Raise() and let the Inspector control the delay.
+:::tip 모범 사례
+**순수한 코드 제어**를 원한다면 Inspector의 Schedule 설정을 0으로 두세요.
+**디자이너가 타이밍을 조정**하도록 하려면 Raise()를 사용하고 Inspector가 지연을 제어하도록 하세요.
 :::
 
 ------
 
-## 🔇 Muting Visuals (SetInspectorListenersActive)
+## 🔇 시각 효과 음소거 (SetInspectorListenersActive)
 
-In complex systems, you often want to separate **Game Logic** (Data) from **Game Feel** (Visuals/Sound).
+복잡한 시스템에서는 종종 **게임 로직**(데이터)과 **게임 느낌**(비주얼/사운드)을 분리하고 싶을 수 있습니다.
 
-Use SetInspectorListenersActive(false) to mute the "Visual/Scene" layer while keeping the "Logic/Code" layer running.
+SetInspectorListenersActive(false)를 사용하여 "로직/코드" 레이어는 실행하면서 "비주얼/씬" 레이어를 음소거할 수 있습니다.
 
-### Use Case: Fast-Forwarding or Loading
+### 사용 사례: 빨리 감기 또는 로딩
 
-Imagine loading a save file. You need to fire OnItemAdded 100 times to populate the inventory, but you **don't** want to play 100 sound effects or spawn 100 UI popups.
-
+저장 파일을 로드한다고 상상해 보세요. 인벤토리를 채우기 위해 OnItemAdded를 100번 발동해야 하지만, 100개의 사운드 효과를 재생하거나 100개의 UI 팝업을 생성하고 싶지 **않습니다**.
 ```csharp
 public void LoadSaveData(List<Item> items)
 {
-    // 1. Mute the "flashy" stuff (Inspector bindings)
+    // 1. "화려한" 것들 음소거(Inspector 바인딩)
     onItemAdded.SetInspectorListenersActive(false);
 
-    // 2. Process logic (Data listeners still run!)
+    // 2. 로직 처리(데이터 리스너는 여전히 실행됨!)
     foreach(var item in items)
     {
-        // This updates the backend inventory data
-        // BUT skips the UI/Sound configured in Editor
+        // 이것은 백엔드 인벤토리 데이터를 업데이트합니다
+        // 하지만 에디터에서 구성된 UI/사운드는 건너뜁니다
         onItemAdded.Raise(item); 
     }
 
-    // 3. Re-enable visuals
+    // 3. 시각 효과 다시 활성화
     onItemAdded.SetInspectorListenersActive(true);
     
-    // 4. Refresh UI once
+    // 4. UI 한 번에 새로고침
     onInventoryUpdated.Raise();
 }
 ```
 
 ------
 
-## 📜 API Summary
+## 📜 API 요약
 
-| Method Signature                                             | Returns          | Description                                                  |
+| 메서드 시그니처                                              | 반환             | 설명                                                         |
 | :----------------------------------------------------------- | :--------------- | :----------------------------------------------------------- |
-| **Immediate Execution**                                      |                  |                                                              |
-| `Raise()`                                                    | `void`           | Fires a Void event immediately.                              |
-| `Raise(T argument)`                                          | `void`           | Fires a Single-Argument event immediately.                   |
-| `Raise(TSender sender, TArgs args)`                          | `void`           | Fires a Sender+Argument event immediately.                   |
-| **Delayed Execution**                                        |                  |                                                              |
-| `RaiseDelayed(float delay)`                                  | `ScheduleHandle` | Schedules a Void event to fire after `delay` seconds.        |
-| `RaiseDelayed(T arg, float delay)`                           | `ScheduleHandle` | Schedules a Typed event to fire after `delay` seconds.       |
-| `RaiseDelayed(TSender s, TArgs a, float delay)`              | `ScheduleHandle` | Schedules a Sender event to fire after `delay` seconds.      |
-| **Repeating Execution**                                      |                  |                                                              |
-| `RaiseRepeating(float interval, int count)`                  | `ScheduleHandle` | Starts a repeating loop. Set `count` to -1 for infinite.     |
-| `RaiseRepeating(T arg, float interval, int count)`           | `ScheduleHandle` | Starts a repeating Typed loop.                               |
-| `RaiseRepeating(TSender s, TArgs a, float interval, int count)` | `ScheduleHandle` | Starts a repeating Sender loop.                              |
-| **Cancellation & Control**                                   |                  |                                                              |
-| `Cancel()`                                                   | `void`           | Stops any **Inspector-configured** auto-loops/delays for this event. |
-| `CancelDelayed(ScheduleHandle handle)`                       | `bool`           | Cancels a specific manual delayed task. Returns true if successful. |
-| `CancelRepeating(ScheduleHandle handle)`                     | `bool`           | Cancels a specific manual repeating task. Returns true if successful. |
-| `SetInspectorListenersActive(bool isActive)`                 | `void`           | Mutes or unmutes the scene-based `UnityEvent` listeners at runtime. |
-
+| **즉시 실행**                                                |                  |                                                              |
+| `Raise()`                                                    | `void`           | Void 이벤트를 즉시 발동합니다.                               |
+| `Raise(T argument)`                                          | `void`           | 단일 인수 이벤트를 즉시 발동합니다.                          |
+| `Raise(TSender sender, TArgs args)`                          | `void`           | Sender+Argument 이벤트를 즉시 발동합니다.                    |
+| **지연 실행**                                                |                  |                                                              |
+| `RaiseDelayed(float delay)`                                  | `ScheduleHandle` | `delay`초 후 Void 이벤트 발동을 예약합니다.                  |
+| `RaiseDelayed(T arg, float delay)`                           | `ScheduleHandle` | `delay`초 후 타입 이벤트 발동을 예약합니다.                  |
+| `RaiseDelayed(TSender s, TArgs a, float delay)`              | `ScheduleHandle` | `delay`초 후 Sender 이벤트 발동을 예약합니다.                |
+| **반복 실행**                                                |                  |                                                              |
+| `RaiseRepeating(float interval, int count)`                  | `ScheduleHandle` | 반복 루프를 시작합니다. 무한은 `count`를 -1로 설정합니다.    |
+| `RaiseRepeating(T arg, float interval, int count)`           | `ScheduleHandle` | 타입 반복 루프를 시작합니다.                                 |
+| `RaiseRepeating(TSender s, TArgs a, float interval, int count)` | `ScheduleHandle` | Sender 반복 루프를 시작합니다.                               |
+| **취소 및 제어**                                             |                  |                                                              |
+| `Cancel()`                                                   | `void`           | 이 이벤트에 대한 **Inspector 구성** 자동 루프/지연을 중지합니다. |
+| `CancelDelayed(ScheduleHandle handle)`                       | `bool`           | 특정 수동 지연 작업을 취소합니다. 성공하면 true를 반환합니다. |
+| `CancelRepeating(ScheduleHandle handle)`                     | `bool`           | 특정 수동 반복 작업을 취소합니다. 성공하면 true를 반환합니다. |
+| `SetInspectorListenersActive(bool isActive)`                 | `void`           | 런타임에 씬 기반 `UnityEvent` 리스너를 음소거하거나 음소거 해제합니다. |

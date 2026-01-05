@@ -1,151 +1,150 @@
 ﻿---
-sidebar_label: 'System Dashboard'
+sidebar_label: 'システムダッシュボード'
 sidebar_position: 1
 ---
 
-# System Dashboard
+# システムダッシュボード
 
-The **Game Event System Window** (The system dashboard) is your central command center. It is designed to provide a high-level overview of the plugin's status, quick access to core tools, and real-time environment telemetry.
+**Game Event System Window**(システムダッシュボード)は、あなたの中央コマンドセンターです。プラグインのステータスの概要、コアツールへの迅速なアクセス、リアルタイム環境テレメトリを提供するように設計されています。
 
-Instead of hunting through project folders or menus, The dashboard brings every critical operation into a single, organized interface—all in one place.
+プロジェクトフォルダやメニューを探し回る代わりに、ダッシュボードはすべての重要な操作を単一の整理されたインターフェースに集約します—すべてが一箇所に。
 
-## 🚀 Accessing the Dashboard
+## 🚀 ダッシュボードへのアクセス
 
-Open the dashboard via the Unity top menu:
-
+Unityのトップメニューからダッシュボードを開きます:
 ```text
 Tools > TinyGiants > Game Event System
 ```
 
-:::tip First Time Setup
-If this is your first time opening the dashboard, you'll be guided through an automatic initialization process. See **[Installation](../intro/installation.md)** for details.
+:::tip 初回セットアップ
+ダッシュボードを初めて開く場合は、自動初期化プロセスがガイドされます。詳細は**[インストール](../intro/installation.md)**を参照してください。
 :::
 
 ------
 
-## 🗺️ Interface Overview
+## 🗺️ インターフェース概要
 
-The dashboard is divided into specific functional zones. Below is a detailed breakdown of each section.
+ダッシュボードは特定の機能ゾーンに分割されています。以下は各セクションの詳細な内訳です。
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-system/system-dashboard-full.png)
 
-### 1. 🚀 Initialization & Status
+### 1. 🚀 初期化&ステータス
 
-Located on the **Middle-Left**, this bar acts as the **Global Health Indicator** for the system.
+**中央左**に配置され、このバーはシステムの**グローバルヘルスインジケーター**として機能します。
 
-- **Green Check**: The system is fully initialized. Core managers and databases are present.
-- **Blue Action Button**: Critical components are missing (e.g., if the Manager object was accidentally deleted from the scene).
+- **緑色のチェック**: システムは完全に初期化されています。コアマネージャーとデータベースが存在します。
+- **青色のアクションボタン**: 重要なコンポーネントが欠落しています(例: Managerオブジェクトがシーンから誤って削除された場合)。
 
-:::tip Quick Repair
-If this bar turns Blue during development, simply click it to **Auto-Repair** the scene dependencies immediately. For the initial setup guide, refer to **[Installation](../intro/installation.md)**.
+:::tip クイック修復
+開発中にこのバーが青色に変わった場合は、単にクリックするだけでシーンの依存関係を即座に**自動修復**できます。初期セットアップガイドについては、**[インストール](../intro/installation.md)**を参照してください。
 :::
 
 ------
 
-### 2. ⚡ Core Workflow Tools
+### 2. ⚡ コアワークフローツール
 
-Located in the **Editor & Monitor** section, these are your daily drivers.
+**Editor & Monitor**セクションに配置され、これらは日常的に使用するツールです。
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-system/hub-core-tools.png)
 
-| Tool                                                    | Description                                                  |
+| ツール                                                    | 説明                                                  |
 | ------------------------------------------------------- | ------------------------------------------------------------ |
-| [**📝 Game Event Editor**](./game-event-editor.md)       | Opens the main management window to batch operations (create, delete, search, filter, and edit events). This is where you will spend 80% of your time. |
-| [**📊 Game Event Monitor**](../tools/runtime-monitor.md) | Opens the runtime debugger. Use this during Play Mode to watch event execution in real-time, inspect listener call stacks, profile performance bottlenecks, and visualize flow graph automation exectuion. |
+| [**📝 Game Event Editor**](./game-event-editor.md)       | バッチ操作(イベントの作成、削除、検索、フィルタ、編集)のためのメイン管理ウィンドウを開きます。時間の80%をここで過ごすことになります。 |
+| [**📊 Game Event Monitor**](../tools/runtime-monitor.md) | 実行時デバッガーを開きます。プレイモード中にこれを使用して、リアルタイムでイベント実行を監視し、リスナーコールスタックを検査し、パフォーマンスボトルネックをプロファイルし、フローグラフ自動化実行を視覚化します。 |
 
 ------
 
-### 3. ⚙️ Code Maintenance Tools
+### 3. ⚙️ コードメンテナンスツール
 
-Located in the **Tools & Utilities** section, these utilities manage the underlying C# generation system.
+**Tools & Utilities**セクションに配置され、これらのユーティリティは基盤となるC#生成システムを管理します。
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-system/hub-code-tools.png)
 
-| Tool                                                         | Description                                                  |
+| ツール                                                         | 説明                                                  |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [**📜 Generate Game Event Code**](../tools/codegen-and-cleanup.md) | Manually triggers the code generator. Use this if you have added a new custom type (e.g., `GameEvent<MyCustomData>`) and need the concrete class generated immediately. |
-| [**✂️ Clean Game Event Code**](../tools/codegen-and-cleanup.md) | Scan your project, find all GameEvent classes, and safely delete them to keep the project tidy. |
-| [**🧹 Clean All Game Event Code**](../tools/codegen-and-cleanup.md) | A hard reset. Removes **ALL** generated code (except basic types). Use this only if you are reinstalling or refactoring significantly. |
+| [**📜 Generate Game Event Code**](../tools/codegen-and-cleanup.md) | コードジェネレーターを手動でトリガーします。新しいカスタム型(例: `GameEvent<MyCustomData>`)を追加し、具象クラスをすぐに生成する必要がある場合に使用します。 |
+| [**✂️ Clean Game Event Code**](../tools/codegen-and-cleanup.md) | プロジェクトをスキャンし、すべてのGameEventクラスを見つけ、安全に削除してプロジェクトを整頓します。 |
+| [**🧹 Clean All Game Event Code**](../tools/codegen-and-cleanup.md) | ハードリセット。**すべて**の生成コード(基本型を除く)を削除します。再インストールまたは大幅なリファクタリングを行う場合にのみ使用してください。 |
 
-:::tip Automation
-The system is designed to auto-generate code when you create events via the Wizard. You rarely need to click "Generate" manually unless you are doing custom scripting work.
+:::tip 自動化
+システムはウィザードを介してイベントを作成する際に自動的にコードを生成するように設計されています。カスタムスクリプティング作業を行っている場合を除き、手動で「Generate」をクリックする必要はほとんどありません。
 :::
 
 ------
 
-### 4. ℹ️ System Telemetry
-Located on the **Right**, this panel monitors your project environment in real-time.
+### 4. ℹ️ システムテレメトリ
+**右側**に配置され、このパネルはプロジェクト環境をリアルタイムで監視します。
 
-It automatically validates your **Unity Version**, **Render Pipeline**, and **Scripting Backend** compatibility.
+**Unityバージョン**、**レンダーパイプライン**、**スクリプティングバックエンド**の互換性を自動的に検証します。
 
-:::tip Environment Check
-For a detailed explanation of what these metrics mean and how they affect the plugin, please refer to the **[Automatic Environment Check](../intro/installation.md#step-2-open-the-system-dashboard)** section in the Installation guide.
+:::tip 環境チェック
+これらのメトリクスが何を意味し、プラグインにどのように影響するかの詳細な説明については、インストールガイドの**[自動環境チェック](../intro/installation.md#step-2-open-the-system-dashboard)**セクションを参照してください。
 :::
 
 ------
 
-### 5. 📂 Quick Access
+### 5. 📂 クイックアクセス
 
-Stop digging through the Project window. The **Quick Access** panel provides direct shortcuts to critical folders and assets.
+プロジェクトウィンドウを掘り下げるのはやめましょう。**Quick Access**パネルは、重要なフォルダとアセットへの直接ショートカットを提供します。
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-system/quick-access.png)
 
-| Tool                | Description                                                  |
+| ツール                | 説明                                                  |
 | ------------------- | ------------------------------------------------------------ |
-| 📘 **Documentation** | Opens this local documentation.                              |
-| 📜 **API Scripts**   | Selects the API folder in the Project View.                  |
-| **🗄️ Databases**     | Selects the folder containing default database asset files.  |
-| **🕸️ Flow Graph**    | Selects the folder containing default visual-graph asset files. |
-| ⚙️ **CodeGen**       | Jumps to the generated code folder                           |
-| **🎮 Demo Scenes**   | Quickly locate the examples folder.                          |
+| 📘 **Documentation** | このローカルドキュメントを開きます。                              |
+| 📜 **API Scripts**   | プロジェクトビューでAPIフォルダを選択します。                  |
+| **🗄️ Databases**     | デフォルトのデータベースアセットファイルを含むフォルダを選択します。  |
+| **🕸️ Flow Graph**    | デフォルトのビジュアルグラフアセットファイルを含むフォルダを選択します。 |
+| ⚙️ **CodeGen**       | 生成されたコードフォルダにジャンプします。                           |
+| **🎮 Demo Scenes**   | サンプルフォルダを素早く見つけます。                          |
 
 ------
 
-### 6. 🌐  Support & Community
+### 6. 🌐  サポート&コミュニティ
 
-I believe in strong support. Use this panel to connect with us.
+私は強力なサポートを信じています。このパネルを使用して私たちとつながってください。
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-system/support-community.png)
 
-| Tool                    | Description                                                  |
+| ツール                    | 説明                                                  |
 | ----------------------- | ------------------------------------------------------------ |
-| **💬 Discord Community** | Join our active server for real-time help and showcase.      |
-| **📺 Video Tutorials**   | Watch step-by-step guides on YouTube.                        |
-| **📧 Email Support**     | Please provide a complete description of the problem you encountered and provide detailed environmental information, I will reply to you within 24 hours every day if I am available. |
-| **🛒 Asset Store**       | If you enjoy the plugin, a 5-star review helps us immensely! 🌟 |
+| **💬 Discord Community** | リアルタイムヘルプとショーケースのための活発なサーバーに参加してください。      |
+| **📺 Video Tutorials**   | YouTubeでステップバイステップガイドを視聴してください。                        |
+| **📧 Email Support**     | 遭遇した問題の完全な説明と詳細な環境情報を提供してください。可能であれば、毎日24時間以内に返信いたします。 |
+| **🛒 Asset Store**       | プラグインを気に入っていただけたら、5つ星のレビューは私たちにとって大きな助けになります! 🌟 |
 
-:::tip Community First
+:::tip コミュニティファースト
 
-Before emailing, check the **Discord #faq** channel—90% of common issues have existing solutions posted by the community!
+メールを送る前に、**Discord #faq**チャンネルを確認してください—一般的な問題の90%は、コミュニティによって投稿された既存のソリューションがあります!
 
 :::
 
 ------
 
-## 📝 Release Notes
+## 📝 リリースノート
 
-This panel highlights the foundational pillars of **Game Event System v1.0.0**. This major release introduces a robust ecosystem for event-driven architecture, featuring:
+このパネルは、**Game Event System v1.0.0**の基本的な柱をハイライトしています。このメジャーリリースは、イベント駆動アーキテクチャのための堅牢なエコシステムを導入し、以下を特徴としています:
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-system/release-notes.png)
 
-- **Core & Logic**: ScriptableObject-driven backend with high-performance Expression Tree compilation.
-- **Visual Orchestration**: A powerful Node Graph for managing complex event dependencies and hybrid execution.
-- **Workflow Automation**: Automated code generation, smart Inspector bindings, and batch processing tools.
-- **Diagnostics**: Real-time monitors and performance profiling for deep system visibility.
+- **コア&ロジック**: 高性能Expression Treeコンパイルを備えたScriptableObjectドリブンバックエンド。
+- **ビジュアルオーケストレーション**: 複雑なイベント依存関係とハイブリッド実行を管理するための強力なノードグラフ。
+- **ワークフロー自動化**: 自動化されたコード生成、スマートインスペクターバインディング、バッチ処理ツール。
+- **診断**: 深いシステム可視性のためのリアルタイムモニターとパフォーマンスプロファイリング。
 
-:::tip View Details
+:::tip 詳細を表示
 
-Click **"View Full Details"** to explore the full technical changelog across all 7 major categories.
+7つの主要カテゴリ全体にわたる完全な技術変更履歴を探索するには、**「View Full Details」**をクリックしてください。
 
 :::
 
 ------
 
-## 🛠️ Troubleshooting
+## 🛠️ トラブルシューティング
 
-:::caution[Pre-flight Check]
+:::caution[プリフライトチェック]
 
-Before troubleshooting, ensure there are no **Red Compiler Errors** in your Unity Console, as they will disable all editor-script functionality.
+トラブルシューティングの前に、Unityコンソールに**赤色のコンパイラエラー**がないことを確認してください。これらはすべてのエディタスクリプト機能を無効にします。
 
 :::
 
@@ -153,58 +152,57 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
 <Tabs>
-<TabItem value="dashboard" label="❌ Dashboard Won't Open" default>
+<TabItem value="dashboard" label="❌ ダッシュボードが開かない" default>
 
-> **Symptom:** The menu item is grayed out or the window fails to appear.
+> **症状:** メニュー項目がグレーアウトしているか、ウィンドウが表示されません。
 
-| Solution                | Action                                                       |
+| 解決策                | アクション                                                       |
 | ----------------------- | ------------------------------------------------------------ |
-| **Check Compilation**   | Fix all script errors in the Console first.                  |
-| **Clear Library Cache** | Close Unity → Delete Library/ folder → Reopen project to force re-index. |
-| **Re-import Plugin**    | If scripts are missing, re-import the package from the Asset Store. |
+| **コンパイルを確認**   | まずコンソールのすべてのスクリプトエラーを修正します。                  |
+| **ライブラリキャッシュをクリア** | Unityを閉じる → Library/フォルダを削除 → プロジェクトを再度開いて強制的に再インデックス化。 |
+| **プラグインを再インポート**    | スクリプトが欠落している場合は、Asset Storeからパッケージを再インポートします。 |
 
 </TabItem>
-<TabItem value="alert" label="🔵 Status Indicator Issues">
+<TabItem value="alert" label="🔵 ステータスインジケーターの問題">
 
-> **Symptom:** Clicking "Initialize" does not turn the status icon green.
+> **症状:** 「Initialize」をクリックしてもステータスアイコンが緑色になりません。
 
-| Solution             | Action                                                       |
+| 解決策             | アクション                                                       |
 | -------------------- | ------------------------------------------------------------ |
-| **Check Exceptions** | Look for any "Initialization Failed" errors in the Console   |
-| **Naming Conflicts** | Ensure no other GameObject is named `GameEventManager` in your active scene |
-| **Prefab Overrides** | If the manager is part of a prefab, ensure the instance isn't blocked by missing references. Delete the instance and re-initialize |
+| **例外を確認** | コンソールで「Initialization Failed」エラーを探します。   |
+| **命名の競合** | アクティブなシーンに`GameEventManager`という名前の他のGameObjectがないことを確認します。 |
+| **プレハブオーバーライド** | マネージャーがプレハブの一部である場合は、インスタンスが欠落した参照によってブロックされていないことを確認します。インスタンスを削除して再初期化します。 |
 
 </TabItem>
-<TabItem value="telemetry" label="🚩 Telemetry Alerts">
+<TabItem value="telemetry" label="🚩 テレメトリアラート">
 
-> **Symptom:** System requirements show a Red Cross ❌ in the telemetry panel.
+> **症状:** システム要件がテレメトリパネルに赤いバツ印❌を表示します。
 
-| Issue | Fix / Requirement |
+| 問題 | 修正/要件 |
 | :--- | :--- |
-| **Unity Version** | Upgrade to **Unity 2020.3 LTS** or higher. |
-| **API Level** | Switch to **.NET Standard 2.0** or **.NET 4.x** in Player Settings. |
-| **IL2CPP Warning** | Ensure "Stripping Level" is not set to "High" to avoid losing generic metadata. |
+| **Unityバージョン** | **Unity 2020.3 LTS**以降にアップグレードしてください。 |
+| **APIレベル** | Player Settingsで**.NET Standard 2.0**または**.NET 4.x**に切り替えます。 |
+| **IL2CPP警告** | ジェネリックメタデータの損失を避けるため、「Stripping Level」が「High」に設定されていないことを確認してください。 |
 
 </TabItem>
 </Tabs>
 
 ------
 
-## Next Steps
+## 次のステップ
 
-**🎨 Manage Existing Events**: Learn the [Edit Game Event](./game-event-editor.md) window features 
+**🎨 既存のイベントを管理**: [Edit Game Event](./game-event-editor.md)ウィンドウ機能を学ぶ 
 
-**📝 Create Your First Event**: Follow the [Create Game Event](./game-event-creator.md) guide 
+**📝 最初のイベントを作成**: [Create Game Event](./game-event-creator.md)ガイドに従う 
 
-**🎯 Raise Your First Event**: View the [Raise Game Event](./game-event-creator.md) guide 
+**🎯 最初のイベントを発火**: [Raise Game Event](./game-event-creator.md)ガイドを表示 
 
-**🕸️ Build Visual Flows**: Orchestrate complex event chains [Game Event Node Editor](../flow-graph/game-event-node-editor.md)
+**🕸️ ビジュアルフローを構築**: 複雑なイベントチェーンをオーケストレート [Game Event Node Editor](../flow-graph/game-event-node-editor.md)
 
-**📊 Debug in Play Mode**: Monitor runtime execution [Runtime Monitor](../tools/runtime-monitor.md)
+**📊 プレイモードでデバッグ**: 実行時実行を監視 [Runtime Monitor](../tools/runtime-monitor.md)
 
 ------
 
-:::tip[Pro Tip]
-For the best experience, **Dock the Dashboard** as a tab next to your Inspector. This allows for instant access to search and debugging tools without disrupting your layout.
+:::tip[プロのヒント]
+最高のエクスペリエンスのために、**ダッシュボードをドッキング**してインスペクターの隣のタブとして配置してください。これにより、レイアウトを乱すことなく、検索およびデバッグツールへの即座のアクセスが可能になります。
 :::
-

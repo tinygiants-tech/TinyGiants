@@ -1,16 +1,16 @@
 ﻿---
-sidebar_label: Overview
+sidebar_label: 概要
 
 sidebar_position: 1
 ---
 
 # Game Event System
 
-A production-ready, visual event architecture for Unity that transforms chaotic event management into maintainable, testable workflows.
+Unityのための本格的なビジュアルイベントアーキテクチャ。混沌としたイベント管理を、保守性と検証性に優れたワークフローへと変革します。
 
-:::tip From the Creator
-"I built this system because I was tired of battling 'invisible spaghetti code' in my own projects. As an indie developer, I needed a tool that balanced visual clarity with raw coding power—without performance trade-offs. **TinyGiants** is my commitment to professional-grade tools that I use in my own games every day."
-—  ***[TinyGiants]** from China*
+:::tip 開発者より
+「このシステムを開発したのは、自分自身のプロジェクトで『見えないスパゲッティコード』と戦うことに疲れたからです。インディー開発者として、ビジュアル面での明快さとコーディングパワーを両立し、しかもパフォーマンスを犠牲にしないツールが必要でした。**TinyGiants**は、私が日々自分のゲーム開発で使用しているプロフェッショナルグレードのツールへの私のこだわりです。」
+—  ***[TinyGiants]** 中国より*
 :::
 
 <div className="img-full-wrapper">
@@ -22,39 +22,38 @@ A production-ready, visual event architecture for Unity that transforms chaotic 
 
 ---
 
-## Why This System Exists
+## このシステムが存在する理由
 
-:::danger The Problem
-In traditional Unity development, events become invisible spaghetti:
+:::danger 問題点
+従来のUnity開発では、イベントが見えないスパゲッティと化します:
 
-- **Hidden Dependencies**: Who's listening? Where's it triggered? Good luck finding out.
-- **Runtime Breakage**: Rename a method, break 10 scene objects.
-- **Cross-Scene Hell**: Events die when scenes unload—memory leaks and null references everywhere.
-- **No Visibility**: Complex event chains exist only in your head (and outdated comments).
+- **隠された依存関係**: 誰がリッスンしている?どこでトリガーされる?見つけ出すのは困難です。
+- **実行時の破損**: メソッド名を変更すると、10個のシーンオブジェクトが壊れます。
+- **クロスシーンの混乱**: シーンがアンロードされるとイベントが消失し、メモリリークとNull参照があちこちに発生します。
+- **可視性の欠如**: 複雑なイベントチェーンは、あなたの頭の中(と古くなったコメント)にしか存在しません。
 
 :::
 
-:::success The Solution
-**TinyGiants.GameEventSystem** provides a **Visual-First, Type-Safe** event architecture:
+:::success 解決策
+**TinyGiants.GameEventSystem**は、**ビジュアルファースト、型安全**なイベントアーキテクチャを提供します:
 
-✅ **Events as Assets** - ScriptableObject-based, GUID-protected, survives refactoring  
+✅ **アセットとしてのイベント** - ScriptableObjectベース、GUID保護、リファクタリングに耐える設計  
 
-✅ **Visual Flow Graphs** - See your event chains, triggers, and conditions in one window  
+✅ **ビジュアルフローグラフ** - イベントチェーン、トリガー、条件を一つのウィンドウで可視化  
 
-✅ **Zero-Reflection Runtime** - Expression Tree compilation for C++-like performance  
+✅ **ゼロリフレクション実行** - Expression Treeコンパイルによる、C++並みのパフォーマンス  
 
-✅ **Designer-Friendly** - Drag-and-drop binding, no coding required for simple workflows  
+✅ **デザイナーフレンドリー** - ドラッグ&ドロップバインディング、シンプルなワークフローにコーディングは不要  
 
-✅ **Production-Grade Tools** - Real-time monitoring, reference finding, code generation automation
+✅ **本格的なツール群** - リアルタイムモニタリング、参照検索、コード生成の自動化
 
 :::
 
 ---
 
-## Core Philosophy: Hybrid Workflow
+## 核となる哲学: ハイブリッドワークフロー
 
-This system embraces a **division of labor** between programmers and designers:
-
+本システムは、プログラマーとデザイナー間の**役割分担**を重視します:
 ```mermaid
 graph LR
 
@@ -66,22 +65,22 @@ graph LR
     classDef visual fill:#9f1239,stroke:#4c0519,stroke-width:2px,color:#ffffff
     classDef runtime fill:#020617,stroke:#000000,stroke-width:2px,color:#ffffff,font-weight:bold
 
-    A(👨‍💻 Programmer):::programmer
-    B(📦 Event Assets):::asset
-    C(🎧 Code Logic):::code
+    A(👨‍💻 プログラマー):::programmer
+    B(📦 イベントアセット):::asset
+    C(🎧 コードロジック):::code
 
-    D(🎨 Designer):::designer
-    E(🎮 Scene Behaviors):::scene
-    F(🕸️ Visual Orchestration):::visual
+    D(🎨 デザイナー):::designer
+    E(🎮 シーンビヘイビア):::scene
+    F(🕸️ ビジュアルオーケストレーション):::visual
 
-    G(▶️ Runtime Execution):::runtime
+    G(▶️ 実行時):::runtime
 
-    A -->|Defines Events| B
-    A -->|Writes Listeners| C
+    A -->|イベントを定義| B
+    A -->|リスナーを記述| C
 
     B --> D
-    D -->|Binds in Inspector| E
-    D -->|Builds Flow Graphs| F
+    D -->|インスペクターでバインド| E
+    D -->|フローグラフを構築| F
 
     C --> G
     E --> G
@@ -91,281 +90,277 @@ graph LR
 
 
 
-| Role              | Responsibility                                               | Tool                                   |
-| ----------------- | ------------------------------------------------------------ | -------------------------------------- |
-| **Programmer**    | Define **when** events fire `Raise()` and **what** logic responds | C# API, Listeners                      |
-| **Designer**      | Wire events to **scene objects** and configure **behaviors** | Inspector Binding, `GameEventBehavior` |
-| **Tech Designer** | Orchestrate **complex sequences** (delays, chains, conditions) | Visual Flow Editor                     |
+| 役割              | 責任範囲                                               | ツール                                 |
+| ----------------- | ------------------------------------------------------ | -------------------------------------- |
+| **プログラマー**    | イベントが**いつ**発火するか`Raise()`と**何の**ロジックが応答するかを定義 | C# API、リスナー                       |
+| **デザイナー**      | イベントを**シーンオブジェクト**に接続し、**ビヘイビア**を構成 | インスペクターバインディング、`GameEventBehavior` |
+| **テクニカルデザイナー** | **複雑なシーケンス**(遅延、チェーン、条件)をオーケストレート | ビジュアルフローエディター                     |
 
-**Result**: Clean separation of concerns with full visibility into event relationships.
+**成果**: 完全な可視性を持つイベント関係性と、明確な関心の分離。
 
 ---
 
-## Architecture Highlights
+## アーキテクチャの特徴
 
-### 🏗️ Foundation: ScriptableObject-Driven
+### 🏗️ 基盤: ScriptableObjectドリブン
 
-Unlike string-based or singleton event systems, **events are first-class assets**:
-
+文字列ベースやシングルトンイベントシステムとは異なり、**イベントは第一級のアセット**です:
 ```csharp
-// Events are assets, not magic strings
+// イベントはアセットであり、マジックストリングではありません
 [GameEventDropdown] public GameEvent onPlayerDeath;
 [GameEventDropdown] public GameEvent<int> onScoreChanged;
 
 void Die() {
-    onPlayerDeath.Raise(); // Type-safe, asset-referenced
+    onPlayerDeath.Raise(); // 型安全、アセット参照
 }
 ```
 
-**Benefits**:
+**利点**:
 
-- ✅ **Complete Decoupling** - Senders never know receivers. Fire once, notify many.
-- ✅ **Cross-Scene Persistence** - Events survive scene loads/unloads.
-- ✅ **GUID Identity** - Rename files, reorganize folders—references never break.
-- ✅ **Multi-Database Support** - Modular organization for large teams.
+- ✅ **完全な疎結合** - 送信者は受信者を知りません。一度発火すれば、多数に通知。
+- ✅ **クロスシーン永続性** - イベントはシーンのロード/アンロードに耐えます。
+- ✅ **GUID識別** - ファイル名を変更し、フォルダを再編成しても、参照は決して壊れません。
+- ✅ **マルチデータベースサポート** - 大規模チーム向けのモジュラー構成。
 
 <details>
-<summary>📖 How GUID Protection Works</summary>
+<summary>📖 GUID保護の仕組み</summary>
 
 
-Every event has a unique GUID stored in `.meta` files:
-
+各イベントは`.meta`ファイルに保存された一意のGUIDを持ちます:
 ```yaml
 # PlayerDeath.asset.meta
 guid: a7f3c21e9b4d8f6e2d1a9c8b7e6f5a4d
 ```
 
-Even if you rename `PlayerDeath` `OnCharacterDied`, Unity maintains the reference via GUID. **No broken scene links.**
+`PlayerDeath`を`OnCharacterDied`に変更しても、UnityはGUIDを通じて参照を維持します。**シーンリンクの破損はありません。**
 
 </details>
 
 ---
 
-### 🕸️ Visual Flow Orchestration
+### 🕸️ ビジュアルフローオーケストレーション
 
-Stop hunting through code to understand event relationships. The **Flow Editor** turns invisible logic into maintainable graphs:
+イベントの関係性を理解するためにコードを探し回るのはもうやめましょう。**フローエディター**は、見えないロジックを保守可能なグラフへと変換します:
 
 
-#### Use Cases
+#### ユースケース
 
-**🎯 Triggers (Fan-Out)**
+**🎯 トリガー(ファンアウト)**
 
 ![alt text](/img/game-event-system/intro/overview/flow-graph-trigger.png)
 
-**⛓️ Chains (Sequential)**
+**⛓️ チェーン(シーケンシャル)**
 
 ![alt text](/img/game-event-system/intro/overview/flow-graph-chain.png)
 
-**🔀 Hybrid Flows** 
+**🔀 ハイブリッドフロー** 
 
-Mix parallel + sequential logic
+並列+順次ロジックのミックス
 
 ![alt text](/img/game-event-system/intro/overview/flow-graph-mix.png)
 
-:::tip Visual Benefits
+:::tip ビジュアルの利点
 
-- **Group Organization** - Color-coded groups for large flows
-- **Real-Time Validation** - Connection type checking (Green=Valid, Red=Error)
-- **Undo/Redo Support** - Full history system (Ctrl+Z/Y)
-- **Runtime Debugging** - Active nodes highlight in Play Mode
+- **グループ整理** - 大規模フロー向けのカラーコード付きグループ
+- **リアルタイム検証** - 接続タイプチェック(緑=有効、赤=エラー)
+- **アンドゥ/リドゥサポート** - 完全な履歴システム(Ctrl+Z/Y)
+- **実行時デバッグ** - プレイモード中にアクティブノードがハイライト
 
 :::
 
 ---
 
-### ⚡ Type-Safe, Zero-Reflection Performance
+### ⚡ 型安全、ゼロリフレクションパフォーマンス
 
-Unity's generic serialization is broken by design. I fixed it.
+Unityのジェネリックシリアライゼーションは設計上壊れています。私はそれを修正しました。
 
-#### The Problem
-
+#### 問題点
 ```csharp
-// ❌ Unity can't serialize this
+// ❌ Unityはこれをシリアライズできません
 [SerializeField] private GameEvent<PlayerData> onPlayerDataChanged;
 ```
 
-#### Our Solution
-
+#### 本システムの解決策
 ```csharp
-// ✅ Auto-generated concrete class
+// ✅ 自動生成される具象クラス
 [GameEventDropdown] public PlayerDataGameEvent onPlayerDataChanged;
 
-// Generated code (automatic):
+// 生成コード(自動):
 [Serializable]
 public class PlayerDataGameEvent : GameEvent<PlayerData> { }
 ```
 
-**Performance Benefits**:
+**パフォーマンス上の利点**:
 
-- 🚀 **Expression Tree Compilation** - Conditions compile to delegates at startup (no runtime parsing)
-- 🚀 **No Reflection Cost** - Direct method calls, not `Invoke()`
-- 🚀 **Native Inspector Support** - Full `UnityEvent<T>` compatibility
+- 🚀 **Expression Treeコンパイル** - 条件は起動時にデリゲートへコンパイル(実行時パースなし)
+- 🚀 **リフレクションコストゼロ** - `Invoke()`ではなく、直接メソッド呼び出し
+- 🚀 **ネイティブインスペクターサポート** - 完全な`UnityEvent<T>`互換性
 
 <details>
-<summary>⚙️ Code Generation Workflow</summary>
+<summary>⚙️ コード生成ワークフロー</summary>
 
 
-1. **Select Types** - Choose your custom types in the Creator window
-2. **Generate** - Click "Generate" to create concrete classes
-3. **Compile** - Unity auto-compiles the new code
-4. **Create** - Now you can create events for your custom types
+1. **型を選択** - Creatorウィンドウでカスタム型を選択
+2. **生成** - 「Generate」をクリックして具象クラスを作成
+3. **コンパイル** - Unityが新しいコードを自動コンパイル
+4. **作成** - これで、カスタム型のイベントを作成可能に
 
-**Time investment**: ~10 seconds. **Benefit**: Lifetime type safety.
+**所要時間**: 約10秒。**効果**: 生涯の型安全性。
 
 </details>
 
 ---
 
-## Feature Matrix
+## 機能マトリックス
 
-### ⚓ Core Architecture
+### ⚓ コアアーキテクチャ
 
-| Feature                    | Description                                                  |
+| 機能                    | 説明                                                  |
 | :------------------------- | :----------------------------------------------------------- |
-| **Asset-Based Events**     | ScriptableObject architecture with **GUID Identity**—references survive renames and file moves. |
-| **Comprehensive Generics** | Native support for `GaneEvent<Void>`, `GameEvent<T>`, and source-aware `GameEvent<TSender, TArgs>`. |
-| **Multi-Database System**  | Modular organization supporting multiple databases with **Dynamic Loading** and **Health Checks**. |
-| **Category System**        | String-based categorization for efficient fuzzy-search filtering within large event libraries. |
-| **Auto Static Reset**      | Automatic clearing of static caches in Editor Play Mode to prevent data pollution. |
+| **アセットベースイベント**     | **GUID識別**を持つScriptableObjectアーキテクチャ—参照はリネームやファイル移動に耐えます。 |
+| **包括的なジェネリクス** | `GaneEvent<Void>`、`GameEvent<T>`、ソース認識型`GameEvent<TSender, TArgs>`のネイティブサポート。 |
+| **マルチデータベースシステム**  | **動的ロード**と**ヘルスチェック**を備えた、複数データベースをサポートするモジュラー構成。 |
+| **カテゴリーシステム**        | 大規模イベントライブラリ内での効率的なファジー検索フィルタリングのための文字列ベースの分類。 |
+| **自動静的リセット**      | エディタープレイモードでの静的キャッシュの自動クリアによるデータ汚染の防止。 |
 
-### 🧠 Advanced Logic & Flow
-| Feature                   | Description                                                  |
+### 🧠 高度なロジック&フロー
+| 機能                   | 説明                                                  |
 | :------------------------ | :----------------------------------------------------------- |
-| **Expression Trees**      | **Zero-reflection** logic evaluation; conditions are compiled into high-performance delegates at runtime. |
-| **Visual Logic Builder**  | Construct complex **nested AND/OR logic** and dynamic property comparisons without code. |
-| **Hybrid Execution**      | Seamlessly mix parallel **Fan-out Triggers** and sequential **Blocking Chains** in one graph. |
-| **Argument Transformers** | Dynamically extract and pass specific object properties as arguments between flow nodes. |
-| **Granular Flow Control** | Per-node delays, **Async/Coroutine waits**, loop counts, and conditional execution gates. |
+| **Expression Tree**      | **ゼロリフレクション**のロジック評価;条件は実行時に高性能デリゲートへコンパイルされます。 |
+| **ビジュアルロジックビルダー**  | コード不要で複雑な**ネストされたAND/ORロジック**と動的プロパティ比較を構築。 |
+| **ハイブリッド実行**      | 並列**ファンアウトトリガー**と順次**ブロッキングチェーン**を一つのグラフ内でシームレスにミックス。 |
+| **引数トランスフォーマー** | フローノード間で特定のオブジェクトプロパティを引数として動的に抽出・渡す。 |
+| **きめ細かいフロー制御** | ノード単位の遅延、**非同期/コルーチン待機**、ループカウント、条件付き実行ゲート。 |
 
-### 🎧 Listening & Binding
-| Feature                   | Description                                                  |
+### 🎧 リスニング&バインディング
+| 機能                   | 説明                                                  |
 | :------------------------ | :----------------------------------------------------------- |
-| **Visual Binding**        | Drag-and-drop **UnityEvent wiring** in the Inspector with visual status markers and type safety. |
-| **Priority Listeners**    | **Integer-based sorting** ensuring critical systems react before standard UI/Audio listeners. |
-| **Conditional Listeners** | Built-in **Predicate support**—callbacks only fire when specific logical criteria are met. |
-| **Persistent Listeners**  | Native support for **cross-scene listeners** that remain active during scene transitions. |
-| **Dynamic Runtime API**   | Full programmatic control to register or unregister listeners and manage **Task Handles**. |
+| **ビジュアルバインディング**        | インスペクターでのドラッグ&ドロップ**UnityEvent配線**、ビジュアルステータスマーカーと型安全性付き。 |
+| **優先度リスナー**    | **整数ベースのソート**により、重要なシステムが標準UI/Audioリスナーより先に反応することを保証。 |
+| **条件付きリスナー** | 組み込みの**Predicateサポート**—コールバックは特定の論理条件が満たされた場合にのみ発火。 |
+| **永続リスナー**  | シーン遷移中もアクティブを維持する**クロスシーンリスナー**のネイティブサポート。 |
+| **動的実行時API**   | リスナーの登録/登録解除および**タスクハンドル**管理のための完全なプログラマティック制御。 |
 
-### 📊 Tooling & Debug
-| Feature                | Description                                                  |
+### 📊 ツール&デバッグ
+| 機能                | 説明                                                  |
 | :--------------------- | :----------------------------------------------------------- |
-| **Dashboard & Wizard** | Modern UI for **Batch Operations** and a fuzzy-matching Wizard for rapid event creation. |
-| **Code Automation**    | **Tri-Mode CodeGen** (Basic/Custom/Sender) with automatic compilation pipeline integration. |
-| **Reference Finder**   | Scene-wide scanner to pinpoint exactly which components reference specific event assets. |
-| **Runtime Monitor**    | Real-time profiling of **Execution Time (Avg/Min/Max)**, listener counts, and **GC allocation**. |
-| **Automation Tree**    | Real-time visualizer for active Trigger and Chain hierarchies to debug complex logic flows. |
+| **ダッシュボード&ウィザード** | **バッチ操作**のためのモダンUIと、迅速なイベント作成のためのファジーマッチングウィザード。 |
+| **コード自動化**    | 自動コンパイルパイプライン統合を備えた**三モードCodeGen**(Basic/Custom/Sender)。 |
+| **参照ファインダー**   | 特定のイベントアセットを参照しているコンポーネントを正確に特定するシーン全体スキャナー。 |
+| **実行時モニター**    | **実行時間(平均/最小/最大)**、リスナー数、**GCアロケーション**のリアルタイムプロファイリング。 |
+| **自動化ツリー**    | 複雑なロジックフローをデバッグするための、アクティブなトリガーとチェーン階層のリアルタイムビジュアライザー。 |
 
 ------
 
-## Performance Characteristics
+## パフォーマンス特性
 
-Real-world metrics from production builds:
+本番ビルドからの実測値:
 
-| Scenario                        | Performance | Notes                        |
+| シナリオ                        | パフォーマンス | 備考                        |
 | ------------------------------- | ----------- | ---------------------------- |
-| **Event Raise (0 listeners)**   | ~0.001ms    | Virtually free               |
-| **Event Raise (10 listeners)**  | ~0.02ms     | No GC allocation             |
-| **Condition Evaluation**        | ~0.003ms    | Expression Tree compilation  |
-| **Flow Node Execution**         | ~0.05ms     | Includes coroutine overhead  |
-| **Monitor Window (100 events)** | ~0.3ms      | Editor-only, no runtime cost |
+| **イベント発火(リスナー0)**   | ~0.001ms    | 実質的にコストなし               |
+| **イベント発火(リスナー10)**  | ~0.02ms     | GCアロケーションなし             |
+| **条件評価**        | ~0.003ms    | Expression Treeコンパイル  |
+| **フローノード実行**         | ~0.05ms     | コルーチンオーバーヘッド含む  |
+| **モニターウィンドウ(イベント100)** | ~0.3ms      | エディターのみ、実行時コストなし |
 
-:::success Production Ready
-Tested in shipped titles with **500+ events** and **10,000+ listeners** across scenes. Zero performance regressions.
+:::success 本番環境対応
+シーン全体で**500以上のイベント**と**10,000以上のリスナー**を持つ出荷タイトルでテスト済み。パフォーマンス低下ゼロ。
 :::
 
 ------
 
-## 🗺️ Navigation Roadmap
+## 🗺️ ナビゲーションロードマップ
 
-This map provides a complete overview of the system documentation. Use the tables below to quickly jump to the specific feature or tutorial you need.
+このマップは、システムドキュメント全体の概要を提供します。以下のテーブルを使用して、必要な特定の機能やチュートリアルに素早くジャンプできます。
 
-:::info Recommended Learning Paths
+:::info 推奨学習パス
 
-- 🚀 **Quickest Start**: Jump straight to [**Example: Quick Start**](../examples/00-quick-start.md).
-- 🎨 **Visual Learner**: Focus on the [**Visual Workflow**](#visual-workflow) and [**Flow Orchestration**](#flow-orchestration) tables.
-- 💻 **Programmer's Deep Dive**: Head directly to [**Runtime API**](#runtime-api).
+- 🚀 **最速スタート**: [**Example: Quick Start**](../examples/00-quick-start.md)に直接ジャンプ。
+- 🎨 **ビジュアル学習者**: [**ビジュアルワークフロー**](#visual-workflow)と[**フローオーケストレーション**](#flow-orchestration)テーブルに集中。
+- 💻 **プログラマー向け詳細**: [**実行時API**](#runtime-api)に直接進む。
 
 :::
 
-### 🏁 1. Introduction {#introduction}
+### 🏁 1. イントロダクション {#introduction}
 
-Foundational setup and core philosophy of the event-as-asset architecture.
+イベントアズアセットアーキテクチャの基本セットアップと核となる哲学。
 
-| Page                                            | Description                                                  |
+| ページ                                            | 説明                                                  |
 | :---------------------------------------------- | :----------------------------------------------------------- |
-| [**Project Structure**](./project-structure.md) | Understanding directory layout, folder protection, and modular organization. |
-| [**Installation**](./installation.md)           | Initializing the plugin and setting up the automated static reset pipeline. |
+| [**プロジェクト構造**](./project-structure.md) | ディレクトリレイアウト、フォルダ保護、モジュラー構成の理解。 |
+| [**インストール**](./installation.md)           | プラグインの初期化と自動静的リセットパイプラインのセットアップ。 |
 
-### 💎 2. Visual Workflow {#visual-workflow}
+### 💎 2. ビジュアルワークフロー {#visual-workflow}
 
-Management tools designed to transform invisible code into a tangible visual dashboard.
+見えないコードを有形のビジュアルダッシュボードへと変換するために設計された管理ツール。
 
-| Page                                                         | Description                                                  |
+| ページ                                                         | 説明                                                  |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| [**System Dashboard**](../visual-workflow/game-event-system.md) | Overview of the asset-based workflow and GUID identity system |
-| [**Database & FlowGraph**](../visual-workflow/game-event-manager.md) | Handling multi-database and multi-flowgraph setups and database health maintenance |
-| [**Edit Game Event**](../visual-workflow/game-event-editor.md) | Using the Dashboard for batch editing, search, and categorization |
-| [**Create Game Event**](../visual-workflow/game-event-creator.md) | Rapidly generating event assets using the fuzzy-search batch wizard |
-| [**Configure Game Event**](../visual-workflow/game-event-behavior.md) | Mastering Inspector binding with visual status markers and type safety |
-| [**Raise Game Event**](../visual-workflow/game-event-raiser.md) | Learn how to call events and enhance inspectors using the built-in GameEventDropdown Attribute |
-| [**Find Game Event**](../visual-workflow/game-event-finder.md) | Scanning scenes to locate component-level event dependencies. |
-| [**Visual Condition Tree**](../visual-workflow/visual-condition-tree.md) | Learn how to control the logic execution of event action through condition tree configuration |
+| [**システムダッシュボード**](../visual-workflow/game-event-system.md) | アセットベースワークフローとGUID識別システムの概要 |
+| [**データベース&フローグラフ**](../visual-workflow/game-event-manager.md) | マルチデータベースおよびマルチフローグラフのセットアップとデータベースヘルスメンテナンス |
+| [**ゲームイベント編集**](../visual-workflow/game-event-editor.md) | バッチ編集、検索、カテゴリー分類のためのダッシュボードの使用 |
+| [**ゲームイベント作成**](../visual-workflow/game-event-creator.md) | ファジー検索バッチウィザードを使用したイベントアセットの迅速な生成 |
+| [**ゲームイベント構成**](../visual-workflow/game-event-behavior.md) | ビジュアルステータスマーカーと型安全性を備えたインスペクターバインディングのマスター |
+| [**ゲームイベント発火**](../visual-workflow/game-event-raiser.md) | イベントの呼び出し方法と組み込みGameEventDropdown属性を使用したインスペクターの強化方法を学ぶ |
+| [**ゲームイベント検索**](../visual-workflow/game-event-finder.md) | コンポーネントレベルのイベント依存関係を見つけるためのシーンスキャン。 |
+| [**ビジュアル条件ツリー**](../visual-workflow/visual-condition-tree.md) | 条件ツリー構成を通じてイベントアクションのロジック実行を制御する方法を学ぶ |
 
-### 🕸️ 3. Flow Orchestration {#flow-orchestration}
+### 🕸️ 3. フローオーケストレーション {#flow-orchestration}
 
-Visualizing and building complex multi-step logic sequences using nodes.
+ノードを使用した複雑なマルチステップロジックシーケンスの可視化と構築。
 
-| Page                                                         | Description                                                  |
+| ページ                                                         | 説明                                                  |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| [**Node Editor**](../flow-graph/game-event-node-editor.md)   | Managing the GraphView canvas, groups, and snapshot-based Undo/Redo |
-| [**Node Connector**](../flow-graph/game-event-node-connector.md) | Rules for hybrid execution modes and real-time connection validation |
-| [**Node Behavior**](../flow-graph/game-event-node-behavior.md) | Configuring node-level delays, loops, and argument transformation logic |
-| [**Advanced Logic Patterns**](../flow-graph/advanced-logic-patterns.md) | Building no-code nested logic groups and conditional execution gates |
+| [**ノードエディター**](../flow-graph/game-event-node-editor.md)   | GraphViewキャンバス、グループ、スナップショットベースのアンドゥ/リドゥの管理 |
+| [**ノードコネクター**](../flow-graph/game-event-node-connector.md) | ハイブリッド実行モードのルールとリアルタイム接続検証 |
+| [**ノードビヘイビア**](../flow-graph/game-event-node-behavior.md) | ノードレベルの遅延、ループ、引数変換ロジックの構成 |
+| [**高度なロジックパターン**](../flow-graph/advanced-logic-patterns.md) | ノーコードのネストされたロジックグループと条件付き実行ゲートの構築 |
 
-### 💻 4. Scripting & API {#runtime-api}
+### 💻 4. スクリプティング&API {#runtime-api}
 
-The developer's guide to high-performance C# integration and lifecycle management.
+高性能C#統合とライフサイクル管理のための開発者ガイド。
 
-| Page                                                         | Description                                                  |
+| ページ                                                         | 説明                                                  |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| [**Raising & Scheduling**](../scripting/raising-and-scheduling.md) | Programmatic firing, delayed execution, and Task Handle management |
-| [**Listening Strategies**](../scripting/listening-strategies.md) | implementing prioritized, persistent, and source-aware (Sender) listeners |
-| [**Programmatic Flow**](../scripting/programmatic-flow.md)   | Using Expression Tree-based predicates for zero-reflection logic filtering |
-| [**Best Practices**](../scripting/best-practices.md)         | Architectural tips for clean decoupling and preventing data pollution |
-| [**API Reference**](../scripting/api-reference.md)           | Detailed technical documentation for all core classes and attributes |
+| [**発火&スケジューリング**](../scripting/raising-and-scheduling.md) | プログラマティック発火、遅延実行、タスクハンドル管理 |
+| [**リスニング戦略**](../scripting/listening-strategies.md) | 優先度付き、永続、ソース認識(Sender)リスナーの実装 |
+| [**プログラマティックフロー**](../scripting/programmatic-flow.md)   | ゼロリフレクションロジックフィルタリングのためのExpression Treeベース述語の使用 |
+| [**ベストプラクティス**](../scripting/best-practices.md)         | クリーンな疎結合とデータ汚染防止のためのアーキテクチャのヒント |
+| [**APIリファレンス**](../scripting/api-reference.md)           | 全コアクラスと属性の詳細な技術ドキュメント |
 
-### 🛠️ 5. Tools & Support {#tools-support}
+### 🛠️ 5. ツール&サポート {#tools-support}
 
-Automation and monitoring utilities for professional production environments.
+プロフェッショナルな本番環境のための自動化およびモニタリングユーティリティ。
 
-| Page                                                         | Description                                                  |
+| ページ                                                         | 説明                                                  |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| [**CodeGen & Cleanup**](../tools/codegen-and-cleanup.md)     | Using the Tri-Mode Generator and compilation pipeline automation |
-| [**Runtime Monitor**](../tools/runtime-monitor.md)           | Real-time performance profiling, deep logging, and warning systems |
-| [**Community & Support**](../tools/community-and-support.md) | Accessing updates, reporting bugs, and getting technical assistance |
+| [**CodeGen&クリーンアップ**](../tools/codegen-and-cleanup.md)     | 三モードジェネレーターとコンパイルパイプライン自動化の使用 |
+| [**実行時モニター**](../tools/runtime-monitor.md)           | リアルタイムパフォーマンスプロファイリング、詳細ログ、警告システム |
+| [**コミュニティ&サポート**](../tools/community-and-support.md) | アップデートへのアクセス、バグ報告、技術サポートの取得 |
 
-### 📚 6. Examples {#examples}
+### 📚 6. 例 {#examples}
 
-Practical, ready-to-use scenes covering every scenario from basics to advanced API usage.
+基本から高度なAPI使用まで、すべてのシナリオをカバーする実用的ですぐに使えるシーン。
 
-| ID   | Example Page                                                 | Key Learning Point                                           |
+| ID   | 例ページ                                                 | 主要な学習ポイント                                           |
 | :--- | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| 00   | [**Quick Start**](../examples/00-quick-start.md)             | The minimal workflow for creating, raising, and binding an event |
-| 01   | [**Void Event**](../examples/01-void-event.md)               | Using parameterless signals for global triggers like "Level Start" |
-| 02   | [**Basic Types Event**](../examples/02-basic-types-event.md) | Passing primitive data (int, float, string) through events   |
-| 03   | [**Custom Type Event**](../examples/03-custom-type-event.md) | Leveraging CodeGen for serialized custom data classes and structs |
-| 04   | [**Custom Sender Event**](../examples/04-custom-sender-event.md) | Using source-aware events to identify which entity raised the signal |
-| 05   | [**Priority Event**](../examples/05-priority-event.md)       | Precisely controlling the execution order of multiple listeners |
-| 06   | [**Conditional Event**](../examples/06-conditional-event.md) | Using predicates to execute callbacks only when criteria are met |
-| 07   | [**Delayed Event**](../examples/07-delayed-event.md)         | Managing timed logic and using Task Handles for cancellation |
-| 08   | [**Repeating Event**](../examples/08-repeating-event.md)     | Creating recurring pulse signals and automated logic loops   |
-| 09   | [**Persistent Event**](../examples/09-persistent-event.md)   | Handling events during scene transitions (DontDestroyOnLoad) |
-| 10   | [**Trigger Event**](../examples/10-trigger-event.md)         | Bridging Unity's Physics system with Game Event assets       |
-| 11   | [**Chain Event**](../examples/11-chain-event.md)             | Building visual sequential logic using the Flow Orchestration graph |
-| 12   | [**Multi Database**](../examples/12-multi-database.md)       | Isolating events into different assets for modular project organization |
-| 13   | [**Runtime API**](../examples/13-runtime-api.md)             | Registering and unregistering listeners dynamically via C# scripts |
-| 14   | [**Runtime Monitor**](../examples/14-runtime-monitor.md)     | Using profiling tools to debug execution timing and GC allocations |
+| 00   | [**クイックスタート**](../examples/00-quick-start.md)             | イベントの作成、発火、バインディングのための最小限のワークフロー |
+| 01   | [**Voidイベント**](../examples/01-void-event.md)               | 「レベル開始」のようなグローバルトリガーのためのパラメータなしシグナルの使用 |
+| 02   | [**基本型イベント**](../examples/02-basic-types-event.md) | イベントを通じてプリミティブデータ(int、float、string)を渡す   |
+| 03   | [**カスタム型イベント**](../examples/03-custom-type-event.md) | シリアライズされたカスタムデータクラスと構造体のためのCodeGenの活用 |
+| 04   | [**カスタムSenderイベント**](../examples/04-custom-sender-event.md) | どのエンティティがシグナルを発火したかを識別するソース認識イベントの使用 |
+| 05   | [**優先度イベント**](../examples/05-priority-event.md)       | 複数のリスナーの実行順序を正確に制御 |
+| 06   | [**条件付きイベント**](../examples/06-conditional-event.md) | 条件が満たされた場合にのみコールバックを実行するための述語の使用 |
+| 07   | [**遅延イベント**](../examples/07-delayed-event.md)         | タイミングロジックの管理とキャンセルのためのタスクハンドルの使用 |
+| 08   | [**繰り返しイベント**](../examples/08-repeating-event.md)     | 繰り返しパルスシグナルと自動ロジックループの作成   |
+| 09   | [**永続イベント**](../examples/09-persistent-event.md)   | シーン遷移中のイベント処理(DontDestroyOnLoad) |
+| 10   | [**トリガーイベント**](../examples/10-trigger-event.md)         | UnityのPhysicsシステムとGame Eventアセットのブリッジング       |
+| 11   | [**チェーンイベント**](../examples/11-chain-event.md)             | フローオーケストレーショングラフを使用したビジュアルシーケンシャルロジックの構築 |
+| 12   | [**マルチデータベース**](../examples/12-multi-database.md)       | モジュラープロジェクト構成のための異なるアセットへのイベント分離 |
+| 13   | [**実行時API**](../examples/13-runtime-api.md)             | C#スクリプトを介してリスナーを動的に登録/登録解除 |
+| 14   | [**実行時モニター**](../examples/14-runtime-monitor.md)     | 実行タイミングとGCアロケーションをデバッグするためのプロファイリングツールの使用 |
 
-:::tip Navigational Tip
-For a hands-on start, we recommend following **Example 00 (Quick Start)** first, then exploring the **Visual Workflow** section to see how the editor tools can streamline your development.
+:::tip ナビゲーションのヒント
+実践的な開始には、まず**Example 00(クイックスタート)**に従い、その後**ビジュアルワークフロー**セクションを探索して、エディターツールがどのように開発を効率化できるかを確認することをお勧めします。
 :::

@@ -1,5 +1,5 @@
 ﻿---
-sidebar_label: 'Create Game Event'
+sidebar_label: 'ゲームイベント作成'
 sidebar_position: 4
 ---
 
@@ -13,249 +13,248 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # Game Event Creator
 
-Your high-speed event creation wizard. This specialized tool handles batch event generation, automatic code compilation, and ScriptableObject creation—all in one streamlined workflow.
+高速イベント作成ウィザード。この特殊なツールは、バッチイベント生成、自動コード コンパイル、ScriptableObject作成を、1つの合理化されたワークフローで処理します。
 
 <VideoGif src="/video/game-event-system/event-create.mp4" />
 
 
 ---
 
-## 🚀 Opening the Creator
+## 🚀 Creatorを開く
 
-The Creator only opens from the **[Game Event Editor](./game-event-editor.md)**:
+Creatorは**[Game Event Editor](./game-event-editor.md)**からのみ開きます:
 ```
-Game Event Editor → Click "+ New Event" button (top-right)
+Game Event Editor → 「+ New Event」ボタンをクリック(右上)
 ```
 
-:::info Why From Editor Only?
-The Creator needs to know which database to add events to. Opening from the Editor ensures proper context.
+:::info なぜEditorからのみ?
+Creatorは、イベントを追加するデータベースを知る必要があります。Editorから開くことで、適切なコンテキストが保証されます。
 :::
 
 ---
 
-## 🗺️ Interface Zones
+## 🗺️ インターフェースゾーン
 
-The window is organized into four functional areas:
+ウィンドウは4つの機能エリアに整理されています:
 
-| Zone                      | Location  | Purpose                                                 |
+| ゾーン                      | 位置  | 目的                                                 |
 | ------------------------- | --------- | ------------------------------------------------------- |
-| **A. Event Mode Tabs**    | Top       | Switch between Void, Single Parameter, or Sender events |
-| **B. Configuration Area** | Middle    | Select types and configure event details                |
-| **C. Events Queue**       | Bottom    | Review pending events before creation                   |
-| **D. Status Badge**       | Top-right | Shows total queued count (e.g., "7 Queued Total")       |
+| **A. イベントモードタブ**    | 上部       | Void、シングルパラメータ、またはSenderイベント間を切り替え |
+| **B. 構成エリア** | 中央    | 型を選択してイベントの詳細を構成                |
+| **C. イベントキュー**       | 下部    | 作成前に保留中のイベントを確認                   |
+| **D. ステータスバッジ**       | 右上 | キューに入っている総数を表示(例: 「7 Queued Total」)       |
 
 ---
 
-## 🎭 Three Event Modes
+## 🎭 3つのイベントモード
 
-Choose the architecture that fits your need:
+ニーズに合ったアーキテクチャを選択します:
 
 <Tabs>
-<TabItem value="void" label="1. Parameterless" default>
+<TabItem value="void" label="1. パラメータなし" default>
 
-### Parameterless Events
+### パラメータなしイベント
 
-**Type**: `GameEvent` (Void)
+**型**: `GameEvent`(Void)
 
-The simplest signal—no data, just notification.
+最もシンプルなシグナル—データなし、通知のみ。
 
 <img src="/img/game-event-system/visual-workflow/game-event-creator/creator-parameterless.png" alt="Parameterless Mode" />
 
-**Best For**:
+**最適な用途**:
 ```
-🖱️ UI Triggers ➔ OnPauseButtonClick, OnMenuOpen
-🌍 Global States ➔ OnGameStart, OnLevelComplete
-🏃 Simple Actions ➔ OnJump, OnFire, OnInteract
+🖱️ UIトリガー ➔ OnPauseButtonClick、OnMenuOpen
+🌍 グローバル状態 ➔ OnGameStart、OnLevelComplete
+🏃 シンプルなアクション ➔ OnJump、OnFire、OnInteract
 ```
 
-**How to Use**:
-1. Click **"Add Event"** button
-2. Event appears in queue with default name "NewEvent"
-3. Rename it in the queue (e.g., "OnGameStart")
-4. Set category if desired (e.g., "Core")
-5. Click **"Create X Event(s)"** at bottom
+**使用方法**:
+1. **「Add Event」**ボタンをクリック
+2. イベントがデフォルト名「NewEvent」でキューに表示される
+3. キューで名前を変更(例: 「OnGameStart」)
+4. 必要に応じてカテゴリを設定(例: 「Core」)
+5. 下部の**「Create X Event(s)」**をクリック
 
-**No Type Selection Needed**: Since it's parameterless, you just click and add.
+**型選択不要**: パラメータなしなので、クリックして追加するだけです。
 
 </TabItem>
 
-<TabItem value="single" label="2. Single Parameter">
+<TabItem value="single" label="2. シングルパラメータ">
 
-### Single Parameter Events
+### シングルパラメータイベント
 
-**Type**: `GameEvent<T>`
+**型**: `GameEvent<T>`
 
-Carries one piece of data with the notification.
+通知と共に1つのデータを運びます。
 
 <img src="/img/game-event-system/visual-workflow/game-event-creator/creator-single.png" alt="Single Parameter Mode" />
 
-**Best For**:
+**最適な用途**:
 ```
-📈 Value Changes ➔ OnHealthChanged(float), OnScoreUpdated(int)
-🔄 State Updates ➔ OnGameStateChanged(GameState)
-📦 Object Events ➔ OnEnemySpawned(GameObject)
-💾 Data Sync ➔ OnPlayerDataChanged(PlayerData)
+📈 値の変更 ➔ OnHealthChanged(float)、OnScoreUpdated(int)
+🔄 状態更新 ➔ OnGameStateChanged(GameState)
+📦 オブジェクトイベント ➔ OnEnemySpawned(GameObject)
+💾 データ同期 ➔ OnPlayerDataChanged(PlayerData)
 ```
 
-**Two Ways to Add**:
+**追加する2つの方法**:
 
-#### Method 1: Quick Add - Basic Types
+#### 方法1: クイック追加 - 基本型
 
-For built-in Unity types (int, float, Vector3, GameObject, etc.):
+組み込みUnity型(int、float、Vector3、GameObjectなど)の場合:
 
-1. **Select Type** from dropdown (shows all 32 basic types)
-2. Click **"Add"** button
-3. Event added to queue automatically
+1. ドロップダウンから**型を選択**(32の基本型すべてを表示)
+2. **「Add」**ボタンをクリック
+3. イベントが自動的にキューに追加される
 
-**Available Basic Types**:
-- C# Primitives: `int`, `float`, `bool`, `string`, etc.
-- Math Types: `Vector2`, `Vector3`, `Quaternion`, `Color`, etc.
-- Components: `GameObject`, `Transform`, `Rigidbody`, etc.
-- Assets: `Sprite`, `Material`, `AudioClip`, etc.
+**利用可能な基本型**:
+- C#プリミティブ: `int`、`float`、`bool`、`string`など
+- 数学型: `Vector2`、`Vector3`、`Quaternion`、`Color`など
+- コンポーネント: `GameObject`、`Transform`、`Rigidbody`など
+- アセット: `Sprite`、`Material`、`AudioClip`など
 
 ---
 
-#### Method 2: Search - Custom Types
+#### 方法2: 検索 - カスタム型
 
-For your own C# classes:
+独自のC#クラスの場合:
 
-1. **Type in search bar** (e.g., "PlayerData")
-2. System searches all serializable types in your project
-3. Click **"Add"** next to your type
-4. Event added to queue
+1. **検索バーに入力**(例: 「PlayerData」)
+2. システムがプロジェクト内のすべてのシリアライズ可能な型を検索
+3. 型の横にある**「Add」**をクリック
+4. イベントがキューに追加される
 
-**Search Features**:
-- ✅ Fuzzy matching (type "plr" finds "PlayerData")
-- ✅ Shows namespace for disambiguation
-- ✅ Badge shows how many events of this type are queued
-- ✅ Green flash effect when adding
+**検索機能**:
+- ✅ ファジーマッチング(「plr」と入力すると「PlayerData」が見つかる)
+- ✅ 曖昧さ回避のために名前空間を表示
+- ✅ バッジに、この型のキューにあるイベントの数を表示
+- ✅ 追加時に緑色のフラッシュ効果
 
-**Requirements for Custom Types**:
+**カスタム型の要件**:
 ```csharp
-// ✅ This works
+// ✅ これは動作します
 [System.Serializable]
 public class PlayerData {
     public string playerName;
     public int level;
 }
 
-// ❌ This won't appear in search
-public class NonSerializableClass { } // Missing [Serializable]
+// ❌ これは検索に表示されません
+public class NonSerializableClass { } // [Serializable]が欠落
 ```
 
 </TabItem>
 
-<TabItem value="sender" label="3. With Sender">
+<TabItem value="sender" label="3. Sender付き">
 
-### Sender Events
+### Senderイベント
 
-**Type**: `GameEvent<TSender, TArgs>`
+**型**: `GameEvent<TSender, TArgs>`
 
-Carries both **who fired it** (sender) and **what happened** (argument).
+**誰が発火したか**(sender)と**何が起こったか**(argument)の両方を運びます。
 
 <img src="/img/game-event-system/visual-workflow/game-event-creator/creator-sender.png" alt="Sender Mode" />
 
-**Best For**:
+**最適な用途**:
 ```
-⚔️ Combat ➔ OnDamageTaken(GameObject victim, DamageInfo damage)
-🤝 Interactions ➔ OnItemPickedUp(Player player, ItemID item)
-🌐 Networking ➔ OnPlayerJoined(NetworkPlayer sender, string playerName)
-📜 Complex Events ➔ OnQuestCompleted(QuestGiver npc, QuestData quest)
-```
-
-**Recommended Pattern**:
-- **TSender** = The actor/source (`GameObject`, `Player`, `Enemy`)
-- **TArgs** = The data/payload (`int`, `DamageInfo`, `Vector3`)
-
-**How to Use**:
-
-1. **Select Sender Type**:
-   - Choose from Basic Types dropdown, OR
-   - Search for custom type
-   - Click "Select" when ready
-
-2. **Select Argument Type**:
-   - Choose from Basic Types dropdown, OR
-   - Search for custom type
-   - Click "Select" when ready
-
-3. **Add Event**:
-   - Blue button appears: "Add Event: GameObject → int" (example)
-   - Click it to add to queue
-
-**Selected Type Display**:
-
-When you select types, they appear in green boxes:
-```
-✅ Selected Sender: GameObject <small>(UnityEngine)</small>
-✅ Selected Argument: DamageInfo <small>(YourGame.Combat)</small>
+⚔️ 戦闘 ➔ OnDamageTaken(GameObject victim, DamageInfo damage)
+🤝 インタラクション ➔ OnItemPickedUp(Player player, ItemID item)
+🌐 ネットワーキング ➔ OnPlayerJoined(NetworkPlayer sender, string playerName)
+📜 複雑なイベント ➔ OnQuestCompleted(QuestGiver npc, QuestData quest)
 ```
 
-Click the **×** to clear and choose different types.
+**推奨パターン**:
+- **TSender** = アクター/ソース(`GameObject`、`Player`、`Enemy`)
+- **TArgs** = データ/ペイロード(`int`、`DamageInfo`、`Vector3`)
+
+**使用方法**:
+
+1. **Sender型を選択**:
+   - 基本型ドロップダウンから選択、または
+   - カスタム型を検索
+   - 準備ができたら「Select」をクリック
+
+2. **Argument型を選択**:
+   - 基本型ドロップダウンから選択、または
+   - カスタム型を検索
+   - 準備ができたら「Select」をクリック
+
+3. **イベントを追加**:
+   - 青いボタンが表示される: 「Add Event: GameObject → int」(例)
+   - クリックしてキューに追加
+
+**選択された型の表示**:
+
+型を選択すると、緑色のボックスに表示されます:
+```
+✅ 選択されたSender: GameObject <small>(UnityEngine)</small>
+✅ 選択されたArgument: DamageInfo <small>(YourGame.Combat)</small>
+```
+
+**×**をクリックしてクリアし、異なる型を選択します。
 
 </TabItem>
 </Tabs>
 
 ---
 
-## 📦 Batch Creation Workflow
+## 📦 バッチ作成ワークフロー
 
-The Creator's power is **batch processing**—create many events at once instead of one-by-one.
+Creatorの強みは**バッチ処理**です—一度に1つずつではなく、多くのイベントを一度に作成します。
 
-### Step-by-Step Process
+### ステップバイステッププロセス
 
-#### 1️⃣ Queue Events
+#### 1️⃣ イベントをキューに入れる
 
-Add multiple events across different modes:
+異なるモードにわたって複数のイベントを追加:
 ```
-🔘 Switch to Parameterless ➔ Add OnGameStart  
-🔘 Switch to Parameterless ➔ Add OnGamePause  
-🔢 Switch to Single Parameter(int) ➔ Add OnScoreChanged  
-🌊 Switch to Single Parameter(float) ➔ Add OnHealthChanged  
-👥 Switch to Sender <GameObject,int> ➔ Add OnEnemyDamaged  
+🔘 パラメータなしに切り替え ➔ OnGameStartを追加  
+🔘 パラメータなしに切り替え ➔ OnGamePauseを追加  
+🔢 シングルパラメータ(int)に切り替え ➔ OnScoreChangedを追加  
+🌊 シングルパラメータ(float)に切り替え ➔ OnHealthChangedを追加  
+👥 Sender <GameObject,int>に切り替え ➔ OnEnemyDamagedを追加  
 
-Total in Queue: 5 events pending creation
+キュー内の合計: 5つのイベントが作成待ち
 ```
 
-**Visual Feedback**:
-- Top-right badge updates: "5 Queued Total"
-- Each mode shows its own count: "Events Queue (2)"
+**視覚的フィードバック**:
+- 右上のバッジが更新される: 「5 Queued Total」
+- 各モードが独自のカウントを表示: 「Events Queue (2)」
 
 ---
 
-#### 2️⃣ Review & Configure
+#### 2️⃣ 確認&構成
 
-In the **Events Queue** section:
+**Events Queue**セクションで:
 
-**Per Event**:
-- ☑️ **Checkbox**: Toggle selection (only selected events will be created)
-- **Name Field**: Rename event (default: "NewEvent", "OnInt", etc.)
-- **Category Field**: Set category for filtering later
-- **Type Label**: Shows event type signature
-- **× Button**: Remove from queue
+**イベントごと**:
+- ☑️ **チェックボックス**: 選択を切り替え(選択されたイベントのみが作成されます)
+- **名前フィールド**: イベント名を変更(デフォルト: 「NewEvent」、「OnInt」など)
+- **カテゴリフィールド**: 後でフィルタリングするためのカテゴリを設定
+- **型ラベル**: イベント型シグネチャを表示
+- **×ボタン**: キューから削除
 
-**Bulk Actions**:
-- **Select All**: Check all events in current queue
-- **Clear Selection**: Uncheck all events
-- **Remove All**: Clear entire queue (with confirmation)
+**一括アクション**:
+- **Select All**: 現在のキュー内のすべてのイベントをチェック
+- **Clear Selection**: すべてのイベントのチェックを外す
+- **Remove All**: キュー全体をクリア(確認付き)
 
 ---
 
-#### 3️⃣ Execute Creation
+#### 3️⃣ 作成を実行
 
-Click the big green button at bottom:
+下部の大きな緑色のボタンをクリック:
 ```
 + Create 5 Event(s)
 ```
 
-**What Happens Next**: See the next section ⬇️
+**次に何が起こるか**: 次のセクションを参照 ⬇️
 
 ---
 
-## ⚙️ Understanding the Creation Process
+## ⚙️ 作成プロセスの理解
 
-When you click "Create", a sophisticated automation pipeline runs. Here's what happens behind the scenes:
-
+「Create」をクリックすると、洗練された自動化パイプラインが実行されます。舞台裏で何が起こるかを以下に示します:
 ```mermaid
 graph LR
     classDef start fill:#1e40af,stroke:#0f172a,stroke-width:2px,color:#ffffff,font-weight:bold
@@ -265,24 +264,23 @@ graph LR
     classDef wait fill:#b45309,stroke:#020617,stroke-width:2px,color:#ffffff,font-style:italic
     classDef endNode fill:#020617,stroke:#000000,stroke-width:2px,color:#ffffff,font-weight:bold
 
-    A(🆕 Create Asset):::start --> B(🔍 Check Events):::decision
-    B --> C([📝 Code Exists?]):::decision
+    A(🆕 アセット作成):::start --> B(🔍 イベント確認):::decision
+    B --> C([📝 コード存在?]):::decision
     
-    C -- Yes --> D(✅ Create Asset):::success
-    C -- No --> E(⚠️ Generation Required):::warning
+    C -- はい --> D(✅ アセット作成):::success
+    C -- いいえ --> E(⚠️ 生成が必要):::warning
     
-    E --> F(⚙️ Gen & Compile):::wait
-    F --> G(⏳ Wait...):::wait
-    G --> H(✅ Auto-Create):::success
+    E --> F(⚙️ 生成&コンパイル):::wait
+    F --> G(⏳ 待機...):::wait
+    G --> H(✅ 自動作成):::success
     
-    D --> I(🏁 Done):::endNode
+    D --> I(🏁 完了):::endNode
     H --> I
 ```
 
-### Scenario 1: Code Already Exists ✅
+### シナリオ1: コードがすでに存在 ✅
 
-**Example**: Creating an `int` event.
-
+**例**: `int`イベントを作成。
 ```mermaid
 graph LR
 
@@ -291,23 +289,22 @@ graph LR
     classDef success fill:#0f766e,stroke:#042f2e,stroke-width:2px,color:#ffffff
     classDef system fill:#020617,stroke:#000000,stroke-width:2px,color:#ffffff,font-weight:bold
 
-    A(🔢 OnScoreChanged <int>):::event --> B(🔍 Check: IntGameEvent.cs):::decision
+    A(🔢 OnScoreChanged <int>):::event --> B(🔍 確認: IntGameEvent.cs):::decision
     
-    B -- "Yes (Pre-generated)" --> C(✅ Instant Creation):::success
+    B -- "はい(事前生成済み)" --> C(✅ 即座に作成):::success
     
-    C --> D(🗄️ Database Updated):::system
+    C --> D(🗄️ データベース更新):::system
 ```
 
-**Speed**: Instant (< 1 second)
+**速度**: 即座(< 1秒)
 
-**No Compilation**: You see the event in the Editor immediately.
+**コンパイルなし**: エディターにすぐにイベントが表示されます。
 
 ---
 
-### Scenario 2: Code Needs Generation ⚠️
+### シナリオ2: コード生成が必要 ⚠️
 
-**Example**: Creating a `PlayerData` event (your custom class).
-
+**例**: `PlayerData`イベントを作成(カスタムクラス)。
 ```mermaid
 graph LR
  
@@ -320,37 +317,37 @@ graph LR
 
     classDef file fill:#4c0519,stroke:#020617,stroke-width:2px,color:#ffffff
 
-    A(👤 OnPlayerDataChanged):::event --> B(🔍 Check Code):::decision
+    A(👤 OnPlayerDataChanged):::event --> B(🔍 コード確認):::decision
     
-    B -- "No" --> C(🛠️ 1. Generate C#):::warning
+    B -- "いいえ" --> C(🛠️ 1. C#生成):::warning
     
-    C --> P[📄 File: .../Custom/PlayerDataGameEvent.cs]:::file
+    C --> P[📄 ファイル: .../Custom/PlayerDataGameEvent.cs]:::file
 
-    C --> D(⚙️ 2 & 3. Unity Compiling):::wait
+    C --> D(⚙️ 2 & 3. Unity コンパイル中):::wait
     
-    D --> E(✅ 4. Auto-Create):::step
+    D --> E(✅ 4. 自動作成):::step
     
-    E --> F(🏁 Done):::system
+    E --> F(🏁 完了):::system
 ```
 
-**Speed**: 3-10 seconds (depends on project size)
+**速度**: 3-10秒(プロジェクトサイズによる)
 
-**You'll See**:
-1. Creator window closes
-2. Unity compilation spinner appears
-3. Console logs appear
-4. Event appears in Editor automatically
+**表示されるもの**:
+1. Creatorウィンドウが閉じる
+2. Unityコンパイルスピナーが表示される
+3. コンソールログが表示される
+4. イベントが自動的にEditorに表示される
 
-:::info What Gets Generated?
+:::info 何が生成されるか?
 
-For each custom type, the system creates **one C# file** containing:
+各カスタム型について、システムは以下を含む**1つのC#ファイル**を作成します:
 ```csharp
-// File: PlayerDataGameEvent.cs
+// ファイル: PlayerDataGameEvent.cs
 
-// 1. The Event Class
+// 1. イベントクラス
 public class PlayerDataGameEvent : GameEvent<PlayerData> { }
 
-// 2. The Binding Field (for Inspector)
+// 2. バインディングフィールド(インスペクター用)
 public partial class GameEventManager {
     public partial class EventBinding {
         public UnityEvent<PlayerData> PlayerDataGameEventAction;
@@ -358,90 +355,89 @@ public partial class GameEventManager {
 }
 ```
 
-**Why Both?** The event class is for raising events. The binding field is for Inspector callbacks.
+**なぜ両方?** イベントクラスはイベント発火用。バインディングフィールドはインスペクターコールバック用。
 :::
 
 ---
 
-### Mixed Batch Handling
+### ミックスバッチ処理
 
-**What if you queue both existing and new types?**
+**既存の型と新しい型の両方をキューに入れるとどうなるか?**
 ```
-Your Queue:
-1. OnGameStart (void) ✅ Code exists
-2. OnScoreChanged (int) ✅ Code exists  
-3. OnPlayerDataChanged (PlayerData) ⚠️ Needs generation
-4. OnQuestCompleted (QuestData) ⚠️ Needs generation
+キュー:
+1. OnGameStart (void) ✅ コード存在
+2. OnScoreChanged (int) ✅ コード存在  
+3. OnPlayerDataChanged (PlayerData) ⚠️ 生成が必要
+4. OnQuestCompleted (QuestData) ⚠️ 生成が必要
 ```
 
-**System Behavior**:
-
+**システムの動作**:
 ```mermaid
 graph LR
-    %% 样式定义：沿用深色系统
+    %% スタイル定義：ダークシステムに沿って
     classDef instant fill:#0f766e,stroke:#042f2e,stroke-width:2px,color:#ffffff,font-weight:bold
     classDef warning fill:#7c2d12,stroke:#431407,stroke-width:2px,color:#ffffff
     classDef wait fill:#4c0519,stroke:#020617,stroke-width:2px,color:#ffffff,font-style:italic
     classDef system fill:#020617,stroke:#000000,stroke-width:2px,color:#ffffff,font-weight:bold
 
-    %% 流程逻辑
-    A(⚡ Step 1: Create Events 1 & 2):::instant --> B(🛠️ Step 2: Gen Code for Data Types):::warning
+    %% フローロジック
+    A(⚡ ステップ1: イベント1&2を作成):::instant --> B(🛠️ ステップ2: データ型のコード生成):::warning
     
-    B --> C(⚙️ Step 3: Trigger Compilation):::wait
+    B --> C(⚙️ ステップ3: コンパイルをトリガー):::wait
     
-    C --> D(✅ Step 4: Auto-create Events 3 & 4):::instant
+    C --> D(✅ ステップ4: イベント3&4を自動作成):::instant
     
-    D --> E(🏁 All Assets Ready):::system
+    D --> E(🏁 すべてのアセット準備完了):::system
 
-    %% 提示说明 (可选)
+    %% ヒント説明(オプション)
     linkStyle 0 stroke:#0f766e,stroke-width:2px
     linkStyle 2 stroke:#0f766e,stroke-width:2px
 ```
 
-**Console Output**:
+**コンソール出力**:
 ```
-✅ [Batch] Immediate events created successfully. (2 events)
-⏳ Generated 2 script files. Triggering compilation to finish creation...
-   (After compilation)
-🎯 Batch Creation Complete: 2 events created.
+✅ [Batch] 即座のイベントが正常に作成されました。(2イベント)
+⏳ 2つのスクリプトファイルを生成しました。作成を完了するためにコンパイルをトリガー中...
+   (コンパイル後)
+🎯 バッチ作成完了: 2イベントが作成されました。
 ```
 
 ---
 
-### Sender Events Special Case
+### Senderイベントの特殊ケース
 
-Sender events (`GameEvent<TSender, TArgs>`) follow the same logic but generate more complex code:
+Senderイベント(`GameEvent<TSender, TArgs>`)は同じロジックに従いますが、より複雑なコードを生成します:
 ```csharp
-// File: GameObjectDamageInfoGameEvent.cs
+// ファイル: GameObjectDamageInfoGameEvent.cs
 
-// Event class with TWO type parameters
+// 2つの型パラメータを持つイベントクラス
 public class GameObjectDamageInfoGameEvent 
     : GameEvent<GameObject, DamageInfo> { }
 
-// Binding field with TWO parameters
+// 2つのパラメータを持つバインディングフィールド
 public UnityEvent<GameObject, DamageInfo> 
     GameObjectDamageInfoGameEventAction;
 ```
 
 ---
 
-## 🎯 Best Practices
+## 🎯 ベストプラクティス
 
-### ✅ DO
+### ✅ 推奨事項
 
-**Pre-Generate Common Types**: If you know you'll use certain types frequently, you can refer to [Code Gen & Cleanup](../tools/codegen-and-cleanup.md) to pre generate custom type classes and event binding code.
+**一般的な型を事前生成**: 特定の型を頻繁に使用することがわかっている場合は、[Code Gen & Cleanup](../tools/codegen-and-cleanup.md)を参照して、カスタム型クラスとイベントバインディングコードを事前生成できます。
 
 ---
 
-**Use Meaningful Names**
+**意味のある名前を使用**
 ```
-✅ Good Names:
+✅ 良い名前:
   - OnPlayerHealthChanged
   - OnEnemySpawned
   - OnQuestCompleted
   - OnScoreUpdated
 
-❌ Avoid:
+❌ 避けるべき:
   - NewEvent1
   - Test
   - Event_Copy
@@ -450,21 +446,21 @@ public UnityEvent<GameObject, DamageInfo>
 
 ---
 
-**Organize with Categories**
+**カテゴリで整理**
 
-Use categories to group related events:
+関連するイベントをグループ化するためにカテゴリを使用:
 ```
-🟥 Category: "Combat"
+🟥 カテゴリ: "Combat"
   - ⚡ OnDamageTaken
   - ⚡ OnEnemyKilled
   - ⚡ OnWeaponFired
 
-🟩 Category: "UI"
+🟩 カテゴリ: "UI"
   - ⚡ OnButtonClicked
   - ⚡ OnMenuOpened
   - ⚡ OnDialogClosed
 
-🟪 Category: "Player"
+🟪 カテゴリ: "Player"
   - ⚡ OnPlayerJumped
   - ⚡ OnPlayerDied
   - ⚡ OnLevelUp
@@ -472,157 +468,156 @@ Use categories to group related events:
 
 ---
 
-### ❌ AVOID
+### ❌ 非推奨事項
 
-**Don't Close During Compilation**
+**コンパイル中に閉じない**
 ```
-❌ WRONG:
-1. Click Create
-2. See "Triggering compilation..." message
-3. Immediately close Unity or force-stop compilation
+❌ 誤り:
+1. Createをクリック
+2. 「コンパイルをトリガー中...」メッセージを確認
+3. すぐにUnityを閉じるか、コンパイルを強制停止
 
-✅ RIGHT:
-1. Click Create  
-2. Wait for compilation bar to finish
-3. Events appear automatically
+✅ 正解:
+1. Createをクリック  
+2. コンパイルバーが完了するまで待つ
+3. イベントが自動的に表示される
 ```
 
-**Why?** Interrupting compilation may leave generated code files without corresponding assets.
+**理由は?** コンパイルを中断すると、対応するアセットなしで生成されたコードファイルが残る可能性があります。
 
 ---
 
-**Don't Manually Edit Generated Files**
+**生成されたファイルを手動で編集しない**
 ```
-❌ WRONG:
-Open: TinyGiantsData/GameEventSystem/CodeGen/Custom/PlayerDataGameEvent.cs
-Edit: Add custom methods, change namespace, etc.
+❌ 誤り:
+開く: TinyGiantsData/GameEventSystem/CodeGen/Custom/PlayerDataGameEvent.cs
+編集: カスタムメソッドを追加、名前空間を変更など
 
-✅ RIGHT:
-Let the system manage generated files.
-Extend functionality through separate scripts.
+✅ 正解:
+システムに生成ファイルを管理させる。
+別のスクリプトを通じて機能を拡張。
 ```
 
-**Why?** The system may regenerate these files, overwriting your changes.
+**理由は?** システムがこれらのファイルを再生成し、変更を上書きする可能性があります。
 
 ---
 
-## 🔍 Progress Indicators
+## 🔍 進捗インジケーター
 
-### During Creation
+### 作成中
 
-**Immediate Creation** (code exists):
+**即座の作成**(コード存在):
 ```
-✅ Events created successfully.
-```
-
-**Code Generation** (new types):
-
-```
-⏳ Generated 3 script files. Triggering compilation to finish creation...
+✅ イベントが正常に作成されました。
 ```
 
-**After Compilation**:
+**コード生成**(新しい型):
 ```
-🎯 Batch Creation Complete: 1 events created.
+⏳ 3つのスクリプトファイルを生成しました。作成を完了するためにコンパイルをトリガー中...
+```
+
+**コンパイル後**:
+```
+🎯 バッチ作成完了: 1イベントが作成されました。
 ```
 
 ---
 
-### Console Logs Explained
+### コンソールログの説明
 
-**Detailed Generation Report**:
+**詳細な生成レポート**:
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🧩 Event Code Generation Complete
+🧩 イベントコード生成完了
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✅ Generated 3 event files (Type + Binding).
+✅ 3つのイベントファイルを生成しました(型 + バインディング)。
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-**What This Means**:
+**これが意味すること**:
 
-- 3 new C# files created
-- Each file contains event class + binding field
-- Files are in `TinyGiantsData/GameEventSystem/CodeGen/Custom/`
-- Assets will be created automatically after compilation
-
----
-
-## ❓ Troubleshooting
-
-### Events Not Appearing After Compilation
-
-**Problem**: Clicked Create, compilation finished, but events missing.
-
-**Solutions**:
-
-**Check Console for Errors**:
-```
-Look for red errors during compilation
-Common issue: Type not serializable
-Fix: Add [System.Serializable] to your class
-```
-
-**Verify Database Selection**:
-```
-1. Open Game Event Editor
-2. Check which database is selected
-3. Events are added to THAT database
-```
-
-**Manual Asset Check**:
-```
-1. Navigate to: TinyGiantsData/GameEventSystem/Databases/
-2. Find your database asset
-3. Expand it in Project window
-4. Look for your event sub-assets
-```
+- 3つの新しいC#ファイルが作成された
+- 各ファイルにはイベントクラス + バインディングフィールドが含まれる
+- ファイルは`TinyGiantsData/GameEventSystem/CodeGen/Custom/`にある
+- コンパイル後にアセットが自動的に作成される
 
 ---
 
-### Compilation Takes Too Long
+## ❓ トラブルシューティング
 
-**Problem**: Stuck on "Compiling Scripts..." for minutes.
+### コンパイル後にイベントが表示されない
 
-**Causes**:
-- Large project with many scripts
-- Other compilation errors blocking progress
-- Unity Editor performance issues
+**問題**: Createをクリックし、コンパイルが完了したが、イベントが見つからない。
 
-**Solutions**:
+**解決策**:
+
+**コンソールでエラーを確認**:
 ```
-1. Check Console for compilation errors
-2. Fix any red errors first
-3. Try: Assets → Reimport All (last resort)
-4. Restart Unity if stuck > 5 minutes
+コンパイル中の赤いエラーを探す
+一般的な問題: 型がシリアライズ可能でない
+修正: クラスに[System.Serializable]を追加
+```
+
+**データベース選択を確認**:
+```
+1. Game Event Editorを開く
+2. どのデータベースが選択されているか確認
+3. イベントはそのデータベースに追加される
+```
+
+**手動アセット確認**:
+```
+1. 移動: TinyGiantsData/GameEventSystem/Databases/
+2. データベースアセットを見つける
+3. Projectウィンドウで展開
+4. イベントサブアセットを探す
 ```
 
 ---
 
-### "Type Not Found" After Generation
+### コンパイルに時間がかかりすぎる
 
-**Problem**: Console says type not found even after compilation.
+**問題**: 「Compiling Scripts...」で数分間スタック。
 
-**Checklist**:
+**原因**:
+- 多くのスクリプトを持つ大規模プロジェクト
+- 進行をブロックする他のコンパイルエラー
+- Unityエディターのパフォーマンス問題
 
-✅ Is your type [Serializable]?
+**解決策**:
+```
+1. コンパイルエラーについてコンソールを確認
+2. 最初に赤いエラーを修正
+3. 試す: Assets → Reimport All(最後の手段)
+4. 5分以上スタックした場合はUnityを再起動
+```
 
-✅ Is your type public?
+---
 
-✅ Does Unity recognize your type? (check Inspector)
+### 生成後に「Type Not Found」
 
-✅ Did compilation actually finish? (no spinner)
+**問題**: コンパイル後でもコンソールに型が見つからないと表示される。
 
-**Fix**:
+**チェックリスト**:
+
+✅ 型は[Serializable]か?
+
+✅ 型はpublicか?
+
+✅ Unityは型を認識しているか?(インスペクターで確認)
+
+✅ コンパイルは実際に完了したか?(スピナーなし)
+
+**修正**:
 ```csharp
-// Make sure your class looks like this:
+// クラスが次のようになっていることを確認:
 using System;
 using UnityEngine;
 
-[Serializable]  // ← Required
-public class PlayerData  // ← Must be public
+[Serializable]  // ← 必須
+public class PlayerData  // ← publicである必要がある
 {
     public string playerName;
     public int level;
@@ -631,33 +626,33 @@ public class PlayerData  // ← Must be public
 
 ---
 
-### Duplicate Event Names
+### 重複するイベント名
 
-**Problem**: Two events with same name in queue.
+**問題**: キュー内に同じ名前の2つのイベント。
 
-**Behavior**: System auto-renames with suffix:
+**動作**: システムが自動的に接尾辞で名前を変更:
 ```
-Queue:
+キュー:
 - OnPlayerDeath
 - OnPlayerDeath_1
 - OnPlayerDeath_2
 ```
 
-**Better Practice**: Rename manually in the queue before creating it.
+**より良い方法**: 作成前にキュー内で手動で名前を変更。
 
 ---
 
-:::tip Pro Workflow
-**First-Time Setup**: Create all your common event types in one batch session. Wait for compilation once. From then on, event creation is instant since all code exists. This one-time investment saves hours over the project lifetime.
+:::tip プロのワークフロー
+**初回セットアップ**: すべての一般的なイベント型を1回のバッチセッションで作成します。一度コンパイルを待ちます。それ以降は、すべてのコードが存在するため、イベント作成は即座です。この一度の投資により、プロジェクトの生涯にわたって数時間節約されます。
 :::
 
-:::info Code Location
-Generated files live in:
+:::info コードの場所
+生成されたファイルは以下にあります:
 ```
 Assets/TinyGiantsData/GameEventSystem/CodeGen/
-├─ Basic/    (pre-generated for int, float, etc.)
-└─ Custom/   (your custom types)
+├─ Basic/    (int、floatなどの事前生成)
+└─ Custom/   (カスタム型)
 ```
 
-These folders are safe to commit to version control—they're deterministic and won't cause merge conflicts.
+これらのフォルダーはバージョン管理にコミットしても安全です—決定論的でマージの競合を引き起こしません。
 :::

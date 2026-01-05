@@ -1,172 +1,172 @@
 ﻿---
-sidebar_label: 'Database & FlowGraph'
+sidebar_label: '데이터베이스 및 플로우 그래프'
 sidebar_position: 2
 
 ---
 
-# Game Event Manager
+# 게임 이벤트 매니저 (Game Event Manager)
 
-The **Game Event Manager** is the runtime brain of the entire system. It is responsible for loading your data (Events & Flows) into memory, managing their lifecycle, and providing real-time telemetry.
+**게임 이벤트 매니저(Game Event Manager)**는 시스템 전체의 런타임 브레인 역할을 합니다. 데이터(이벤트 및 플로우)를 메모리에 로드하고, 라이프사이클을 관리하며, 실시간 원격 측정(Telemetry) 데이터를 제공하는 책임을 집니다.
 
-Unlike the Dashboard (which is a tool for *creating*), the Manager is the container that *holds* your data.
+대시보드가 *생성*을 위한 도구라면, 매니저는 데이터를 *담고 있는* 컨테이너입니다.
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-manager/manager-full.png)
 
 ---
 
-## 🏗️ The Data Architecture
+## 🏗️ 데이터 아키텍처
 
-Before diving into the UI, it is critical to understand how this system stores data.
+UI를 살펴보기 전에, 이 시스템이 데이터를 저장하는 방식을 이해하는 것이 중요합니다.
 
-### Storage Model
+### 저장 모델
 
-1. **Container-Based Storage**: Events are not loose files. They are stored as **Sub-Assets** inside a parent **Database Asset** (`.asset`).
-2. **Separation of Concerns**:
-   - **Databases**: Store Event Definitions (Identity, Name, Type).
-   - **Flow Graphs**: Store Logic Nodes (Triggers, Chains, Connections).
-3. **The "Sanctuary"**: By default, all assets are created in `Assets/TinyGiantsData/GameEventSystem/`.
+1. **컨테이너 기반 저장**: 이벤트는 개별 파일로 존재하지 않습니다. 부모 **데이터베이스 에셋**(`.asset`) 내부에 **하위 에셋(Sub-Assets)**으로 저장됩니다.
+2. **관심사 분리**:
+   - **데이터베이스(Databases)**: 이벤트 정의(식별자, 이름, 타입)를 저장합니다.
+   - **플로우 그래프(Flow Graphs)**: 로직 노드(트리거, 체인, 연결 관계)를 저장합니다.
+3. **"보호 구역(Sanctuary)"**: 기본적으로 모든 에셋은 `Assets/TinyGiantsData/GameEventSystem/` 폴더 내에 생성됩니다.
 
-:::danger CRITICAL: Do Not Manually Delete Sub-Assets
+:::danger 중요: 하위 에셋을 수동으로 삭제하지 마십시오
 
-Because events are sub-assets, **NEVER** delete them directly from the Project view by expanding the Database asset.
+이벤트는 하위 에셋이므로, 프로젝트 뷰에서 데이터베이스 에셋을 확장하여 직접 삭제해서는 **절대로** 안 됩니다.
 
-**Correct Workflow**:
+**올바른 워크플로우**:
 
-- ✅ **To Delete an Event**: Use the **[Game Event Editor](./game-event-editor.md)**
-- ✅ **To Delete a Flow**: Use the **[Game Event Flow Editor](../flow-graph/game-event-node-editor.md)**
+- ✅ **이벤트 삭제 시**: **[게임 이벤트 에디터](./game-event-editor.md)**를 사용하십시오.
+- ✅ **플로우 삭제 시**: **[게임 이벤트 플로우 에디터](../flow-graph/game-event-node-editor.md)**를 사용하십시오.
 
-**Why?** Manual deletion breaks GUID references and corrupts the database integrity.
+**이유는 무엇인가요?** 수동으로 삭제하면 GUID 참조가 깨지고 데이터베이스의 무결성이 손상됩니다.
 :::
 
 ---
 
-## 🗃️ Database Management
+## 🗃️ 데이터베이스 관리
 
-This section controls which sets of events are active in your scene. The system supports **Multi-Database Architecture**, allowing you to split events (e.g., "Core", "Combat", "UI") and load them as needed.
+이 섹션에서는 씬에서 활성화할 이벤트 세트를 제어합니다. 시스템은 **멀티 데이터베이스 아키텍처**를 지원하므로 이벤트를 용도별(예: "Core", "Combat", "UI")로 나누고 필요에 따라 로드할 수 있습니다.
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-manager/manager-databases.png)
 
-### Management Actions
+### 관리 기능
 
-| Action                | Description                                                  |
+| 기능 | 설명 |
 | :-------------------- | :----------------------------------------------------------- |
-| **Active / Inactive** | Toggles whether this database is loaded. Inactive databases will not resolve event lookups at runtime. |
-| **Remove (×)**        | Removes the database **from this list only**. It **DOES NOT** delete the asset file from your project. |
-| **+ Create New**      | Creates a new `.asset` database file in the `TinyGiantsData/GameEventSystem/Database` folder and adds it here. |
-| **📂 Add Existing**    | Opens a file picker to add a database you created previously (This operation will search for all database assets under Assets directory and display them in the drop-down list). |
+| **활성화 / 비활성화** | 해당 데이터베이스의 로드 여부를 토글합니다. 비활성화된 데이터베이스는 런타임에 이벤트를 찾을 수 없습니다. |
+| **제거 (×)** | **이 목록에서만** 데이터베이스를 제거합니다. 프로젝트의 실제 에셋 파일은 **삭제되지 않습니다.** |
+| **+ 새 데이터베이스 생성** | `TinyGiantsData/GameEventSystem/Database` 폴더에 새로운 `.asset` 데이터베이스 파일을 생성하고 목록에 추가합니다. |
+| **📂 기존 에셋 추가** | 이전에 생성한 데이터베이스를 추가하기 위해 파일 선택창을 엽니다. (Assets 디렉토리 아래의 모든 데이터베이스 에셋을 검색하여 드롭다운 목록에 표시합니다.) |
 
-### Understanding Active vs Inactive
+### 활성화(Active) vs 비활성화(Inactive) 이해하기
 
-**Active Database** (Green Badge):
+**활성화된 데이터베이스** (녹색 배지):
 
-- ✅ Events are available for binding in Inspectors
-- ✅ Events can be triggered at runtime
-- ✅ Appears in Game Event Editor searches
+- ✅ 인스펙터에서 바인딩할 수 있는 이벤트 목록에 표시됨
+- ✅ 런타임에 이벤트 트리거 가능
+- ✅ 게임 이벤트 에디터 검색 결과에 포함됨
 
-**Inactive Database** (Yellow Badge):
+**비활성화된 데이터베이스** (노란색 배지):
 
-- ⏸️ Temporarily disabled without removing from list
-- 🔒 Events cannot be triggered or bound
-- 💡 Useful for seasonal content or DLC events
+- ⏸️ 목록에서 제거하지 않고 일시적으로 비활성화함
+- 🔒 이벤트를 트리거하거나 바인딩할 수 없음
+- 💡 시즌 콘텐츠나 DLC 전용 이벤트 관리에 유용함
 
-:::tip Project Context Menu
-You can also create databases directly in the Project window:
+:::tip 프로젝트 컨텍스트 메뉴
+프로젝트 창에서 직접 데이터베이스를 생성할 수도 있습니다:
 
 ```
-Right-Click → Create → TinyGiants → Game Event System → Game Event Database
+우클릭 → Create → TinyGiants → Game Event System → Game Event Database
 ```
 
-Then add it to the Manager via **"Add Existing"** button.
+그 후 매니저의 **"기존 에셋 추가(Add Existing)"** 버튼을 통해 등록하십시오.
 :::
 
 ---
 
-## 🕸️ Flow Graph Management
+## 🕸️ 플로우 그래프 관리
 
-Similar to databases, this section manages your **Visual Logic Containers**.
+데이터베이스와 마찬가지로, 이 섹션은 **시각적 로직 컨테이너**를 관리합니다.
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-manager/manager-flowgraphs.png)
 
-### What is a Flow Container?
+### 플로우 컨테이너란 무엇인가요?
 
-A **Flow Container** is a ScriptableObject that holds multiple "Flow Graphs" (visual event sequences).
+**플로우 컨테이너(Flow Container)**는 여러 개의 "플로우 그래프(시각적 이벤트 시퀀스)"를 담고 있는 스크립터블 오브젝트입니다.
 
-**Common Workflow**:
+**일반적인 워크플로우**:
 
-- **Global Flow**: Persistent logic active across all scenes (e.g., UI events, audio triggers)
-- **Level-Specific Flows**: Load/unload per scene (e.g., boss fight sequences, tutorial steps)
+- **글로벌 플로우(Global Flow)**: 모든 씬에서 활성화되는 영구적인 로직 (예: UI 이벤트, 오디오 트리거)
+- **레벨별 플로우(Level-Specific Flows)**: 씬마다 로드/언로드되는 로직 (예: 보스전 시퀀스, 튜토리얼 단계)
 
-### Management Actions
+### 관리 기능
 
-Same controls as databases:
+데이터베이스와 동일한 제어 기능을 제공합니다:
 
-- **Create New**: Generate a new flow container asset
-- **Add Existing**: Register a previously created flow container
-- **Active/Inactive**: Enable or disable flow execution
-- **Remove (×)**: Unregister from manager (doesn't delete the asset)
+- **새 컨테이너 생성**: 새로운 플로우 컨테이너 에셋을 생성합니다.
+- **기존 컨테이너 추가**: 이전에 생성된 플로우 컨테이너를 등록합니다.
+- **활성화/비활성화**: 플로우 실행 여부를 설정합니다.
+- **제거 (×)**: 매니저 등록을 해제합니다 (에셋 자체는 삭제되지 않음).
 
-:::info Editing Flow Graphs
-Flow graphs themselves are edited in the **[Game Event Flow Editor](../flow-graph/game-event-node-editor.md)**, not here. The Manager only controls **which flows are loaded**.
+:::info 플로우 그래프 편집
+플로우 그래프 자체는 여기서 편집하지 않고 **[게임 이벤트 플로우 에디터](../flow-graph/game-event-node-editor.md)**에서 편집합니다. 매니저는 오직 **어떤 플로우가 로드될지**만 제어합니다.
 :::
 
 ---
 
-## 📊 Live Statistics (Telemetry)
+## 📊 실시간 통계 (원격 측정)
 
-The Inspector provides three dedicated panels to monitor the health and composition of your event system.
+인스펙터는 이벤트 시스템의 상태와 구성을 모니터링할 수 있는 세 개의 전용 패널을 제공합니다.
 
-### 1. Overview Stats
+### 1. 개요 통계 (Overview Stats)
 
-Tracks the binding status of your events.
+이벤트의 바인딩 상태를 추적합니다.
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-manager/manager-overview.png)
 
-| Metric              | Description                                                  |
+| 지표 | 설명 |
 | :------------------ | :----------------------------------------------------------- |
-| **Total Events**    | The sum of all events across all active databases.           |
-| **Bound Events**    | The number of events that are currently **configured in the Inspector** (Visual Binding). |
-| **Runtime Binding** | Events bound via code (`AddListener`) are tracked separately in the **[Runtime Monitor](../tools/runtime-monitor.md)**. |
+| **전체 이벤트** | 모든 활성화된 데이터베이스에 포함된 이벤트의 총합입니다. |
+| **바인딩된 이벤트** | 현재 **인스펙터에서 설정된**(시각적 바인딩) 이벤트의 수입니다. |
+| **런타임 바인딩** | 코드(`AddListener`)를 통해 바인딩된 이벤트는 **[런타임 모니터](../tools/runtime-monitor.md)**에서 별도로 추적됩니다. |
 
-**Progress Bar**: Shows the percentage of events that have been bound (configured with listeners).
+**프로그레스 바**: 리스너가 설정되어 바인딩이 완료된 이벤트의 비율을 보여줍니다.
 
-:::tip Play Mode Auto-Refresh
-During Play Mode, the statistics panel automatically updates to reflect runtime listener registrations. The bound events count will change as you call `AddListener()` in your code.
+:::tip 플레이 모드 자동 갱신
+플레이 모드 중에는 런타임 리스너 등록 현황을 반영하여 통계 패널이 자동으로 업데이트됩니다. 코드에서 `AddListener()`를 호출함에 따라 바인딩된 이벤트 수가 변경됩니다.
 :::
 
 ---
 
-### 2. Composition
+### 2. 구성 성분 (Composition)
 
-Shows the complexity distribution of your event architecture.
+이벤트 아키텍처의 복잡도 분포를 보여줍니다.
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-manager/manager-composition.png)
 
-| Category             | Definition                     | Example Use Cases                               |
+| 카테고리 | 정의 | 예시 유스케이스 |
 | :------------------- | :----------------------------- | :---------------------------------------------- |
-| **Void Events**      | Simple signals (no parameters) | `OnGameStart`, `OnPause`, `OnButtonClick`       |
-| **Single Parameter** | Typed payload events           | `OnHealthChanged(float)`, `OnScoreUpdated(int)` |
-| **With Sender**      | Source-aware events            | `OnDamage(GameObject sender, float amount)`     |
+| **Void 이벤트** | 단순 신호 (파라미터 없음) | `OnGameStart`, `OnPause`, `OnButtonClick` |
+| **단일 파라미터** | 타입이 지정된 데이터 포함 이벤트 | `OnHealthChanged(float)`, `OnScoreUpdated(int)` |
+| **송신자 포함** | 소스 인지형(Source-aware) 이벤트 | `OnDamage(GameObject sender, float amount)` |
 
-**Why This Matters**: 
+**이 지표가 중요한 이유**: 
 
-- High percentage of Void events = Simple, easy-to-maintain architecture
-- High percentage of Sender events = Complex, data-rich system with detailed tracking
+- Void 이벤트 비율이 높음 = 단순하고 유지보수가 쉬운 아키텍처
+- 송신자 포함 이벤트 비율이 높음 = 정밀한 추적이 가능한 복잡하고 데이터가 풍부한 시스템
 
 ---
 
-### 3. Event Types Registry
+### 3. 이벤트 타입 레지스트리 (Event Types Registry)
 
-A live registry of every data type currently compiled and supported by your project.
+현재 프로젝트에서 컴파일되어 지원되는 모든 데이터 타입의 실시간 레지스트리입니다.
 
-#### Built-in Types (Out of the Box)
+#### 내장 타입 (기본 제공)
 
-The system comes pre-loaded with native support for **32 standard types**, categorized by usage:
+시스템은 사용 목적에 따라 분류된 **32가지 표준 타입**에 대한 네이티브 지원을 사전 로드하여 제공합니다.
 
 <details>
-<summary>📋 View Supported Built-in Types</summary>
+<summary>📋 지원되는 내장 타입 보기</summary>
 
 
-| C# Types | Math         | Components       | Assets          |
+| C# 타입 | 수학 (Math) | 컴포넌트 (Components) | 에셋 (Assets) |
 | :------- | :----------- | :--------------- | :-------------- |
 | `int`    | `Vector2`    | `GameObject`     | `Sprite`        |
 | `float`  | `Vector3`    | `Transform`      | `Texture2D`     |
@@ -181,10 +181,10 @@ The system comes pre-loaded with native support for **32 standard types**, categ
 
 </details>
 
-**What You Can Do**: Create events using any of these types immediately, without code generation.
+**활용 방법**: 별도의 코드 생성 없이 이러한 타입을 사용하여 즉시 이벤트를 생성할 수 있습니다.
 
 ```csharp
-// Examples of built-in type events
+// 내장 타입을 사용한 이벤트 예시
 [GameEventDropdown] GameEvent<int> OnScoreChanged;
 [GameEventDropdown] GameEvent<Vector3> OnPositionUpdated;
 [GameEventDropdown] GameEvent<GameObject> OnObjectSpawned;
@@ -192,170 +192,170 @@ The system comes pre-loaded with native support for **32 standard types**, categ
 
 ---
 
-#### Custom & Sender Types
+#### 커스텀 및 송신자 타입 (Custom & Sender Types)
 
-When you create an event with a **Custom Class** (e.g., `PlayerStats`) or a **Sender Event** (e.g., `<GameObject, DamageInfo>`), those types will automatically appear in this list after code generation.
+**커스텀 클래스**(예: `PlayerStats`) 또는 **송신자 이벤트**(예: `<GameObject, DamageInfo>`)를 사용하여 이벤트를 생성하면, 코드 생성 후 해당 타입들이 이 목록에 자동으로 나타납니다.
 
-**Example Display**:
+**표시 예시**:
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-manager/manager-type.png)
 
-**Creation Process**:
+**생성 프로세스**:
 
-1. Write your custom class in C#
-2. Use **[Game Event Creator](./game-event-creator.md)** to create event(generate code & event sub-asset)
-3. Type appears in this registry
-4. Now you can create event assets using your custom type
+1. C#으로 커스텀 클래스 작성
+2. **[게임 이벤트 생성기](./game-event-creator.md)**를 사용하여 이벤트 생성 (코드 및 이벤트 하위 에셋 생성)
+3. 해당 타입이 레지스트리에 나타남
+4. 이제 해당 커스텀 타입을 사용하는 이벤트 에셋을 생성할 수 있음
 
 ---
 
-## 🛠 Best Practices
+## 🛠 권장 사항 (Best Practices)
 
-### ✅ DO
+### ✅ 하세요 (DO)
 
-**Split Your Databases**
+**데이터베이스를 분리하십시오**
 
-Keep a modular structure for better organization:
+더 나은 조직화를 위해 모듈식 구조를 유지하십시오:
 
 ```tex
 📁 Database/
-├─ Global_DB.asset        (Core game events)
-├─ Combat_DB.asset        (Combat-specific events)
-├─ UI_DB.asset            (UI interaction events)
-└─ Tutorial_DB.asset      (Tutorial sequence events)
+├─ Global_DB.asset        (핵심 게임 이벤트)
+├─ Combat_DB.asset        (전투 전용 이벤트)
+├─ UI_DB.asset            (UI 상호작용 이벤트)
+└─ Tutorial_DB.asset      (튜토리얼 시퀀스 이벤트)
 ```
 
-**Benefits**:
+**장점**:
 
-- Clearer organization
-- Easier collaboration (different team members work on different databases)
-- Better performance (load only what you need)
-
----
-
-**Keep the Manager in Every Scene**
-
-Ensure the `GameEventManager` object exists in every scene:
-
-- The Manager persists across scenes using `DontDestroyOnLoad`
-- If it's missing, open the **[Game Event System Window](./game-event-system.md)** to auto-create it
+- 명확한 조직화
+- 협업 용이성 (팀원마다 다른 데이터베이스 작업 가능)
+- 성능 향상 (필요한 것만 로드)
 
 ---
 
-**Use "Add Existing" for Team Collaboration**
+**모든 씬에 매니저를 유지하십시오**
 
-When working with teammates:
+모든 씬에 `GameEventManager` 오브젝트가 존재하는지 확인하십시오:
 
-1. Teammate creates a database and commits to version control
-2. You pull the latest changes
-3. Open Manager Inspector → Click **"Add Existing"**
-4. Select the new database
-5. ✅ GUID references remain intact, no broken links!
+- 매니저는 `DontDestroyOnLoad`를 사용하여 씬 간에 유지됩니다.
+- 만약 누락되었다면, **[게임 이벤트 시스템 창](./game-event-system.md)**을 열어 자동으로 생성하십시오.
 
 ---
 
-### ❌ DO NOT
+**팀 협업 시 "기존 에셋 추가"를 사용하십시오**
 
-**Never Delete Assets Manually**
+팀원과 작업할 때:
+
+1. 팀원이 데이터베이스를 생성하고 버전 관리 시스템에 커밋함
+2. 당신이 최신 변경 사항을 풀(Pull)함
+3. 매니저 인스펙터 열기 → **"기존 에셋 추가(Add Existing)"** 클릭
+4. 새 데이터베이스 선택
+5. ✅ GUID 참조가 그대로 유지되어 링크가 깨지지 않습니다!
+
+---
+
+### ❌ 하지 마세요 (DO NOT)
+
+**에셋을 수동으로 삭제하지 마십시오**
 
 ```
-❌ WRONG: Project Window → Expand Database Asset → Delete Event Sub-Asset
-✅ RIGHT: Game Event Editor → Select Event → Click Delete Button
+❌ 잘못된 방법: 프로젝트 창 → 데이터베이스 에셋 확장 → 이벤트 하위 에셋 삭제
+✅ 올바른 방법: 게임 이벤트 에디터 → 이벤트 선택 → 삭제 버튼 클릭
 ```
 
-**Why?** Manual deletion corrupts the database and breaks all references.
+**이유는 무엇인가요?** 수동 삭제는 데이터베이스를 손상시키고 모든 참조를 깨뜨립니다.
 
 ---
 
-**Don't Move to Plugins Folder**
+**Plugins 폴더로 이동하지 마십시오**
 
-Keep your Data folder (`TinyGiantsData`) **outside** of the `Plugins` folder:
+데이터 폴더(`TinyGiantsData`)를 `Plugins` 폴더 **외부**에 두십시오:
 
 ```
-✅ Correct: Assets/TinyGiantsData/GameEventSystem/
-❌ Wrong:   Assets/Plugins/TinyGiantsData/GameEventSystem/
+✅ 올바른 위치: Assets/TinyGiantsData/GameEventSystem/
+❌ 잘못된 위치: Assets/Plugins/TinyGiantsData/GameEventSystem/
 ```
 
 ---
 
-## 🔧 Inspector Context Menu
+## 🔧 인스펙터 컨텍스트 메뉴
 
-Right-click the `GameEventManager` component to access utility commands:
+`GameEventManager` 컴포넌트를 우클릭하여 유틸리티 명령에 액세스할 수 있습니다.
 
-### Clean Invalid Bindings
+### 잘못된 바인딩 정리 (Clean Invalid Bindings)
 
-**Purpose**: Remove event bindings that no longer exist in any active database.
+**목적**: 활성화된 데이터베이스에 더 이상 존재하지 않는 이벤트 바인딩을 제거합니다.
 
-**When to Use**:
+**사용 시기**:
 
-- After deleting events via the Game Event Editor
-- After removing a database from the manager
-- When cleaning up an old project
+- 게임 이벤트 에디터를 통해 이벤트를 삭제한 후
+- 매니저에서 데이터베이스를 제거한 후
+- 오래된 프로젝트를 정리할 때
 
-**What It Does**: Scans all bindings and removes orphaned references.
-
----
-
-### Sync All Database Events
-
-**Purpose**: Synchronize the manager's internal binding list with all events in active databases.
-
-**When to Use**:
-
-- After importing events from another project
-- After adding a new database with many events
-- When the binding list seems out of sync
-
-**What It Does**:
-
-- Adds bindings for new events
-- Removes bindings for deleted events
-- Preserves existing configurations
+**작동 방식**: 모든 바인딩을 스캔하여 연결이 끊긴(orphaned) 참조를 제거합니다.
 
 ---
 
-## ❓ Troubleshooting
+### 모든 데이터베이스 이벤트 동기화 (Sync All Database Events)
 
-### Manager Object is Missing
+**목적**: 매니저의 내부 바인딩 목록을 활성화된 데이터베이스의 모든 이벤트와 동기화합니다.
 
-**Problem**: Can't find `GameEventManager` in the scene hierarchy
+**사용 시기**:
 
-**Solution**:
+- 다른 프로젝트에서 이벤트를 임포트한 후
+- 많은 이벤트가 포함된 새 데이터베이스를 추가한 후
+- 바인딩 목록이 동기화되지 않은 것처럼 보일 때
 
-1. Open **[Game Event System Window](./game-event-system.md)** via `Tools → TinyGiants → Game Event System`
-2. Look for the status bar at the top
-3. If it shows a blue button, click **"Initialize System"**
-4. The manager will be auto-created
+**작동 방식**:
 
----
-
-### Events Not Appearing in Editor
-
-**Problem**: Can't find my events in dropdown menus or search.
-
-**Checklist**:
-
-- ✅ Is the database **Active** (green badge)?
-- ✅ Is the database added to the Manager?
-- ✅ Are there actually events in the database? (Check in **[Game Event Editor](./game-event-editor.md)**)
-- ✅ Does the Manager **GameObject** exist in your scene?
+- 새 이벤트에 대한 바인딩 추가
+- 삭제된 이벤트에 대한 바인딩 제거
+- 기존 설정 유지
 
 ---
 
-### Database Appears Corrupted
+## ❓ 문제 해결
 
-**Problem**: Inspector shows errors about "orphaned sub-assets" or database integrity issues.
+### 매니저 오브젝트가 사라졌습니다
 
-**Recovery**:
+**문제**: 씬 하이어라키에서 `GameEventManager`를 찾을 수 없음
 
-1. Right-click the Manager component
-2. Select **"Clean Invalid Bindings"**
-3. Right-click the database asset in Project window
-4. Select **"Validate Database"** (if available)
-5. Save your scene and restart Unity
+**해결책**:
 
-**Prevention**: Always use the Game Event Editor to delete events, never manually.
+1. `Tools → TinyGiants → Game Event System`을 통해 **[게임 이벤트 시스템 창](./game-event-system.md)** 열기
+2. 상단의 상태 바 확인
+3. 파란색 버튼이 보인다면 **"Initialize System"** 클릭
+4. 매니저가 자동으로 생성됨
 
-:::tip Key Takeaway
-The Manager is your **data container**. Think of it like a library: databases are bookshelves, events are books. The Manager decides which bookshelves are open (active) and keeps track of who's reading which books (bindings).
+---
+
+### 에디터에 이벤트가 나타나지 않습니다
+
+**문제**: 드롭다운 메뉴나 검색에서 내 이벤트를 찾을 수 없음
+
+**체크리스트**:
+
+- ✅ 데이터베이스가 **활성화(Active)** 상태입니까 (녹색 배지)?
+- ✅ 데이터베이스가 매니저에 추가되어 있습니까?
+- ✅ 데이터베이스에 실제로 이벤트가 들어있습니까? (**[게임 이벤트 에디터](./game-event-editor.md)**에서 확인)
+- ✅ 씬에 매니저 **GameObject**가 존재합니까?
+
+---
+
+### 데이터베이스가 손상된 것 같습니다
+
+**문제**: 인스펙터에 "연결 끊긴 하위 에셋(orphaned sub-assets)" 또는 데이터베이스 무결성 관련 에러가 표시됨
+
+**복구 방법**:
+
+1. 매니저 컴포넌트 우클릭
+2. **"Clean Invalid Bindings"** 선택
+3. 프로젝트 창에서 데이터베이스 에셋 우클릭
+4. **"Validate Database"** 선택 (사용 가능한 경우)
+5. 씬을 저장하고 유니티 재시작
+
+**예방 방법**: 이벤트를 삭제할 때는 항상 게임 이벤트 에디터를 사용하고, 절대 수동으로 삭제하지 마십시오.
+
+:::tip 핵심 요약
+매니저는 여러분의 **데이터 컨테이너**입니다. 도서관이라고 생각하면 이해가 쉽습니다. 데이터베이스는 책장이고, 이벤트는 책입니다. 매니저는 어떤 책장을 열어둘지(활성화) 결정하고, 누가 어떤 책을 읽고 있는지(바인딩) 추적합니다.
 :::

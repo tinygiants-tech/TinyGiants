@@ -1,16 +1,15 @@
 ﻿---
-sidebar_label: Overview
-
+sidebar_label: 개요
 sidebar_position: 1
 ---
 
-# Game Event System
+# 게임 이벤트 시스템 (Game Event System)
 
-A production-ready, visual event architecture for Unity that transforms chaotic event management into maintainable, testable workflows.
+혼란스러운 이벤트 관리를 유지보수와 테스트가 가능한 워크플로우로 전환해 주는, 유니티를 위한 상용화 수준의 시각적 이벤트 아키텍처입니다.
 
-:::tip From the Creator
-"I built this system because I was tired of battling 'invisible spaghetti code' in my own projects. As an indie developer, I needed a tool that balanced visual clarity with raw coding power—without performance trade-offs. **TinyGiants** is my commitment to professional-grade tools that I use in my own games every day."
-—  ***[TinyGiants]** from China*
+:::tip 개발자의 한마디
+"제 프로젝트에서 '보이지 않는 스파게티 코드'와 싸우는 데 지쳐 이 시스템을 구축했습니다. 인디 개발자로서 성능 저하 없이 시각적 명확성과 강력한 코딩 제어권 사이의 균형을 맞출 수 있는 도구가 필요했습니다. **TinyGiants**는 제가 매일 게임 개발에 실제로 사용하는 전문가급 도구를 만들겠다는 약속입니다."
+—  ***[TinyGiants]** (중국)*
 :::
 
 <div className="img-full-wrapper">
@@ -22,38 +21,38 @@ A production-ready, visual event architecture for Unity that transforms chaotic 
 
 ---
 
-## Why This System Exists
+## 이 시스템이 존재하는 이유
 
-:::danger The Problem
-In traditional Unity development, events become invisible spaghetti:
+:::danger 문제점
+전통적인 유니티 개발 방식에서 이벤트는 보이지 않는 스파게티 코드가 되기 쉽습니다:
 
-- **Hidden Dependencies**: Who's listening? Where's it triggered? Good luck finding out.
-- **Runtime Breakage**: Rename a method, break 10 scene objects.
-- **Cross-Scene Hell**: Events die when scenes unload—memory leaks and null references everywhere.
-- **No Visibility**: Complex event chains exist only in your head (and outdated comments).
+- **숨겨진 의존성**: 누가 리스닝하고 있는지, 어디서 트리거되는지 파악하기가 매우 어렵습니다.
+- **런타임 오류**: 메서드 이름 하나만 바꿔도 10개의 씬 오브젝트가 먹통이 됩니다.
+- **교차 씬(Cross-Scene)의 지옥**: 씬이 언로드될 때 이벤트가 유실되며, 곳곳에서 메모리 누수와 null 참조가 발생합니다.
+- **가시성 부족**: 복잡한 이벤트 체인은 오직 개발자의 머릿속(그리고 오래된 주석)에만 존재합니다.
 
 :::
 
-:::success The Solution
-**TinyGiants.GameEventSystem** provides a **Visual-First, Type-Safe** event architecture:
+:::success 해결책
+**TinyGiants.GameEventSystem**은 **시각적 우선, 타입 안정성 보장**의 이벤트 아키텍처를 제공합니다:
 
-✅ **Events as Assets** - ScriptableObject-based, GUID-protected, survives refactoring  
+✅ **에셋 기반 이벤트** - 스크립터블 오브젝트(ScriptableObject) 기반으로 GUID로 보호되며 리팩토링에도 안전합니다.
 
-✅ **Visual Flow Graphs** - See your event chains, triggers, and conditions in one window  
+✅ **시각적 플로우 그래프** - 이벤트 체인, 트리거, 조건을 하나의 창에서 한눈에 확인할 수 있습니다.
 
-✅ **Zero-Reflection Runtime** - Expression Tree compilation for C++-like performance  
+✅ **리플렉션 비용 제로 런타임** - C++에 가까운 성능을 위해 익스프레션 트리(Expression Tree) 컴파일 방식을 사용합니다.
 
-✅ **Designer-Friendly** - Drag-and-drop binding, no coding required for simple workflows  
+✅ **디자이너 친화적** - 드래그 앤 드롭 바인딩을 지원하여 단순한 워크플로우에는 코딩이 필요 없습니다.
 
-✅ **Production-Grade Tools** - Real-time monitoring, reference finding, code generation automation
+✅ **전문가급 도구** - 실시간 모니터링, 레퍼런스 찾기, 코드 생성 자동화 도구를 제공합니다.
 
 :::
 
 ---
 
-## Core Philosophy: Hybrid Workflow
+## 핵심 철학: 하이브리드 워크플로우
 
-This system embraces a **division of labor** between programmers and designers:
+이 시스템은 프로그래머와 디자이너 간의 **효율적인 분업**을 지향합니다:
 
 ```mermaid
 graph LR
@@ -66,22 +65,22 @@ graph LR
     classDef visual fill:#9f1239,stroke:#4c0519,stroke-width:2px,color:#ffffff
     classDef runtime fill:#020617,stroke:#000000,stroke-width:2px,color:#ffffff,font-weight:bold
 
-    A(👨‍💻 Programmer):::programmer
-    B(📦 Event Assets):::asset
-    C(🎧 Code Logic):::code
+    A(👨‍💻 프로그래머):::programmer
+    B(📦 이벤트 에셋):::asset
+    C(🎧 코드 로직):::code
 
-    D(🎨 Designer):::designer
-    E(🎮 Scene Behaviors):::scene
-    F(🕸️ Visual Orchestration):::visual
+    D(🎨 디자이너):::designer
+    E(🎮 씬 비헤이비어):::scene
+    F(🕸️ 시각적 오케스트레이션):::visual
 
-    G(▶️ Runtime Execution):::runtime
+    G(▶️ 런타임 실행):::runtime
 
-    A -->|Defines Events| B
-    A -->|Writes Listeners| C
+    A -->|이벤트 정의| B
+    A -->|리스너 작성| C
 
     B --> D
-    D -->|Binds in Inspector| E
-    D -->|Builds Flow Graphs| F
+    D -->|인스펙터 바인딩| E
+    D -->|플로우 그래프 구축| F
 
     C --> G
     E --> G
@@ -91,281 +90,281 @@ graph LR
 
 
 
-| Role              | Responsibility                                               | Tool                                   |
+| 역할              | 책임 범위                                               | 도구                                   |
 | ----------------- | ------------------------------------------------------------ | -------------------------------------- |
-| **Programmer**    | Define **when** events fire `Raise()` and **what** logic responds | C# API, Listeners                      |
-| **Designer**      | Wire events to **scene objects** and configure **behaviors** | Inspector Binding, `GameEventBehavior` |
-| **Tech Designer** | Orchestrate **complex sequences** (delays, chains, conditions) | Visual Flow Editor                     |
+| **프로그래머**    | 이벤트가 언제 발생하는지(`Raise()`)와 어떤 로직이 응답하는지 정의 | C# API, 리스너                      |
+| **디자이너**      | 이벤트를 **씬 오브젝트**에 연결하고 **비헤이비어**를 설정 | 인스펙터 바인딩, `GameEventBehavior` |
+| **테크 디자이너** | **복잡한 시퀀스**(지연, 체인, 조건)를 오케스트레이션 | 시각적 플로우 에디터                     |
 
-**Result**: Clean separation of concerns with full visibility into event relationships.
+**결과**: 이벤트 관계에 대한 완전한 가시성을 확보하면서 관심사를 깔끔하게 분리할 수 있습니다.
 
 ---
 
-## Architecture Highlights
+## 아키텍처 주요 특징
 
-### 🏗️ Foundation: ScriptableObject-Driven
+### 🏗️ 기반: 스크립터블 오브젝트(ScriptableObject) 기반
 
-Unlike string-based or singleton event systems, **events are first-class assets**:
+문자열 기반이나 싱글톤 이벤트 시스템과 달리, **이벤트가 일급 에셋(First-class asset)**으로 취급됩니다:
 
 ```csharp
-// Events are assets, not magic strings
+// 이벤트는 '매직 스트링'이 아닌 에셋입니다.
 [GameEventDropdown] public GameEvent onPlayerDeath;
 [GameEventDropdown] public GameEvent<int> onScoreChanged;
 
 void Die() {
-    onPlayerDeath.Raise(); // Type-safe, asset-referenced
+    onPlayerDeath.Raise(); // 타입 안정성 보장, 에셋 참조 방식
 }
 ```
 
-**Benefits**:
+**장점**:
 
-- ✅ **Complete Decoupling** - Senders never know receivers. Fire once, notify many.
-- ✅ **Cross-Scene Persistence** - Events survive scene loads/unloads.
-- ✅ **GUID Identity** - Rename files, reorganize folders—references never break.
-- ✅ **Multi-Database Support** - Modular organization for large teams.
+- ✅ **완벽한 디커플링** - 송신자는 수신자를 알 필요가 없습니다. 한 번 발생시키면 다수에게 알립니다.
+- ✅ **씬 간 지속성** - 씬이 로드되거나 언로드되어도 이벤트 바인딩이 유지됩니다.
+- ✅ **GUID 고유 식별** - 파일 이름을 바꾸거나 폴더를 옮겨도 참조가 깨지지 않습니다.
+- ✅ **멀티 데이터베이스 지원** - 대규모 팀을 위한 모듈식 조직화가 가능합니다.
 
 <details>
-<summary>📖 How GUID Protection Works</summary>
+<summary>📖 GUID 보호 작동 방식</summary>
 
 
-Every event has a unique GUID stored in `.meta` files:
+모든 이벤트는 `.meta` 파일에 저장된 고유한 GUID를 가집니다:
 
 ```yaml
 # PlayerDeath.asset.meta
 guid: a7f3c21e9b4d8f6e2d1a9c8b7e6f5a4d
 ```
 
-Even if you rename `PlayerDeath` `OnCharacterDied`, Unity maintains the reference via GUID. **No broken scene links.**
+`PlayerDeath` 에셋의 이름을 `OnCharacterDied`로 바꿔도, 유니티는 GUID를 통해 참조를 유지합니다. **씬 링크가 깨질 걱정이 없습니다.**
 
 </details>
 
 ---
 
-### 🕸️ Visual Flow Orchestration
+### 🕸️ 시각적 플로우 오케스트레이션
 
-Stop hunting through code to understand event relationships. The **Flow Editor** turns invisible logic into maintainable graphs:
+이벤트 관계를 이해하기 위해 더 이상 코드를 뒤질 필요가 없습니다. **플로우 에디터**는 보이지 않는 로직을 관리 가능한 그래프로 바꿔줍니다:
 
 
-#### Use Cases
+#### 유스케이스
 
-**🎯 Triggers (Fan-Out)**
+**🎯 트리거 (팬-아웃)**
 
 ![alt text](/img/game-event-system/intro/overview/flow-graph-trigger.png)
 
-**⛓️ Chains (Sequential)**
+**⛓️ 체인 (순차 실행)**
 
 ![alt text](/img/game-event-system/intro/overview/flow-graph-chain.png)
 
-**🔀 Hybrid Flows** 
+**🔀 하이브리드 플로우** 
 
-Mix parallel + sequential logic
+병렬 로직과 순차 로직을 혼합
 
 ![alt text](/img/game-event-system/intro/overview/flow-graph-mix.png)
 
-:::tip Visual Benefits
+:::tip 시각적 도구의 장점
 
-- **Group Organization** - Color-coded groups for large flows
-- **Real-Time Validation** - Connection type checking (Green=Valid, Red=Error)
-- **Undo/Redo Support** - Full history system (Ctrl+Z/Y)
-- **Runtime Debugging** - Active nodes highlight in Play Mode
+- **그룹 조직화** - 대규모 플로우를 위해 색상별 그룹 지정 가능
+- **실시간 검증** - 연결 타입 체크 (녹색=유효, 빨간색=오류)
+- **실행 취소/다시 실행 지원** - 완전한 히스토리 시스템 (Ctrl+Z/Y)
+- **런타임 디버깅** - 플레이 모드에서 활성화된 노드 하이라이트
 
 :::
 
 ---
 
-### ⚡ Type-Safe, Zero-Reflection Performance
+### ⚡ 타입 안정성 및 리플렉션 프리 성능
 
-Unity's generic serialization is broken by design. I fixed it.
+유니티의 제네릭 직렬화 한계를 해결했습니다.
 
-#### The Problem
+#### 문제점
 
 ```csharp
-// ❌ Unity can't serialize this
+// ❌ 유니티는 이를 기본적으로 직렬화할 수 없습니다.
 [SerializeField] private GameEvent<PlayerData> onPlayerDataChanged;
 ```
 
-#### Our Solution
+#### 해결책
 
 ```csharp
-// ✅ Auto-generated concrete class
+// ✅ 자동 생성된 구체 클래스 사용
 [GameEventDropdown] public PlayerDataGameEvent onPlayerDataChanged;
 
-// Generated code (automatic):
+// 생성된 코드 (자동):
 [Serializable]
 public class PlayerDataGameEvent : GameEvent<PlayerData> { }
 ```
 
-**Performance Benefits**:
+**성능상 이점**:
 
-- 🚀 **Expression Tree Compilation** - Conditions compile to delegates at startup (no runtime parsing)
-- 🚀 **No Reflection Cost** - Direct method calls, not `Invoke()`
-- 🚀 **Native Inspector Support** - Full `UnityEvent<T>` compatibility
+- 🚀 **익스프레션 트리 컴파일** - 조건문이 시작 시 대리자(Delegate)로 컴파일되어 런타임 분석 비용이 없습니다.
+- 🚀 **리플렉션 비용 없음** - `Invoke()`가 아닌 직접적인 메서드 호출 방식을 사용합니다.
+- 🚀 **네이티브 인스펙터 지원** - `UnityEvent<T>`와 완벽하게 호환됩니다.
 
 <details>
-<summary>⚙️ Code Generation Workflow</summary>
+<summary>⚙️ 코드 생성 워크플로우</summary>
 
 
-1. **Select Types** - Choose your custom types in the Creator window
-2. **Generate** - Click "Generate" to create concrete classes
-3. **Compile** - Unity auto-compiles the new code
-4. **Create** - Now you can create events for your custom types
+1. **타입 선택** - 생성기 창에서 커스텀 타입을 선택합니다.
+2. **생성** - "Generate"를 클릭하여 구체 클래스를 생성합니다.
+3. **컴파일** - 유니티가 새 코드를 자동으로 컴파일합니다.
+4. **생성** - 이제 커스텀 타입에 대한 이벤트를 생성할 수 있습니다.
 
-**Time investment**: ~10 seconds. **Benefit**: Lifetime type safety.
+**소요 시간**: 약 10초. **장점**: 평생 보장되는 타입 안정성.
 
 </details>
 
 ---
 
-## Feature Matrix
+## 기능 매트릭스
 
-### ⚓ Core Architecture
+### ⚓ 코어 아키텍처
 
-| Feature                    | Description                                                  |
+| 기능 | 설명 |
 | :------------------------- | :----------------------------------------------------------- |
-| **Asset-Based Events**     | ScriptableObject architecture with **GUID Identity**—references survive renames and file moves. |
-| **Comprehensive Generics** | Native support for `GaneEvent<Void>`, `GameEvent<T>`, and source-aware `GameEvent<TSender, TArgs>`. |
-| **Multi-Database System**  | Modular organization supporting multiple databases with **Dynamic Loading** and **Health Checks**. |
-| **Category System**        | String-based categorization for efficient fuzzy-search filtering within large event libraries. |
-| **Auto Static Reset**      | Automatic clearing of static caches in Editor Play Mode to prevent data pollution. |
+| **에셋 기반 이벤트** | **GUID 식별** 기반의 스크립터블 오브젝트 아키텍처 — 이름 변경이나 파일 이동에도 참조가 유지됩니다. |
+| **포괄적인 제네릭 지원** | `GameEvent<Void>`, `GameEvent<T>`, 그리고 소스 인지형 `GameEvent<TSender, TArgs>`를 기본 지원합니다. |
+| **멀티 데이터베이스 시스템** | **동적 로드** 및 **상태 체크** 기능을 갖춘 여러 데이터베이스를 지원하는 모듈식 구조입니다. |
+| **카테고리 시스템** | 대규모 이벤트 라이브러리 내에서 효율적인 검색과 필터링을 위한 문자열 기반 카테고리화 기능입니다. |
+| **자동 정적 데이터 리셋** | 데이터 오염을 방지하기 위해 에디터 플레이 모드 시 정적 캐시를 자동으로 초기화합니다. |
 
-### 🧠 Advanced Logic & Flow
-| Feature                   | Description                                                  |
+### 🧠 고급 로직 및 플로우
+| 기능 | 설명 |
 | :------------------------ | :----------------------------------------------------------- |
-| **Expression Trees**      | **Zero-reflection** logic evaluation; conditions are compiled into high-performance delegates at runtime. |
-| **Visual Logic Builder**  | Construct complex **nested AND/OR logic** and dynamic property comparisons without code. |
-| **Hybrid Execution**      | Seamlessly mix parallel **Fan-out Triggers** and sequential **Blocking Chains** in one graph. |
-| **Argument Transformers** | Dynamically extract and pass specific object properties as arguments between flow nodes. |
-| **Granular Flow Control** | Per-node delays, **Async/Coroutine waits**, loop counts, and conditional execution gates. |
+| **익스프레션 트리** | **리플렉션 없는** 로직 평가; 조건문은 런타임에 고성능 대리자로 컴파일됩니다. |
+| **시각적 로직 빌더** | 코드 없이 복잡한 **중첩 AND/OR 로직**과 동적 프로퍼티 비교를 구성할 수 있습니다. |
+| **하이브리드 실행** | 하나의 그래프에서 병렬 **팬-아웃 트리거**와 순차적 **블로킹 체인**을 매끄럽게 혼합합니다. |
+| **인자 트랜스포머** | 플로우 노드 사이에서 특정 오브젝트 프로퍼티를 동적으로 추출하여 인자로 전달합니다. |
+| **세밀한 플로우 제어** | 노드별 지연, **비동기/코루틴 대기**, 루프 횟수 및 조건부 실행 게이트를 지원합니다. |
 
-### 🎧 Listening & Binding
-| Feature                   | Description                                                  |
+### 🎧 리스닝 및 바인딩
+| 기능 | 설명 |
 | :------------------------ | :----------------------------------------------------------- |
-| **Visual Binding**        | Drag-and-drop **UnityEvent wiring** in the Inspector with visual status markers and type safety. |
-| **Priority Listeners**    | **Integer-based sorting** ensuring critical systems react before standard UI/Audio listeners. |
-| **Conditional Listeners** | Built-in **Predicate support**—callbacks only fire when specific logical criteria are met. |
-| **Persistent Listeners**  | Native support for **cross-scene listeners** that remain active during scene transitions. |
-| **Dynamic Runtime API**   | Full programmatic control to register or unregister listeners and manage **Task Handles**. |
+| **시각적 바인딩** | 시각적 상태 표시기와 타입 안정성을 갖춘 인스펙터 내 드래그 앤 드롭 방식의 **UnityEvent 연결**입니다. |
+| **우선순위 리스너** | **정수 기반 정렬**을 통해 표준 UI/오디오 리스너보다 크리티컬한 시스템이 먼저 반응하도록 보장합니다. |
+| **조건부 리스너** | 특정 논리적 기준을 충족할 때만 콜백이 실행되는 내장 **조건자(Predicate) 지원** 기능입니다. |
+| **상주 리스너** | 씬 전환 중에도 활성 상태를 유지하는 **교차 씬 리스너**를 기본 지원합니다. |
+| **동적 런타임 API** | 리스너 등록/해제 및 **태스크 핸들(Task Handles)** 관리를 위한 완전한 프로그래밍 제어권을 제공합니다. |
 
-### 📊 Tooling & Debug
-| Feature                | Description                                                  |
+### 📊 도구 및 디버깅
+| 기능 | 설명 |
 | :--------------------- | :----------------------------------------------------------- |
-| **Dashboard & Wizard** | Modern UI for **Batch Operations** and a fuzzy-matching Wizard for rapid event creation. |
-| **Code Automation**    | **Tri-Mode CodeGen** (Basic/Custom/Sender) with automatic compilation pipeline integration. |
-| **Reference Finder**   | Scene-wide scanner to pinpoint exactly which components reference specific event assets. |
-| **Runtime Monitor**    | Real-time profiling of **Execution Time (Avg/Min/Max)**, listener counts, and **GC allocation**. |
-| **Automation Tree**    | Real-time visualizer for active Trigger and Chain hierarchies to debug complex logic flows. |
+| **대시보드 및 위자드** | **일괄 작업**을 위한 현대적인 UI와 빠른 이벤트 생성을 위한 유사 일치 위자드를 제공합니다. |
+| **코드 자동화** | 자동 컴파일 파이프라인 통합 기능을 갖춘 **3중 모드 코드 생성기**(기본/커스텀/송신자)입니다. |
+| **레퍼런스 파인더** | 특정 이벤트 에셋을 참조하는 컴포넌트 수준의 의존성을 씬 전체에서 정밀하게 스캔합니다. |
+| **런타임 모니터** | **실행 시간(평균/최소/최대)**, 리스너 수, **GC 할당**에 대한 실시간 프로파일링을 지원합니다. |
+| **자동화 트리** | 복잡한 로직 플로우를 디버깅하기 위해 활성 트리거 및 체인 계층 구조를 실시간으로 시각화합니다. |
 
 ------
 
-## Performance Characteristics
+## 성능 지표
 
-Real-world metrics from production builds:
+실제 상용 빌드에서의 측정 수치:
 
-| Scenario                        | Performance | Notes                        |
+| 시나리오 | 성능 | 비고 |
 | ------------------------------- | ----------- | ---------------------------- |
-| **Event Raise (0 listeners)**   | ~0.001ms    | Virtually free               |
-| **Event Raise (10 listeners)**  | ~0.02ms     | No GC allocation             |
-| **Condition Evaluation**        | ~0.003ms    | Expression Tree compilation  |
-| **Flow Node Execution**         | ~0.05ms     | Includes coroutine overhead  |
-| **Monitor Window (100 events)** | ~0.3ms      | Editor-only, no runtime cost |
+| **이벤트 발생 (리스너 0개)** | ~0.001ms    | 사실상 비용 없음 |
+| **이벤트 발생 (리스너 10개)** | ~0.02ms     | GC 할당 없음 |
+| **조건 평가** | ~0.003ms    | 익스프레션 트리 컴파일 방식 |
+| **플로우 노드 실행** | ~0.05ms     | 코루틴 오버헤드 포함 |
+| **모니터 창 (이벤트 100개)** | ~0.3ms      | 에디터 전용, 런타임 비용 없음 |
 
-:::success Production Ready
-Tested in shipped titles with **500+ events** and **10,000+ listeners** across scenes. Zero performance regressions.
+:::success 상용 준비 완료
+씬 전체에 걸쳐 **500개 이상의 이벤트**와 **10,000개 이상의 리스너**가 있는 출시 프로젝트에서 테스트되었습니다. 성능 저하가 전혀 발생하지 않았습니다.
 :::
 
 ------
 
-## 🗺️ Navigation Roadmap
+## 🗺️ 네비게이션 가이드맵
 
-This map provides a complete overview of the system documentation. Use the tables below to quickly jump to the specific feature or tutorial you need.
+이 맵은 시스템 문서에 대한 전체 개요를 제공합니다. 아래 표를 사용하여 필요한 특정 기능이나 튜토리얼로 빠르게 이동하세요.
 
-:::info Recommended Learning Paths
+:::info 추천 학습 경로
 
-- 🚀 **Quickest Start**: Jump straight to [**Example: Quick Start**](../examples/00-quick-start.md).
-- 🎨 **Visual Learner**: Focus on the [**Visual Workflow**](#visual-workflow) and [**Flow Orchestration**](#flow-orchestration) tables.
-- 💻 **Programmer's Deep Dive**: Head directly to [**Runtime API**](#runtime-api).
+- 🚀 **빠른 시작**: [**예제: 퀵 스타트**](../examples/00-quick-start.md)로 바로 이동하세요.
+- 🎨 **시각적 학습**: [**시각적 워크플로우**](#visual-workflow) 및 [**플로우 오케스트레이션**](#flow-orchestration) 표에 집중하세요.
+- 💻 **개발자 심화**: [**런타임 API**](#runtime-api) 섹션으로 바로 이동하세요.
 
 :::
 
-### 🏁 1. Introduction {#introduction}
+### 🏁 1. 소개 {#introduction}
 
-Foundational setup and core philosophy of the event-as-asset architecture.
+에셋 기반 이벤트 아키텍처의 기본 설정과 핵심 철학입니다.
 
-| Page                                            | Description                                                  |
+| 페이지 | 설명 |
 | :---------------------------------------------- | :----------------------------------------------------------- |
-| [**Project Structure**](./project-structure.md) | Understanding directory layout, folder protection, and modular organization. |
-| [**Installation**](./installation.md)           | Initializing the plugin and setting up the automated static reset pipeline. |
+| [**프로젝트 구조**](./project-structure.md) | 디렉토리 레이아웃, 폴더 보호 및 모듈식 조직화 이해하기. |
+| [**설치 가이드**](./installation.md) | 플러그인 초기화 및 자동 정적 리셋 파이프라인 설정하기. |
 
-### 💎 2. Visual Workflow {#visual-workflow}
+### 💎 2. 시각적 워크플로우 {#visual-workflow}
 
-Management tools designed to transform invisible code into a tangible visual dashboard.
+보이지 않는 코드를 실질적인 시각적 대시보드로 변환해 주는 관리 도구입니다.
 
-| Page                                                         | Description                                                  |
+| 페이지 | 설명 |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| [**System Dashboard**](../visual-workflow/game-event-system.md) | Overview of the asset-based workflow and GUID identity system |
-| [**Database & FlowGraph**](../visual-workflow/game-event-manager.md) | Handling multi-database and multi-flowgraph setups and database health maintenance |
-| [**Edit Game Event**](../visual-workflow/game-event-editor.md) | Using the Dashboard for batch editing, search, and categorization |
-| [**Create Game Event**](../visual-workflow/game-event-creator.md) | Rapidly generating event assets using the fuzzy-search batch wizard |
-| [**Configure Game Event**](../visual-workflow/game-event-behavior.md) | Mastering Inspector binding with visual status markers and type safety |
-| [**Raise Game Event**](../visual-workflow/game-event-raiser.md) | Learn how to call events and enhance inspectors using the built-in GameEventDropdown Attribute |
-| [**Find Game Event**](../visual-workflow/game-event-finder.md) | Scanning scenes to locate component-level event dependencies. |
-| [**Visual Condition Tree**](../visual-workflow/visual-condition-tree.md) | Learn how to control the logic execution of event action through condition tree configuration |
+| [**시스템 대시보드**](../visual-workflow/game-event-system.md) | 에셋 기반 워크플로우 및 GUID 식별 시스템 개요 |
+| [**데이터베이스 및 플로우 그래프**](../visual-workflow/game-event-manager.md) | 멀티 데이터베이스/플로우 그래프 설정 및 데이터베이스 상태 유지 관리 |
+| [**게임 이벤트 편집**](../visual-workflow/game-event-editor.md) | 대시보드를 사용한 일괄 편집, 검색 및 카테고리화 |
+| [**게임 이벤트 생성**](../visual-workflow/game-event-creator.md) | 유사 검색 일괄 위자드를 사용한 빠른 이벤트 에셋 생성 |
+| [**게임 이벤트 설정**](../visual-workflow/game-event-behavior.md) | 시각적 상태 표시기와 타입 안정성을 갖춘 인스펙터 바인딩 마스터하기 |
+| [**게임 이벤트 발생**](../visual-workflow/game-event-raiser.md) | 내장된 GameEventDropdown 속성을 사용하여 이벤트 호출 및 인스펙터 개선하기 |
+| [**게임 이벤트 찾기**](../visual-workflow/game-event-finder.md) | 컴포넌트 수준의 이벤트 의존성을 찾기 위해 씬 스캔하기 |
+| [**비주얼 조건ツリー**](../visual-workflow/visual-condition-tree.md) | 조건ツリー 설정을 통해 이벤트 액션의 로직 실행 제어하기 |
 
-### 🕸️ 3. Flow Orchestration {#flow-orchestration}
+### 🕸️ 3. 플로우 오케스트레이션 {#flow-orchestration}
 
-Visualizing and building complex multi-step logic sequences using nodes.
+노드를 사용하여 복잡한 다단계 로직 시퀀스를 시각화하고 구축합니다.
 
-| Page                                                         | Description                                                  |
+| 페이지 | 설명 |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| [**Node Editor**](../flow-graph/game-event-node-editor.md)   | Managing the GraphView canvas, groups, and snapshot-based Undo/Redo |
-| [**Node Connector**](../flow-graph/game-event-node-connector.md) | Rules for hybrid execution modes and real-time connection validation |
-| [**Node Behavior**](../flow-graph/game-event-node-behavior.md) | Configuring node-level delays, loops, and argument transformation logic |
-| [**Advanced Logic Patterns**](../flow-graph/advanced-logic-patterns.md) | Building no-code nested logic groups and conditional execution gates |
+| [**노드 에디터**](../flow-graph/game-event-node-editor.md) | GraphView 캔버스, 그룹, 스냅샷 기반의 Undo/Redo 관리하기 |
+| [**노드 커넥터**](../flow-graph/game-event-node-connector.md) | 하이브리드 실행 모드 규칙 및 실시간 연결 검증 |
+| [**노드 비헤이비어**](../flow-graph/game-event-node-behavior.md) | 노드 수준의 지연, 루프 및 인자 변환 로직 설정하기 |
+| [**고급 로직 패턴**](../flow-graph/advanced-logic-patterns.md) | 코드 없는 중첩 로직 그룹 및 조건부 실행 게이트 구축하기 |
 
-### 💻 4. Scripting & API {#runtime-api}
+### 💻 4. 스크립팅 및 API {#runtime-api}
 
-The developer's guide to high-performance C# integration and lifecycle management.
+고성능 C# 통합 및 ライフサイクル 관리를 위한 개발자 가이드입니다.
 
-| Page                                                         | Description                                                  |
+| 페이지 | 설명 |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| [**Raising & Scheduling**](../scripting/raising-and-scheduling.md) | Programmatic firing, delayed execution, and Task Handle management |
-| [**Listening Strategies**](../scripting/listening-strategies.md) | implementing prioritized, persistent, and source-aware (Sender) listeners |
-| [**Programmatic Flow**](../scripting/programmatic-flow.md)   | Using Expression Tree-based predicates for zero-reflection logic filtering |
-| [**Best Practices**](../scripting/best-practices.md)         | Architectural tips for clean decoupling and preventing data pollution |
-| [**API Reference**](../scripting/api-reference.md)           | Detailed technical documentation for all core classes and attributes |
+| [**발생 및 스케줄링**](../scripting/raising-and-scheduling.md) | 프로그래밍 방식의 호출, 지연 실행 및 태스크 핸들 관리 |
+| [**리스닝 전략**](../scripting/listening-strategies.md) | 우선순위 지정, 상주형 및 소스 인지형(Sender) 리스너 구현하기 |
+| [**프로그래매틱 플로우**](../scripting/programmatic-flow.md) | 리플렉션 없는 로직 필터링을 위한 익스프레션 트리 기반 조건자 사용하기 |
+| [**베스트 프랙티스**](../scripting/best-practices.md) | 깔끔한 디커플링과 데이터 오염 방지를 위한 아키텍처 팁 |
+| [**API 레퍼런스**](../scripting/api-reference.md) | 모든 핵심 클래스 및 속성에 대한 상세 기술 문서 |
 
-### 🛠️ 5. Tools & Support {#tools-support}
+### 🛠️ 5. 도구 및 지원 {#tools-support}
 
-Automation and monitoring utilities for professional production environments.
+전문적인 제작 환경을 위한 자동화 및 모니터링 유틸리티입니다.
 
-| Page                                                         | Description                                                  |
+| 페이지 | 설명 |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| [**CodeGen & Cleanup**](../tools/codegen-and-cleanup.md)     | Using the Tri-Mode Generator and compilation pipeline automation |
-| [**Runtime Monitor**](../tools/runtime-monitor.md)           | Real-time performance profiling, deep logging, and warning systems |
-| [**Community & Support**](../tools/community-and-support.md) | Accessing updates, reporting bugs, and getting technical assistance |
+| [**코드 생성 및 정리**](../tools/codegen-and-cleanup.md) | 3중 모드 생성기 및 컴파일 파이프라인 자동화 사용하기 |
+| [**런타임 모니터**](../tools/runtime-monitor.md) | 실시간 성능 프로파일링, 상세 로깅 및 경고 시스템 |
+| [**커뮤니티 및 지원**](../tools/community-and-support.md) | 업데이트 확인, 버그 보고 및 기술 지원 받기 |
 
-### 📚 6. Examples {#examples}
+### 📚 6. 예제 {#examples}
 
-Practical, ready-to-use scenes covering every scenario from basics to advanced API usage.
+기초부터 고급 API 사용까지 모든 시나리오를 다루는 즉시 사용 가능한 실습용 씬입니다.
 
-| ID   | Example Page                                                 | Key Learning Point                                           |
+| ID | 예제 페이지 | 핵심 학습 포인트 |
 | :--- | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| 00   | [**Quick Start**](../examples/00-quick-start.md)             | The minimal workflow for creating, raising, and binding an event |
-| 01   | [**Void Event**](../examples/01-void-event.md)               | Using parameterless signals for global triggers like "Level Start" |
-| 02   | [**Basic Types Event**](../examples/02-basic-types-event.md) | Passing primitive data (int, float, string) through events   |
-| 03   | [**Custom Type Event**](../examples/03-custom-type-event.md) | Leveraging CodeGen for serialized custom data classes and structs |
-| 04   | [**Custom Sender Event**](../examples/04-custom-sender-event.md) | Using source-aware events to identify which entity raised the signal |
-| 05   | [**Priority Event**](../examples/05-priority-event.md)       | Precisely controlling the execution order of multiple listeners |
-| 06   | [**Conditional Event**](../examples/06-conditional-event.md) | Using predicates to execute callbacks only when criteria are met |
-| 07   | [**Delayed Event**](../examples/07-delayed-event.md)         | Managing timed logic and using Task Handles for cancellation |
-| 08   | [**Repeating Event**](../examples/08-repeating-event.md)     | Creating recurring pulse signals and automated logic loops   |
-| 09   | [**Persistent Event**](../examples/09-persistent-event.md)   | Handling events during scene transitions (DontDestroyOnLoad) |
-| 10   | [**Trigger Event**](../examples/10-trigger-event.md)         | Bridging Unity's Physics system with Game Event assets       |
-| 11   | [**Chain Event**](../examples/11-chain-event.md)             | Building visual sequential logic using the Flow Orchestration graph |
-| 12   | [**Multi Database**](../examples/12-multi-database.md)       | Isolating events into different assets for modular project organization |
-| 13   | [**Runtime API**](../examples/13-runtime-api.md)             | Registering and unregistering listeners dynamically via C# scripts |
-| 14   | [**Runtime Monitor**](../examples/14-runtime-monitor.md)     | Using profiling tools to debug execution timing and GC allocations |
+| 00 | [**퀵 스타트**](../examples/00-quick-start.md) | 이벤트 생성, 발생 및 바인딩을 위한 최소한의 워크플로우 |
+| 01 | [**Void 이벤트**](../examples/01-void-event.md) | "레벨 시작"과 같은 글로벌 트리거를 위해 인자 없는 신호 사용하기 |
+| 02 | [**기본 타입 이벤트**](../examples/02-basic-types-event.md) | 이벤트를 통해 기본 데이터(int, float, string) 전달하기 |
+| 03 | [**커스텀 타입 이벤트**](../examples/03-custom-type-event.md) | 직렬화된 커스텀 데이터 클래스 및 구조체를 위해 CodeGen 활용하기 |
+| 04 | [**커스텀 송신자 이벤트**](../examples/04-custom-sender-event.md) | 신호를 보낸 엔티티를 식별하기 위해 소스 인지형 이벤트 사용하기 |
+| 05 | [**우선순위 이벤트**](../examples/05-priority-event.md) | 여러 리스너의 실행 순서를 정밀하게 제어하기 |
+| 06 | [**조건부 이벤트**](../examples/06-conditional-event.md) | 기준을 충족할 때만 콜백을 실행하기 위해 조건자 사용하기 |
+| 07 | [**지연 이벤트**](../examples/07-delayed-event.md) | 타이밍 로직 관리 및 취소를 위해 태스크 핸들 사용하기 |
+| 08 | [**반복 이벤트**](../examples/08-repeating-event.md) | 반복적인 펄스 신호 및 자동화된 로직 루프 생성하기 |
+| 09 | [**상주 이벤트**](../examples/09-persistent-event.md) | 씬 전환 중에도 이벤트 처리하기 (DontDestroyOnLoad) |
+| 10 | [**트리거 이벤트**](../examples/10-trigger-event.md) | 유니티의 물리 시스템과 게임 이벤트 에셋 연결하기 |
+| 11 | [**체인 이벤트**](../examples/11-chain-event.md) | 플로우 오케스트레이션 그래프를 사용하여 시각적 순차 로직 구축하기 |
+| 12 | [**멀티 데이터베이스**](../examples/12-multi-database.md) | 모듈식 프로젝트 구성을 위해 이벤트를 다른 에셋으로 분리하기 |
+| 13 | [**런타임 API**](../examples/13-runtime-api.md) | C# 스크립트를 통해 동적으로 리스너 등록 및 해제하기 |
+| 14 | [**런타임 모니터**](../examples/14-runtime-monitor.md) | 실행 타이밍과 GC 할당 디버깅을 위해 프로파일링 도구 사용하기 |
 
-:::tip Navigational Tip
-For a hands-on start, we recommend following **Example 00 (Quick Start)** first, then exploring the **Visual Workflow** section to see how the editor tools can streamline your development.
+:::tip 탐색 팁
+실습을 시작하려면 **예제 00 (퀵 스타트)**를 먼저 따라 해본 다음, **시각적 워크플로우** 섹션을 살펴보며 에디터 도구가 개발 속도를 어떻게 높여주는지 확인해 보시는 것을 권장합니다.
 :::

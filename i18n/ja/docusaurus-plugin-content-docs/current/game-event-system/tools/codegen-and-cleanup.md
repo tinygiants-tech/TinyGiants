@@ -1,75 +1,75 @@
 ﻿---
-sidebar_label: 'Code Gen & Cleanup'
+sidebar_label: 'コード生成とクリーンアップ'
 sidebar_position: 1
 ---
 
-# Code Generation & Maintenance
+# コード生成とメンテナンス
 
-To achieve maximum performance and **perfect Unity Inspector integration**, the **Game Event System** relies on concrete C# classes for your specific data types.
+最高のパフォーマンスと**完璧なUnityインスペクターへの統合**を実現するために、**Game Event System** は特定のデータ型に対応した具体的なC#クラスを利用します。
 
-While `GameEvent<T>` is powerful, Unity's Inspector (`UnityEvent`) cannot serialize generic types directly. This toolset automates the creation of these wrapper classes, ensuring your custom data types (structs, classes, enums) appear natively in the Inspector without you writing a single line of boilerplate code.
+`GameEvent<T>` は強力ですが、Unityのインスペクター（`UnityEvent`）はジェネリック型を直接シリアライズすることができません。このツールセットは、これらのラッパークラスの作成を自動化し、ボイラープレートコードを一行も書くことなく、カスタムデータ型（構造体、クラス、列挙型）をインスペクター上でネイティブに表示できるようにします。
 
-## 🚀 Accessing the Tools
+## 🚀 ツールへのアクセス
 
-These utilities are located within the **[Game Event System](../visual-workflow/game-event-system)**, you can access through the following method:
+これらのユーティリティは **[Game Event System](../visual-workflow/game-event-system)** 内に配置されており、以下の方法でアクセスできます：
 
-**From the System Dashboard:**
+**システムダッシュボードから:**
 
 ```
-Game Event System Window → Click "Generate/Clean Game Event Code" or "Clean All Game Event Code"
+Game Event System Window → "Generate/Clean Game Event Code" または "Clean All Game Event Code" をクリック
 ```
 
 ![alt text](/img/game-event-system/tools/codegen-and-cleanup/hub-code-tools.png)
 
 ---
 
-## 📂 The Architecture
+## 📂 アーキテクチャ
 
-Before using the tools, it is important to understand where your code lives. The system strictly separates **Core Logic** from **User Data** to ensure you can upgrade the plugin without losing your generated files.
+ツールを使用する前に、コードがどこに保存されるかを理解しておくことが重要です。システムは、プラグインをアップグレードしても生成されたファイルが失われないよう、**コアロジック**と**ユーザーデータ**を厳密に分離しています。
 
 ```text
 Assets/
-├── 📁 TinyGiants/                  # [CORE LOGIC] The immutable plugin root
+├── 📁 TinyGiants/                  # [コアロジック] 変更不可のプラグインルート
 │   └── 📁 GameEventSystem/
 │
-└── 📁 TinyGiantsData/              # [USER DATA] Your generated content sanctuary
+└── 📁 TinyGiantsData/              # [ユーザーデータ] 生成されたコンテンツの保存場所
     └── 📁 GameEventSystem/
-        └── 📁 CodeGen/             # 💾 Auto-Generated C# Classes
-            ├── 📁 Basic/           # 🛡️ Primitive Types (Required System Files)
-            └── 📁 Custom/          # 💾 Your Custom Types (Managed by Tools)
+        └── 📁 CodeGen/             # 💾 自動生成されたC#クラス
+            ├── 📁 Basic/           # 🛡️ プリミティブ型（システム必須ファイル）
+            └── 📁 Custom/          # 💾 カスタム型（ツールによって管理）
 ```
 
-:::info **Project Structure**
+:::info **プロジェクト構造**
 
-You can refer to the previous chapter **[Project Structure](../intro/project-structure.md)** to gain a detailed understanding of the structure of the entire project directory
+プロジェクトディレクトリ全体の構造について詳しく理解するには、前の章の **[プロジェクト構造](../intro/project-structure.md)** を参照してください。
 
 :::
 
-:::danger Do Not Modify the 'Basic' Folder
-The `TinyGiantsData/GameEventSystem/CodeGen/Basic` folder contains essential system types (Int, Float, Bool, String, etc.).
+:::danger 'Basic' フォルダを修正しないでください
+`TinyGiantsData/GameEventSystem/CodeGen/Basic` フォルダには、必須のシステム型（Int, Float, Bool, Stringなど）が含まれています。
 
-**Never manually delete or modify files in this folder.** 
+**このフォルダ内のファイルを手動で削除したり修正したりしないでください。** 
 
-If you accidentally delete the Basic folder or if the system reports missing basic types (like Int32GameEvent), you can self-repair the environment.
+誤って Basic フォルダを削除したり、システムが基本型（Int32GameEventなど）の欠落を報告した場合は、環境を自己修復できます。
 
-1. Open the **Game Event System** (`Tools > TinyGiants > Game Event System`).
-2. Click the **Initialize Event System** button at the top of the window.
-3. The system will:
-   - Re-create the directory structure.
-   - Regenerate all missing Basic Type codes.
+1. **Game Event System** (`Tools > TinyGiants > Game Event System`) を開きます。
+2. ウィンドウ上部の **Initialize Event System** ボタンをクリックします。
+3. システムが以下を実行します：
+   - ディレクトリ構造の再作成。
+   - すべての欠落している基本型コードの再生成。
 
 :::
 
 ------
 
-## 📝 Understanding Generated Code
+## 📝 生成されたコードの理解
 
-When you generate code for a type (e.g., int or a custom `DamageInfo` struct), the tool creates a file containing two critical parts:
+特定の型（例：intやカスタムの `DamageInfo` 構造体）に対してコードを生成すると、ツールは2つの重要な部分を含むファイルを作成します：
 
-1. **The Event Class**: A concrete wrapper (e.g., Int32GameEvent) inheriting from `GameEvent<T>`.
-2. **The Binding Field**: A partial class extension for `GameEventManager` that adds a `UnityEvent<T>` field, allowing the Inspector to bind listeners via reflection.
+1. **イベントクラス**: `GameEvent<T>` を継承した具体的なラッパー（例：Int32GameEvent）。
+2. **バインディングフィールド**: `GameEventManager` の partial クラス拡張。これにより `UnityEvent<T>` フィールドが追加され、インスペクターがリフレクションを介してリスナーをバインドできるようになります。
 
-### Example: Basic Type (Int32)
+### 例：基本型 (Int32)
 
 ```csharp
 // =============================================================
@@ -80,10 +80,10 @@ using UnityEngine.Events;
 
 namespace TinyGiants.GameEventSystem.Runtime
 {
-    // 1. The ScriptableObject Class
+    // 1. ScriptableObject クラス
     public class Int32GameEvent : GameEvent<int> { }
     
-    // 2. The Inspector Binding
+    // 2. インスペクターバインディング
     public partial class GameEventManager
     {
         public partial class EventBinding
@@ -95,9 +95,9 @@ namespace TinyGiants.GameEventSystem.Runtime
 }
 ```
 
-### Example: Custom Sender Type
+### 例：カスタム送信元（Sender）型
 
-For events that carry both a **Sender** and **Arguments**:
+**送信元（Sender）**と**引数（Arguments）**の両方を持つイベントの場合：
 
 ```csharp
 // =============================================================
@@ -108,10 +108,10 @@ using UnityEngine.Events;
 
 namespace TinyGiants.GameEventSystem.Runtime
 {
-    // 1. The ScriptableObject Class
+    // 1. ScriptableObject クラス
     public class GameObjectDamageInfoGameEvent : GameEvent<UnityEngine.GameObject, DamageInfo> { }
     
-    // 2. The Inspector Binding
+    // 2. インスペクターバインディング
     public partial class GameEventManager
     {
         public partial class EventBinding
@@ -128,82 +128,81 @@ namespace TinyGiants.GameEventSystem.Runtime
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-## ⚡ Code Generator Tool
+## ⚡ コードジェネレーターツール
 
-The **Game Event Code Generator** features a tabbed interface allowing you to switch between simple single-parameter events and complex sender-argument events. Both modes support **batch queuing**, meaning you can setup multiple types and generate them all at once.
+**Game Event Code Generator** はタブ形式のインターフェースを備えており、シンプルな単一引数イベントと複雑な送信元・引数付きイベントを切り替えることができます。どちらのモードも**バッチキューイング**をサポートしており、複数の型を設定して一度に生成することが可能です。
 
 <Tabs>
-  <TabItem value="single" label="Single Parameter" default>
+  <TabItem value="single" label="単一引数 (Single Parameter)" default>
 
-  ![Code Generator - Single Parameter](/img/game-event-system/tools/codegen-and-cleanup/tool_codegen_single.png)
+  ![コードジェネレーター - 単一引数](/img/game-event-system/tools/codegen-and-cleanup/tool_codegen_single.png)
 
-  Use this mode for events that carry a single data payload (e.g., `GameEvent<float>` or `GameEvent<MyClass>`).
+  単一のデータペイロードを持つイベント（例：`GameEvent<float>` や `GameEvent<MyClass>`）には、このモードを使用します。
 
-  1.  **Quick Add**: Use the dropdown to quickly add standard C# types (Double, Long, Vector3, etc.).
-  2.  **Search Custom Types**: Type the name of any class, struct, or enum in your project.
-  3.  **Queue System**: Click **Add** to move types into the "Selected Queue".
-  4.  **Batch Generate**: Click the green **Generate Code(s)** button to create files for all queued types simultaneously.
+  1.  **クイック追加 (Quick Add)**: ドロップダウンを使用して、標準的なC#型（Double, Long, Vector3など）を素早く追加します。
+  2.  **カスタム型の検索**: プロジェクト内のクラス、構造体、列挙型の名前を入力して検索します。
+  3.  **キューシステム**: **Add** をクリックして、型を「Selected Queue（選択済みキュー）」に移動します。
+  4.  **一括生成**: 緑色の **Generate Code(s)** ボタンをクリックすると、キューに入れられたすべての型のファイルが同時に作成されます。
 
   </TabItem>
-  <TabItem value="sender" label="With Sender">
+  <TabItem value="sender" label="送信元付き (With Sender)">
 
-  ![Code Generator - With Sender](/img/game-event-system/tools/codegen-and-cleanup/tool_codegen_sender.png)
+  ![コードジェネレーター - 送信元付き](/img/game-event-system/tools/codegen-and-cleanup/tool_codegen_sender.png)
 
-  Use this mode for events that need to know **who** triggered the event and **what** happened (e.g., `Player` sent `DamageInfo`).
+  **誰が**イベントをトリガーし、**何が**起きたか（例：`Player` が `DamageInfo` を送信した）を知る必要があるイベントには、このモードを使用します。
 
-  1.  **Select Sender Type**: Usually `GameObject` or a specific script (e.g., `PlayerController`).
-  2.  **Select Argument Type**: The payload data (e.g., `DamageInfo`).
-  3.  **Add Pair**: Creates a specific combination (e.g., `GameObject` → `DamageInfo`) and adds it to the queue.
-  4.  **Batch Generate**: Generates all defined pairs in one operation.
+  1.  **送信元（Sender）型の選択**: 通常は `GameObject` や特定のスクリプト（例：`PlayerController`）を選択します。
+  2.  **引数（Argument）型の選択**: ペイロードデータ（例：`DamageInfo`）を選択します。
+  3.  **ペアを追加**: 特定の組み合わせ（例：`GameObject` → `DamageInfo`）を作成し、キューに追加します。
+  4.  **一括生成**: 定義されたすべてのペアを一回の操作で生成します。
 
   </TabItem>
 </Tabs>
 
-:::tip Automatic Compilation
-After clicking "Generate", Unity will trigger a script recompilation. The new event types will be available in the **Create Asset Menu** and the **Event Editor** immediately after compilation finishes.
+:::tip 自動コンパイル
+"Generate" をクリックすると、Unityはスクリプトの再コンパイルを開始します。コンパイル終了後、新しいイベントタイプが **Create Asset Menu** および **Event Editor** ですぐに利用可能になります。
 :::
 
 ---
 
-## 🧹 Code Cleaner Tool
+## 🧹 コードクリーナーツール
 
-As your project evolves, you may delete old structs or refactor code, leaving behind unused GameEvent classes. The **Code Cleaner** mirrors the Generator's interface, allowing you to filter and batch-delete obsolete files safely.
+プロジェクトが進むにつれて、古い構造体を削除したりコードをリファクタリングしたりすると、未使用の GameEvent クラスが残ることがあります。**Code Cleaner** はジェネレーターのインターフェースをミラーリングしており、不要になったファイルを安全にフィルタリングして一括削除できます。
 
-It **only targets the Custom folder** (`TinyGiantsData/.../Custom`). It will never display or delete files from the `Basic` folder, protecting system integrity.
+このツールは **Custom フォルダのみ** (`TinyGiantsData/.../Custom`) を対象とします。システムの整合性を守るため、`Basic` フォルダのファイルを表示したり削除したりすることはありません。
 
 <Tabs>
-  <TabItem value="single" label="Single Parameter" default>
+  <TabItem value="single" label="単一引数 (Single Parameter)" default>
 
-  ![Code Cleaner - Single Parameter](/img/game-event-system/tools/codegen-and-cleanup/tool_cleaner_single.png)
+  ![コードクリーナー - 単一引数](/img/game-event-system/tools/codegen-and-cleanup/tool_cleaner_single.png)
 
-  Lists all custom generated files for `GameEvent<T>`.
+  生成されたすべてのカスタム `GameEvent<T>` ファイルをリスト表示します。
 
-  *   **Search & Filter**: Find files by type name (e.g., searching "Damage" will find `DamageInfoGameEvent.cs`).
-  *   **Select All / Clear**: Quickly manage large lists.
-  *   **Multi-Selection**: Tick individual files or use "Select All".
-  *   **Delete**: The red **Delete All Selected Files** button removes the `.cs` files and their `.meta` files for all checked items.
+  *   **検索とフィルタリング**: 型名でファイルを検索します（例：「Damage」と検索すると `DamageInfoGameEvent.cs` が見つかります）。
+  *   **すべて選択 / 解除**: 大規模なリストを素早く管理します。
+  *   **複数選択**: 個別のファイルにチェックを入れるか、「Select All」を使用します。
+  *   **削除**: 赤色の **Delete All Selected Files** ボタンを押すと、チェックされたすべての項目の `.cs` ファイルと対応する `.meta` ファイルが削除されます。
 
   </TabItem>
-  <TabItem value="sender" label="With Sender">
+  <TabItem value="sender" label="送信元付き (With Sender)">
 
-  ![Code Cleaner - With Sender](/img/game-event-system/tools/codegen-and-cleanup/tool_cleaner_sender.png)
+  ![コードクリーナー - 送信元付き](/img/game-event-system/tools/codegen-and-cleanup/tool_cleaner_sender.png)
 
-  Lists all custom generated files for `GameEvent<Sender, Args>`.
+  生成されたすべてのカスタム `GameEvent<Sender, Args>` ファイルをリスト表示します。
 
-  *   **Complex Filtering**: You can search by Sender name OR Argument name.
-  *   **File Inspection**: Click the **Object Icon** 📦 next to any file to ping/highlight the script in the Project Window before deleting (useful to double-check references).
-  *   **Batch Delete**: Safely removes multiple Sender-Event definitions in one click.
+  *   **高度なフィルタリング**: 送信元（Sender）名、または引数（Argument）名で検索できます。
+  *   **ファイルの確認**: 各ファイルの横にある **オブジェクトアイコン** 📦 をクリックすると、削除前にプロジェクトウィンドウでスクリプトをハイライト表示（Ping）できます（参照を再確認するのに便利です）。
+  *   **一括削除**: 複数の送信元イベント定義を一クリックで安全に削除します。
 
   </TabItem>
 </Tabs>
 
 ------
 
-## ☢️ Clean All (Reset)
+## ☢️ すべてクリーンアップ（リセット）
 
-The **Clean All Game Event Code** button is the "Nuclear Option".
+**Clean All Game Event Code** ボタンは「最終手段（Nuclear Option）」です。
 
-- **Action**: Deletes **ALL** custom files in `TinyGiantsData/GameEventSystem/CodeGen/Custom`.
-- **Preservation**: It **preserves** the Basic folder.
-- **Use Case**: Use this when you want to perform a hard reset of your custom events or if you have refactored a large number of types and want to regenerate only what is currently needed.
-
+- **アクション**: `TinyGiantsData/GameEventSystem/CodeGen/Custom` 内の**すべての**カスタムファイルを削除します。
+- **保護**: Basic フォルダは**維持**されます。
+- **ユースケース**: カスタムイベントをハードリセットしたい場合、または大量の型をリファクタリングして現在必要なものだけを再生成したい場合に使用します。

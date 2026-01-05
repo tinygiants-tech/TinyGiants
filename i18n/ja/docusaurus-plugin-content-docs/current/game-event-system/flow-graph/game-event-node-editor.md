@@ -1,537 +1,534 @@
 ﻿---
-sidebar_label: 'Edit Flow Graph'
+sidebar_label: 'フローグラフの編集'
 sidebar_position: 1
 ---
 
-# Game Event Node Editor
+# ゲームイベントノードエディタ (Game Event Node Editor)
 
-The **Node Editor** is a visual orchestration tool that solves the "spaghetti code" problem by displaying complex event dependencies in a single, readable graph.
+**ノードエディタ**は、複雑なイベントの依存関係を単一の読み取り可能なグラフに表示することで、「スパゲッティコード」問題を解決するビジュアルオーケストレーションツールです。
 
-Instead of hunting through scattered scripts to understand *why* an event fired, you simply look at the flow graph.
+イベントが*なぜ*発行されたのかを理解するために散らばったスクリプトを探し回る代わりに、フローグラフを見るだけでその流れを把握できます。
 
-![Flow Graph Editor Overview](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-editor-overview.png)
+![フローグラフエディタの概要](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-editor-overview.png)
 
 ---
 
-## 🎯 Design Philosophy
+## 🎯 設計思想
 
-Traditional Unity events are "fire and forget"—great for decoupling, but terrible for debugging sequences.
+従来のUnityイベントは「投げっぱなし（Fire and Forget）」です。これはデカップリング（疎結合化）には最適ですが、一連のシーケンスをデバッグするには不向きです。
 
-The Flow Graph introduces **two powerful execution patterns**:
+フローグラフは、**2つの強力な実行パターン**を導入します：
 
-| Pattern               | Execution    | Behavior                                                     | Use Case                                                     |
+| パターン | 実行方式 | 動作 | ユースケース |
 | --------------------- | ------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| **Trigger** (Fan-Out) | **Parallel** | Non-blocking. One event fires multiple others simultaneously | "OnPlayerDeath" → Play Sound + Spawn Particles + Show UI     |
-| **Chain** (Sequence)  | **Serial**   | Blocking. Events fire one after another with delays          | "StartCutscene" → (Wait 2s) → "ShowDialog" → (Wait Input) → "EndCutscene" |
+| **トリガー** (Fan-Out) | **並列** | 非ブロッキング。1つのイベントが複数のイベントを同時に発行する | 「OnPlayerDeath」→ SE再生 + パーティクル生成 + UI表示 |
+| **チェーン** (Sequence) | **直列** | ブロッキング。遅延を挟みながらイベントを1つずつ順番に発行する | 「StartCutscene」→（2秒待機）→「ShowDialog」→（入力待機）→「EndCutscene」 |
 
-**🎯 Triggers (Fan-Out)**
+**🎯 トリガー (Fan-Out)**
 
-![Flow Graph Editor Overview](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-trigger.png)
+![フローグラフエディタの概要](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-trigger.png)
 
-⛓️ Chains (Sequential)
+⛓️ チェーン (Sequential)
 
-![Flow Graph Editor Overview](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-chain.png)
+![フローグラフエディタの概要](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-chain.png)
 
-By combining these patterns, you build logic that is both **decoupled** and **structured**.
-
----
-
-## 🚀 Opening the Editor
-
-Access the Flow Graph Editor from the **[Game Event Editor](../visual-workflow/game-event-editor.md)**
-```
-Game Event Editor → Click "Flow Graph" button in toolbar
-```
-
-This ensures you're working within the correct event library context.
+これらのパターンを組み合わせることで、**デカップリング**されつつも**構造化された**ロジックを構築できます。
 
 ---
 
-## 🛠️ Toolbar Overview
+## 🚀 エディタを開く
 
-The toolbar manages flow graph assets and global settings.
+フローグラフエディタには、**[Game Event Editor](../visual-workflow/game-event-editor.md)** からアクセスします。
+```
+Game Event Editor → ツールバーの "Flow Graph" ボタンをクリック
+```
 
-![Flow Graph Editor Overview](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-toolbar.png)
+これにより、正しいイベントライブラリのコンテキスト内で作業を行うことが保証されます。
 
-### Flow Asset Dropdown
+---
 
-Switch between different Flow Graph assets (e.g., `Global_Flow`, `Level_1_Flow`).
+## 🛠️ ツールバーの概要
 
-**Graph content updates instantly** when switching.
+ツールバーでは、フローグラフアセットとグローバル設定を管理します。
 
-:::tip Asset Organization
-Create separate flow graphs for different game systems to keep logic clean and maintainable. Store graphs as sub-assets inside Flow Container assets.
+![フローグラフエディタの概要](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-toolbar.png)
+
+### フローアセットドロップダウン
+
+異なるフローグラフアセット（例：`Global_Flow`, `Level_1_Flow`）を切り替えます。
+
+切り替えると、**グラフの内容は即座に更新**されます。
+
+:::tip アセットの整理
+ゲームシステムごとに別々のフローグラフを作成することで、ロジックをクリーンでメンテナンスしやすい状態に保てます。グラフは Flow Container アセット内にサブアセットとして保存されます。
 :::
 
-### Graph Management
+### グラフ管理
 
-**New Button** (`+ New`): Create new graph in current container.
+**New ボタン** (`+ New`): 現在のコンテナ内に新しいグラフを作成します。
 
-**Graph Name Field**: Click to rename current graph.
+**グラフ名フィールド**: クリックして現在のグラフ名を変更します。
 
-**Delete Button**: Remove current graph (with confirmation).
+**Delete ボタン**: 現在のグラフを削除します（確認ダイアログが表示されます）。
 
-### Graph Controls
+### グラフコントロール
 
-**Snap Button** (`Snap`): Toggle grid snapping. When enabled, nodes will automatically snap to the 20-unit grid lines during movement, ensuring a perfectly organized layout.
+**Snap ボタン** (`Snap`): グリッドスナップを切り替えます。有効にすると、ノードの移動時に20ユニットのグリッド線に自動的に吸着し、完璧に整理されたレイアウトを維持できます。
 
-**Align Button** (`Align`): Toggle smart alignment guides. When enabled, blue vertical or horizontal dotted lines appear when the node you are dragging aligns its edges (left, center, right) or midlines (top, center, bottom) with other nodes on the canvas.
+**Align ボタン** (`Align`): スマート整列ガイドを切り替えます。有効にすると、ドラッグ中のノードのエッジ（左、中央、右）や中心線（上、中央、下）がキャンバス上の他のノードと揃ったときに、青い垂直または水平の点線が表示されます。
 
-**Active Toggle** (🟢 / 🔴): Enable/disable entire graph at runtime.
+**Active トグル** (🟢 / 🔴): 実行時にグラフ全体を有効/無効にします。
 
-**Refresh Button**: Reload container list from `GameEventManager`.
+**Refresh ボタン**: `GameEventManager` からコンテナリストをリロードします。
 
-**Help Button** (`? Help`): Open Quick Reference Guide with all shortcuts and color codes.
+**Help ボタン** (`? Help`): すべてのショートカットとカラーコードが記載されたクイックリファレンスガイドを開きます。
 
-![Flow Graph Editor Help](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-help.png)
+![フローグラフエディタのヘルプ](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-help.png)
 
 ---
 
-## 🖱️ Canvas Navigation
+## 🖱️ キャンバスの操作
 
-The editor features an infinite zoomable canvas designed for large-scale logic graphs.
+エディタは、大規模なロジックグラフ向けに設計された、無限にズーム可能なキャンバスを備えています。
 
-### Basic Controls
+### 基本操作
 
-| Action           | Control           | Description                             |
+| アクション | 操作 | 説明 |
 | ---------------- | ----------------- | --------------------------------------- |
-| **Pan View**     | Middle Mouse Drag | Move around the canvas                  |
-| **Zoom**         | Scroll Wheel      | Zoom in/out (centered on mouse cursor)  |
-| **Context Menu** | Right Click       | Add nodes or groups                     |
-| **Quick Create** | Double Click      | Open node creation menu on empty canvas |
+| **ビューのパン** | マウス中ボタンでドラッグ | キャンバス内を移動します |
+| **ズーム** | スクロールホイール | 拡大/縮小（マウスカーソルの位置を中心に） |
+| **コンテキストメニュー** | 右クリック | ノードやグループを追加します |
+| **クイック作成** | ダブルクリック | 空のキャンバス上でノード作成メニューを開きます |
 
-**Zoom Range**: 0.2x - 3.0x (20% to 300%)
+**ズーム範囲**: 0.2x - 3.0x (20% ～ 300%)
 
-**Grid**: Minor lines every 20 units, major lines every 100 units. When **Snap** is enabled, nodes lock to the 20-unit minor grid lines.
+**グリッド**: 20ユニットごとに補助線、100ユニットごとに主線が表示されます。**Snap** が有効な場合、ノードは20ユニットの補助線にロックされます。
 
 ---
 
-## 🎯 Working with Nodes
+## 🎯 ノードの操作
 
-### Creating Nodes
+### ノードの作成
 
-![Flow Graph Editor Overview](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-basic-menu.png)
+![フローグラフエディタの概要](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-basic-menu.png)
 
-| Action             | Control                | Description                      |
+| アクション | 操作 | 説明 |
 | ------------------ | ---------------------- | -------------------------------- |
-| **Quick Create**   | Double Click Canvas    | Open node creation menu          |
-| **Context Menu**   | Right Click → Add Node | Create Trigger or Chain node     |
-| **From Selection** | Right Click Node       | Context menu for node operations |
+| **クイック作成** | キャンバスをダブルクリック | ノード作成メニューを開きます |
+| **コンテキストメニュー** | 右クリック → Add Node | トリガーまたはチェーンノードを作成します |
+| **選択中から作成** | ノードを右クリック | ノード操作のコンテキストメニューを開きます |
 
-**Node Types**:
-- **Trigger Node**: Parallel execution (fan-out pattern)
-- **Chain Node**: Sequential execution (sequence pattern)
+**ノードタイプ**:
+- **Trigger ノード**: 並列実行（ファンアウトパターン）
+- **Chain ノード**: 直列実行（シーケンスパターン）
 
-### Node Selection
+### ノードの選択
 
-| Action               | Control            | Description                                                  |
+| アクション | 操作 | 説明 |
 | -------------------- | ------------------ | ------------------------------------------------------------ |
-| **Select Node**      | Left Click         | Select individual node                                       |
-| **Add to Selection** | Ctrl/Shift + Click | Toggle node in/out of selection                              |
-| **Box Select**       | Left Click + Drag  | Select all nodes in rectangle                                |
-| **Select All**       | Ctrl + A           | Select all nodes in graph                                    |
-| **Clear Selection**  | Escape             | Deselect everything                                          |
-| **Edit Node**        | Double Click Node  | Open [Node Behavior Configuration](./game-event-node-behavior.md) |
+| **ノードの選択** | 左クリック | 個別のノードを選択します |
+| **選択への追加** | Ctrl/Shift + クリック | ノードの選択状態を切り替えます |
+| **ボックス選択** | 左クリック + ドラッグ | 矩形範囲内のすべてのノードを選択します |
+| **すべて選択** | Ctrl + A | グラフ内のすべてのノードを選択します |
+| **選択解除** | Escape | すべての選択を解除します |
+| **ノードの編集** | ノードをダブルクリック | [ノードの振る舞い設定](./game-event-node-behavior.md) を開きます |
 
+### ノードの移動
 
-
-### Moving Nodes
-
-| Action         | Control                    | Description                      |
+| アクション | 操作 | 説明 |
 | -------------- | -------------------------- | -------------------------------- |
-| **Move Node**  | Left Drag                  | Move selected node               |
-| **Multi-Move** | Left Drag (with selection) | Move all selected nodes together |
+| **ノードの移動** | 左ボタンでドラッグ | 選択したノードを移動します |
+| **複数移動** | 左ボタンでドラッグ（選択中） | 選択されたすべてのノードを一緒に移動します |
 
-**Group Behavior**: When nodes belong to a group, moving them automatically updates the group bounds.
+**グループの挙動**: ノードがグループに属している場合、移動するとグループの境界線も自動的に更新されます。
 
-**Layout Assistants**:
+**レイアウト補助**:
 
-*   **Grid Snapping**: When **Snap** is active, movement is locked to 20-pixel increments, matching the background grid.
-*   **Smart Alignment**: When **Align** is active, the editor provides visual feedback via blue dotted lines. It automatically detects alignment for:
-    *   **Vertical**: Left edges, horizontal centers, and right edges.
-    *   **Horizontal**: Top edges, vertical centers, and bottom edges.
+*   **グリッドスナップ**: **Snap** が有効な場合、移動は背景グリッドに合わせた20ピクセル単位にロックされます。
+*   **スマート整列**: **Align** が有効な場合、エディタは青い点線による視覚的なフィードバックを提供します。以下の位置で自動的に整列を検知します：
+    *   **垂直方向**: 左端、水平中心、右端
+    *   **水平方向**: 上端、垂直中心、下端
 
-### Node Context Menu
+### ノードのコンテキストメニュー
 
-![Flow Graph Editor Overview](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-node-menu.png)
+![フローグラフエディタの概要](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-node-menu.png)
 
-Right-click on a node for quick actions:
+ノードを右クリックすると、クイックアクションが表示されます：
 
-- **Edit Node**: Open [Behavior Configuration Window](./game-event-node-behavior.md)
-- **Copy Node**: Copy to clipboard
-- **Cut Node**: Copy and delete
-- **Delete Node**: Remove node and all connections
-- **Set as Root**: Mark as graph entry point
-- **Convert to Trigger/Chain**: Change node type
+- **Edit Node**: [振る舞い設定ウィンドウ](./game-event-node-behavior.md) を開く
+- **Copy Node**: クリップボードにコピー
+- **Cut Node**: コピーして削除
+- **Delete Node**: ノードとすべての接続を削除
+- **Set as Root**: グラフの開始点としてマーク
+- **Convert to Trigger/Chain**: ノードタイプを変換
 
-### Multi-Selection Context Menu
+### 複数選択時のコンテキストメニュー
 
-![Flow Graph Editor Overview](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-multi-node-menu.png)
+![フローグラフエディタの概要](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-multi-node-menu.png)
 
-When multiple nodes are selected, right-click shows:
+複数のノードが選択されている状態で右クリックすると表示されます：
 
-- **Copy N Node(s)**: Copy selection to clipboard
-- **Cut N Node(s)**: Copy and delete selection
-- **Delete N Node(s)**: Remove all selected nodes
-- **Create Group**: Create group from selected nodes (minimum 2 nodes required)
+- **Copy N Node(s)**: 選択範囲をクリップボードにコピー
+- **Cut N Node(s)**: 選択範囲をコピーして削除
+- **Delete N Node(s)**: 選択されたすべてのノードを削除
+- **Create Group**: 選択されたノードからグループを作成（最低2つのノードが必要）
 
 ---
 
-## 🔗 Creating Connections
+## 🔗 接続 (Connections) の作成
 
-Connections define event flow between nodes.
+接続は、ノード間のイベントの流れを定義します。
 
-### Connection Operations
+### 接続操作
 
-| Action                  | Control                       | Description                               |
+| アクション | 操作 | 説明 |
 | ----------------------- | ----------------------------- | ----------------------------------------- |
-| **Create Connection**   | Drag from Output Port (right) | Drag to Input Port (left) of another node |
-| **Re-route Connection** | Drag from Input Port          | Disconnect and connect to different node  |
-| **Delete Connection**   | Select + Delete               | Remove connection                         |
+| **接続の作成** | 出力ポート（右側）からドラッグ | 別のノードの入力ポート（左側）へドラッグします |
+| **接続の付け替え** | 入力ポートからドラッグ | 接続を切り離し、別のノードへ接続し直します |
+| **接続の削除** | 選択して Delete キー | 接続を削除します |
 
-**Visual Feedback**: 
-- Preview line shows while dragging
-- Color indicates compatibility (see [Connection Types](./game-event-node-connector.md))
-- Invalid targets show as grayed out
+**ビジュアルフィードバック**: 
+- ドラッグ中にプレビュー線が表示されます。
+- 色は互換性を示します（[接続タイプ](./game-event-node-connector.md) を参照）。
+- 無効なターゲットはグレーアウトされます。
 
-**Connection Rules**:
-- Always drag from Output (right port) to Input (left port)
-- Root nodes have no input port
-- Nodes can have multiple incoming and outgoing connections
+**接続ルール**:
+- 常に「出力（右ポート）」から「入力（左ポート）」へドラッグします。
+- ルートノードに入力ポートはありません。
+- ノードは複数の入力および出力接続を持つことができます。
 
 ---
 
-## 📁 Grouping System
+## 📁 グループ化システム
 
-Organize large graphs with visual groups to improve readability and maintainability.
+大規模なグラフを視覚的なグループで整理し、可読性とメンテナンス性を向上させます。
 
-![Flow Graph Groups](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-groups.png)
+![フローグラフのグループ](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-groups.png)
 
-### Creating Groups
+### グループの作成
 
-**Method 1**: Select nodes → Right Click → **Create Group**
+**方法 1**: ノードを選択 → 右クリック → **Create Group**
 
-**Method 2**: Use box select → Right Click selection → **Create Group**
+**方法 2**: ボックス選択を使用 → 選択範囲を右クリック → **Create Group**
 
-**Requirements**:
-- Minimum **2 nodes** required
-- Selected nodes will be grouped together
-- Group bounds calculated automatically from node positions
+**要件**:
+- 最低 **2つのノード** が必要です。
+- 選択されたノードがまとめられます。
+- グループの境界（Bounds）はノードの位置から自動的に計算されます。
 
-### Managing Groups
+### グループの管理
 
-| Operation                | How To                   | Result                             |
+| 操作 | 方法 | 結果 |
 | ------------------------ | ------------------------ | ---------------------------------- |
-| **Rename**               | Double-click group title | Enter edit mode (Escape to cancel) |
-| **Select Group**         | Left Click group area    | Select entire group                |
-| **Move Group**           | Drag group area          | Moves all member nodes together    |
-| **Delete Group Only**    | Delete key               | Removes group frame, keeps nodes   |
-| **Delete Group + Nodes** | Shift + Delete           | Removes group AND all nodes inside |
+| **名前変更** | グループのタイトルをダブルクリック | 編集モードになります（Escapeでキャンセル） |
+| **グループ選択** | グループエリアを左クリック | グループ全体を選択します |
+| **グループ移動** | グループエリアをドラッグ | 属するすべてのノードを一緒に移動します |
+| **グループのみ削除** | Delete キー | 枠線のみを削除し、ノードは維持します |
+| **グループとノードを削除** | Shift + Delete | グループとその中のすべてのノードを削除します |
 
-**Visual Indicators**:
-- Selected groups: Brighter border + highlighted title
-- Group titles: Display in bottom-right corner of group bounds
-- Group bounds: Semi-transparent rounded rectangle
+**ビジュアルインジケーター**:
+- 選択中のグループ：枠線が明るくなり、タイトルが強調されます。
+- グループタイトル：グループの左上隅（境界内）に表示されます。
+- グループ境界：半透明の角丸矩形で表示されます。
 
-### Group Membership
+### グループの所属関係
 
-**Adding Nodes to Group**:
-1. Select existing group + nodes you want to add
-2. Right Click → **Create Group**
-3. All selected nodes will be included in the new group
-4. Old group is removed, new group is created
+**ノードをグループに追加する**:
+1. 既存のグループと追加したいノードを一緒に選択します。
+2. 右クリック → **Create Group** を選択します。
+3. 選択されたすべてのノードが新しいグループに含まれます。
+4. 古いグループは削除され、新しいグループが作成されます。
 
-**Removing Nodes from Group**:
-- Delete the specific node from the group
-- Group automatically removes the node from its membership
-- If group has ≤1 node remaining, group is automatically deleted
+**ノードをグループから削除する**:
+- グループ内の特定のノードを削除します。
+- グループは自動的に所属リストからそのノードを削除します。
+- グループ内のノードが1つ以下になると、グループは自動的に削除されます。
 
-**Constraints**:
-- **One Group Per Node**: Each node can only belong to one group at a time
-- **Auto-Cleanup**: Groups with ≤1 nodes are automatically removed
-- **Dynamic Bounds**: Groups resize automatically when member nodes move
+**制約**:
+- **1ノードにつき1グループ**: 各ノードは一度に1つのグループにしか属せません。
+- **自動クリーンアップ**: ノードが1つ以下のグループは自動的に削除されます。
+- **動的な境界**: メンバーノードが移動すると、グループのサイズも自動的に変更されます。
 
-### Group Context Menu
+### グループのコンテキストメニュー
 
-![Flow Graph Editor Overview](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-group-menu.png)
+![フローグラフエディタの概要](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-group-menu.png)
 
-Right-click on a group:
+グループを右クリックしたときの操作：
 
-- **Rename Group**: Enter rename mode
-- **Copy Group**: Copy entire group structure (nodes + internal connections)
-- **Delete Group (Keep Nodes)**: Remove group frame only
-- **Delete Group + Nodes**: Remove everything
+- **Rename Group**: 名前変更モードに入る
+- **Copy Group**: グループ構造全体をコピー（ノード + 内部接続）
+- **Delete Group (Keep Nodes)**: グループの枠のみを削除
+- **Delete Group + Nodes**: すべてを削除
 
 ---
 
-## 📋 Copy & Paste System
+## 📋 コピー＆ペースト
 
-Duplicate nodes and groups to speed up workflow.
+ノードやグループを複製してワークフローをスピードアップさせます。
 
-### Node Copy & Paste
+### ノードのコピー＆ペースト
 
-| Action            | Control  | Description                            |
+| アクション | 操作 | 説明 |
 | ----------------- | -------- | -------------------------------------- |
-| **Copy Node(s)**  | Ctrl + C | Copy selected node(s) to clipboard     |
-| **Cut Node(s)**   | Ctrl + X | Cut selected node(s) (copy + delete)   |
-| **Paste Node(s)** | Ctrl + V | Paste with incremental offset          |
-| **Reset Paste**   | Escape   | Reset paste counter for next operation |
+| **ノードのコピー** | Ctrl + C | 選択したノードをクリップボードにコピーします |
+| **ノードの切り取り** | Ctrl + X | 選択したノードを切り取ります（コピー + 削除） |
+| **ノードの貼り付け** | Ctrl + V | オフセットを付けて貼り付けます |
+| **貼り付けのリセット** | Escape | 次の操作のために貼り付けカウンターをリセットします |
 
-**Paste Behavior**:
+**貼り付けの挙動**:
+- Escape を押すと、位置オフセットのカウンターがリセットされます。
+- 貼り付けられたノード間の接続は維持されます。
+- 貼り付けられたノードがルート（Root）に設定されることはありません。
 
-- Press Escape to reset offset counter
-- Connections between pasted nodes are preserved
-- Pasted nodes are never set as root
+### グループのコピー＆ペースト
 
-### Group Copy & Paste
-
-| Action          | Control  | Description                  |
+| アクション | 操作 | 説明 |
 | --------------- | -------- | ---------------------------- |
-| **Copy Group**  | Ctrl + C | Copy entire group structure  |
-| **Paste Group** | Ctrl + V | Paste group with 50px offset |
+| **グループのコピー** | Ctrl + C | グループ構造全体をコピーします |
+| **グループの貼り付け** | Ctrl + V | 50pxのオフセットを付けてグループを貼り付けます |
 
-**What's Copied**:
-- Group frame and title (with " (Copy)" suffix)
-- All member nodes with their configurations
-- Internal connections (connections between group members)
-- Relative node positions
+**コピーされるもの**:
+- グループの枠線とタイトル（末尾に " (Copy)" が付きます）
+- すべてのメンバーノードとその設定
+- 内部接続（グループのメンバー同士の接続）
+- ノードの相対位置
 
-**What's NOT Copied**:
-- External connections (connections to/from outside nodes)
-- Root node status
-- Node IDs (new IDs generated automatically)
+**コピーされないもの**:
+- 外部接続（グループ外のノードとの接続）
+- ルートノードの状態
+- ノードID（新しいIDが自動的に生成されます）
 
-:::tip Copy Strategy
-**Right-click menu** shows "Copy Group" option for quick access. Both Ctrl+C and right-click menu work identically. Use groups as templates for repeated logic patterns.
+:::tip コピー戦略
+**右クリックメニュー** からも「Copy Group」を素早く実行できます。Ctrl+C と右クリックメニューは同じように機能します。繰り返されるロジックパターンのテンプレートとしてグループを活用してください。
 :::
 
 ---
 
-## ⌨️ Keyboard Shortcuts
+## ⌨️ キーボードショートカット
 
-### Copy & Paste
+### コピー＆ペースト
 
-| Shortcut     | Action                               |
+| ショートカット | アクション |
 | ------------ | ------------------------------------ |
-| **Ctrl + C** | Copy selected node(s) or group       |
-| **Ctrl + V** | Paste with incremental offset        |
-| **Ctrl + X** | Cut selected node(s) (copy + delete) |
+| **Ctrl + C** | 選択したノードまたはグループをコピー |
+| **Ctrl + V** | オフセット付きで貼り付け |
+| **Ctrl + X** | 選択したノードを切り取り |
 
-### Undo/Redo
+### 取り消し・やり直し (Undo/Redo)
 
-| Shortcut                            | Action                |
+| ショートカット | アクション |
 | ----------------------------------- | --------------------- |
-| **Ctrl + Z**                        | Undo (up to 50 steps) |
-| **Ctrl + Shift + Z** / **Ctrl + Y** | Redo                  |
+| **Ctrl + Z** | 元に戻す（最大50ステップ） |
+| **Ctrl + Shift + Z** / **Ctrl + Y** | やり直し |
 
-**History Scope**: Tracks node creation/deletion, connections, group changes, position changes, copy/paste operations.
+**履歴の範囲**: ノードの作成/削除、接続、グループの変更、位置の変更、コピー＆ペースト操作を記録します。
 
-### Selection
+### 選択
 
-| Shortcut     | Action                                                   |
+| ショートカット | アクション |
 | ------------ | -------------------------------------------------------- |
-| **Ctrl + A** | Select all nodes                                         |
-| **Escape**   | Clear selection / Cancel operation / Reset paste counter |
+| **Ctrl + A** | すべてのノードを選択 |
+| **Escape**   | 選択解除 / 操作のキャンセル / 貼り付けカウンターのリセット |
 
-### Deletion
+### 削除
 
-| Shortcut           | Action                                                |
+| ショートカット | アクション |
 | ------------------ | ----------------------------------------------------- |
-| **Delete**         | Delete selected items                                 |
-| **Shift + Delete** | **Cascade Delete**: Delete group AND all nodes inside |
+| **Delete** | 選択したアイテムを削除 |
+| **Shift + Delete** | **カスケード削除**: グループとその中のすべてのノードを削除 |
 
-**Delete Behavior**:
-- Deleting a node: Removes all connected connections and updates group membership
-- Deleting a group (Delete): Keeps member nodes
-- Deleting a group (Shift + Delete): Removes group and all member nodes
-- Deleting a connection: Removes link only
-- Groups with ≤1 remaining nodes are automatically deleted
-
----
-
-## 🎨 Context Menu Reference
-
-### On Empty Space
-
-- **Add Trigger Node**: Create new trigger node at cursor position
-- **Add Chain Node**: Create new chain node at cursor position
-- **Paste Node(s)**: (if clipboard has nodes) Shows paste count
-- **Paste Group**: (if clipboard has group) Shows group name
-
-### On Single Node
-
-- **Edit Node**: Open [Behavior Configuration Window](./game-event-node-behavior.md)
-- **Copy Node**: Copy to clipboard
-- **Cut Node**: Copy and delete
-- **Delete Node**: Remove node and connections
-- **Set as Root**: Mark as graph entry point
-- **Convert to Trigger/Chain**: Change node type
-
-### On Multiple Nodes (Selection)
-
-- **Copy N Node(s)**: Copy selection to clipboard
-- **Cut N Node(s)**: Copy and delete selection
-- **Delete N Nodes**: Remove all selected
-- **Create Group**: Group selection (minimum 2 nodes)
-
-### On Group
-
-- **Rename Group**: Enter rename mode
-- **Copy Group**: Copy entire group structure
-- **Delete Group (Keep Nodes)**: Remove group frame only
-- **Delete Group + Nodes**: Remove group and all member nodes
+**削除の挙動**:
+- ノードの削除：すべての関連する接続が解除され、グループの所属が更新されます。
+- グループの削除 (Delete)：メンバーノードは維持されます。
+- グループの削除 (Shift + Delete)：グループと全メンバーノードが削除されます。
+- 接続の削除：リンクのみが削除されます。
+- メンバーが1つ以下のグループは自動的に削除されます。
 
 ---
 
-## 📊 Status Bar
+## 🎨 コンテキストメニュー・リファレンス
 
-Real-time information displayed at bottom of canvas:
+### 空白部分
 
-- Current zoom level (e.g., `Zoom: 1.2x`)
-- Node count (e.g., `Nodes: 15`)
-- Connection count (e.g., `Connections: 23`)
-- Selection info (e.g., `Selected: 3 node(s), 1 group(s)`)
-- Undo/Redo stack depth
+- **Add Trigger Node**: カーソル位置に新しいトリガーノードを作成
+- **Add Chain Node**: カーソル位置に新しいチェーンノードを作成
+- **Paste Node(s)**:（クリップボードにノードがある場合）貼り付け件数を表示
+- **Paste Group**:（クリップボードにグループがある場合）グループ名を表示
 
----
+### 個別ノード上
 
-## 🎓 Workflow Examples
+- **Edit Node**: [振る舞い設定ウィンドウ](./game-event-node-behavior.md) を開く
+- **Copy Node**: クリップボードにコピー
+- **Cut Node**: コピーして削除
+- **Delete Node**: ノードと接続を削除
+- **Set as Root**: グラフの開始点としてマーク
+- **Convert to Trigger/Chain**: ノードタイプを変換
 
-### Example 1: Build a Player Death Sequence
+### 複数ノード上（選択中）
 
-![Flow Graph Groups](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-editor-example.png)
+- **Copy N Node(s)**: 選択範囲をコピー
+- **Cut N Node(s)**: 選択範囲を切り取り
+- **Delete N Nodes**: 選択されたすべてを削除
+- **Create Group**: 選択範囲をグループ化（最低2ノード）
 
-**Goal**: Create a death sequence with parallel effects and sequential menu transition.
+### グループ上
 
-**Step 1**: Create Root Node
-1. Double-click canvas → Select "Add Trigger Node"
-2. Choose `OnPlayerDeath` event
-3. Right-click node → "Set as Root"
-
-**Step 2**: Add Parallel Actions (Trigger Pattern)
-1. Create 3 Trigger nodes: `PlayDeathSound`, `SpawnParticles`, `ShowGameOverUI`
-2. Drag from Root output → Connect to all 3 nodes (fan-out)
-
-**Step 3**: Add Sequential Actions (Chain Pattern)
-1. Create Chain node: `FadeToBlack`
-2. Double-click → Set delay: 2 seconds
-3. Create Chain node: `ReturnToMenu`
-4. Connect `FadeToBlack` → `ReturnToMenu`
-4. Connect `OnPlayerDeath` → `FadeToBlack`
-
-**Step 4**: Organize with Groups
-1. Box select all death-related nodes
-2. Right-click → "Create Group"
-3. Double-click group title → Rename to "Death Sequence"
-
-**Result**: Clean visual representation of parallel sound/VFX execution followed by sequential menu transition.
+- **Rename Group**: 名前変更モードに入る
+- **Copy Group**: グループ構造全体をコピー
+- **Delete Group (Keep Nodes)**: 枠のみを削除
+- **Delete Group + Nodes**: グループと全メンバーノードを削除
 
 ---
 
-## ❓ Troubleshooting
+## 📊 ステータスバー
 
-### Changes Not Saving
+キャンバス下部にリアルタイムの情報が表示されます：
 
-**Cause**: Unity hasn't serialized changes yet.
-
-**Solution**: 
-- Close window to force save
-- Switch to another graph and back
-- Press Ctrl+S in Unity
-
----
-
-### Graph Appears Empty
-
-**Possible Causes**:
-- Wrong graph selected in toolbar dropdown
-- Flow container not assigned in GameEventManager
-
-**Solution**: 
-- Check toolbar graph dropdown selection
-- Verify container assignment in GameEventManager Inspector
+- 現在のズームレベル（例：`Zoom: 1.2x`）
+- ノード数（例：`Nodes: 15`）
+- 接続数（例：`Connections: 23`）
+- 選択情報（例：`Selected: 3 node(s), 1 group(s)`）
+- Undo/Redo スタックの深さ
 
 ---
 
-### Cannot Create Connection
+## 🎓 ワークフローの例
 
-**Possible Causes**:
-- Dragging from Input to Output (reversed direction)
-- Trying to connect to Root node's input port
-- Connection already exists
+### 例 1: プレイヤー死亡時のシーケンスを構築する
 
-**Solution**: 
-- Always drag from **Output (right)** to **Input (left)**
-- Root nodes have no input port
+![フローグラフのグループ](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-editor-example.png)
 
----
+**目標**: 並列エフェクトと直列のメニュー遷移を伴う死亡シーケンスを作成します。
 
-### Group Not Auto-Resizing
+**ステップ 1: ルートノードの作成**
+1. キャンバスをダブルクリック → 「Add Trigger Node」を選択。
+2. `OnPlayerDeath` イベントを選択します。
+3. ノードを右クリック → 「Set as Root」を選択。
 
-**Cause**: Group bounds only update when member nodes are moved.
+**ステップ 2: 並列アクションの追加（トリガーパターン）**
+1. 3つの Trigger ノード（`PlayDeathSound`, `SpawnParticles`, `ShowGameOverUI`）を作成します。
+2. ルートの出力からドラッグし、3つのノードすべてに接続します（ファンアウト）。
 
-**Solution**: Move any member node slightly to trigger bounds recalculation.
+**ステップ 3: 直列アクションの追加（チェーンパターン）**
+1. Chain ノード `FadeToBlack` を作成します。
+2. ダブルクリックして遅延を「2秒」に設定します。
+3. Chain ノード `ReturnToMenu` を作成します。
+4. `FadeToBlack` → `ReturnToMenu` を接続します。
+5. `OnPlayerDeath` → `FadeToBlack` を接続します。
 
----
+**ステップ 4: グループで整理**
+1. 死亡に関連するすべてのノードをボックス選択します。
+2. 右クリック → 「Create Group」を選択。
+3. タイトルをダブルクリックして「Death Sequence」にリネームします。
 
-### Pasted Group Missing External Connections
-
-**Expected Behavior**: Only **internal connections** (between group members) are copied.
-
-**Explanation**: External connections to nodes outside the group are intentionally not copied to allow flexible reuse of group templates.
-
-**Solution**: Manually reconnect external dependencies after pasting group.
-
----
-
-### Cannot Create Group
-
-**Possible Causes**:
-- Less than 2 nodes selected
-- Trying to group already grouped nodes
-
-**Solution**: 
-- Select at least 2 nodes
-- To regroup, delete old group first or select both group and new nodes to create new group
+**結果**: 並列で実行されるSE/VFXと、その後の直列なメニュー遷移が視覚的にわかりやすく表現されます。
 
 ---
 
-## 📖 Next Steps
+## ❓ トラブルシューティング
 
-Now that you understand canvas navigation and organization, continue your journey:
+### 変更が保存されない
 
-🔗 **[Connection Types & Compatibility](./game-event-node-connector.md)**
+**原因**: Unityがまだ変更をシリアライズしていない可能性があります。
 
-> **Core Concept:** Understand port colors, line types, and type compatibility rules.
-
-⚙️ **[Node Behavior Configuration](./game-event-node-behavior.md)**
-
-> **Logic Control:** Configure delays, conditions, and execution settings.
-
-🧩 **[Advanced Patterns](./advanced-logic-patterns.md)**
-
-> **Expert Level:** Build complex event orchestrations with combined patterns.
+**解決策**: 
+- ウィンドウを閉じて強制的に保存させる。
+- 別のグラフに切り替えてから戻す。
+- Unity上で Ctrl+S を押す。
 
 ---
 
-:::tip Pro Workflow Tips
+### グラフが空に見える
 
-**Organize Early**: Create groups as you build to avoid messy graphs later.
+**考えられる原因**:
+- ツールバーのドロップダウンで間違ったグラフが選択されている。
+- GameEventManager に Flow Container が割り当てられていない。
 
-**Use Undo Freely**: Ctrl+Z tracks up to 50 steps—experiment with connections without fear.
+**解決策**: 
+- ツールバーのグラフ選択を確認してください。
+- GameEventManager のインスペクターでコンテナの割り当てを確認してください。
 
-**Build Templates**: Create reusable group templates for common patterns.
+---
 
-**Name Descriptively**: Clear graph and group names help when switching between systems.
+### 接続が作成できない
 
-**Set Root Nodes**: Mark clear entry points for each logical flow sequence.
+**考えられる原因**:
+- 入力から出力へドラッグしている（方向が逆）。
+- ルートノードの入力ポートに接続しようとしている。
+- 既に接続が存在している。
 
-**Copy Smart**: Build once, paste many times. Use groups as blueprints.
+**解決策**: 
+- 常に **出力（右）** から **入力（左）** へドラッグしてください。
+- ルートノードには入力ポートがありません。
+
+---
+
+### グループのサイズが自動で変わらない
+
+**原因**: グループの境界は、メンバーノードが移動したときにのみ更新されます。
+
+**解決策**: メンバーノードを少し動かして、境界の再計算をトリガーしてください。
+
+---
+
+### 貼り付けたグループに外部接続がない
+
+**期待される動作**: **内部接続**（メンバー同士の接続）のみがコピーされます。
+
+**説明**: グループ外のノードへの接続は、テンプレートとしての柔軟な再利用を可能にするため、意図的にコピーされないようになっています。
+
+**解決策**: グループを貼り付けた後、手動で外部依存関係を接続し直してください。
+
+---
+
+### グループが作成できない
+
+**考えられる原因**:
+- 選択されたノードが2つ未満である。
+- 既にグループ化されているノードをグループ化しようとしている。
+
+**解決策**: 
+- 最低2つのノードを選択してください。
+- 再グループ化する場合は、先に古いグループを削除するか、グループと新しいノードの両方を選択して新しいグループを作成してください。
+
+---
+
+## 📖 次のステップ
+
+キャンバスの操作と整理方法を理解したら、次は以下のトピックに進みましょう：
+
+🔗 **[接続タイプと互換性](./game-event-node-connector.md)**
+
+> **コアコンセプト:** ポートの色、線の種類、型の互換性ルールを理解します。
+
+⚙️ **[ノードの振る舞い設定](./game-event-node-behavior.md)**
+
+> **ロジック制御:** 遅延、条件、実行設定を構成します。
+
+🧩 **[高度なパターン](./advanced-logic-patterns.md)**
+
+> **エキスパートレベル:** パターンを組み合わせて複雑なイベントオーケストレーションを構築します。
+
+---
+
+:::tip プロのワークフロー・ヒント
+
+**早めに整理**: グラフが散らかる前に、作成しながらグループ化を行ってください。
+
+**Undoを活用**: 50ステップまで戻せます。恐れずに接続を試行錯誤してください。
+
+**テンプレート化**: よく使うロジックパターンのために、再利用可能なグループテンプレートを作成しましょう。
+
+**わかりやすい名前**: システムを切り替える際に迷わないよう、グラフやグループには明確な名前を付けてください。
+
+**ルートノードの設定**: 各論理フローの開始点を明確にマークしてください。
+
+**賢くコピー**: 一度作れば、何度でも貼り付けられます。グループを設計図（Blueprint）として活用しましょう。
 
 :::
 
-:::info Quick Reference
+:::info クイックリファレンス
 
-Forgot a shortcut? Click the **Help** button (`? Help`) in the toolbar to view the complete Quick Reference Guide with all keyboard shortcuts, mouse controls, and visual color legend.
+ショートカットを忘れましたか？ツールバーの **Help** ボタン (`? Help`) をクリックすれば、ショートカットキー、マウス操作、色の意味などの完全なガイドをいつでも確認できます。
 
 :::

@@ -1,537 +1,536 @@
 ﻿---
-sidebar_label: 'Edit Flow Graph'
+sidebar_label: '플로우 그래프 편집'
 sidebar_position: 1
 ---
 
-# Game Event Node Editor
+# 게임 이벤트 노드 에디터 (Game Event Node Editor)
 
-The **Node Editor** is a visual orchestration tool that solves the "spaghetti code" problem by displaying complex event dependencies in a single, readable graph.
+**노드 에디터**는 복잡한 이벤트 의존성을 가독성이 높은 하나의 그래프로 표시하여 "스파게티 코드" 문제를 해결하는 시각적 오케스트레이션 도구입니다.
 
-Instead of hunting through scattered scripts to understand *why* an event fired, you simply look at the flow graph.
+이벤트가 *왜* 발생했는지 이해하기 위해 흩어져 있는 스크립트를 뒤지는 대신, 플로우 그래프를 보는 것만으로 흐름을 파악할 수 있습니다.
 
 ![Flow Graph Editor Overview](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-editor-overview.png)
 
 ---
 
-## 🎯 Design Philosophy
+## 🎯 설계 철학
 
-Traditional Unity events are "fire and forget"—great for decoupling, but terrible for debugging sequences.
+전통적인 유니티 이벤트는 "발생 후 방치(fire and forget)" 방식입니다. 이는 디커플링(결합도 낮추기)에는 훌륭하지만, 일련의 시퀀스를 디버깅하기에는 매우 어렵습니다.
 
-The Flow Graph introduces **two powerful execution patterns**:
+플로우 그래프는 **두 가지 강력한 실행 패턴**을 도입합니다:
 
-| Pattern               | Execution    | Behavior                                                     | Use Case                                                     |
+| 패턴 | 실행 방식 | 동작 | 유스케이스 |
 | --------------------- | ------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| **Trigger** (Fan-Out) | **Parallel** | Non-blocking. One event fires multiple others simultaneously | "OnPlayerDeath" → Play Sound + Spawn Particles + Show UI     |
-| **Chain** (Sequence)  | **Serial**   | Blocking. Events fire one after another with delays          | "StartCutscene" → (Wait 2s) → "ShowDialog" → (Wait Input) → "EndCutscene" |
+| **트리거** (Trigger / Fan-Out) | **병렬 (Parallel)** | 비차단(Non-blocking). 하나의 이벤트가 동시에 여러 다른 이벤트를 발생시킴 | "OnPlayerDeath" → 사운드 재생 + 파티클 생성 + UI 표시 |
+| **체인** (Chain / Sequence) | **직렬 (Serial)** | 차단(Blocking). 이벤트가 지연 시간을 두고 하나씩 순차적으로 발생함 | "StartCutscene" → (2초 대기) → "ShowDialog" → (입력 대기) → "EndCutscene" |
 
-**🎯 Triggers (Fan-Out)**
+**🎯 트리거 (팬아웃 패턴)**
 
 ![Flow Graph Editor Overview](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-trigger.png)
 
-⛓️ Chains (Sequential)
+**⛓️ 체인 (순차 패턴)**
 
 ![Flow Graph Editor Overview](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-chain.png)
 
-By combining these patterns, you build logic that is both **decoupled** and **structured**.
+이러한 패턴들을 조합함으로써, **디커플링**되면서도 **구조화된** 로직을 구축할 수 있습니다.
 
 ---
 
-## 🚀 Opening the Editor
+## 🚀 에디터 열기
 
-Access the Flow Graph Editor from the **[Game Event Editor](../visual-workflow/game-event-editor.md)**
+**[게임 이벤트 에디터](../visual-workflow/game-event-editor.md)**에서 플로우 그래프 에디터에 접속할 수 있습니다:
 ```
-Game Event Editor → Click "Flow Graph" button in toolbar
+게임 이벤트 에디터 → 툴바의 "Flow Graph" 버튼 클릭
 ```
 
-This ensures you're working within the correct event library context.
+이렇게 하면 올바른 이벤트 라이브러리 컨텍스트 내에서 작업하고 있음을 보장합니다.
 
 ---
 
-## 🛠️ Toolbar Overview
+## 🛠️ 툴바 개요
 
-The toolbar manages flow graph assets and global settings.
+툴바는 플로우 그래프 에셋과 글로벌 설정을 관리합니다.
 
 ![Flow Graph Editor Overview](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-toolbar.png)
 
-### Flow Asset Dropdown
+### 플로우 에셋 드롭다운
 
-Switch between different Flow Graph assets (e.g., `Global_Flow`, `Level_1_Flow`).
+서로 다른 플로우 그래프 에셋(예: `Global_Flow`, `Level_1_Flow`) 사이를 전환합니다.
 
-**Graph content updates instantly** when switching.
+전환 시 **그래프 콘텐츠가 즉시 업데이트**됩니다.
 
-:::tip Asset Organization
-Create separate flow graphs for different game systems to keep logic clean and maintainable. Store graphs as sub-assets inside Flow Container assets.
+:::tip 에셋 조직화
+로직을 깨끗하고 유지보수가 용이하게 관리하려면 서로 다른 게임 시스템마다 별도의 플로우 그래프를 생성하십시오. 그래프는 Flow Container 에셋 내부에 하위 에셋으로 저장됩니다.
 :::
 
-### Graph Management
+### 그래프 관리
 
-**New Button** (`+ New`): Create new graph in current container.
+**New 버튼** (`+ New`): 현재 컨테이너 내에 새 그래프를 생성합니다.
 
-**Graph Name Field**: Click to rename current graph.
+**그래프 이름 필드**: 클릭하여 현재 그래프의 이름을 변경합니다.
 
-**Delete Button**: Remove current graph (with confirmation).
+**Delete 버튼**: 현재 그래프를 삭제합니다 (확인 창 표시).
 
-### Graph Controls
+### 그래프 제어
 
-**Snap Button** (`Snap`): Toggle grid snapping. When enabled, nodes will automatically snap to the 20-unit grid lines during movement, ensuring a perfectly organized layout.
+**Snap 버튼** (`Snap`): 그리드 스냅을 토글합니다. 활성화하면 노드 이동 시 20유닛 그리드 라인에 자동으로 달라붙어 완벽하게 정렬된 레이아웃을 유지할 수 있습니다.
 
-**Align Button** (`Align`): Toggle smart alignment guides. When enabled, blue vertical or horizontal dotted lines appear when the node you are dragging aligns its edges (left, center, right) or midlines (top, center, bottom) with other nodes on the canvas.
+**Align 버튼** (`Align`): 스마트 정렬 가이드를 토글합니다. 활성화하면 노드를 드래그할 때 해당 노드의 가장자리(좌, 우, 중앙)나 중심선(상, 하, 중앙)이 캔버스의 다른 노드와 정렬될 때 파란색 수직 또는 수평 점선이 나타납니다.
 
-**Active Toggle** (🟢 / 🔴): Enable/disable entire graph at runtime.
+**Active 토글** (🟢 / 🔴): 런타임 시 그래프 전체의 활성화/비활성화 여부를 설정합니다.
 
-**Refresh Button**: Reload container list from `GameEventManager`.
+**Refresh 버튼**: `GameEventManager`로부터 컨테이너 목록을 다시 로드합니다.
 
-**Help Button** (`? Help`): Open Quick Reference Guide with all shortcuts and color codes.
+**Help 버튼** (`? Help`): 모든 단축키와 컬러 코드가 포함된 퀵 리퍼런스 가이드를 엽니다.
 
 ![Flow Graph Editor Help](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-help.png)
 
 ---
 
-## 🖱️ Canvas Navigation
+## 🖱️ 캔버스 네비게이션
 
-The editor features an infinite zoomable canvas designed for large-scale logic graphs.
+에디터는 대규모 로직 그래프용으로 설계된 무한 줌 캔버스를 제공합니다.
 
-### Basic Controls
+### 기본 조작
 
-| Action           | Control           | Description                             |
+| 액션 | 조작 | 설명 |
 | ---------------- | ----------------- | --------------------------------------- |
-| **Pan View**     | Middle Mouse Drag | Move around the canvas                  |
-| **Zoom**         | Scroll Wheel      | Zoom in/out (centered on mouse cursor)  |
-| **Context Menu** | Right Click       | Add nodes or groups                     |
-| **Quick Create** | Double Click      | Open node creation menu on empty canvas |
+| **뷰 팬(Pan)** | 마우스 휠 클릭 드래그 | 캔버스 화면 이동 |
+| **줌(Zoom)** | 마우스 휠 스크롤 | 확대/축소 (마우스 커서 위치 기준) |
+| **컨텍스트 메뉴** | 마우스 우클릭 | 노드 또는 그룹 추가 |
+| **빠른 생성** | 더블 클릭 | 빈 캔버스에서 노드 생성 메뉴 열기 |
 
-**Zoom Range**: 0.2x - 3.0x (20% to 300%)
+**줌 범위**: 0.2x - 3.0x (20% ~ 300%)
 
-**Grid**: Minor lines every 20 units, major lines every 100 units. When **Snap** is enabled, nodes lock to the 20-unit minor grid lines.
+**그리드**: 20유닛마다 보조선, 100유닛마다 주선이 표시됩니다. **Snap**이 활성화되면 노드는 20유닛 보조선에 고정됩니다.
 
 ---
 
-## 🎯 Working with Nodes
+## 🎯 노드 작업
 
-### Creating Nodes
+### 노드 생성
 
 ![Flow Graph Editor Overview](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-basic-menu.png)
 
-| Action             | Control                | Description                      |
+| 액션 | 조작 | 설명 |
 | ------------------ | ---------------------- | -------------------------------- |
-| **Quick Create**   | Double Click Canvas    | Open node creation menu          |
-| **Context Menu**   | Right Click → Add Node | Create Trigger or Chain node     |
-| **From Selection** | Right Click Node       | Context menu for node operations |
+| **빠른 생성** | 캔버스 더블 클릭 | 노드 생성 메뉴 열기 |
+| **컨텍스트 메뉴** | 우클릭 → Add Node | 트리거 또는 체인 노드 생성 |
+| **선택 노드 조작** | 노드 우클릭 | 노드 관련 조작 컨텍스트 메뉴 |
 
-**Node Types**:
-- **Trigger Node**: Parallel execution (fan-out pattern)
-- **Chain Node**: Sequential execution (sequence pattern)
+**노드 타입**:
+- **트리거 노드 (Trigger Node)**: 병렬 실행 (팬아웃 패턴)
+- **체인 노드 (Chain Node)**: 직렬 실행 (순차 패턴)
 
-### Node Selection
+### 노드 선택
 
-| Action               | Control            | Description                                                  |
+| 액션 | 조작 | 설명 |
 | -------------------- | ------------------ | ------------------------------------------------------------ |
-| **Select Node**      | Left Click         | Select individual node                                       |
-| **Add to Selection** | Ctrl/Shift + Click | Toggle node in/out of selection                              |
-| **Box Select**       | Left Click + Drag  | Select all nodes in rectangle                                |
-| **Select All**       | Ctrl + A           | Select all nodes in graph                                    |
-| **Clear Selection**  | Escape             | Deselect everything                                          |
-| **Edit Node**        | Double Click Node  | Open [Node Behavior Configuration](./game-event-node-behavior.md) |
+| **노드 선택** | 마우스 클릭 | 개별 노드 선택 |
+| **다중 선택 추가** | Ctrl/Shift + 클릭 | 선택 영역에 노드 추가/제거 토글 |
+| **박스 선택** | 클릭 후 드래그 | 사각형 영역 내의 모든 노드 선택 |
+| **전체 선택** | Ctrl + A | 그래프 내의 모든 노드 선택 |
+| **선택 해제** | Escape | 모든 선택 취소 |
+| **노드 편집** | 노드 더블 클릭 | [노드 동작 설정](./game-event-node-behavior.md) 열기 |
 
 
 
-### Moving Nodes
+### 노드 이동
 
-| Action         | Control                    | Description                      |
+| 액션 | 조작 | 설명 |
 | -------------- | -------------------------- | -------------------------------- |
-| **Move Node**  | Left Drag                  | Move selected node               |
-| **Multi-Move** | Left Drag (with selection) | Move all selected nodes together |
+| **노드 이동** | 클릭 드래그 | 선택된 노드 이동 |
+| **다중 이동** | 클릭 드래그 (다중 선택 시) | 선택된 모든 노드 함께 이동 |
 
-**Group Behavior**: When nodes belong to a group, moving them automatically updates the group bounds.
+**그룹 동작**: 노드가 특정 그룹에 속해 있는 경우, 노드를 이동하면 그룹 영역(Bounds)이 자동으로 업데이트됩니다.
 
-**Layout Assistants**:
+**레이아웃 보조 도구**:
 
-*   **Grid Snapping**: When **Snap** is active, movement is locked to 20-pixel increments, matching the background grid.
-*   **Smart Alignment**: When **Align** is active, the editor provides visual feedback via blue dotted lines. It automatically detects alignment for:
-    *   **Vertical**: Left edges, horizontal centers, and right edges.
-    *   **Horizontal**: Top edges, vertical centers, and bottom edges.
+*   **그리드 스냅**: **Snap**이 활성화되면 이동 단위가 20픽셀로 고정되어 배경 그리드와 일치하게 됩니다.
+*   **스마트 정렬**: **Align**이 활성화되면 에디터가 파란색 점선을 통해 시각적 피드백을 제공합니다. 다음 항목에 대해 정렬을 자동 감지합니다:
+    *   **수직**: 왼쪽 가장자리, 수평 중앙, 오른쪽 가장자리.
+    *   **수평**: 위쪽 가장자리, 수직 중앙, 아래쪽 가장자리.
 
-### Node Context Menu
+### 노드 컨텍스트 메뉴
 
 ![Flow Graph Editor Overview](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-node-menu.png)
 
-Right-click on a node for quick actions:
+노드를 우클릭하여 퀵 액션을 실행할 수 있습니다:
 
-- **Edit Node**: Open [Behavior Configuration Window](./game-event-node-behavior.md)
-- **Copy Node**: Copy to clipboard
-- **Cut Node**: Copy and delete
-- **Delete Node**: Remove node and all connections
-- **Set as Root**: Mark as graph entry point
-- **Convert to Trigger/Chain**: Change node type
+- **Edit Node**: [동작 설정 창](./game-event-node-behavior.md) 열기
+- **Copy Node**: 클립보드에 복사
+- **Cut Node**: 복사 후 삭제
+- **Delete Node**: 노드 및 모든 연결 제거
+- **Set as Root**: 그래프의 진입점(시작점)으로 설정
+- **Convert to Trigger/Chain**: 노드 타입 변환
 
-### Multi-Selection Context Menu
+### 다중 선택 컨텍스트 메뉴
 
 ![Flow Graph Editor Overview](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-multi-node-menu.png)
 
-When multiple nodes are selected, right-click shows:
+여러 노드가 선택된 상태에서 우클릭하면 다음이 표시됩니다:
 
-- **Copy N Node(s)**: Copy selection to clipboard
-- **Cut N Node(s)**: Copy and delete selection
-- **Delete N Node(s)**: Remove all selected nodes
-- **Create Group**: Create group from selected nodes (minimum 2 nodes required)
+- **Copy N Node(s)**: 선택 영역을 클립보드에 복사
+- **Cut N Node(s)**: 선택 영역을 복사 후 삭제
+- **Delete N Node(s)**: 선택된 모든 노드 제거
+- **Create Group**: 선택된 노드들로 그룹 생성 (최소 2개 노드 필요)
 
 ---
 
-## 🔗 Creating Connections
+## 🔗 연결(Connection) 생성
 
-Connections define event flow between nodes.
+연결은 노드 간의 이벤트 흐름을 정의합니다.
 
-### Connection Operations
+### 연결 조작
 
-| Action                  | Control                       | Description                               |
+| 액션 | 조작 | 설명 |
 | ----------------------- | ----------------------------- | ----------------------------------------- |
-| **Create Connection**   | Drag from Output Port (right) | Drag to Input Port (left) of another node |
-| **Re-route Connection** | Drag from Input Port          | Disconnect and connect to different node  |
-| **Delete Connection**   | Select + Delete               | Remove connection                         |
+| **연결 생성** | 출력 포트(우측)에서 드래그 | 다른 노드의 입력 포트(좌측)로 드래그 |
+| **연결 재지정** | 입력 포트에서 드래그 | 기존 연결을 끊고 다른 노드에 연결 |
+| **연결 삭제** | 연결 선택 + Delete | 연결 제거 |
 
-**Visual Feedback**: 
-- Preview line shows while dragging
-- Color indicates compatibility (see [Connection Types](./game-event-node-connector.md))
-- Invalid targets show as grayed out
+**시각적 피드백**: 
+- 드래그 중에 프리뷰 선이 표시됩니다.
+- 색상을 통해 호환성을 나타냅니다 ([연결 타입](./game-event-node-connector.md) 참조).
+- 유효하지 않은 대상은 비활성화(Grayed out)되어 표시됩니다.
 
-**Connection Rules**:
-- Always drag from Output (right port) to Input (left port)
-- Root nodes have no input port
-- Nodes can have multiple incoming and outgoing connections
+**연결 규칙**:
+- 항상 출력(우측 포트)에서 입력(좌측 포트)으로 드래그해야 합니다.
+- 루트 노드(Root node)는 입력 포트가 없습니다.
+- 노드는 여러 개의 유입 및 유출 연결을 가질 수 있습니다.
 
 ---
 
-## 📁 Grouping System
+## 📁 그룹화 시스템
 
-Organize large graphs with visual groups to improve readability and maintainability.
+시각적 그룹을 사용하여 거대한 그래프를 정리함으로써 가독성과 유지보수성을 높일 수 있습니다.
 
 ![Flow Graph Groups](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-groups.png)
 
-### Creating Groups
+### 그룹 생성
 
-**Method 1**: Select nodes → Right Click → **Create Group**
+**방법 1**: 노드 선택 → 우클릭 → **Create Group**
 
-**Method 2**: Use box select → Right Click selection → **Create Group**
+**방법 2**: 박스 선택 사용 → 선택 영역 우클릭 → **Create Group**
 
-**Requirements**:
-- Minimum **2 nodes** required
-- Selected nodes will be grouped together
-- Group bounds calculated automatically from node positions
+**요구 사항**:
+- 최소 **2개의 노드**가 필요합니다.
+- 선택된 노드들이 함께 그룹화됩니다.
+- 그룹 영역은 노드 위치로부터 자동으로 계산됩니다.
 
-### Managing Groups
+### 그룹 관리
 
-| Operation                | How To                   | Result                             |
+| 조작 | 방법 | 결과 |
 | ------------------------ | ------------------------ | ---------------------------------- |
-| **Rename**               | Double-click group title | Enter edit mode (Escape to cancel) |
-| **Select Group**         | Left Click group area    | Select entire group                |
-| **Move Group**           | Drag group area          | Moves all member nodes together    |
-| **Delete Group Only**    | Delete key               | Removes group frame, keeps nodes   |
-| **Delete Group + Nodes** | Shift + Delete           | Removes group AND all nodes inside |
+| **이름 변경** | 그룹 타이틀 더블 클릭 | 편집 모드 진입 (Escape로 취소) |
+| **그룹 선택** | 그룹 영역 클릭 | 그룹 전체 선택 |
+| **그룹 이동** | 그룹 영역 드래그 | 소속된 모든 노드 함께 이동 |
+| **그룹만 삭제** | Delete 키 | 그룹 틀만 제거하고 노드는 유지 |
+| **그룹 + 노드 삭제** | Shift + Delete | 그룹과 그 안의 모든 노드 제거 |
 
-**Visual Indicators**:
-- Selected groups: Brighter border + highlighted title
-- Group titles: Display in bottom-right corner of group bounds
-- Group bounds: Semi-transparent rounded rectangle
+**시각적 지표**:
+- 선택된 그룹: 더 밝은 테두리 + 강조된 타이틀.
+- 그룹 타이틀: 그룹 영역의 우측 하단에 표시됩니다.
+- 그룹 영역: 반투명한 둥근 사각형.
 
-### Group Membership
+### 그룹 멤버십
 
-**Adding Nodes to Group**:
-1. Select existing group + nodes you want to add
-2. Right Click → **Create Group**
-3. All selected nodes will be included in the new group
-4. Old group is removed, new group is created
+**그룹에 노드 추가하기**:
+1. 기존 그룹과 추가하려는 노드들을 함께 선택합니다.
+2. 우클릭 → **Create Group**을 선택합니다.
+3. 선택된 모든 노드가 새 그룹에 포함됩니다.
+4. 이전 그룹은 제거되고 새 그룹이 생성됩니다.
 
-**Removing Nodes from Group**:
-- Delete the specific node from the group
-- Group automatically removes the node from its membership
-- If group has ≤1 node remaining, group is automatically deleted
+**그룹에서 노드 제거하기**:
+- 그룹 내의 특정 노드를 삭제합니다.
+- 그룹 멤버십에서 해당 노드가 자동으로 제거됩니다.
+- 그룹에 남은 노드가 1개 이하가 되면 그룹은 자동으로 삭제됩니다.
 
-**Constraints**:
-- **One Group Per Node**: Each node can only belong to one group at a time
-- **Auto-Cleanup**: Groups with ≤1 nodes are automatically removed
-- **Dynamic Bounds**: Groups resize automatically when member nodes move
+**제약 사항**:
+- **노드당 하나의 그룹**: 각 노드는 한 번에 하나의 그룹에만 속할 수 있습니다.
+- **자동 정리**: 노드가 1개 이하인 그룹은 자동으로 제거됩니다.
+- **동적 영역**: 멤버 노드가 이동하면 그룹 크기가 자동으로 조정됩니다.
 
-### Group Context Menu
+### 그룹 컨텍스트 메뉴
 
 ![Flow Graph Editor Overview](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-group-menu.png)
 
-Right-click on a group:
+그룹을 우클릭하여 실행 가능한 작업:
 
-- **Rename Group**: Enter rename mode
-- **Copy Group**: Copy entire group structure (nodes + internal connections)
-- **Delete Group (Keep Nodes)**: Remove group frame only
-- **Delete Group + Nodes**: Remove everything
+- **Rename Group**: 이름 변경 모드 진입
+- **Copy Group**: 그룹 구조 전체 복사 (노드 + 내부 연결 포함)
+- **Delete Group (Keep Nodes)**: 그룹 틀만 제거
+- **Delete Group + Nodes**: 모든 항목 제거
 
 ---
 
-## 📋 Copy & Paste System
+## 📋 복사 및 붙여넣기 시스템
 
-Duplicate nodes and groups to speed up workflow.
+노드와 그룹을 복제하여 워크플로우 속도를 높이십시오.
 
-### Node Copy & Paste
+### 노드 복사 및 붙여넣기
 
-| Action            | Control  | Description                            |
+| 액션 | 조작 | 설명 |
 | ----------------- | -------- | -------------------------------------- |
-| **Copy Node(s)**  | Ctrl + C | Copy selected node(s) to clipboard     |
-| **Cut Node(s)**   | Ctrl + X | Cut selected node(s) (copy + delete)   |
-| **Paste Node(s)** | Ctrl + V | Paste with incremental offset          |
-| **Reset Paste**   | Escape   | Reset paste counter for next operation |
+| **노드 복사** | Ctrl + C | 선택된 노드를 클립보드에 복사 |
+| **노드 잘라내기** | Ctrl + X | 선택된 노드 잘라내기 (복사 후 삭제) |
+| **노드 붙여넣기** | Ctrl + V | 점진적인 오프셋을 적용하여 붙여넣기 |
+| **붙여넣기 초기화** | Escape | 다음 작업을 위해 붙여넣기 카운터 초기화 |
 
-**Paste Behavior**:
+**붙여넣기 동작**:
+- Escape를 누르면 오프셋 카운터가 초기화됩니다.
+- 붙여넣은 노드들 사이의 연결 관계는 유지됩니다.
+- 붙여넣은 노드는 절대로 루트(Root)로 설정되지 않습니다.
 
-- Press Escape to reset offset counter
-- Connections between pasted nodes are preserved
-- Pasted nodes are never set as root
+### 그룹 복사 및 붙여넣기
 
-### Group Copy & Paste
-
-| Action          | Control  | Description                  |
+| 액션 | 조작 | 설명 |
 | --------------- | -------- | ---------------------------- |
-| **Copy Group**  | Ctrl + C | Copy entire group structure  |
-| **Paste Group** | Ctrl + V | Paste group with 50px offset |
+| **그룹 복사** | Ctrl + C | 그룹 구조 전체 복사 |
+| **그룹 붙여넣기** | Ctrl + V | 50px 오프셋을 적용하여 그룹 붙여넣기 |
 
-**What's Copied**:
-- Group frame and title (with " (Copy)" suffix)
-- All member nodes with their configurations
-- Internal connections (connections between group members)
-- Relative node positions
+**복사되는 항목**:
+- 그룹 틀 및 타이틀 (" (Copy)" 접미사 추가)
+- 설정을 포함한 모든 멤버 노드
+- 내부 연결 (그룹 멤버 간의 연결)
+- 노드 간의 상대적 위치
 
-**What's NOT Copied**:
-- External connections (connections to/from outside nodes)
-- Root node status
-- Node IDs (new IDs generated automatically)
+**복사되지 않는 항목**:
+- 외부 연결 (그룹 외부 노드와의 연결)
+- 루트 노드 상태
+- 노드 ID (새 ID가 자동으로 생성됨)
 
-:::tip Copy Strategy
-**Right-click menu** shows "Copy Group" option for quick access. Both Ctrl+C and right-click menu work identically. Use groups as templates for repeated logic patterns.
+:::tip 복사 전략
+**우클릭 메뉴**에서도 "Copy Group" 옵션을 빠르게 사용할 수 있습니다. Ctrl+C와 우클릭 메뉴는 동일하게 작동합니다. 반복되는 로직 패턴을 위한 템플릿으로 그룹을 활용하십시오.
 :::
 
 ---
 
-## ⌨️ Keyboard Shortcuts
+## ⌨️ 키보드 단축키
 
-### Copy & Paste
+### 복사 및 붙여넣기
 
-| Shortcut     | Action                               |
+| 단축키 | 액션 |
 | ------------ | ------------------------------------ |
-| **Ctrl + C** | Copy selected node(s) or group       |
-| **Ctrl + V** | Paste with incremental offset        |
-| **Ctrl + X** | Cut selected node(s) (copy + delete) |
+| **Ctrl + C** | 선택된 노드 또는 그룹 복사 |
+| **Ctrl + V** | 점진적 오프셋으로 붙여넣기 |
+| **Ctrl + X** | 선택된 노드 잘라내기 (복사 후 삭제) |
 
-### Undo/Redo
+### 실행 취소/다시 실행 (Undo/Redo)
 
-| Shortcut                            | Action                |
+| 단축키 | 액션 |
 | ----------------------------------- | --------------------- |
-| **Ctrl + Z**                        | Undo (up to 50 steps) |
-| **Ctrl + Shift + Z** / **Ctrl + Y** | Redo                  |
+| **Ctrl + Z** | 실행 취소 (최대 50단계) |
+| **Ctrl + Shift + Z** / **Ctrl + Y** | 다시 실행 |
 
-**History Scope**: Tracks node creation/deletion, connections, group changes, position changes, copy/paste operations.
+**히스토리 범위**: 노드 생성/삭제, 연결, 그룹 변경, 위치 변경, 복사/붙여넣기 작업을 추적합니다.
 
-### Selection
+### 선택
 
-| Shortcut     | Action                                                   |
+| 단축키 | 액션 |
 | ------------ | -------------------------------------------------------- |
-| **Ctrl + A** | Select all nodes                                         |
-| **Escape**   | Clear selection / Cancel operation / Reset paste counter |
+| **Ctrl + A** | 모든 노드 선택 |
+| **Escape**   | 선택 해제 / 작업 취소 / 붙여넣기 카운터 초기화 |
 
-### Deletion
+### 삭제
 
-| Shortcut           | Action                                                |
+| 단축키 | 액션 |
 | ------------------ | ----------------------------------------------------- |
-| **Delete**         | Delete selected items                                 |
-| **Shift + Delete** | **Cascade Delete**: Delete group AND all nodes inside |
+| **Delete** | 선택된 항목 삭제 |
+| **Shift + Delete** | **계층 구조 삭제**: 그룹과 그 안의 모든 노드 삭제 |
 
-**Delete Behavior**:
-- Deleting a node: Removes all connected connections and updates group membership
-- Deleting a group (Delete): Keeps member nodes
-- Deleting a group (Shift + Delete): Removes group and all member nodes
-- Deleting a connection: Removes link only
-- Groups with ≤1 remaining nodes are automatically deleted
-
----
-
-## 🎨 Context Menu Reference
-
-### On Empty Space
-
-- **Add Trigger Node**: Create new trigger node at cursor position
-- **Add Chain Node**: Create new chain node at cursor position
-- **Paste Node(s)**: (if clipboard has nodes) Shows paste count
-- **Paste Group**: (if clipboard has group) Shows group name
-
-### On Single Node
-
-- **Edit Node**: Open [Behavior Configuration Window](./game-event-node-behavior.md)
-- **Copy Node**: Copy to clipboard
-- **Cut Node**: Copy and delete
-- **Delete Node**: Remove node and connections
-- **Set as Root**: Mark as graph entry point
-- **Convert to Trigger/Chain**: Change node type
-
-### On Multiple Nodes (Selection)
-
-- **Copy N Node(s)**: Copy selection to clipboard
-- **Cut N Node(s)**: Copy and delete selection
-- **Delete N Nodes**: Remove all selected
-- **Create Group**: Group selection (minimum 2 nodes)
-
-### On Group
-
-- **Rename Group**: Enter rename mode
-- **Copy Group**: Copy entire group structure
-- **Delete Group (Keep Nodes)**: Remove group frame only
-- **Delete Group + Nodes**: Remove group and all member nodes
+**삭제 동작**:
+- 노드 삭제: 모든 연결된 선을 제거하고 그룹 멤버십을 업데이트합니다.
+- 그룹 삭제 (Delete): 멤버 노드들은 유지합니다.
+- 그룹 삭제 (Shift + Delete): 그룹과 모든 멤버 노드를 제거합니다.
+- 연결 삭제: 링크만 제거합니다.
+- 남은 노드가 1개 이하인 그룹은 자동으로 삭제됩니다.
 
 ---
 
-## 📊 Status Bar
+## 🎨 컨텍스트 메뉴 리퍼런스
 
-Real-time information displayed at bottom of canvas:
+### 빈 공간 클릭 시
 
-- Current zoom level (e.g., `Zoom: 1.2x`)
-- Node count (e.g., `Nodes: 15`)
-- Connection count (e.g., `Connections: 23`)
-- Selection info (e.g., `Selected: 3 node(s), 1 group(s)`)
-- Undo/Redo stack depth
+- **Add Trigger Node**: 커서 위치에 새 트리거 노드 생성
+- **Add Chain Node**: 커서 위치에 새 체인 노드 생성
+- **Paste Node(s)**: (클립보드에 노드가 있는 경우) 붙여넣기 개수 표시
+- **Paste Group**: (클립보드에 그룹이 있는 경우) 그룹 이름 표시
+
+### 단일 노드 클릭 시
+
+- **Edit Node**: [동작 설정 창](./game-event-node-behavior.md) 열기
+- **Copy Node**: 클립보드에 복사
+- **Cut Node**: 복사 후 삭제
+- **Delete Node**: 노드 및 연결 제거
+- **Set as Root**: 그래프 진입점으로 설정
+- **Convert to Trigger/Chain**: 노드 타입 변경
+
+### 다중 노드(선택 영역) 클릭 시
+
+- **Copy N Node(s)**: 선택 영역을 클립보드에 복사
+- **Cut N Node(s)**: 선택 영역 잘라내기
+- **Delete N Nodes**: 선택된 모든 항목 제거
+- **Create Group**: 선택 영역 그룹화 (최소 2개 노드)
+
+### 그룹 클릭 시
+
+- **Rename Group**: 이름 변경 모드 진입
+- **Copy Group**: 그룹 구조 전체 복사
+- **Delete Group (Keep Nodes)**: 그룹 틀만 제거
+- **Delete Group + Nodes**: 그룹 및 모든 멤버 노드 제거
 
 ---
 
-## 🎓 Workflow Examples
+## 📊 상태 바 (Status Bar)
 
-### Example 1: Build a Player Death Sequence
+캔버스 하단에 실시간 정보가 표시됩니다:
+
+- 현재 줌 레벨 (예: `Zoom: 1.2x`)
+- 노드 개수 (예: `Nodes: 15`)
+- 연결 개수 (예: `Connections: 23`)
+- 선택 정보 (예: `Selected: 3 node(s), 1 group(s)`)
+- 실행 취소/다시 실행 스택 깊이
+
+---
+
+## 🎓 워크플로우 예제
+
+### 예제 1: 플레이어 사망 시퀀스 구축하기
 
 ![Flow Graph Groups](/img/game-event-system/flow-graph/game-event-node-editor/flow-graph-editor-example.png)
 
-**Goal**: Create a death sequence with parallel effects and sequential menu transition.
+**목표**: 병렬 이펙트와 순차적인 메뉴 전환이 포함된 사망 시퀀스를 생성합니다.
 
-**Step 1**: Create Root Node
-1. Double-click canvas → Select "Add Trigger Node"
-2. Choose `OnPlayerDeath` event
-3. Right-click node → "Set as Root"
+**1단계**: 루트 노드 생성
+1. 캔버스 더블 클릭 → "Add Trigger Node" 선택
+2. `OnPlayerDeath` 이벤트 선택
+3. 노드 우클릭 → "Set as Root" 선택
 
-**Step 2**: Add Parallel Actions (Trigger Pattern)
-1. Create 3 Trigger nodes: `PlayDeathSound`, `SpawnParticles`, `ShowGameOverUI`
-2. Drag from Root output → Connect to all 3 nodes (fan-out)
+**2단계**: 병렬 액션 추가 (트리거 패턴)
+1. 3개의 트리거 노드 생성: `PlayDeathSound`, `SpawnParticles`, `ShowGameOverUI`
+2. 루트 출력부에서 드래그 → 3개 노드 모두에 연결 (팬아웃)
 
-**Step 3**: Add Sequential Actions (Chain Pattern)
-1. Create Chain node: `FadeToBlack`
-2. Double-click → Set delay: 2 seconds
-3. Create Chain node: `ReturnToMenu`
-4. Connect `FadeToBlack` → `ReturnToMenu`
-4. Connect `OnPlayerDeath` → `FadeToBlack`
+**3단계**: 순차 액션 추가 (체인 패턴)
+1. 체인 노드 생성: `FadeToBlack`
+2. 더블 클릭 → 지연 시간(Delay): 2초 설정
+3. 체인 노드 생성: `ReturnToMenu`
+4. `FadeToBlack` → `ReturnToMenu` 연결
+5. `OnPlayerDeath` → `FadeToBlack` 연결
 
-**Step 4**: Organize with Groups
-1. Box select all death-related nodes
-2. Right-click → "Create Group"
-3. Double-click group title → Rename to "Death Sequence"
+**4단계**: 그룹으로 정리
+1. 사망과 관련된 모든 노드를 박스 선택
+2. 우클릭 → "Create Group" 선택
+3. 그룹 타이틀 더블 클릭 → "Death Sequence"로 이름 변경
 
-**Result**: Clean visual representation of parallel sound/VFX execution followed by sequential menu transition.
-
----
-
-## ❓ Troubleshooting
-
-### Changes Not Saving
-
-**Cause**: Unity hasn't serialized changes yet.
-
-**Solution**: 
-- Close window to force save
-- Switch to another graph and back
-- Press Ctrl+S in Unity
+**결과**: 병렬로 실행되는 사운드/VFX와 그 뒤를 잇는 순차적인 메뉴 전환을 시각적으로 명확하게 표현했습니다.
 
 ---
 
-### Graph Appears Empty
+## ❓ 문제 해결
 
-**Possible Causes**:
-- Wrong graph selected in toolbar dropdown
-- Flow container not assigned in GameEventManager
+### 변경 사항이 저장되지 않음
 
-**Solution**: 
-- Check toolbar graph dropdown selection
-- Verify container assignment in GameEventManager Inspector
+**원인**: 유니티가 아직 변경 사항을 직렬화하지 않았을 수 있습니다.
 
----
-
-### Cannot Create Connection
-
-**Possible Causes**:
-- Dragging from Input to Output (reversed direction)
-- Trying to connect to Root node's input port
-- Connection already exists
-
-**Solution**: 
-- Always drag from **Output (right)** to **Input (left)**
-- Root nodes have no input port
+**해결 방법**: 
+- 창을 닫아 강제 저장 유도
+- 다른 그래프로 전환했다가 다시 돌아오기
+- 유니티에서 Ctrl+S 누르기
 
 ---
 
-### Group Not Auto-Resizing
+### 그래프가 비어 있음
 
-**Cause**: Group bounds only update when member nodes are moved.
+**가능한 원인**:
+- 툴바 드롭다운에서 잘못된 그래프가 선택됨
+- GameEventManager에 Flow Container가 할당되지 않음
 
-**Solution**: Move any member node slightly to trigger bounds recalculation.
-
----
-
-### Pasted Group Missing External Connections
-
-**Expected Behavior**: Only **internal connections** (between group members) are copied.
-
-**Explanation**: External connections to nodes outside the group are intentionally not copied to allow flexible reuse of group templates.
-
-**Solution**: Manually reconnect external dependencies after pasting group.
+**해결 방법**: 
+- 툴바의 그래프 드롭다운 선택 확인
+- GameEventManager 인스펙터에서 컨테이너 할당 확인
 
 ---
 
-### Cannot Create Group
+### 연결을 생성할 수 없음
 
-**Possible Causes**:
-- Less than 2 nodes selected
-- Trying to group already grouped nodes
+**가능한 원인**:
+- 입력에서 출력으로 드래그함 (반대 방향)
+- 루트 노드의 입력 포트에 연결하려고 시도함
+- 이미 연결이 존재함
 
-**Solution**: 
-- Select at least 2 nodes
-- To regroup, delete old group first or select both group and new nodes to create new group
-
----
-
-## 📖 Next Steps
-
-Now that you understand canvas navigation and organization, continue your journey:
-
-🔗 **[Connection Types & Compatibility](./game-event-node-connector.md)**
-
-> **Core Concept:** Understand port colors, line types, and type compatibility rules.
-
-⚙️ **[Node Behavior Configuration](./game-event-node-behavior.md)**
-
-> **Logic Control:** Configure delays, conditions, and execution settings.
-
-🧩 **[Advanced Patterns](./advanced-logic-patterns.md)**
-
-> **Expert Level:** Build complex event orchestrations with combined patterns.
+**해결 방법**: 
+- 항상 **출력(우측)**에서 **입력(좌측)**으로 드래그하십시오.
+- 루트 노드는 입력 포트가 없습니다.
 
 ---
 
-:::tip Pro Workflow Tips
+### 그룹 크기가 자동으로 조정되지 않음
 
-**Organize Early**: Create groups as you build to avoid messy graphs later.
+**원인**: 그룹 영역은 멤버 노드가 이동할 때만 업데이트됩니다.
 
-**Use Undo Freely**: Ctrl+Z tracks up to 50 steps—experiment with connections without fear.
+**해결 방법**: 멤버 노드 중 하나를 아주 약간 이동시켜 영역 재계산을 트리거하십시오.
 
-**Build Templates**: Create reusable group templates for common patterns.
+---
 
-**Name Descriptively**: Clear graph and group names help when switching between systems.
+### 붙여넣은 그룹에 외부 연결이 누락됨
 
-**Set Root Nodes**: Mark clear entry points for each logical flow sequence.
+**의도된 동작**: **내부 연결**(그룹 멤버 간의 연결)만 복사됩니다.
 
-**Copy Smart**: Build once, paste many times. Use groups as blueprints.
+**설명**: 그룹 템플릿을 유연하게 재사용할 수 있도록 그룹 외부 노드와의 연결은 의도적으로 복사되지 않습니다.
+
+**해결 방법**: 그룹을 붙여넣은 후 수동으로 외부 의존성을 다시 연결하십시오.
+
+---
+
+### 그룹을 생성할 수 없음
+
+**가능한 원인**:
+- 선택된 노드가 2개 미만임
+- 이미 그룹화된 노드를 다시 그룹화하려고 시도함
+
+**해결 방법**: 
+- 최소 2개의 노드를 선택하십시오.
+- 다시 그룹화하려면 먼저 기존 그룹을 삭제하거나, 기존 그룹과 새 노드를 모두 선택하여 새 그룹을 생성하십시오.
+
+---
+
+## 📖 다음 단계
+
+캔버스 조작과 조직화 방법을 익혔으므로, 다음 여정을 계속하십시오:
+
+🔗 **[연결 타입 및 호환성](./game-event-node-connector.md)**
+
+> **핵심 개념:** 포트 색상, 선 스타일 및 타입 호환성 규칙을 이해합니다.
+
+⚙️ **[노드 동작 설정](./game-event-node-behavior.md)**
+
+> **로직 제어:** 지연, 조건 및 실행 설정을 구성합니다.
+
+🧩 **[고급 로직 패턴](./advanced-logic-patterns.md)**
+
+> **전문가 레벨:** 결합된 패턴으로 복잡한 이벤트 오케스트레이션을 구축합니다.
+
+---
+
+:::tip 전문가의 워크플로우 팁
+
+**미리 정리하기**: 그래프가 복잡해지기 전에 구축하면서 그룹을 생성하십시오.
+
+**Undo를 자유롭게 사용하기**: Ctrl+Z는 최대 50단계까지 추적합니다. 두려워하지 말고 연결을 실험해 보십시오.
+
+**템플릿 구축**: 공통 패턴을 위한 재사용 가능한 그룹 템플릿을 만드십시오.
+
+**설명 위주의 이름 짓기**: 시스템을 전환할 때 헷갈리지 않도록 그래프와 그룹 이름을 명확하게 지으십시오.
+
+**루트 노드 설정**: 각 논리 플로우 시퀀스의 명확한 진입점을 표시하십시오.
+
+**똑똑하게 복사하기**: 한 번 구축하고 여러 번 붙여넣으십시오. 그룹을 설계도로 활용하십시오.
 
 :::
 
-:::info Quick Reference
+:::info 빠른 리퍼런스
 
-Forgot a shortcut? Click the **Help** button (`? Help`) in the toolbar to view the complete Quick Reference Guide with all keyboard shortcuts, mouse controls, and visual color legend.
+단축키를 잊으셨나요? 툴바의 **Help** 버튼(`? Help`)을 클릭하여 모든 키보드 단축키, 마우스 조작 및 시각적 컬러 범례가 포함된 전체 퀵 리퍼런스 가이드를 확인하십시오.
 
 :::

@@ -1,110 +1,110 @@
 ﻿---
-sidebar_label: 'Community & Support'
+sidebar_label: 'コミュニティ & サポート'
 sidebar_position: 3
 ---
 
-# Community & Support
+# コミュニティ & サポート (Community & Support)
 
-## 💌 A Note from the Developer
+## 💌 開発者からのメッセージ
 
-Hello! I'm the creator behind **TinyGiants**, and I want to share the heart behind this tool.
+こんにちは！**TinyGiants** の開発者です。このツールに込めた想いをお伝えさせてください。
 
-As an indie developer, I learned that the Event System is the **nervous system of any game**—it touches everything. Early in my career, I battled endless "spaghetti code": events scattered across dozens of scripts, mysterious sound triggers, and UI windows that opened for reasons I couldn't trace.
+一人のインディー開発者として、私はイベントシステムこそが**あらゆるゲームの神経系**であり、すべての要素に関わる重要なものであることを学びました。キャリアの初期、私は終わりのない「スパゲッティコード」との戦いに明け暮れていました。数十ものスクリプトに散らばったイベント、出所不明のサウンドトリガー、そして理由も分からず開くUIウィンドウ……。
 
-I tried existing solutions, but each had compromises:
-- **Visual-only tools** were great for organization but lacked coding flexibility.
-- **Code-heavy frameworks** offered power but became impossible to visualize.
-- **Performance** was often sacrificed for convenience.
+既存のソリューションもいくつか試しましたが、どれも妥協が必要でした：
+- **ビジュアル特化型ツール**：整理には適していましたが、コーディングの柔軟性に欠けていました。
+- **コード重視のフレームワーク**：強力ではありましたが、視覚的に把握することが不可能でした。
+- **パフォーマンス**：利便性のために犠牲にされることが多々ありました。
 
-### The Solution I Built
-I created the tool I always wished existed—one that delivers:
+### 私が構築したソリューション
+私は、自分がずっと欲しかったツール――以下のすべてを兼ね備えたものを形にしました：
 
-| 🎨 Visual Management               | ⚡ Code Control                     | 🚀 Zero Overhead              |
+| 🎨 ビジュアル管理               | ⚡ コードによる制御                     | 🚀 オーバーヘッド・ゼロ              |
 | --------------------------------- | ---------------------------------- | ---------------------------- |
-| Organization and flow at a glance | Complex logic and full flexibility | Production-ready performance |
+| 構造と流れを一目で把握 | 複雑なロジックと完全な柔軟性 | 本番環境に対応した高いパフォーマンス |
 
-### The TinyGiants Vision
-**TinyGiants** represents my commitment to creating professional-grade tools for the Unity community. The Game Event System is my flagship product—the first of many high-quality solutions designed to empower developers.
+### TinyGiants のビジョン
+**TinyGiants** は、Unityコミュニティのためにプロフェッショナルグレードのツールを提供したいという私のコミットメントの象徴です。Game Event System はそのフラグシップ製品であり、開発者の力を引き出すために設計された高品質なソリューションの第一歩です。
 
-When you choose this tool, you're not just purchasing a plugin; you're joining a journey of continuous improvement. I'm here to support your project as if it were my own.
+このツールを選ぶということは、単にプラグインを購入するということではありません。継続的な改善の旅に加わるということです。私は、あなたのプロジェクトをまるで自分自身のもののようにサポートします。
 
 *Happy coding,*
 **[Tiny Giants]**
 
 ------
 
-## 🤝 Get Support
+## 🤝 サポートを受ける
 
-I'm here to ensure your success. Whether you've hit a bug, need architecture advice, or just want to discuss implementation patterns, there are multiple ways to connect.
+あなたのプロジェクトを成功させるために、私はここにいます。バグに遭遇した、設計のアドバイスが欲しい、あるいは実装パターンについて議論したいなど、どのような理由でもお気軽にご連絡ください。
 
-### 💬 Discord Community (Recommended)
+### 💬 Discord コミュニティ (推奨)
 
-The **fastest way** to get help and connect with other developers.
+ヘルプを得たり、他の開発者とつながるための**最短の方法**です。
 
-**Why join?**
+**参加するメリット：**
 
-- Real-time answers from myself and experienced community members
-- Early access to roadmap updates and beta features
-- 24/7 community support across global timezones
-- Share screenshots, debug together, and learn best practices
+- 開発者本人や経験豊富なコミュニティメンバーからのリアルタイムな回答
+- ロードマップの更新やベータ機能への早期アクセス
+- 全世界のタイムゾーンをカバーする24時間体制のコミュニティサポート
+- スクリーンショットの共有、共同デバッグ、ベストプラクティスの学習
 
-**[👉 Join Discord Server](https://discord.tinygiants.tech)**
-
-------
-
-### 📧 Email Support
-
-For private inquiries, business discussions, or sensitive bug reports.
-
-- **Contact**: [support@tinygiants.tech](mailto:support@tinygiants.tech)
-- **Response Time**: Within 24-48 hours
+**[👉 Discord サーバーに参加する](https://discord.tinygiants.tech)**
 
 ------
 
-### 🎮 Unity Forum
+### 📧 メールサポート
 
-Join the conversation in my official Unity Forum thread.
+非公開の問い合わせ、ビジネスに関する相談、または機密性の高いバグ報告についてはこちら。
 
-**[👉 Visit Forum Thread](https://forum.unity.com/your-thread-link)**
+- **連絡先**: [support@tinygiants.tech](mailto:support@tinygiants.tech)
+- **返信時間**: 24〜48時間以内
 
 ------
 
-## 🗺️ Roadmap & Your Voice Matters
+### 🎮 Unity フォーラム
 
-This is a **living plugin**—your feedback directly shapes future development.
+公式の Unity フォーラムのスレッドでも議論に参加できます。
 
-### Share Your Ideas
+**[👉 フォーラムスレッドを訪ねる](https://forum.unity.com/your-thread-link)**
 
-Have a feature request or improvement suggestion? I want to hear it!
+------
 
-- Post in the #ges-features channel on Discord
-- Vote on upcoming features in community polls
-- Participate in priority discussions
+## 🗺️ ロードマップ & あなたの声が力になります
 
-### What's Coming Next
+これは**「生きているプラグイン」**です。あなたのフィードバックが今後の開発を直接形作ります。
 
-I publish the development roadmap and run feature polls exclusively on Discord. Join to see what's in the pipeline and influence what gets built next.
+### アイデアを共有してください
 
-:::tip Lifetime License Guarantee 
+機能のリクエストや改善の提案はありますか？ぜひお聞かせください！
 
-Your purchase includes **lifetime updates** to the Game Event System. All future versions, improvements, and new features are **completely free**—no subscriptions again.
+- Discord の #ges-features チャンネルに投稿する
+- コミュニティ投票で今後の機能に一票を投じる
+- 優先順位に関する議論に参加する
+
+### 今後の展開
+
+開発ロードマップの公開や機能の投票は、主に Discord で行っています。次に何が作られるのかを確認し、開発に影響を与えるために、ぜひ参加してください。
+
+:::tip 永久ライセンス保証 
+
+購入には Game Event System の**生涯アップデート**が含まれています。将来のすべてのバージョン、改善、新機能は**完全に無料**です。追加のサブスクリプションは必要ありません。
 
 :::
 
 ------
 
-## ❤️ Enjoying the Plugin?
+## ❤️ プラグインを気に入っていただけましたか？
 
-If the Game Event System has saved you time, cleaned up your codebase, or made your project more maintainable, please consider sharing your experience.
+Game Event System があなたの時間を節約し、コードをクリーンにし、プロジェクトの保守性を高めるのに役立ったなら、ぜひその体験を共有してください。
 
-### Leave a Review
+### レビューを書く
 
-As a solo developer, **reviews are essential** to the plugin's growth. A 5-star rating helps other developers discover the tool and allows me to dedicate more resources to updates and innovation.
+個人開発者にとって、**レビューはプラグインの成長に不可欠**です。5つ星の評価は、他の開発者がこのツールを見つける助けとなり、私がさらなるアップデートや革新にリソースを割くことを可能にします。
 
-**[🌟 Rate on Asset Store](https://assetstore.unity.com/packages/slug/your-package-id)**
+**[🌟 アセットストアで評価する](https://assetstore.unity.com/packages/slug/your-package-id)**
 
 ------
 
-**Thank you for being part of the TinyGiants journey!**
+**TinyGiants の旅の一部になっていただき、ありがとうございます！**
 
-*Together, I'm building better tools for better games.*
+*より良いゲームのために、より良いツールを共に作り上げましょう。*

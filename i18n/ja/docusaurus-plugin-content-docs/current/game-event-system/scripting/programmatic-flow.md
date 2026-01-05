@@ -1,41 +1,40 @@
 ﻿---
-sidebar_label: 'Programmatic Flow'
+sidebar_label: 'プログラマティックフロー'
 sidebar_position: 3
 ---
 
 # Programmatic Flow
 
-While the **Visual Flow Graph** is excellent for static, design-time logic, game development often requires constructing event relationships **dynamically at runtime**.
+**ビジュアルフローグラフ**は静的な設計時ロジックに優れていますが、ゲーム開発では**実行時に動的に**イベントの関係を構築する必要があることがよくあります。
 
-The **Programmatic Flow API** allows you to build Triggers (Fan-out) and Chains (Sequences) entirely via C# code. This is essential for:
-*   **Procedural Generation:** Wiring events for objects spawned at runtime.
-*   **Dynamic Quests:** creating logic steps based on player choices.
-*   **Temporary Status Effects:** Chaining damage ticks or buffs that expire.
+**Programmatic Flow API**を使用すると、トリガー(ファンアウト)とチェーン(シーケンス)を完全にC#コードで構築できます。これは以下の場合に不可欠です:
+*   **プロシージャル生成:** 実行時に生成されたオブジェクトのイベントを配線。
+*   **動的クエスト:** プレイヤーの選択に基づいてロジックステップを作成。
+*   **一時的なステータスエフェクト:** 期限切れになるダメージティックやバフをチェーン。
 
 ---
 
-## ⚡ Core Concepts: Triggers vs. Chains
+## ⚡ コアコンセプト: トリガー vs チェーン
 
-Before coding, it is crucial to understand the difference between the two flow types handled by the internal managers (`GameEventTriggerManager` and `GameEventChainManager`).
+コーディングの前に、内部マネージャー(`GameEventTriggerManager`と`GameEventChainManager`)が処理する2つのフロータイプの違いを理解することが重要です。
 
-| Feature              | ⚡ Triggers (Fan-Out)                   | 🔗 Chains (Sequence)                            |
+| 機能              | ⚡ トリガー(ファンアウト)                   | 🔗 チェーン(シーケンス)                            |
 | :------------------- | :------------------------------------- | :--------------------------------------------- |
-| **Execution Mode**   | **Parallel** (Fire-and-Forget)         | **Sequential** (Blocking)                      |
-| **Failure Handling** | Independent (If A fails, B still runs) | Strict (If A fails, the chain stops)           |
-| **Timing**           | Synchronous (unless `delay` is used)   | Coroutine-based (supports `wait` & `duration`) |
-| **Ordering**         | Sorted by **Priority**                 | Executed in **Order of Addition**              |
-| **Use Case**         | VFX, Achievements, UI Updates          | Cutscenes, Tutorials, Turn Logic               |
+| **実行モード**   | **並列**(Fire-and-Forget)         | **順次**(ブロッキング)                      |
+| **失敗処理** | 独立(Aが失敗してもBは実行される) | 厳格(Aが失敗するとチェーンが停止)           |
+| **タイミング**           | 同期(`delay`が使用されない限り)   | コルーチンベース(`wait`と`duration`をサポート) |
+| **順序**         | **優先度**でソート                 | **追加順**で実行              |
+| **使用例**         | VFX、実績、UI更新          | カットシーン、チュートリアル、ターンロジック               |
 
 ---
 
-## 1. Triggers (Parallel Execution)
+## 1. トリガー(並列実行)
 
-Use `AddTriggerEvent` to make one event automatically fire others. All registered triggers execute immediately (or after their individual delay) when the source event is raised.
+`AddTriggerEvent`を使用して、あるイベントが自動的に他のイベントを発火するようにします。すべての登録されたトリガーは、ソースイベントが発火されたときに即座に(または個別の遅延後に)実行されます。
 
-### Basic Usage
+### 基本的な使用法
 
-When `onPlayerDeath` fires, automatically fire `onPlayDeathSound` and `onShowGameOverUI`.
-
+`onPlayerDeath`が発火すると、自動的に`onPlayDeathSound`と`onShowGameOverUI`を発火します。
 ```csharp
 [GameEventDropdown] public GameEvent onPlayerDeath;
 [GameEventDropdown] public GameEvent onPlayDeathSound;
@@ -43,53 +42,51 @@ When `onPlayerDeath` fires, automatically fire `onPlayDeathSound` and `onShowGam
 
 void Awake()
 {
-    // These happen effectively at the same time
+    // これらは事実上同時に発生
     onPlayerDeath.AddTriggerEvent(onPlayDeathSound);
     onPlayerDeath.AddTriggerEvent(onShowGameOverUI);
 }
 ```
 
-### Advanced Configuration (Priority & Conditions)
+### 高度な構成(優先度と条件)
 
-You can inject logic into the connection without modifying the events themselves.
-
+イベント自体を変更せずに、接続にロジックを注入できます。
 ```csharp
-// 1. High Priority: Heal first
+// 1. 高優先度: 最初にヒール
 onPotionUsed.AddTriggerEvent(
     targetEvent: onRegenHealth,
-    priority: 100 // Higher numbers run first
+    priority: 100 // 高い数値が最初に実行される
 );
 
-// 2. Low Priority: Play sound after logic starts
+// 2. 低優先度: ロジック開始後にサウンドを再生
 onPotionUsed.AddTriggerEvent(
     targetEvent: onPlaySound,
-    delay: 0.2f, // Optional delay
+    delay: 0.2f, // オプションの遅延
     priority: 10
 );
 
-// 3. Conditional: Only trigger particle if graphics settings allow
+// 3. 条件付き: グラフィック設定が許可する場合のみパーティクルをトリガー
 onPotionUsed.AddTriggerEvent(
     targetEvent: onParticleEffect,
     condition: () => GameSettings.EnableParticles
 );
 ```
 
-:::info Automatic Argument Passing
-By default (passArgument: true), Triggers attempt to pass the data from the Source to the Target. If types match (e.g., int to int), it flows automatically. If types mismatch, you need a **Transformer** (see below).
+:::info 自動引数渡し
+デフォルト(passArgument: true)では、トリガーはソースからターゲットへデータを渡そうとします。型が一致する場合(例: intからint)、自動的に流れます。型が一致しない場合は、**Transformer**が必要です(以下を参照)。
 :::
 
 ------
 
-## 2. Chains (Sequential Execution)
+## 2. チェーン(順次実行)
 
-Use `AddChainEvent` to build a strictly ordered execution list on a single event.
+`AddChainEvent`を使用して、単一のイベントに厳密に順序付けられた実行リストを構築します。
 
-### The Sequence Logic (The Queue)
+### シーケンスロジック(キュー)
 
-When you add multiple chain nodes to **the same source event**, they form a **Queue**. The system executes them one by one, waiting for the previous node's `duration` to finish before starting the next node.
+**同じソースイベント**に複数のチェーンノードを追加すると、それらは**キュー**を形成します。システムは一つずつ実行し、次のノードを開始する前に前のノードの`duration`が終了するのを待ちます。
 
-This allows you to orchestrate a complex timeline (A → Wait → B → Wait → C) managed entirely by the source event, without linking B directly to C.
-
+これにより、ソースイベントによって完全に管理される複雑なタイムライン(A → 待機 → B → 待機 → C)をオーケストレートでき、BをCに直接リンクする必要はありません。
 ```csharp
 [GameEventDropdown] public GameEvent onTurnStart;
 [GameEventDropdown] public GameEvent onDrawCard;
@@ -97,73 +94,70 @@ This allows you to orchestrate a complex timeline (A → Wait → B → Wait →
 
 void Awake()
 {
-    // --- The "Turn Start" Timeline ---
+    // --- 「ターン開始」タイムライン ---
     
-    // Step 1: Draw Card
-    // Setting 'duration' means: "Execute this, then WAIT 0.5s before processing the next item in the list."
+    // ステップ1: カードを引く
+    // 'duration'を設定することは: 「これを実行し、リストの次のアイテムを処理する前に0.5秒待つ」ことを意味します。
     onTurnStart.AddChainEvent(onDrawCard, duration: 0.5f);
     
-    // Step 2: Refresh Mana
-    // This runs automatically AFTER Step 1 finishes (and its 0.5s duration passes).
+    // ステップ2: マナをリフレッシュ
+    // これはステップ1が終了した後(そして0.5秒のdurationが経過した後)に自動的に実行されます。
     onTurnStart.AddChainEvent(onRefreshMana);
     
-    // Note: I attach both to 'onTurnStart'. 
-    // I do NOT attach Step 2 to 'onDrawCard', because I don't want 
-    // drawing a card from a spell to accidentally trigger mana refresh.
+    // 注意: 両方を'onTurnStart'にアタッチします。
+    // ステップ2を'onDrawCard'にアタッチしません。なぜなら、
+    // スペルからカードを引くことで誤ってマナリフレッシュをトリガーしたくないからです。
 }
 ```
 
-### Async Waiting (waitForCompletion)
+### 非同期待機(waitForCompletion)
 
-If your event listeners launch Coroutines or Async tasks, you can force the chain to wait for them.
-
+イベントリスナーがコルーチンまたは非同期タスクを起動する場合、チェーンにそれらを待機させることができます。
 ```csharp
-// The chain will pause here until all listeners of 'onPlayCutscene' 
-// have finished their work (yield return null).
+// チェーンはここで一時停止し、'onPlayCutscene'のすべてのリスナーが
+// 作業を終了するまで待機します(yield return null)。
 onLevelEnd.AddChainEvent(onPlayCutscene, waitForCompletion: true);
 
-// This runs only after the cutscene is fully processed
+// これはカットシーンが完全に処理された後にのみ実行されます
 onLevelEnd.AddChainEvent(onLoadNextLevel);
 ```
 
-:::warning Chain Breaking
-If a condition returns false or an exception occurs in a Chain Node, **the entire subsequent chain is halted**. This is useful for conditional logic (e.g., "Stop combo attack if enemy blocked").
+:::warning チェーン中断
+条件がfalseを返すか、チェーンノードで例外が発生した場合、**その後のチェーン全体が停止します**。これは条件ロジックに便利です(例: 「敵がブロックした場合、コンボ攻撃を停止」)。
 :::
 
 ------
 
-## 🔄 Data Flow & Transformers
+## 🔄 データフロー&トランスフォーマー
 
-The most powerful feature of the Programmatic Flow is **Argument Transformation**. This allows you to bridge events with incompatible types or extract specific data from complex objects.
+Programmatic Flowの最も強力な機能は**引数変換**です。これにより、互換性のない型のイベントをブリッジしたり、複雑なオブジェクトから特定のデータを抽出したりできます。
 
-### 1. Complex to Void (Filter)
+### 1. 複雑からVoid(フィルター)
 
-Trigger a generic event only based on specific data.
-
+特定のデータのみに基づいて汎用イベントをトリガー。
 ```csharp
-// Source: Damage Event (float amount)
-// Target: Critical Hit Event (Void)
+// ソース: ダメージイベント(float amount)
+// ターゲット: クリティカルヒットイベント(Void)
 onDamageTaken.AddTriggerEvent(
     targetEvent: onCriticalHitEffect,
-    condition: (amount) => amount > 50f, // Only if damage > 50
-    passArgument: false // Target is void, don't pass the float
+    condition: (amount) => amount > 50f, // ダメージが50を超える場合のみ
+    passArgument: false // ターゲットはvoid、floatを渡さない
 );
 ```
 
-### 2. Simple Transformation (Type Casting)
+### 2. シンプルな変換(型キャスト)
 
-Map a complex object event to a simple primitive event.
+複雑なオブジェクトイベントをシンプルなプリミティブイベントにマップ。
 
-- **Source:** `GameEvent<Enemy> (OnEnemyKilled)`
-- **Target:** `GameEvent<int> (OnAddXP)`
-
+- **ソース:** `GameEvent<Enemy> (OnEnemyKilled)`
+- **ターゲット:** `GameEvent<int> (OnAddXP)`
 ```csharp
 [GameEventDropdown] public GameEvent<Enemy> onEnemyKilled;
 [GameEventDropdown] public GameEvent<int> onAddXP;
 
 void Awake()
 {
-    // Extract the 'xpValue' from the Enemy object and pass it to the int event
+    // Enemyオブジェクトから'xpValue'を抽出し、intイベントに渡す
     onEnemyKilled.AddTriggerEvent(
         targetEvent: onAddXP,
         passArgument: true,
@@ -172,40 +166,38 @@ void Awake()
 }
 ```
 
-### 3. Sender & Argument Transformation
+### 3. Sender&引数変換
 
-For `GameEvent<TSender, TArgs>`, the transformer receives both parameters.
-
+`GameEvent<TSender, TArgs>`の場合、トランスフォーマーは両方のパラメータを受け取ります。
 ```csharp
-// Source: Player picked up item (Sender: Player, Args: ItemData)
-// Target: Notification (string)
+// ソース: プレイヤーがアイテムをピックアップ(Sender: Player、Args: ItemData)
+// ターゲット: 通知(string)
 onItemPickup.AddTriggerEvent(
     targetEvent: onShowNotification,
     passArgument: true,
-    argumentTransformer: (player, item) => $"{player.Name} found a {item.Rarity} item!"
+    argumentTransformer: (player, item) => $"{player.Name}が{item.Rarity}アイテムを見つけました!"
 );
 ```
 
 ------
 
-## 🧹 Lifecycle Management
+## 🧹 ライフサイクル管理
 
-Unlike standard listeners (AddListener), dynamic Triggers and Chains return a **Handle**. You must manage these handles to prevent memory leaks or unwanted logic persistence, especially when pooling objects.
+標準のリスナー(AddListener)とは異なり、動的トリガーとチェーンは**ハンドル**を返します。特にオブジェクトプーリング時に、メモリリークや不要なロジックの永続化を防ぐために、これらのハンドルを管理する必要があります。
 
-### Using Handles
-
+### ハンドルの使用
 ```csharp
 private TriggerHandle _triggerHandle;
 
 void OnEnable()
 {
-    // Save the handle
+    // ハンドルを保存
     _triggerHandle = onDoorOpen.AddTriggerEvent(onLightOn);
 }
 
 void OnDisable()
 {
-    // Use the handle to remove ONLY this specific link
+    // ハンドルを使用してこの特定のリンクのみを削除
     if (_triggerHandle != null)
     {
         onDoorOpen.RemoveTriggerEvent(_triggerHandle);
@@ -214,35 +206,34 @@ void OnDisable()
 }
 ```
 
-### Bulk Cleanup
+### 一括クリーンアップ
 
-If an object is being destroyed or returned to a pool, you can wipe all dynamic logic associated with an event.
-
+オブジェクトが破棄されるか、プールに返される場合、イベントに関連するすべての動的ロジックを一掃できます。
 ```csharp
 void OnDestroy()
 {
-    // Removes ALL dynamic triggers targeting this event
+    // このイベントをターゲットとするすべての動的トリガーを削除
     myEvent.RemoveAllTriggerEvents();
     
-    // Removes ALL dynamic chains targeting this event
+    // このイベントをターゲットとするすべての動的チェーンを削除
     myEvent.RemoveAllChainEvents();
 }
 ```
 
-## 📜 API Summary
+## 📜 APIサマリー
 
-| Method Signature                                             | Returns         | Description                          |
+| メソッドシグネチャ                                             | 戻り値         | 説明                          |
 | ------------------------------------------------------------ | --------------- | ------------------------------------ |
-| **Trigger Registration**                                     |                 | *Parallel / Fire-and-Forget*         |
-| `AddTriggerEvent(GameEventBase target, float delay, Func<bool> condition, int priority)` | `TriggerHandle` | Adds a trigger to a Void event.      |
-| `AddTriggerEvent(GameEventBase target, float delay, Func<T, bool> condition, bool passArg, Func<T, object> transformer, int priority)` | `TriggerHandle` | Adds a trigger to a Typed event.     |
-| `AddTriggerEvent(GameEventBase target, float delay, Func<TSender, TArgs, bool> condition, bool passArg, Func<TSender, TArgs, object> transformer, int priority)` | `TriggerHandle` | Adds a trigger to a Sender event.    |
-| **Chain Registration**                                       |                 | *Sequential / Blocking*              |
-| `AddChainEvent(GameEventBase target, float delay, float duration, Func<bool> condition, bool wait)` | `ChainHandle`   | Adds a chain step to a Void event.   |
-| `AddChainEvent(GameEventBase target, float delay, float duration, Func<T, bool> condition, bool passArg, Func<T, object> transformer, bool wait)` | `ChainHandle`   | Adds a chain step to a Typed event.  |
-| `AddChainEvent(GameEventBase target, float delay, float duration, Func<TSender, TArgs, bool> condition, bool passArg, Func<TSender, TArgs, object> transformer, bool wait)` | `ChainHandle`   | Adds a chain step to a Sender event. |
-| **Cleanup**                                                  |                 | *Removal*                            |
-| `RemoveTriggerEvent(TriggerHandle handle)`                   | `void`          | Removes a specific trigger node.     |
-| `RemoveChainEvent(ChainHandle handle)`                       | `void`          | Removes a specific chain node.       |
-| `RemoveAllTriggerEvents()`                                   | `void`          | Clears all dynamic triggers.         |
-| `RemoveAllChainEvents()`                                     | `void`          | Clears all dynamic chains.           |
+| **トリガー登録**                                     |                 | *並列 / Fire-and-Forget*         |
+| `AddTriggerEvent(GameEventBase target, float delay, Func<bool> condition, int priority)` | `TriggerHandle` | Voidイベントにトリガーを追加。      |
+| `AddTriggerEvent(GameEventBase target, float delay, Func<T, bool> condition, bool passArg, Func<T, object> transformer, int priority)` | `TriggerHandle` | 型付きイベントにトリガーを追加。     |
+| `AddTriggerEvent(GameEventBase target, float delay, Func<TSender, TArgs, bool> condition, bool passArg, Func<TSender, TArgs, object> transformer, int priority)` | `TriggerHandle` | Senderイベントにトリガーを追加。    |
+| **チェーン登録**                                       |                 | *順次 / ブロッキング*              |
+| `AddChainEvent(GameEventBase target, float delay, float duration, Func<bool> condition, bool wait)` | `ChainHandle`   | Voidイベントにチェーンステップを追加。   |
+| `AddChainEvent(GameEventBase target, float delay, float duration, Func<T, bool> condition, bool passArg, Func<T, object> transformer, bool wait)` | `ChainHandle`   | 型付きイベントにチェーンステップを追加。  |
+| `AddChainEvent(GameEventBase target, float delay, float duration, Func<TSender, TArgs, bool> condition, bool passArg, Func<TSender, TArgs, object> transformer, bool wait)` | `ChainHandle`   | Senderイベントにチェーンステップを追加。 |
+| **クリーンアップ**                                                  |                 | *削除*                            |
+| `RemoveTriggerEvent(TriggerHandle handle)`                   | `void`          | 特定のトリガーノードを削除。     |
+| `RemoveChainEvent(ChainHandle handle)`                       | `void`          | 特定のチェーンノードを削除。       |
+| `RemoveAllTriggerEvents()`                                   | `void`          | すべての動的トリガーをクリア。         |
+| `RemoveAllChainEvents()`                                     | `void`          | すべての動的チェーンをクリア。           |

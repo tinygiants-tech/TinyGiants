@@ -1,179 +1,179 @@
 ﻿---
-sidebar_label: '02 Basic Types Event'
+sidebar_label: '02 基本型イベント'
 sidebar_position: 3
 ---
 
 import VideoGif from '@site/src/components/Video/VideoGif';
 
-# 02 Basic Types Event: Passing Data with Events
+# 02 基本型イベント：イベントでのデータ受け渡し
 
 <!-- <VideoGif src="/video/game-event-system/02-basic-types-event.mp4" /> -->
 
-## 📋 Overview
+## 📋 概要
 
-While void events are great for simple signals, most games need to pass data: *"How much damage?"*, *"Which item?"*, *"Where to spawn?"*. This demo showcases the **Generic Event System**, which allows you to pass standard C# and Unity types as event parameters without writing custom event classes.
+引数なし（void）イベントは単純な信号には適していますが、ほとんどのゲームではデータの受け渡しが必要です。「ダメージ量は？」「どのアイテム？」「どこにスポーンさせる？」といった情報のやり取りです。このデモでは、標準的なC#やUnityの型をイベントパラメータとして渡すことができる**ジェネリックイベントシステム**を紹介します。カスタムイベントクラスを手書きする必要はありません。
 
-:::tip 💡 What You'll Learn
-- How to create generic events for different data types
-- How the system auto-generates type-safe event classes
-- How to raise and receive events with parameters
-- Type safety enforcement in the Editor
+:::tip 💡 学べること
+- 異なるデータ型に対するジェネリックイベントの作成方法
+- システムが型安全なイベントクラスを自動生成する仕組み
+- パラメータ（引数）を伴うイベントの発行と受信方法
+- エディタにおける型安全性の強制
 
 :::
 
 ---
 
-## 🎬 Demo Scene
+## 🎬 デモシーン
 ```
 Assets/TinyGiants/GameEventSystem/Demo/02_BasicTypesEvent/02_BasicTypesEvent.unity
 ```
 
-### Scene Composition
+### シーン構成
 
-**UI Layer (Canvas):**
-- 🎮 **Four Buttons** - Located at the bottom of the screen
-  - "Raise (String)" → Triggers `BasicTypesEventRaiser.RaiseString()`
-  - "Raise (Vector3)" → Triggers `BasicTypesEventRaiser.RaiseVector3()`
-  - "Raise (GameObject)" → Triggers `BasicTypesEventRaiser.RaiseGameObject()`
-  - "Raise (Material)" → Triggers `BasicTypesEventRaiser.RaiseMaterial()`
+**UIレイヤー (Canvas):**
+- 🎮 **4つのボタン** - 画面下部に配置されています
+  - "Raise (String)" ➔ `BasicTypesEventRaiser.RaiseString()` をトリガー
+  - "Raise (Vector3)" ➔ `BasicTypesEventRaiser.RaiseVector3()` をトリガー
+  - "Raise (GameObject)" ➔ `BasicTypesEventRaiser.RaiseGameObject()` をトリガー
+  - "Raise (Material)" ➔ `BasicTypesEventRaiser.RaiseMaterial()` をトリガー
 
-**Game Logic Layer (Demo Scripts):**
-- 📤 **BasicTypesEventRaiser** - GameObject with the raiser script
-  - Holds references to 4 different generic events: `GameEvent<string>`, `GameEvent<Vector3>`, `GameEvent<GameObject>`, `GameEvent<Material>`
-  - Each button triggers a different raise method with specific data
+**ゲームロジックレイヤー (デモスクリプト):**
+- 📤 **BasicTypesEventRaiser** - 発行側スクリプトを持つGameObject
+  - 4つの異なるジェネリックイベントへの参照を保持しています： `GameEvent<string>`, `GameEvent<Vector3>`, `GameEvent<GameObject>`, `GameEvent<Material>`
+  - 各ボタンが特定のデータを使用して、異なる発行メソッドをトリガーします。
 
-- 📥 **BasicTypesEventReceiver** - GameObject with the receiver script
-  - Listens to all 4 events through visual binding in Game Event Editor
-  - References various scene objects to apply event data
+- 📥 **BasicTypesEventReceiver** - 受信側スクリプトを持つGameObject
+  - Game Event Editorでのビジュアルバインディングを通じて、4つのイベントすべてをリッスンします。
+  - シーン内の様々なオブジェクトを参照し、イベントデータを適用します。
 
-**Visual Feedback Layer (Demo Objects):**
-- 📝 **HoloDisplay** - TextMeshPro object displaying received string messages
-- 🎲 **Cube** - 3D object that moves when Vector3 event fires and changes color when Material event fires
-- 📍 **TargetPosition** - Transform marking the spawn location for GameObject events
-- 🏠 **Plane** - Ground surface for visual context
-
----
-
-## 🎮 How to Interact
-
-### Step 1: Enter Play Mode
-
-Press the **Play** button in Unity.
-
-### Step 2: Test Each Event Type
-
-**Click "Raise (String)":**
-- 📝 The HoloDisplay text updates with "Hello World [count]"
-- 🔢 Counter increments with each click
-- 📊 Console logs: `[Sender] Raised String Event` → `[Receiver] String Event Processed`
-
-**Click "Raise (Vector3)":**
-- 🎲 The blue cube teleports to a random position
-- 📊 Position is randomized within range (-2 to 2, 0 to 3, 0)
-- 📝 Console shows the exact coordinates sent and received
-
-**Click "Raise (GameObject)":**
-- 🎁 A random prefab (Cube or Sphere) spawns at TargetPosition
-- 🔄 Previous spawn is destroyed before creating new one
-- 📝 Console logs which prefab was instantiated
-
-**Click "Raise (Material)":**
-- 🎨 The cube changes to a random color (Red/Green/Blue/Yellow)
-- ✨ Material change is instant
-- 📝 Console logs the material name applied
+**ビジュアルフィードバックレイヤー (デモオブジェクト):**
+- 📝 **HoloDisplay** - 受信した文字列メッセージを表示するTextMeshProオブジェクト
+- 🎲 **Cube** - Vector3イベントで移動し、Materialイベントで色が変わる3Dオブジェクト
+- 📍 **TargetPosition** - GameObjectイベントでのスポーン位置を示すTransform
+- 🏠 **Plane** - 視覚的なコンテキストのための地面
 
 ---
 
-## 🏗️ Scene Architecture
+## 🎮 操作方法
 
-### Event Definitions
+### ステップ 1: プレイモードに入る
 
-Open the **Game Event Editor** window to see the 4 pre-configured events:
+Unityの **Play** ボタンを押します。
+
+### ステップ 2: 各イベントタイプをテストする
+
+**"Raise (String)" をクリック:**
+- 📝 HoloDisplay のテキストが "Hello World [カウント]" に更新されます。
+- 🔢 クリックするたびにカウンターが増加します。
+- 📊 コンソールログ: `[Sender] Raised String Event` ➔ `[Receiver] String Event Processed`
+
+**"Raise (Vector3)" をクリック:**
+- 🎲 青いキューブがランダムな位置にテレポートします。
+- 📊 位置は指定された範囲（-2～2, 0～3, 0）内でランダムに決定されます。
+- 📝 コンソールに送信および受信された正確な座標が表示されます。
+
+**"Raise (GameObject)" をクリック:**
+- 🎁 ランダムなプレハブ（CubeまたはSphere）が TargetPosition にスポーンします。
+- 🔄 新しいものを作成する前に、前回スポーンしたものは破棄されます。
+- 📝 コンソールにどのプレハブがインスタンス化されたかが記録されます。
+
+**"Raise (Material)" をクリック:**
+- 🎨 キューブの色がランダム（赤/緑/青/黄）に変わります。
+- ✨ マテリアルの変更は瞬時に行われます。
+- 📝 コンソールに適用されたマテリアル名が記録されます。
+
+---
+
+## 🏗️ シーンのアーキテクチャ
+
+### イベント定義 (Event Definitions)
+
+**Game Event Editor** ウィンドウを開き、設定済みの4つのイベントを確認します：
 
 ![Game Event Editor](/img/game-event-system/examples/02-basic-types-event/demo-02-editor.png)
 
-**Events in Database:**
+**データベース内のイベント:**
 
-| Event Name     | Type                    | Purpose                                 |
+| イベント名      | 型                      | 用途                                    |
 | -------------- | ----------------------- | --------------------------------------- |
-| `OnString`     | `GameEvent<string>`     | Update text displays                    |
-| `OnVector3`    | `GameEvent<Vector3>`    | Send position/movement data             |
-| `OnGameObject` | `GameEvent<GameObject>` | Pass prefab references for spawning     |
-| `OnMaterial`   | `GameEvent<Material>`   | Send material assets for visual changes |
+| `OnString`     | `GameEvent<string>`     | テキスト表示の更新                      |
+| `OnVector3`    | `GameEvent<Vector3>`    | 位置や移動データの送信                  |
+| `OnGameObject` | `GameEvent<GameObject>` | スポーン用のプレハブ参照の受け渡し      |
+| `OnMaterial`   | `GameEvent<Material>`   | ビジュアル変更用のマテリアルアセット送信 |
 
-**Notice the Behavior Column:**
-Each event shows a colored type indicator (e.g., **(String)**, **(Vector3)**) in the Behavior column. Clicking these icons opens the Behavior Window where you can configure callback bindings—the same visual binding system you saw in the previous demo.
+**Behavior カラムに注目:**
+各イベントには、Behavior カラムに色付きの型インジケーター（例: **(String)**, **(Vector3)**）が表示されています。これらのアイコンをクリックすると Behavior Window が開き、コールバックのバインディングを設定できます。これは前のデモで見たビジュアルバインディングシステムと同じです。
 
-:::note 🔧 Auto-Generation
-You don't need to manually create `StringGameEvent` or `Vector3GameEvent` classes. The system automatically generates concrete types like `GameEvent<T>` when you create a new event in the Editor.
+:::note 🔧 自動生成
+`StringGameEvent` や `Vector3GameEvent` クラスを手動で作成する必要はありません。エディタで新しいイベントを作成すると、システムが `GameEvent<T>` の具体的な型を自動的に生成します。
 :::
 
 ---
 
-### Sender Setup (BasicTypesEventRaiser)
+### 発行側の設定 (BasicTypesEventRaiser)
 
-Select the **BasicTypesEventRaiser** GameObject in the Hierarchy:
+ヒエラルキーで **BasicTypesEventRaiser** GameObject を選択します：
 
 ![BasicTypesEventRaiser Inspector](/img/game-event-system/examples/02-basic-types-event/demo-02-inspector.png)
 
-**Configuration Details:**
+**設定の詳細:**
 
-**1. C# Type (String)**
-- `Message Event` → `OnString` (type-filtered dropdown)
-- `Message To Send` → "Hello World" (template text)
+**1. C# 型 (String)**
+- `Message Event` ➔ `OnString` (型でフィルタリングされたドロップダウン)
+- `Message To Send` ➔ "Hello World" (テンプレートテキスト)
 
-**2. Math Type (Vector3)**
-- `Movement Event` → `OnVector3`
-- `Target Position` → (0, 5.41, -1.45) (reference position)
+**2. 数学型 (Vector3)**
+- `Movement Event` ➔ `OnVector3`
+- `Target Position` ➔ (0, 5.41, -1.45) (基準位置)
 
-**3. Component Type (GameObject)**
-- `Spawn Event` → `OnGameObject`
-- `Prefabs To Spawn` → List of 4 primitive prefabs (Cube, Sphere, etc.)
+**3. コンポーネント型 (GameObject)**
+- `Spawn Event` ➔ `OnGameObject`
+- `Prefabs To Spawn` ➔ 4つのプリミティブプレハブのリスト (Cube, Sphereなど)
 
-**4. Asset Type (Material)**
-- `Change Material Event` → `OnMaterial`
-- `Target Materials` → List of 5 colored materials
+**4. アセット型 (Material)**
+- `Change Material Event` ➔ `OnMaterial`
+- `Target Materials` ➔ 5つの色付きマテリアルのリスト
 
-**Type Safety in Action:**
-- The `[GameEventDropdown]` attribute automatically filters events by type
-- You can only assign `GameEvent<string>` to the "Message Event" slot
-- Attempting to assign a `GameEvent<Vector3>` to the string slot is prevented by the Editor
-- This compile-time type safety prevents runtime errors
+**型安全性の動作:**
+- `[GameEventDropdown]` 属性は、型に合わせてイベントを自動的にフィルタリングします。
+- "Message Event" スロットには `GameEvent<string>` しか割り当てられません。
+- 文字列スロットに `GameEvent<Vector3>` を割り当てようとしても、エディタによって防止されます。
+- このコンパイル時の型安全性により、実行時のエラーを未然に防ぎます。
 
 ---
 
-### Receiver Setup (BasicTypesEventReceiver)
+### 受信側の設定 (BasicTypesEventReceiver)
 
-Select the **BasicTypesEventReceiver** GameObject in the Hierarchy to see its scene references:
+ヒエラルキーで **BasicTypesEventReceiver** GameObject を選択し、そのシーン参照を確認します：
 
-**Scene References:**
-- `Log Text` → HoloDisplay (TextMeshPro component)
-- `Moving Cube` → Cube (Transform component)
-- `Changing Cube Renderer` → Cube (MeshRenderer component)
-- `Spawn Point` → TargetPosition (Transform component)
+**シーン参照:**
+- `Log Text` ➔ HoloDisplay (TextMeshPro コンポーネント)
+- `Moving Cube` ➔ Cube (Transform コンポーネント)
+- `Changing Cube Renderer` ➔ Cube (MeshRenderer コンポーネント)
+- `Spawn Point` ➔ TargetPosition (Transform コンポーネント)
 
-**Behavior Binding:**
+**Behavior バインディング:**
 
-Each of the 4 events is bound to a corresponding receiver method through the **Behavior Window** in the Game Event Editor (similar to what you configured in the Void Event demo):
+4つのイベントは、それぞれ Game Event Editor の **Behavior Window** を通じて対応する受信メソッドに紐付けられています：
 
-| Event          | Bound Method         | Signature                  |
+| イベント        | 紐付けられたメソッド | シグネチャ                 |
 | -------------- | -------------------- | -------------------------- |
 | `OnString`     | `OnMessageReceived`  | `void (string msg)`        |
 | `OnVector3`    | `OnMoveReceived`     | `void (Vector3 pos)`       |
 | `OnGameObject` | `OnSpawnReceived`    | `void (GameObject prefab)` |
 | `OnMaterial`   | `OnMaterialReceived` | `void (Material mat)`      |
 
-:::tip 🎯 Type Matching
+:::tip 🎯 型の一致
 
-The Behavior Window's method dropdown automatically filters methods based on the event's parameter type. For `GameEvent<string>`, you'll only see methods with a `(string)` parameter. This ensures type safety at configuration time!
+Behavior Window のメソッドドロップダウンは、イベントのパラメータ型に基づいてメソッドを自動的にフィルタリングします。`GameEvent<string>` の場合、`(string)` パラメータを持つメソッドのみが表示されます。これにより、設定時点での型安全性が保証されます！
 
 :::
 
 ---
 
-## 💻 Code Breakdown
+## 💻 コード解説
 
-### 📤 BasicTypesEventRaiser.cs (Sender)
+### 📤 BasicTypesEventRaiser.cs (発行側)
 ```csharp
 using UnityEngine;
 using TinyGiants.GameEventSystem.Runtime;
@@ -181,19 +181,19 @@ using System.Collections.Generic;
 
 public class BasicTypesEventRaiser : MonoBehaviour
 {
-    [Header("1. C# Type (String)")]
+    [Header("1. C# 型 (String)")]
     [GameEventDropdown] public GameEvent<string> messageEvent;
     public string messageToSend = "Hello World";
 
-    [Header("2. Math Type (Vector3)")]
+    [Header("2. 数学型 (Vector3)")]
     [GameEventDropdown] public GameEvent<Vector3> movementEvent;
     public Vector3 targetPosition = new Vector3(0, 2, 0);
 
-    [Header("3. Component Type (GameObject)")]
+    [Header("3. コンポーネント型 (GameObject)")]
     [GameEventDropdown] public GameEvent<GameObject> spawnEvent;
     public List<GameObject> prefabsToSpawn = new List<GameObject>();
 
-    [Header("4. Asset Type (Material)")]
+    [Header("4. アセット型 (Material)")]
     [GameEventDropdown] public GameEvent<Material> changeMaterialEvent;
     public List<Material> targetMaterials = new List<Material>();
 
@@ -201,25 +201,25 @@ public class BasicTypesEventRaiser : MonoBehaviour
     private AudioSource _audioSource;
 
     /// <summary>
-    /// Raises a GameEvent<string> with dynamic text content.
-    /// The receiver must have signature: void MethodName(string value)
+    /// 動的なテキスト内容で GameEvent<string> を発行します。
+    /// 受信側は void MethodName(string value) というシグネチャを持つ必要があります。
     /// </summary>
     public void RaiseString()
     {
         if (messageEvent == null)
         {
-            Debug.LogWarning("[MessageEvent] No GameEvent assigned.");
+            Debug.LogWarning("[MessageEvent] GameEvent が割り当てられていません。");
             return;
         }
 
-        // Pass dynamic string with incremented counter
+        // カウンターを付与した動的な文字列を渡す
         messageEvent.Raise($"{messageToSend} [{_count++}]");
-        Debug.Log($"[Sender] Raised String Event: {messageEvent.name}");
+        Debug.Log($"[Sender] Stringイベントを発行しました: {messageEvent.name}");
     }
 
     /// <summary>
-    /// Raises a GameEvent<Vector3> with random position data.
-    /// Useful for movement, directions, or physics forces.
+    /// ランダムな位置データで GameEvent<Vector3> を発行します。
+    /// 移動、方向、または物理的な力の指定に便利です。
     /// </summary>
     public void RaiseVector3()
     {
@@ -232,13 +232,13 @@ public class BasicTypesEventRaiser : MonoBehaviour
         if (movementEvent != null)
         {
             movementEvent.Raise(randomPos);
-            Debug.Log($"[Sender] Raised Vector3 Event: {randomPos}");
+            Debug.Log($"[Sender] Vector3イベントを発行しました: {randomPos}");
         }
     }
 
     /// <summary>
-    /// Raises a GameEvent<GameObject> with a prefab reference.
-    /// Demonstrates passing Unity Object references safely.
+    /// プレハブの参照を伴う GameEvent<GameObject> を発行します。
+    /// Unity Object の参照を安全に渡す方法を示しています。
     /// </summary>
     public void RaiseGameObject()
     {
@@ -246,17 +246,17 @@ public class BasicTypesEventRaiser : MonoBehaviour
         {
             GameObject randomPrefab = prefabsToSpawn[Random.Range(0, prefabsToSpawn.Count)];
             spawnEvent.Raise(randomPrefab);
-            Debug.Log($"[Sender] Raised GameObject Event. Spawning: {randomPrefab?.name ?? "null"}");
+            Debug.Log($"[Sender] GameObjectイベントを発行しました。スポーン対象: {randomPrefab?.name ?? "null"}");
         }
         else
         {
-            Debug.LogWarning("[Sender] RaiseGameObject failed: Event or prefab list is null/empty.");
+            Debug.LogWarning("[Sender] RaiseGameObject 失敗: イベントまたはプレハブリストが null または空です。");
         }
     }
 
     /// <summary>
-    /// Raises a GameEvent<Material> with a material asset reference.
-    /// Perfect for runtime visual customization.
+    /// マテリアルアセットの参照を伴う GameEvent<Material> を発行します。
+    /// 実行時のビジュアルカスタマイズに最適です。
     /// </summary>
     public void RaiseMaterial()
     {
@@ -264,25 +264,25 @@ public class BasicTypesEventRaiser : MonoBehaviour
         {
             Material randomMaterial = targetMaterials[Random.Range(0, targetMaterials.Count)];
             changeMaterialEvent.Raise(randomMaterial);
-            Debug.Log($"[Sender] Raised Material Event. Material: {randomMaterial?.name ?? "null"}");
+            Debug.Log($"[Sender] Materialイベントを発行しました。適用マテリアル: {randomMaterial?.name ?? "null"}");
         }
         else
         {
-            Debug.LogWarning("[Sender] RaiseMaterial failed: Event or material list is null/empty.");
+            Debug.LogWarning("[Sender] RaiseMaterial 失敗: イベントまたはマテリアルリストが null または空です。");
         }
     }
 }
 ```
 
-**Key Points:**
-- 🎯 **Generic Syntax** - `GameEvent<T>` automatically handles different types
-- 🔒 **Type Safety** - Each event can only accept its declared parameter type
-- 📦 **Data Passing** - `.Raise(value)` method accepts the typed parameter
-- 🔇 **Decoupling** - Sender has no knowledge of who or what responds
+**ポイント:**
+- 🎯 **ジェネリック構文** - `GameEvent<T>` が異なる型を自動的に処理します。
+- 🔒 **型安全性** - 各イベントは宣言されたパラメータ型のみを受け入れます。
+- 📦 **データの受け渡し** - `.Raise(value)` メソッドが型付きパラメータを受け取ります。
+- 🔇 **デカップリング** - 発行側は「誰が、何が」反応するかを知りません。
 
 ---
 
-### 📥 BasicTypesEventReceiver.cs (Listener)
+### 📥 BasicTypesEventReceiver.cs (リスナー)
 ```csharp
 using UnityEngine;
 using TMPro;
@@ -295,38 +295,38 @@ public class BasicTypesEventReceiver : MonoBehaviour
     [SerializeField] private Transform spawnPoint;
 
     /// <summary>
-    /// Bound to 'OnString' event via Game Event Editor's Behavior Window.
-    /// Signature: void (string)
+    /// Game Event Editor の Behavior Window を通じて 'OnString' イベントに紐付けられています。
+    /// シグネチャ: void (string)
     /// </summary>
     public void OnMessageReceived(string msg)
     {
         if (logText != null)
-            logText.text = $"Received String: \n<color=yellow>{msg}</color>";
+            logText.text = $"受信した文字列: \n<color=yellow>{msg}</color>";
             
-        Debug.Log($"[Receiver] String Event Processed: {msg}");
+        Debug.Log($"[Receiver] Stringイベントを処理しました: {msg}");
     }
 
     /// <summary>
-    /// Bound to 'OnVector3' event via Game Event Editor's Behavior Window.
-    /// Signature: void (Vector3)
+    /// Game Event Editor の Behavior Window を通じて 'OnVector3' イベントに紐付けられています。
+    /// シグネチャ: void (Vector3)
     /// </summary>
     public void OnMoveReceived(Vector3 pos)
     {
         if (movingCube != null)
             movingCube.localPosition = pos;
             
-        Debug.Log($"[Receiver] Moving Cube to: {pos}");
+        Debug.Log($"[Receiver] キューブを移動しました: {pos}");
     }
 
     /// <summary>
-    /// Bound to 'OnGameObject' event via Game Event Editor's Behavior Window.
-    /// Signature: void (GameObject)
+    /// Game Event Editor の Behavior Window を通じて 'OnGameObject' イベントに紐付けられています。
+    /// シグネチャ: void (GameObject)
     /// </summary>
     public void OnSpawnReceived(GameObject prefab)
     {
         if (prefab != null && spawnPoint != null)
         {
-            // Clear previous spawn
+            // 前回のスポーンをクリア
             if (spawnPoint.childCount > 0)
             {
                 foreach(Transform child in spawnPoint) 
@@ -334,62 +334,62 @@ public class BasicTypesEventReceiver : MonoBehaviour
             }
 
             Instantiate(prefab, spawnPoint.position, Quaternion.identity, spawnPoint);
-            Debug.Log($"[Receiver] Spawned Instance of: {prefab.name}");
+            Debug.Log($"[Receiver] プレハブのインスタンスをスポーンしました: {prefab.name}");
         }
     }
 
     /// <summary>
-    /// Bound to 'OnMaterial' event via Game Event Editor's Behavior Window.
-    /// Signature: void (Material)
+    /// Game Event Editor の Behavior Window を通じて 'OnMaterial' イベントに紐付けられています。
+    /// シグネチャ: void (Material)
     /// </summary>
     public void OnMaterialReceived(Material mat)
     {
         if (changingCubeRenderer != null && mat != null)
         {
             changingCubeRenderer.material = mat;
-            Debug.Log($"[Receiver] Material Changed to: {mat.name}");
+            Debug.Log($"[Receiver] マテリアルを変更しました: {mat.name}");
         }
     }
 }
 ```
 
-**Key Points:**
-- 🎯 **Signature Matching** - Each method parameter must match the event type exactly
-- 🔒 **Type Safety** - Editor's Behavior Window only shows compatible methods
-- 🎨 **Direct Usage** - Received data can be used immediately (no casting needed)
-- 🔇 **Decoupling** - Receiver has no knowledge of the sender
+**ポイント:**
+- 🎯 **シグネチャの一致** - 各メソッドのパラメータはイベントの型と完全に一致する必要があります。
+- 🔒 **型安全性** - エディタの Behavior Window は互換性のあるメソッドのみを表示します。
+- 🎨 **直接利用** - 受信したデータはキャストなしでそのまま使用できます。
+- 🔇 **デカップリング** - 受信側は発行側が誰であるかを知りません。
 
 ---
 
-## 🔑 Key Takeaways
+## 🔑 重要なまとめ
 
-| Concept               | Implementation                                               |
-| --------------------- | ------------------------------------------------------------ |
-| 🎯 **Generic Events**  | `GameEvent<T>` supports any serializable type                |
-| 🔒 **Type Safety**     | Editor enforces matching types at configuration time         |
-| 🏭 **Auto-Generation** | No manual event class creation needed                        |
-| 📦 **Data Passing**    | `.Raise(value)` passes typed parameters seamlessly           |
-| 🔄 **Flexibility**     | One system handles strings, vectors, objects, materials, and more |
+| コンセプト            | 実装内容                                                     |
+| ---------------------- | ------------------------------------------------------------ |
+| 🎯 **ジェネリックイベント** | `GameEvent<T>` はあらゆるシリアライズ可能な型をサポートします |
+| 🔒 **型安全性**         | エディタは設定時に一致する型を強制します                     |
+| 🏭 **自動生成**         | イベントクラスの手動作成は不要です                           |
+| 📦 **データの受け渡し** | `.Raise(value)` が型付きパラメータをシームレスに渡します     |
+| 🔄 **柔軟性**           | 文字列、ベクトル、オブジェクト、マテリアルなどを一つのシステムで扱えます |
 
-:::note 🎓 Design Insight
+:::note 🎓 設計の洞察
 
-The generic system eliminates boilerplate code. Instead of creating `StringGameEvent`, `Vector3GameEvent`, etc., you simply use `GameEvent<T>` with any type. The system handles code generation and type enforcement automatically!
+ジェネリックシステムにより、ボイラープレートコード（定型コード）が排除されます。`StringGameEvent` や `Vector3GameEvent` などを個別に作成する代わりに、任意の型で `GameEvent<T>` を使用するだけです。システムがコード生成と型チェックを自動的に処理します！
 
 :::
 
 ---
 
-## 🎯 What's Next?
+## 🎯 次のステップは？
 
-You've learned how to pass built-in types. But what about **your own custom classes**?
+組み込み型を渡す方法は分かりました。では、**独自のカスタムクラス**についてはどうでしょうか？
 
-**Next Chapter**: Create events with custom data types in **[03 Custom Type Event](./03-custom-type-event.md)**
+**次の章**: カスタムデータ型でイベントを作成する **[03 カスタム型イベント](./03-custom-type-event.md)**
 
 ---
 
-## 📚 Related Documentation
+## 📚 関連ドキュメント
 
-- **[Game Event Creator](../visual-workflow/game-event-creator.md)** - How to create generic events in the Editor
-- **[Game Event Behavior](../visual-workflow/game-event-behavior.md)** - Detailed guide to callback binding
-- **[Raising Events](../scripting/raising-and-scheduling.md)** - API reference for `.Raise()` methods
-- **[API Reference](../scripting/api-reference.md)** - Complete generic event API
+- **[Game Event Creator](../visual-workflow/game-event-creator.md)** - エディタでジェネリックイベントを作成する方法
+- **[Game Event Behavior](../visual-workflow/game-event-behavior.md)** - コールバックバインディングの詳細ガイド
+- **[イベントの発行](../scripting/raising-and-scheduling.md)** - `.Raise()` メソッドのAPIリファレンス
+- **[APIリファレンス](../scripting/api-reference.md)** - 完全なジェネリックイベントAPI

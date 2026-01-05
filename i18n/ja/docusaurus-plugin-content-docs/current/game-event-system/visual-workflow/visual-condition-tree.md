@@ -1,5 +1,5 @@
 ﻿---
-sidebar_label: 'Visual Condition Tree'
+sidebar_label: 'ビジュアル条件ツリー'
 sidebar_position: 8
 ---
 
@@ -8,65 +8,63 @@ import TabItem from '@theme/TabItem';
 
 # Visual Condition Tree
 
-Build complex boolean logic **visually** to control whether event actions should execute. Create sophisticated runtime checks through an intuitive interface—no coding required.
+イベントアクションが実行されるべきかどうかを制御するために、複雑なブール論理を**視覚的に**構築します。直感的なインターフェースを通じて洗練された実行時チェックを作成—コーディング不要。
 
 ![Visual Condition Tree](/img/game-event-system/visual-workflow/visual-condition-tree/condition-tree-overview.png)
 
 ---
 
-## 🎯 Overview
+## 🎯 概要
 
-The Visual Condition Tree is a **logic gate system** that evaluates runtime conditions before executing event actions.
+ビジュアル条件ツリーは、イベントアクションを実行する前に実行時条件を評価する**ロジックゲートシステム**です。
 
-### The Problem It Solves
+### 解決する問題
 
-**Traditional Approach** (scattered logic):
-
+**従来のアプローチ**(分散したロジック):
 ```csharp
-// Logic buried in scripts, hard to modify
+// ロジックがスクリプトに埋め込まれ、変更が困難
 if (damageInfo.amount > 20 && 
     (damageInfo.isCritical || damageInfo.type == DamageType.Fire) &&
     playerController.Health < 50 &&
     gameManager.IsInCombat()) {
-    // Execute actions
+    // アクションを実行
 }
 ```
 
-**Visual Approach**:
+**ビジュアルアプローチ**:
 
 ![Visual Condition Tree](/img/game-event-system/visual-workflow/visual-condition-tree/condition-tree-example.png)
 
 ------
 
-### Build an example
+### 例を構築
 
-**Event**: `OnPlayerDamaged`
+**イベント**: `OnPlayerDamaged`
 
-**Event Types**:
+**イベント型**:
 
 - `GameEvent<GameObject, DamageInfo>` (GameObject sender)
-- `GameEvent<PlayerStats, DamageInfo>` (Custom sender)
+- `GameEvent<PlayerStats, DamageInfo>` (カスタムsender)
 
-**Data Structures**:
-
+**データ構造**:
 ```csharp
-// Damage type enumeration
+// ダメージ型列挙
 public enum DamageType {
     Physical,
     Fire,
     Void
 }
 
-// Damage information payload
+// ダメージ情報ペイロード
 public class DamageInfo {
-    public float amount;           // Damage value
-    public bool isCritical;        // Critical hit flag
-    public DamageType type;        // Damage type
-    public Vector3 hitPoint;       // Impact location
-    public string attacker;        // Attacker name
+    public float amount;           // ダメージ値
+    public bool isCritical;        // クリティカルヒットフラグ
+    public DamageType type;        // ダメージタイプ
+    public Vector3 hitPoint;       // 衝撃位置
+    public string attacker;        // 攻撃者名
 }
 
-// Custom sender type (alternative to GameObject)
+// カスタムsender型(GameObjectの代替)
 public class PlayerStats {
     public string playerName;
     public int level;
@@ -74,39 +72,38 @@ public class PlayerStats {
 }
 ```
 
-**Goal**: Trigger warning effects when player takes significant damage under specific conditions.
+**目標**: 特定の条件下でプレイヤーが重大なダメージを受けたときに警告エフェクトをトリガー。
 
 ---
 
-### Key Benefits
+### 主な利点
 
-| Feature                | Benefit                                            |
+| 機能                | 利点                                            |
 | ---------------------- | -------------------------------------------------- |
-| 🎨 **Visual Building**  | Designers create logic without code                |
-| 🚀 **High Performance** | Compiles to Expression Trees (zero reflection)     |
-| 🔄 **Reusable**         | Same condition applies to all event actions        |
-| 🧪 **Live Testing**     | Tweak values in Inspector, see results immediately |
-| 🔒 **Type-Safe**        | Auto-validates type compatibility                  |
+| 🎨 **ビジュアル構築**  | デザイナーがコードなしでロジックを作成                |
+| 🚀 **高性能** | Expression Treeにコンパイル(ゼロリフレクション)     |
+| 🔄 **再利用可能**         | 同じ条件がすべてのイベントアクションに適用        |
+| 🧪 **ライブテスト**     | インスペクターで値を調整し、結果をすぐに確認 |
+| 🔒 **型安全**        | 型互換性を自動検証                  |
 
 ---
 
-## 🏗️ Tree Structure
+## 🏗️ ツリー構造
 
-The condition tree is built from **two node types**:
+条件ツリーは**2つのノードタイプ**から構築されます:
 
 ![Node Types](/img/game-event-system/visual-workflow/visual-condition-tree/condition-node-types.png)
 
-### 🌳 Group Nodes
+### 🌳 グループノード
 
-Combine multiple conditions using AND/OR logic.
+AND/ORロジックを使用して複数の条件を結合します。
 
-**Logic Types**:
+**ロジックタイプ**:
 
 <Tabs>
-<TabItem value="and" label="AND Logic" default>
+<TabItem value="and" label="ANDロジック" default>
 
-All child conditions must evaluate to TRUE.
-
+すべての子条件がTRUEと評価される必要があります。
 ```mermaid
 graph LR
   
@@ -114,29 +111,28 @@ graph LR
     classDef cond fill:#b45309,stroke:#020617,stroke-width:2px,color:#ffffff
     classDef success fill:#0f766e,stroke:#042f2e,stroke-width:2px,color:#ffffff,font-weight:bold
 
-    A(📂 AND Group):::group
+    A(📂 ANDグループ):::group
     
     A --> C1(⚔️ Damage > 20):::cond
     A --> C2(🔥 Type == Fire):::cond
     A --> C3(❤️ Health < 50):::cond
 
-    C1 -- "✓" --> R([✅ Result: TRUE]):::success
+    C1 -- "✓" --> R([✅ 結果: TRUE]):::success
     C2 -- "✓" --> R
     C3 -- "✓" --> R
 
     linkStyle 3,4,5 stroke:#10b981,stroke-width:2px
 ```
 
-**Visual**: 🟢 Green border
+**ビジュアル**: 🟢 緑色の枠線
 
-**Use**: "Must satisfy ALL requirements"
+**用途**: 「すべての要件を満たす必要がある」
 
 </TabItem>
 
-<TabItem value="or" label="OR Logic">
+<TabItem value="or" label="ORロジック">
 
-Any child condition can evaluate to TRUE.
-
+任意の子条件がTRUEと評価されることができます。
 ```mermaid
 graph LR
 
@@ -144,13 +140,13 @@ graph LR
     classDef cond fill:#b45309,stroke:#020617,stroke-width:2px,color:#ffffff
     classDef success fill:#0f766e,stroke:#042f2e,stroke-width:2px,color:#ffffff,font-weight:bold
 
-    A(📂 OR Group):::group
+    A(📂 ORグループ):::group
     
     A --> C1(🎯 Is Critical):::cond
     A --> C2(🔥 Type == Fire):::cond
     A --> C3(⚔️ Damage > 100):::cond
 
-    C1 -- "✗" --> R([✅ Result: TRUE]):::success
+    C1 -- "✗" --> R([✅ 結果: TRUE]):::success
     C2 -- "✓" --> R
     C3 -- "✗" --> R
 
@@ -158,17 +154,16 @@ graph LR
     linkStyle 4 stroke:#10b981,stroke-width:3px
 ```
 
-**Visual**: 🟠 Orange border
+**ビジュアル**: 🟠 オレンジ色の枠線
 
-**Use**: "Satisfy ANY requirement"
+**用途**: 「いずれかの要件を満たす」
 
 </TabItem>
 </Tabs>
 
-**Toggle Logic**: Click the logic button (AND/OR) to switch.
+**ロジック切り替え**: ロジックボタン(AND/OR)をクリックして切り替えます。
 
-**Nesting**: Groups can contain other groups—build complex logic with unlimited depth.
-
+**ネスト**: グループは他のグループを含むことができます—無制限の深さで複雑なロジックを構築。
 ```mermaid
 graph LR
 
@@ -177,16 +172,16 @@ graph LR
     classDef nested fill:#334155,stroke:#020617,stroke-width:2px,color:#ffffff
     classDef success fill:#0f766e,stroke:#042f2e,stroke-width:2px,color:#ffffff,font-weight:bold
 
-    ROOT(📂 Root: AND Group):::root
+    ROOT(📂 ルート: ANDグループ):::root
 
-    ROOT --> A(📜 Condition A):::cond
-    ROOT --> OR(📂 Nested: OR Group):::nested
-    ROOT --> D(📜 Condition D):::cond
+    ROOT --> A(📜 条件A):::cond
+    ROOT --> OR(📂 ネスト: ORグループ):::nested
+    ROOT --> D(📜 条件D):::cond
 
-    OR --> B(📜 Condition B):::cond
-    OR --> C(📜 Condition C):::cond
+    OR --> B(📜 条件B):::cond
+    OR --> C(📜 条件C):::cond
 
-    A --> RES([✅ Logic Result]):::success
+    A --> RES([✅ ロジック結果]):::success
     B --> OR_OUT(( ))
     C --> OR_OUT
     OR_OUT --> RES
@@ -196,71 +191,70 @@ graph LR
     linkStyle 4,5 stroke:#94a3b8,stroke-width:1px
 ```
 
-**Add Nodes**: Use **+ Condition** or **+ Group** buttons on each group.
+**ノードを追加**: 各グループの**+ Condition**または**+ Group**ボタンを使用します。
 
 ---
 
-### ⚖️ Comparison Nodes
+### ⚖️ 比較ノード
 
-**Comparison Nodes** are the fundamental building blocks of your event logic. Each node performs a single **boolean check** (True/False) to determine if the event actions should proceed.
+**比較ノード**は、イベントロジックの基本的な構成要素です。各ノードは、イベントアクションが続行すべきかどうかを判断するために、単一の**ブールチェック**(True/False)を実行します。
 
-#### 🏗️ Anatomy of a Comparison
+#### 🏗️ 比較の構造
 
-Every node follows a standard tripartite structure, making complex logic easy to read at a glance.
+すべてのノードは標準的な三部構造に従っており、複雑なロジックを一目で読みやすくしています。
 
-> **[ 🟦 Source(Left Operand) ]**  **[ Operator ]**  **[ 🟧 Target (Right Operand) ]** 
+> **[ 🟦 ソース(左オペランド) ]**  **[ 演算子 ]**  **[ 🟧 ターゲット(右オペランド) ]** 
 
-**Practical Example:**
-Imagine an event that only triggers if a hit is powerful enough:
+**実用例:**
+ヒットが十分に強力な場合にのみトリガーするイベントを想像してください:
 Argument.amount  **>**  20.0
 
-- **🔍 Source:** Argument.amount — The raw damage value passed by the `GameEvent<float>`
-- **📐 Operator:** > — The logical rule (Greater Than)
-- **🎯 Target:** 20.0 — The constant threshold or another variable to compare against
+- **🔍 ソース:** Argument.amount — `GameEvent<float>`によって渡される生のダメージ値
+- **📐 演算子:** > — 論理ルール(より大きい)
+- **🎯 ターゲット:** 20.0 — 比較する定数閾値または別の変数
 
 ------
 
-#### 👓 View Modes
+#### 👓 表示モード
 
-The editor UI adapts to your needs, balancing **readability** with **precision control**.
+エディターUIはニーズに適応し、**可読性**と**精密制御**のバランスを取ります。
 
-| View Mode       | Visual Style                            | Best For...                                |
+| 表示モード       | ビジュアルスタイル                            | 最適な用途...                                |
 | --------------- | --------------------------------------- | ------------------------------------------ |
-| 📖 **Collapsed** | **Summary Text** (e.g., Health < 50)    | Quick overview of complex logic chains.    |
-| 🛠️ **Expanded**  | **Detailed Editor** (Dropdowns, Fields) | Modifying specific parameters and sources. |
+| 📖 **折りたたみ** | **要約テキスト**(例: Health < 50)    | 複雑なロジックチェーンの概要。    |
+| 🛠️ **展開**  | **詳細エディター**(ドロップダウン、フィールド) | 特定のパラメータとソースの変更。 |
 
-:::tip **Interaction Hint**
-Simply **Click** on any comparison block to toggle between these two views. This allows you to keep your workspace clean while retaining the ability to deep-dive into settings.
+:::tip **操作ヒント**
+任意の比較ブロックを**クリック**するだけで、これら2つのビュー間を切り替えられます。これにより、設定に深く入る能力を保持しながら、ワークスペースをクリーンに保つことができます。
 :::
 
 ---
 
-## **📝** Structure Configuration
+## **📝** 構造設定
 
 <details>
-<summary>📌 Source</summary>
+<summary>📌 ソース</summary>
 
 <Tabs>
-<TabItem value="event-arg" label="Event Argument" default>
+<TabItem value="event-arg" label="イベント引数" default>
 
-### 🧬 Event Argument (Data Payload)
+### 🧬 イベント引数(データペイロード)
 
-The **Argument** system allows you to drill down into the event's data payload to extract specific values for conditions and actions.
+**Argument**システムにより、イベントのデータペイロードを詳しく調べて、条件とアクションのための特定の値を抽出できます。
 
-:::info **Availability**
-Data access is exclusive to typed events: `GameEvent<T>` or `GameEvent<TSender, TArgs>`.
+:::info **利用可能性**
+データアクセスは型付きイベント専用です: `GameEvent<T>`または`GameEvent<TSender, TArgs>`。
 :::
 
-#### 🔢 Single Parameter Events
+#### 🔢 シングルパラメータイベント
 
-**Signature:** `GameEvent<DamageInfo>`
+**シグネチャ:** `GameEvent<DamageInfo>`
 
-When an event carries a single object, you can access the object itself or any of its public members.
+イベントが単一のオブジェクトを運ぶ場合、オブジェクト自体またはそのパブリックメンバーのいずれかにアクセスできます。
 
-**Data Structure Example:**
-
+**データ構造例:**
 ```
-📦 (this Argument)      ➔ Full DamageInfo object
+📦 (this Argument)      ➔ 完全なDamageInfoオブジェクト
 ├── 🔢 amount           ➔ float
 ├── ✅ isCritical       ➔ bool
 ├── 🏷️ type             ➔ DamageType (Enum)
@@ -270,21 +264,20 @@ When an event carries a single object, you can access the object itself or any o
 
 ------
 
-#### 👥 Sender Events (Context-Aware)
+#### 👥 Senderイベント(コンテキスト認識)
 
-Sender events provide two distinct roots for data access: **Sender** (Who) and **Argument** (What).
+Senderイベントは、データアクセスのための2つの異なるルートを提供します: **Sender**(誰)と**Argument**(何)。
 
-##### 🎮 Case A: GameObject Sender
+##### 🎮 ケースA: GameObject Sender
 
-**Signature:** `GameEvent<GameObject, DamageInfo>`
+**シグネチャ:** `GameEvent<GameObject, DamageInfo>`
 
-| Root         | Path Example              | Data Type |
+| ルート         | パス例              | データ型 |
 | ------------ | ------------------------- | --------- |
 | **Sender**   | Sender.Transform.position | Vector3   |
 | **Argument** | Argument.amount           | float     |
 
-**Visual Hierarchy:**
-
+**ビジュアル階層:**
 ```
 👥 Sender
    ├── 🆔 tag           ➔ string
@@ -297,141 +290,135 @@ Sender events provide two distinct roots for data access: **Sender** (Who) and *
    └── ✅ isCritical    ➔ bool
 ```
 
-##### 🛡️ Case B: Custom C# Sender (Advanced)
+##### 🛡️ ケースB: カスタムC# Sender(高度)
 
-**Signature:** `GameEvent<PlayerStats, DamageInfo>`
+**シグネチャ:** `GameEvent<PlayerStats, DamageInfo>`
 
-> 🚀 **Why it's special:** Unlike traditional systems, you are not tied to GameObjects. Use any **Pure C# Class** as a sender for decoupled, logic-first architecture.
+> 🚀 **なぜ特別か:** 従来のシステムとは異なり、GameObjectに縛られません。疎結合でロジック優先のアーキテクチャのために、任意の**Pure C#クラス**をSenderとして使用できます。
 
-- 💎 **Pure Logic** — Works with non-MonoBehaviour classes.
-- 🌐 **Network Ready** — Ideal for PlayerData or NetworkAgent sync.
-- 🤖 **AI Agents** — Track internal state without scene dependencies.
+- 💎 **純粋なロジック** — MonoBehaviourでないクラスで動作します。
+- 🌐 **ネットワーク対応** — PlayerDataまたはNetworkAgent同期に最適。
+- 🤖 **AIエージェント** — シーン依存なしで内部状態を追跡。
 
 ------
 
-#### 🧭 Deep Property Access
+#### 🧭 深いプロパティアクセス
 
-**Precision Navigation.** Navigate nested structures up to **5 levels deep** with high-performance reflection.
+**精密ナビゲーション。** 高性能リフレクションで**5レベルの深さ**までネストされた構造をナビゲート。
 
-**Example: Directional Check**
+**例: 方向チェック**
 
-- **Path:** Argument.hitPoint.normalized.x
-- **Condition:** > 0.5
-- **Result:** 🎯 "Hit came from the right side."
+- **パス:** Argument.hitPoint.normalized.x
+- **条件:** > 0.5
+- **結果:** 🎯 「ヒットは右側から来ました。」
 
-**Breadcrumb Logic:**
+**ブレッドクラムロジック:**
 Argument (DamageInfo) ➔ hitPoint (Vector3) ➔ normalized (Vector3) ➔ x (float)
 
 ------
 
-#### 📋 Supported Types
+#### 📋 サポートされている型
 
-The system automatically support below types:
+システムは以下の型を自動的にサポートします:
 
-| Category       | Supported Types                                   |
+| カテゴリ       | サポートされている型                                   |
 | -------------- | ------------------------------------------------- |
-| **Primitives** | int, float, double, long, bool, string            |
-| **Math**       | Vector2, Vector3, Quaternion, Color               |
-| **Unity**      | GameObject, Transform, Component references       |
-| **Logic**      | Enums (with dropdowns), [Serializable] C# Classes |
+| **プリミティブ** | int、float、double、long、bool、string            |
+| **数学**       | Vector2、Vector3、Quaternion、Color               |
+| **Unity**      | GameObject、Transform、Component参照       |
+| **ロジック**      | Enum(ドロップダウン付き)、[Serializable] C#クラス |
 
-:::tip **Pro Tip: Custom Classes**
-Any public **Field** or **Property** in a [Serializable] class is automatically exposed in the deep-link picker.
+:::tip **プロのヒント: カスタムクラス**
+[Serializable]クラス内の任意のパブリック**フィールド**または**プロパティ**は、ディープリンクピッカーで自動的に公開されます。
 :::
 
 </TabItem>
 
-<TabItem value="scene-type" label="Scene Type">
+<TabItem value="scene-type" label="シーンタイプ">
 
-### **🎬** Scene Type
+### **🎬** シーンタイプ
 
-Access runtime data from GameObjects or Components in the scene.
-
----
-
-#### How to Use
-
-**Step 1**: Drag GameObject or Component from Hierarchy into the object field.
-
-**Step 2**: Click "Select Property..." to browse available members.
+シーン内のGameObjectまたはComponentから実行時データにアクセスします。
 
 ---
 
-#### GameObject Example
+#### 使用方法
 
-Drag `PlayerController` GameObject:
+**ステップ1**: HierarchyからGameObjectまたはComponentをオブジェクトフィールドにドラッグします。
 
+**ステップ2**: 「Select Property...」をクリックして利用可能なメンバーを参照します。
+
+---
+
+#### GameObject例
+
+`PlayerController` GameObjectをドラッグ:
 ```
-📦 GameObject (Instance)
-├─ 📦 (this GameObject)    ➔ The reference itself
+📦 GameObject (インスタンス)
+├─ 📦 (this GameObject)    ➔ 参照自体
 ├─ ✅ activeSelf           ➔ bool
 ├─ 🔤 tag                  ➔ string
 └─ 🔢 layer                ➔ int
 
-📐 Transform (Component)
+📐 Transform (コンポーネント)
 ├─ 📍 position             ➔ Vector3
 ├─ 📏 localScale           ➔ Vector3
 └─ 📂 childCount           ➔ int
 
-🧩 PlayerController (Script)
+🧩 PlayerController (スクリプト)
 ├─ 🔢 Health               ➔ float
 ├─ 🛡️ Shield               ➔ float
 ├─ 🏅 Level                ➔ int
 ├─ ✅ HasFireResistance    ➔ bool
 │
-├─ ⚡ IsInDangerZone()      ➔ bool (Method)
-└─ ⚡ IsCriticallyWounded() ➔ bool (Method)
+├─ ⚡ IsInDangerZone()      ➔ bool (メソッド)
+└─ ⚡ IsCriticallyWounded() ➔ bool (メソッド)
 ```
 
-**Usage**:
-
+**使用法**:
 ```
-Player.Health < 50                  → Health check
-Player.Level >= 10                  → Level requirement
-Player.IsInDangerZone() == true     → Complex check via method
+Player.Health < 50                  → ヘルスチェック
+Player.Level >= 10                  → レベル要件
+Player.IsInDangerZone() == true     → メソッド経由の複雑なチェック
 ```
 
 ---
 
-#### Bool Method Support ✨
+#### Boolメソッドサポート ✨
 
-**Zero-parameter methods** returning `bool` appear in the dropdown!
+`bool`を返す**ゼロパラメータメソッド**がドロップダウンに表示されます!
 
-**Example**:
-
+**例**:
 ```csharp
-// In your component
+// コンポーネント内
 public bool IsInDangerZone() {
     return Health < 20 && Shield == 0 && !IsInvincible;
 }
 ```
 
-**In Condition Tree**:
-
+**条件ツリー内**:
 ```
 Player.IsInDangerZone() == true
 ```
 
-This encapsulates complex logic in a single method call instead of building it visually.
+これにより、視覚的に構築する代わりに、単一のメソッド呼び出しで複雑なロジックをカプセル化できます。
 
 ---
 
-#### Component Example
+#### Component例
 
-Drag `GameManager` Component:
-
+`GameManager` Componentをドラッグ:
 ```
-🏛️ GameManager (Global System)
+🏛️ GameManager (グローバルシステム)
 ├─ 🔄 CurrentState        ➔ GameState (Enum)
 ├─ 🌊 CurrentWave         ➔ int
 ├─ 🏅 DifficultyLevel     ➔ int
 │
-├─ ⚡ IsInCombat()         ➔ bool (Method)
-└─ ⚡ IsHardMode()         ➔ bool (Method)
+├─ ⚡ IsInCombat()         ➔ bool (メソッド)
+└─ ⚡ IsHardMode()         ➔ bool (メソッド)
 ```
 
-**Usage**:
-
+**使用法**:
 ```
 GameManager.CurrentState == Playing
 GameManager.IsInCombat() == true
@@ -440,74 +427,70 @@ GameManager.DifficultyLevel >= 3
 
 ---
 
-#### Important Limitation
+#### 重要な制限
 
-⚠️ **Scene Type requires objects to exist at scene load time.**
-
+⚠️ **シーンタイプは、シーンロード時にオブジェクトが存在する必要があります。**
 ```
-✅ Works: Objects in scene hierarchy (exist at initialization)
-❌ Fails: Runtime-instantiated objects (don't exist yet)
+✅ 動作: シーン階層内のオブジェクト(初期化時に存在)
+❌ 失敗: 実行時にインスタンス化されたオブジェクト(まだ存在しない)
 
-Solution: Use Event Argument for runtime objects
+解決策: 実行時オブジェクトにはイベント引数を使用
 ```
 
 </TabItem>
 
-<TabItem value="random" label="Random Type">
+<TabItem value="random" label="ランダムタイプ">
 
-### **🎲** Random Type
+### **🎲** ランダムタイプ
 
-**Purpose**: Generate random values at execution time.
+**目的**: 実行時にランダム値を生成します。
 
 ---
 
-#### Two Modes
+#### 2つのモード
 
-**Mode 1: Range**
+**モード1: 範囲**
 
-Generate random number within bounds.
+境界内でランダム数値を生成します。
 
 ![Visual Condition Tree](/img/game-event-system/visual-workflow/visual-condition-tree/condition-tree-random-value.png)
 
-**Configuration**:
+**構成**:
 
-- **Min**: Lower bound
-- **Max**: Upper bound  
-- **Integer**: Check for whole numbers, uncheck for decimals
+- **Min**: 下限
+- **Max**: 上限  
+- **Integer**: 整数の場合はチェック、小数の場合はチェックを外す
 
 ---
 
-**Mode 2: List**
+**モード2: リスト**
 
-Pick random item from predefined values.
+事前定義された値からランダムアイテムを選択します。
 
 ![Visual Condition Tree](/img/game-event-system/visual-workflow/visual-condition-tree/condition-tree-random-list.png)
 
-**Configuration**:
+**構成**:
 
-- **Data Type**: Choose type (int, float, string, bool, etc.)
-- **List Items**: Add/remove values with +/- buttons
+- **Data Type**: 型を選択(int、float、string、boolなど)
+- **List Items**: +/-ボタンで値を追加/削除
 
 ---
 
-#### Use Cases
+#### 使用例
 
-**Critical Hit Chance**:
-
+**クリティカルヒット確率**:
 ```
-Random(0~100) > 90  → 10% chance
-```
-
-**Damage Variance**:
-
-```
-Random(0~10) → Add random bonus damage
+Random(0~100) > 90  → 10%の確率
 ```
 
-**Dynamic Events**:
-
+**ダメージばらつき**:
 ```
-Random List[Easy, Normal, Hard] → Randomize difficulty
+Random(0~10) → ランダムボーナスダメージを追加
+```
+
+**動的イベント**:
+```
+Random List[Easy, Normal, Hard] → 難易度をランダム化
 ```
 
 </TabItem>
@@ -516,91 +499,86 @@ Random List[Easy, Normal, Hard] → Randomize difficulty
 </details>
 
 <details>
-<summary>📌 Operator</summary>
+<summary>📌 演算子</summary>
 
 
-### **📐** Available Operators
+### **📐** 利用可能な演算子
 
-**Numeric (6)**
+**数値(6)**
 
-For numbers (int, float, double, long):
+数値用(int、float、double、long):
 
-| Operator         | Symbol | Example         |
+| 演算子         | シンボル | 例         |
 | ---------------- | ------ | --------------- |
-| Equals           | `==`   | `Health == 100` |
-| Not Equals       | `!=`   | `Health != 0`   |
-| Greater          | `>`    | `Damage > 20`   |
-| Less             | `<`    | `Health < 50`   |
-| Greater Or Equal | `>=`   | `Level >= 10`   |
-| Less Or Equal    | `<=`   | `Shield <= 0`   |
+| 等しい           | `==`   | `Health == 100` |
+| 等しくない       | `!=`   | `Health != 0`   |
+| より大きい          | `>`    | `Damage > 20`   |
+| より小さい             | `<`    | `Health < 50`   |
+| 以上 | `>=`   | `Level >= 10`   |
+| 以下    | `<=`   | `Shield <= 0`   |
 
-**Auto-Conversion**: Compatible numeric types convert automatically (int ↔ float).
+**自動変換**: 互換性のある数値型は自動的に変換されます(int ↔ float)。
 
 ---
 
-**String (4)**
+**文字列(4)**
 
-For text values:
+テキスト値用:
 
-| Operator    | Symbol         | Example                      |
+| 演算子    | シンボル         | 例                      |
 | ----------- | -------------- | ---------------------------- |
-| Equals      | `==`           | `Name == "Hero"`             |
-| Not Equals  | `!=`           | `Tag != "Enemy"`             |
-| Starts With | `Starts With`  | `Name Starts With "Player_"` |
-| Ends With   | `Ends With`    | `File Ends With ".png"`      |
-| Contains    | `Contains (⊃)` | `Message Contains "error"`   |
+| 等しい      | `==`           | `Name == "Hero"`             |
+| 等しくない  | `!=`           | `Tag != "Enemy"`             |
+| で始まる | `Starts With`  | `Name Starts With "Player_"` |
+| で終わる   | `Ends With`    | `File Ends With ".png"`      |
+| 含む    | `Contains (⊃)` | `Message Contains "error"`   |
 
-⚠️ **Case-sensitive**: "Hero" ≠ "hero"
+⚠️ **大文字小文字を区別**: "Hero" ≠ "hero"
 
 ---
 
-**Enum Support**
+**Enumサポート**
 
-Full enumeration support with dropdown selection!
+ドロップダウン選択付きの完全な列挙サポート!
 
-**Example**:
-
+**例**:
 ```csharp
 public enum DamageType { Physical, Fire, Void }
 ```
 
-**In Condition Tree**:
-
+**条件ツリー内**:
 ```
-Source: Argument.type (DamageType)
-Operator: ==
-Target: DamageType.Fire (dropdown shows Physical/Fire/Void)
+ソース: Argument.type (DamageType)
+演算子: ==
+ターゲット: DamageType.Fire (ドロップダウンにPhysical/Fire/Voidを表示)
 ```
 
-**With Lists**:
-
+**リストと共に**:
 ```
 Argument.type In List [Fire, Void]
-Result: TRUE if type is DamageType.Fire OR DamageType.Void
+結果: typeがDamageType.FireまたはDamageType.Voidの場合TRUE
 ```
 
-**Supported Operators**: `==`, `!=`, `In List (∈)`
+**サポートされている演算子**: `==`、`!=`、`In List (∈)`
 
 ---
 
-**Collection (1)**
+**コレクション(1)**
 
-Check list/array membership:
+リスト/配列メンバーシップをチェック:
 
-| Operator | Symbol | Purpose                       |
+| 演算子 | シンボル | 目的                       |
 | -------- | ------ | ----------------------------- |
-| In List  | `∈`    | Check if value exists in list |
+| In List  | `∈`    | 値がリストに存在するかをチェック |
 
-**Structure**:
-
+**構造**:
 ```
-Source: Single value
-Operator: In List (∈)
-Target: List/Array (matching type)
+ソース: 単一値
+演算子: In List (∈)
+ターゲット: リスト/配列(一致する型)
 ```
 
-**Examples**:
-
+**例**:
 ```
 Argument.attacker In List ["Dragon", "Demon", "Lich"]
 Player.Level In List [10, 20, 30, 40, 50]
@@ -610,112 +588,109 @@ Argument.type In List [Fire, Void]
 </details>
 
 <details>
-<summary>📌 Target</summary>
+<summary>📌 ターゲット</summary>
 <Tabs>
-<TabItem value="event-arg" label="Event Argument" default>
+<TabItem value="event-arg" label="イベント引数" default>
 
-### 🧬 Event Argument (Data Payload)
+### 🧬 イベント引数(データペイロード)
 
-:::tip Same as Source
+:::tip ソースと同じ
 
-Like Source, please refer to the relevant configuration introduction in Source for specific details
-
-:::
-
-</TabItem>
-
-<TabItem value="scene-type" label="Scene Type">
-
-### **🎬** Scene Type
-
-:::tip Same as Source
-
-Like Source, please refer to the relevant configuration introduction in Source for specific details
+ソースと同様に、具体的な詳細についてはソースの関連する構成説明を参照してください
 
 :::
 
 </TabItem>
 
-<TabItem value="random" label="Random Type">
+<TabItem value="scene-type" label="シーンタイプ">
 
-### **🎲** Random Type
+### **🎬** シーンタイプ
 
-:::tip Same as Source
+:::tip ソースと同じ
 
-Like Source, please refer to the relevant configuration introduction in Source for specific details
+ソースと同様に、具体的な詳細についてはソースの関連する構成説明を参照してください
 
 :::
 
 </TabItem>
 
-<TabItem value="constant" label="Constant">
+<TabItem value="random" label="ランダムタイプ">
 
-### **📌** Constant
+### **🎲** ランダムタイプ
 
-Fixed comparison value.
+:::tip ソースと同じ
 
-**Note**: Only available as **Target** (right side), not Source.
+ソースと同様に、具体的な詳細についてはソースの関連する構成説明を参照してください
+
+:::
+
+</TabItem>
+
+<TabItem value="constant" label="定数">
+
+### **📌** 定数
+
+固定比較値。
+
+**注意**: **ターゲット**(右側)としてのみ使用可能、ソースではありません。
 
 ---
 
-#### Two Modes
+#### 2つのモード
 
-**Mode 1: Single Value**
+**モード1: 単一値**
 
-Enter one fixed value.
+1つの固定値を入力します。
 
 ![Visual Condition Tree](/img/game-event-system/visual-workflow/visual-condition-tree/condition-tree-constant-value.png)
 
-**Data Types**: Int, Float, Double, String, Bool
+**データ型**: Int、Float、Double、String、Bool
 
 ---
 
-**Mode 2: List**
+**モード2: リスト**
 
-Define multiple acceptable values (for "In List" operator).
+複数の許容値を定義します(「In List」演算子用)。
 
 ![Visual Condition Tree](/img/game-event-system/visual-workflow/visual-condition-tree/condition-tree-constant-list.png)
 
-**Configuration**:
+**構成**:
 
-- **Data Type**: Type for all list items
-- **+ / -**: Add/remove items
+- **Data Type**: すべてのリストアイテムの型
+- **+ / -**: アイテムを追加/削除
 
 ---
 
-#### Use Cases
+#### 使用例
 
-**Thresholds**:
-
+**閾値**:
 ```
 Health < 50.0
 ```
 
-**Exact Matches**:
-
+**完全一致**:
 ```
 Name == "Hero"
 ```
 
-**Multiple Values**:
-
+**複数値**:
 ```
 Type In List [Fire, Void, Lightning]
 ```
 
-:::tip **Key difference**
+:::tip **主な違い**
 
-Additional support type: Constant Type**（only available for Target）**
+追加サポート型: 定数型**（ターゲットのみ利用可能）**
 
 :::
 
-:::tip **Context-Aware**
+:::tip **コンテキスト認識**
 
-Some operators restrict target type:
+一部の演算子はターゲット型を制限します:
 
-- Numeric operators (`>`, `<`, etc.) require single values
+- 数値演算子(`>`、`<`など)は単一値が必要
 
-- "In List" operator requires list types
+- 「In List」演算子はリスト型が必要
 
 :::
 
@@ -726,42 +701,39 @@ Some operators restrict target type:
 
 ------
 
-## 🎨 Type Validation
+## 🎨 型検証
 
-The system automatically validates type compatibility.
+システムは型の互換性を自動的に検証します。
 
-**Valid Comparisons**:
-
+**有効な比較**:
 ```
 ✅ int == int
-✅ float > int (auto-converts)
+✅ float > int (自動変換)
 ✅ string Contains string
 ✅ DamageType == Fire (enum)
 ✅ int In List<int>
 ```
 
-**Invalid Comparisons**:
-
+**無効な比較**:
 ```
-❌ string > int (incompatible types)
-❌ bool Contains string (meaningless)
-❌ float In List<string> (type mismatch)
+❌ string > int (互換性のない型)
+❌ bool Contains string (無意味)
+❌ float In List<string> (型の不一致)
 ```
 
-**Visual Feedback**: Red outline + warning text on incompatible types.
+**ビジュアルフィードバック**: 互換性のない型に赤いアウトライン+警告テキスト。
 
 ---
 
-## 🧩 Bool Methods vs Visual Tree
+## 🧩 Boolメソッド vs ビジュアルツリー
 
-Two approaches to building conditions—when to use each?
+条件を構築する2つのアプローチ—それぞれをいつ使用するか?
 
-### Approach 1: Bool Methods
+### アプローチ1: Boolメソッド
 
-**Best for**: Complex multi-step logic.
+**最適**: 複雑な複数ステップロジック。
 
-**Example**:
-
+**例**:
 ```csharp
 public bool IsInDangerZone() {
     bool lowHealth = Health < 20;
@@ -774,49 +746,48 @@ public bool IsInDangerZone() {
 }
 ```
 
-**In Tree**: `Player.IsInDangerZone() == true`
+**ツリー内**: `Player.IsInDangerZone() == true`
 
-**Pros**:
+**長所**:
 
-- Encapsulates complexity
-- Can use Physics, raycasts
-- Unit testable
-- Code reusable
+- 複雑さをカプセル化
+- Physics、raycastsを使用可能
+- ユニットテスト可能
+- コードの再利用可能
 
-**Cons**:
+**短所**:
 
-- Requires C# coding
-- Designers can't modify
+- C#コーディングが必要
+- デザイナーが変更不可
 
 ---
 
-### Approach 2: Visual Tree
+### アプローチ2: ビジュアルツリー
 
-**Best for**: Simple checks designers should control.
+**最適**: デザイナーが制御すべきシンプルなチェック。
 
-**Example**:
-
+**例**:
 ```mermaid
 graph LR
 
-    A(📂 AND Group):::root
+    A(📂 ANDグループ):::root
     
     C1(💔 Health < 20):::cond
     C2(🛡️ Shield == 0):::cond
     C3(🚫 IsInvincible == false):::cond
     
-    R([✅ Result: TRUE]):::success
-    F([❌ Result: FALSE]):::fail
+    R([✅ 結果: TRUE]):::success
+    F([❌ 結果: FALSE]):::fail
 
     A --> C1
     
-    C1 -- Yes --> C2
-    C2 -- Yes --> C3
-    C3 -- Yes --> R
+    C1 -- はい --> C2
+    C2 -- はい --> C3
+    C3 -- はい --> R
 
-    C1 -- No --> F
-    C2 -- No --> F
-    C3 -- No --> F
+    C1 -- いいえ --> F
+    C2 -- いいえ --> F
+    C3 -- いいえ --> F
 
     classDef root fill:#1e40af,stroke:#0f172a,stroke-width:2px,color:#ffffff,font-weight:bold
     classDef cond fill:#b45309,stroke:#78350f,stroke-width:2px,color:#ffffff,font-weight:bold
@@ -826,210 +797,203 @@ graph LR
     linkStyle default stroke:#94a3b8,stroke-width:2px,color:#94a3b8
 ```
 
-**Pros**:
+**長所**:
 
-- No coding needed
-- Designer-friendly
-- Visual representation
-- Quick iteration
+- コーディング不要
+- デザイナーフレンドリー
+- ビジュアル表現
+- 迅速な反復
 
-**Cons**:
+**短所**:
 
-- Can't use Physics/algorithms
-- Large trees get complex
+- Physics/アルゴリズムを使用不可
+- 大きなツリーは複雑化
 
 ---
 
-### Hybrid Approach (Recommended)
+### ハイブリッドアプローチ(推奨)
 
-Combine both for optimal results:
-
+最適な結果のために両方を組み合わせます:
 ```mermaid
 graph LR
 
-    %% 节点定义
-    ROOT(📂 AND Group):::root
+    %% ノード定義
+    ROOT(📂 ANDグループ):::root
     
-    C1("🏷️ Type == Fire<br/>───<br/><sub>Data: Enum</sub>"):::cond
-    C2("👤 Health < 50<br/>───<br/><sub>Source: Player</sub>"):::cond
-    C3("⚙️ IsInCombat<br/>───<br/><sub>Method: Manager</sub>"):::cond
+    C1("🏷️ Type == Fire<br/>───<br/><sub>データ: Enum</sub>"):::cond
+    C2("👤 Health < 50<br/>───<br/><sub>ソース: Player</sub>"):::cond
+    C3("⚙️ IsInCombat<br/>───<br/><sub>メソッド: Manager</sub>"):::cond
     
-    RES_T([✅ Result: TRUE]):::result
-    RES_F([❌ Result: FALSE]):::fail
+    RES_T([✅ 結果: TRUE]):::result
+    RES_F([❌ 結果: FALSE]):::fail
 
-    %% 逻辑连接
+    %% ロジック接続
     ROOT --> C1
     
-    C1 -- Yes --> C2
-    C2 -- Yes --> C3
-    C3 -- Yes --> RES_T
+    C1 -- はい --> C2
+    C2 -- はい --> C3
+    C3 -- はい --> RES_T
 
-    C1 -- No --> RES_F
-    C2 -- No --> RES_F
-    C3 -- No --> RES_F
+    C1 -- いいえ --> RES_F
+    C2 -- いいえ --> RES_F
+    C3 -- いいえ --> RES_F
 
-    %% 样式定义
+    %% スタイル定義
     classDef root fill:#1e40af,stroke:#0f172a,stroke-width:2px,color:#ffffff,font-weight:bold
     classDef cond fill:#b45309,stroke:#78350f,stroke-width:2px,color:#ffffff,font-weight:bold
     classDef result fill:#059669,stroke:#064e3b,stroke-width:2px,color:#ffffff,font-weight:bold
     classDef fail fill:#991b1b,stroke:#450a0a,stroke-width:2px,color:#ffffff,font-weight:bold
 
-    %% 连线样式
+    %% 接続線スタイル
     linkStyle default stroke:#94a3b8,stroke-width:2px,color:#94a3b8
 ```
 
-**Guideline**:
+**ガイドライン**:
 
-- Visual Tree: Thresholds, enums, simple properties
-- Bool Methods: Physics queries, complex algorithms, cross-system checks
-
----
-
-## 🔄 Drag & Reorder
-
-**Change execution order**: Drag the handle (☰) on the left edge of any condition.
-
-**Why Order Matters**:
-
-**AND Groups**: Order doesn't affect result (all must pass).
-
-**OR Groups**: Order affects **short-circuit evaluation** (stops at first TRUE).
-
-**Optimization Example**:
-
-```
-❌ Slow:
-OR Group
-├─ ExpensivePhysicsCheck()  ← Runs first (slow!)
-└─ SimpleBoolCheck          ← May never run
-
-✅ Fast:
-OR Group
-├─ SimpleBoolCheck          ← Runs first (fast!)
-└─ ExpensivePhysicsCheck()  ← Only if needed
-```
-
-Put cheap checks first in OR groups for better performance.
+- ビジュアルツリー: 閾値、enum、シンプルなプロパティ
+- Boolメソッド: Physicsクエリ、複雑なアルゴリズム、クロスシステムチェック
 
 ---
 
-## 🚀 Performance
+## 🔄 ドラッグ&並べ替え
 
-### Compilation Process
+**実行順序を変更**: 任意の条件の左端にあるハンドル(☰)をドラッグします。
 
-**One-time cost** (scene load):
+**順序が重要な理由**:
 
+**ANDグループ**: 順序は結果に影響しません(すべてが合格する必要がある)。
+
+**ORグループ**: 順序は**短絡評価**に影響します(最初のTRUEで停止)。
+
+**最適化例**:
 ```
-Visual Tree → Expression Tree → IL Code → Compiled Lambda
+❌ 遅い:
+ORグループ
+├─ ExpensivePhysicsCheck()  ← 最初に実行(遅い!)
+└─ SimpleBoolCheck          ← 実行されない可能性
+
+✅ 速い:
+ORグループ
+├─ SimpleBoolCheck          ← 最初に実行(速い!)
+└─ ExpensivePhysicsCheck()  ← 必要な場合のみ
 ```
 
-**Runtime execution**:
-
-```
-Event Fires → Call Compiled Lambda → Return TRUE/FALSE
-```
-
-**Benchmark**: Complex nested conditions execute in ~0.001ms (1 microsecond).
+より良いパフォーマンスのために、ORグループで安価なチェックを最初に配置します。
 
 ---
 
-### Why It's Fast
+## 🚀 パフォーマンス
 
-**Zero Reflection**: Direct compiled access like hand-written C#.
+### コンパイルプロセス
 
-**Expression Trees**: System generates optimized IL code at initialization.
-
+**一度だけのコスト**(シーンロード):
 ```
-❌ Traditional: GetComponent() + GetField() + Invoke() per check
-✅ This System: Direct property access via compiled lambda
+ビジュアルツリー → Expression Tree → ILコード → コンパイル済みラムダ
 ```
 
-**Result**: Negligible overhead even with hundreds of events firing per frame.
+**実行時実行**:
+```
+イベント発火 → コンパイル済みラムダを呼び出し → TRUE/FALSEを返す
+```
+
+**ベンチマーク**: 複雑なネストされた条件が約0.001ms(1マイクロ秒)で実行されます。
 
 ---
 
-## 🧹 Tree Management
+### なぜ速いのか
 
-- **Enable/Disable**: Toggle checkbox to bypass all conditions (always TRUE).
-- **Reset Tree**: Click "Reset Tree" button to clear all nodes and start fresh.
+**ゼロリフレクション**: 手書きC#のような直接コンパイルアクセス。
 
-- **Collapse/Expand**: Click comparison blocks to toggle between summary and detail views.
-
----
-
-## ❓ Troubleshooting
-
-### Conditions Always Return False
-
-**Checklist**:
-
-- ✅ Is "Enable Conditions" toggle checked?
-- ✅ Are there red type mismatch warnings?
-- ✅ Are Scene Type references still valid (not destroyed)?
-- ✅ Do bool methods return expected values? (add Debug.Log)
-
----
-
-### Property Not in Dropdown
-
-**For Event Arguments**:
-
-- Must be public field or property
-- Must be supported type
-
-**For Scene Types**:
-
-- GameObject must exist in scene at Editor time
-- Component must be enabled
-- Property must be public
-- Methods must: return bool, zero parameters, public, instance (not static)
-
-**For Runtime Objects**: Use Event Argument instead of Scene Type.
-
----
-
-### Changes Not Saving
-
-**Common Causes**:
-
-- Multiple Behavior Windows open (close duplicates)
-- Script compilation during editing (wait for completion)
-- Unity didn't apply SerializedProperty changes (wait before closing)
-
----
-
-## 📖 Where It's Used
-
-The Visual Condition Tree system appears in **two contexts**:
-
-**1. Event Behaviors** → [Game Event Behavior](./game-event-behavior.md)
-
-Controls whether event actions execute:
-
+**Expression Tree**: システムが初期化時に最適化されたILコードを生成します。
 ```
-Event Fires → Check Conditions → Execute/Skip Actions
+❌ 従来: GetComponent() + GetField() + Invoke() チェックごと
+✅ このシステム: コンパイル済みラムダを介した直接プロパティアクセス
 ```
 
-**2. Flow Nodes** → Flow Node Configuration *(future documentation)*
-
-Controls whether flow nodes execute:
-
-```
-Flow Reaches Node → Check Conditions → Execute/Skip Node
-```
-
-Both use the **exact same** condition tree system.
+**結果**: フレームごとに数百のイベントが発火しても無視できるオーバーヘッド。
 
 ---
 
-:::tip Best Practices
+## 🧹 ツリー管理
 
-**Simple Checks**: Use Visual Tree for thresholds, enums, basic comparisons
+- **有効/無効**: すべての条件をバイパスするためにチェックボックスを切り替えます(常にTRUE)。
+- **ツリーをリセット**: 「Reset Tree」ボタンをクリックして、すべてのノードをクリアして最初からやり直します。
 
-**Complex Logic**: Use Bool Methods for Physics, algorithms, multi-step checks
+- **折りたたみ/展開**: 比較ブロックをクリックして、要約ビューと詳細ビュー間を切り替えます。
 
-**Optimal Approach**: Combine both—visual for simple, methods for complex
+---
 
-**Performance**: Put cheap checks first in OR groups for short-circuit optimization
+## ❓ トラブルシューティング
+
+### 条件が常にFalseを返す
+
+**チェックリスト**:
+
+- ✅ 「Enable Conditions」トグルがチェックされているか?
+- ✅ 赤い型不一致警告はあるか?
+- ✅ シーンタイプ参照はまだ有効か(破棄されていない)?
+- ✅ boolメソッドは期待値を返すか?(Debug.Logを追加)
+
+---
+
+### プロパティがドロップダウンにない
+
+**イベント引数の場合**:
+
+- publicフィールドまたはプロパティである必要がある
+- サポートされている型である必要がある
+
+**シーンタイプの場合**:
+
+- GameObjectがエディター時にシーンに存在する必要がある
+- Componentが有効である必要がある
+- プロパティがpublicである必要がある
+- メソッドは: boolを返す、ゼロパラメータ、public、インスタンス(staticではない)
+
+**実行時オブジェクトの場合**: シーンタイプの代わりにイベント引数を使用。
+
+---
+
+### 変更が保存されない
+
+**一般的な原因**:
+
+- 複数のBehaviorウィンドウが開いている(重複を閉じる)
+- 編集中のスクリプトコンパイル(完了まで待つ)
+- UnityがSerializedPropertyの変更を適用しなかった(閉じる前に待つ)
+
+---
+
+## 📖 使用される場所
+
+ビジュアル条件ツリーシステムは**2つのコンテキスト**で表示されます:
+
+**1. イベントビヘイビア** → [Game Event Behavior](./game-event-behavior.md)
+
+イベントアクションが実行されるかどうかを制御:
+```
+イベント発火 → 条件をチェック → アクションを実行/スキップ
+```
+
+**2. フローノード** → フローノード構成 *(将来のドキュメント)*
+
+フローノードが実行されるかどうかを制御:
+```
+フローがノードに到達 → 条件をチェック → ノードを実行/スキップ
+```
+
+両方とも**まったく同じ**条件ツリーシステムを使用します。
+
+---
+
+:::tip ベストプラクティス
+
+**シンプルなチェック**: 閾値、enum、基本比較にはビジュアルツリーを使用
+
+**複雑なロジック**: Physics、アルゴリズム、複数ステップチェックにはBoolメソッドを使用
+
+**最適なアプローチ**: 両方を組み合わせる—シンプルにはビジュアル、複雑にはメソッド
+
+**パフォーマンス**: 短絡最適化のためにORグループで安価なチェックを最初に配置
 
 :::

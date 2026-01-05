@@ -1,49 +1,49 @@
 ﻿---
-sidebar_label: 'Connection Types & Ports'
+sidebar_label: '接続タイプとポート'
 sidebar_position: 2
 ---
 
 
 
-# Connection Types & Ports
+# 接続タイプとポート (Connection Types & Ports)
 
-Before building flows, you must understand the **visual language** of the graph. Every color, shape, and line style communicates data flow and execution behavior.
+フローを構築する前に、グラフの「視覚言語」を理解する必要があります。色、形状、線のスタイルはすべて、データフローと実行時の振る舞いを表しています。
 
-:::tip Quick Reference
-The legend shown here is also available in the **Flow Editor** (right-side panel). mouse hover anywhere in the legend to see detailed tooltips.
+:::tip クイックリファレンス
+ここに記載されている凡例は、**フローエディタ**（右側のパネル）でも確認できます。凡例内の項目にマウスをホバーすると、詳細なツールチップが表示されます。
 :::
 
 ---
 
-## 🧬 Node Types
+## 🧬 ノードタイプ
 
-A node's **header color** indicates its execution pattern.
+ノードの**ヘッダーの色**は、その実行パターンを示しています。
 
-![Node Types](/img/game-event-system/flow-graph/game-event-node-connector/node-anatomy.png)
+![ノードタイプ](/img/game-event-system/flow-graph/game-event-node-connector/node-anatomy.png)
 
-### Execution Patterns
+### 実行パターン
 
-| Color        | Type             | Behavior                                                     | Use Case                                          |
+| 色            | タイプ             | 振る舞い                                                     | ユースケース                                      |
 | ------------ | ---------------- | ------------------------------------------------------------ | ------------------------------------------------- |
-| 🔴 **Red**    | **Root Node**    | **Entry Point** - Fires when event is raised externally      | Game start, player input, collision detection     |
-| 🟠 **Orange** | **Trigger Node** | **Parallel (Fan-Out)** - Fires and immediately continues (non-blocking) | Sound + VFX + UI updates happening simultaneously |
-| 🟢 **Green**  | **Chain Node**   | **Sequential (Blocking)** - Fires and waits before continuing | Cutscenes, delayed actions, async operations      |
+| 🔴 **赤**    | **ルートノード**    | **エントリポイント** - イベントが外部から発行されたときに開始されます | ゲーム開始、プレイヤー入力、衝突検知               |
+| 🟠 **オレンジ** | **トリガーノード** | **並列 (ファンアウト)** - 発行後、即座に次へ進みます（非ブロッキング） | SE再生 + VFX発生 + UI更新を同時に行う場合           |
+| 🟢 **緑**    | **チェーンノード**   | **直列 (ブロッキング)** - 発行後、完了を待ってから次へ進みます         | カットシーン、遅延アクション、非同期操作           |
 
 ---
 
-### Root Node Rules
+### ルートノードのルール
 
-**One Per Graph**: Each graph has exactly **one** root node.
+**1グラフにつき1つ**: 各グラフには、必ず**1つ**のルートノードが存在します。
 
-**Set Root**: Right-click any node to **Set as Root** to change entry point.
+**ルートの設定**: 任意のノードを右クリックして **"Set as Root"** を選択することで、開始点を変更できます。
 
-**Visual**: Red header gradient makes it instantly recognizable.
+**視覚効果**: 赤いヘッダーグラデーションにより、即座に識別可能です。
 
 ---
 
-### Trigger vs Chain
+### トリガー vs チェーン
 
-**Trigger Pattern** (Parallel):
+**トリガーパターン** (並列):
 
 ```mermaid
 graph TD
@@ -51,11 +51,11 @@ graph TD
     classDef event fill:#1e40af,stroke:#0f172a,stroke-width:2px,color:#ffffff,font-weight:bold
     classDef sideEffect fill:#0f766e,stroke:#042f2e,stroke-width:2px,color:#ffffff
     
-    A("⚡ On Player Death"):::event
+    A("⚡ プレイヤー死亡時"):::event
     
-    B("🔊 Play Sound Effect"):::sideEffect
-    C("🎁 Spawn Particle VFX"):::sideEffect
-    D("📱 Show Victory UI"):::sideEffect
+    B("🔊 効果音を再生"):::sideEffect
+    C("🎁 パーティクルVFXを生成"):::sideEffect
+    D("📱 勝利UIを表示"):::sideEffect
 
     A --- B
     A --- C
@@ -64,13 +64,13 @@ graph TD
     linkStyle default stroke:#94a3b8,stroke-width:2px
 ```
 
-:::info Triggers
+:::info トリガー
 
-All executed in parallel together!
+すべてが同時に並列実行されます！
 
 :::
 
-**Chain Pattern** (Sequential):
+**チェーンパターン** (直列):
 
 ```mermaid
 graph LR
@@ -79,12 +79,12 @@ graph LR
     classDef action fill:#0f766e,stroke:#042f2e,stroke-width:2px,color:#ffffff
     classDef delay fill:#b45309,stroke:#78350f,stroke-width:2px,color:#ffffff,font-style:italic
 
-    A("🚩 Start Cutscene"):::event
-    B("🗔 Wait for Dialogue"):::action
-    C(["⏱ Delay 3.0s"]):::delay
-    D("🎬 Show Next Act<br/>───<br/><sub>Wait for Finish</sub>"):::action
-    E(["⏱ Delay 1.0s"]):::delay
-    F("🎞️ Fade Out"):::action
+    A("🚩 カットシーン開始"):::event
+    B("🗔 ダイアログ待機"):::action
+    C(["⏱ 遅延 3.0s"]):::delay
+    D("🎬 次の幕を表示<br/>───<br/><sub>完了まで待機</sub>"):::action
+    E(["⏱ 遅延 1.0s"]):::delay
+    F("🎞️ フェードアウト"):::action
 
     A --> B
     B --> C
@@ -95,100 +95,100 @@ graph LR
     linkStyle default stroke:#94a3b8,stroke-width:2px
 ```
 
-:::info Chains
+:::info チェーン
 
-Each waits for the previous to finish!
+それぞれが前の処理の完了を待ってから実行されます！
 
 :::
 
 ---
 
-## 🔌 Port Types (Data Signatures)
+## 🔌 ポートタイプ (データシグネチャ)
 
-**Port colors** indicate the C# event signature and data payload.
+**ポートの色**は、C#イベントのシグネチャとデータペイロードを示しています。
 
-![Port Colors](/img/game-event-system/flow-graph/game-event-node-connector/node-ports.png)
+![ポートの色](/img/game-event-system/flow-graph/game-event-node-connector/node-ports.png)
 
-### Port Color Meanings
+### ポートの色の意味
 
-| Color        | Signature          | Description                            | Example Events                                |
+| 色            | シグネチャ          | 説明                            | イベント例                                |
 | ------------ | ------------------ | -------------------------------------- | --------------------------------------------- |
-| 🔵 **Cyan**   | `()`               | **Void** - No data passed              | `OnGameStart`, `OnButtonClick`                |
-| 🌸 **Pink**   | `<T>`              | **Single Argument** - One data payload | `OnScoreChanged(int)`, `OnDamage(DamageInfo)` |
-| 💜 **Purple** | `<TSender, TArgs>` | **Dual Arguments** - Sender + Payload  | `OnPlayerDamaged(GameObject, DamageInfo)`     |
+| 🔵 **シアン**   | `()`               | **Void** - 渡されるデータなし              | `OnGameStart`, `OnButtonClick`                |
+| 🌸 **ピンク**   | `<T>`              | **単一引数** - 1つのデータペイロード | `OnScoreChanged(int)`, `OnDamage(DamageInfo)` |
+| 💜 **パープル** | `<TSender, TArgs>` | **二重引数** - 送信元 + ペイロード  | `OnPlayerDamaged(GameObject, DamageInfo)`     |
 
 ---
 
-### Port Anatomy
+### ポートの構造
 
-- **Left Port** (Input): Receives data from previous node.
-- **Right Port** (Output): Sends data to next node.
+- **左ポート** (入力): 前のノードからデータを受け取ります。
+- **右ポート** (出力): 次のノードへデータを送ります。
 
-## 🔗 Connection Compatibility
+## 🔗 接続の互換性
 
-The system provides **real-time type safety** when creating connections.
+システムは、接続作成時に**リアルタイムの型安全性**を提供します。
 
-![Connection Colors](/img/game-event-system/flow-graph/game-event-node-connector/node-connection.png)
+![接続の色](/img/game-event-system/flow-graph/game-event-node-connector/node-connection.png)
 
-### Compatibility Levels
+### 互換性レベル
 
-| Color        | Status            | Meaning                          | Impact                            |
+| 色            | ステータス            | 意味                          | 影響                            |
 | ------------ | ----------------- | -------------------------------- | --------------------------------- |
-| 🟢 **Green**  | **Perfect Match** | Types match exactly              | Zero overhead, no conversion      |
-| 🟡 **Yellow** | **Compatible**    | Safe operation with data discard | Arguments ignored, no errors      |
-| 🟠 **Orange** | **Warning**       | Type conversion required         | Auto-converts (e.g., int → float) |
-| 🔴 **Red**    | **Incompatible**  | Will fail at runtime             | Connection blocked                |
+| 🟢 **緑**    | **完全一致** | 型が完全に一致しています              | オーバーヘッドなし、変換不要      |
+| 🟡 **黄色** | **互換あり**    | データを破棄して安全に実行可能 | 引数は無視され、エラーは発生しません      |
+| 🟠 **オレンジ** | **警告**       | 型変換が必要         | 自動変換（例：int → float）が行われます |
+| 🔴 **赤**    | **互換性なし**  | 実行時に失敗します             | 接続がブロックされます                |
 
 ---
 
-### Visual Feedback
+### ビジュアルフィードバック
 
-**While Dragging**:
-- Preview line shows compatibility color
-- Invalid targets appear dimmed
-- Valid targets highlight
+**ドラッグ中**:
+- プレビュー線に互換性の色が表示されます
+- 無効なターゲットは暗く表示されます
+- 有効なターゲットはハイライトされます
 
-**After Connection**:
-- Line color persists
-- Warning icon (⚠️) appears for Orange/Red
-- Hover for detailed tooltip
+**接続後**:
+- 線の色が維持されます
+- オレンジ/赤の場合は警告アイコン (⚠️) が表示されます
+- ホバーすると詳細なツールチップが表示されます
 
 ---
 
-## 📊 Compatibility Matrix
+## 📊 互換性マトリクス
 
-Connection color is determined by **Source Type**, **Target Type**, and **Pass Argument** setting.
+接続の色は、**ソース（送信元）の型**、**ターゲット（送信先）の型**、および **Pass Argument（引数を渡す）** 設定によって決定されます。
 
-### Full Compatibility Table
+### 完全互換性テーブル
 
-| Source Event | Target Event | Pass Argument | Result   | Explanation                                     |
+| ソースイベント | ターゲットイベント | 引数を渡す (Pass Argument) | 結果   | 説明                                     |
 | ------------ | ------------ | ------------- | -------- | ----------------------------------------------- |
-| Any          | Any          | **OFF**       | 🟢 Green  | **Override**: Target ignores all input          |
-| Void `()`    | Void `()`    | ON            | 🟢 Green  | Perfect match - no data needed                  |
-| Void `()`    | `<T>`        | ON            | 🔴 Red    | **Error**: Target needs data, source has none   |
-| Void `()`    | `<S,T>`      | ON            | 🔴 Red    | **Error**: Target needs sender, source has none |
-| `<T>`        | Void `()`    | ON            | 🟡 Yellow | **Safe**: Argument discarded                    |
-| `<T>`        | `<T>`        | ON            | 🟢 Green  | Perfect match - same type                       |
-| `<T>`        | `<S,T>`      | ON            | 🔴 Red    | **Error**: Target needs sender, source has none |
-| `<S,T>`      | Void `()`    | ON            | 🟡 Yellow | **Safe**: Both sender & arg discarded           |
-| `<S,T>`      | `<T>`        | ON            | 🟡 Yellow | **Safe**: Sender discarded, arg passes          |
-| `<S,T>`      | `<S,T>`      | ON            | 🟢 Green  | Perfect match - sender + arg                    |
-| `<T1>`       | `<T2>`       | ON            | 🟠 Orange | **Warning**: Type conversion (int ↔ float)      |
+| すべて          | すべて          | **OFF**       | 🟢 緑  | **上書き**: ターゲットはすべての入力を無視します          |
+| Void `()`    | Void `()`    | ON            | 🟢 緑  | 完全一致 - データ不要                  |
+| Void `()`    | `<T>`        | ON            | 🔴 赤  | **エラー**: ターゲットはデータを必要としますが、ソースにありません   |
+| Void `()`    | `<S,T>`      | ON            | 🔴 赤  | **エラー**: ターゲットは送信元を必要としますが、ソースにありません |
+| `<T>`        | Void `()`    | ON            | 🟡 黄色 | **安全**: 引数は破棄されます                    |
+| `<T>`        | `<T>`        | ON            | 🟢 緑  | 完全一致 - 同じ型                       |
+| `<T>`        | `<S,T>`      | ON            | 🔴 赤  | **エラー**: ターゲットは送信元を必要としますが、ソースにありません |
+| `<S,T>`      | Void `()`    | ON            | 🟡 黄色 | **安全**: 送信元と引数の両方が破棄されます           |
+| `<S,T>`      | `<T>`        | ON            | 🟡 黄色 | **安全**: 送信元は破棄され、引数のみ渡されます          |
+| `<S,T>`      | `<S,T>`      | ON            | 🟢 緑  | 完全一致 - 送信元 + 引数                    |
+| `<T1>`       | `<T2>`       | ON            | 🟠 オレンジ | **警告**: 型変換 (int ↔ float)      |
 
 ---
 
-### Special Cases
+### 特殊なケース
 
 **Pass Argument = OFF**:
 
-Always results in 🟢 **Green** connection because target ignores all input data.
+ターゲットがすべての入力データを無視するため、常に 🟢 **緑** の接続になります。
 
-**Use Case**: Chain a typed event to a void event without type errors.
+**ユースケース**: 型エラーを発生させずに、型付きイベントをVoidイベントに連結する場合。
 
 ```mermaid
 graph LR
 
-    subgraph Title ["<span style='color:#10b981'>✅ Result: Safe Connection</span>"]
+    subgraph Title ["<span style='color:#10b981'>✅ 結果: 安全な接続</span>"]
         direction LR
         A("🔢 OnScoreChanged(int)"):::event --> B(["⚙️ Pass Argument: OFF"]):::setting
         B --> C("🔄 OnGenericUpdate()"):::action
@@ -205,188 +205,188 @@ graph LR
 
 ---
 
-**Numeric Conversions**:
+**数値変換**:
 
-Auto-converts between compatible numeric types (🟠 Orange):
+互換性のある数値型間では自動変換されます (🟠 オレンジ):
 - `int` ↔ `float`
 - `float` ↔ `double`
 - `int` ↔ `long`
 
-**Warning**: May lose precision (e.g., `float` 3.14 → `int` 3).
+**警告**: 精度が失われる可能性があります（例：`float` 3.14 → `int` 3）。
 
 ---
 
-**Incompatible Types**:
+**互換性のない型**:
 
-Blocked at connection time (🔴 Red):
+接続時にブロックされます (🔴 赤):
 - `string` → `int`
 - `GameObject` → `float`
-- Custom type mismatches
+- カスタム型の不一致
 
-**System prevents creation** of these connections.
+**システムにより作成が防止**されます。
 
 ---
 
-## 🏷️ Status Badges
+## 🏷️ ステータスバッジ
 
-Badges appear at the **bottom of nodes** to show active configuration.
+ノードの**下部**に、現在のアクティブな設定を示すバッジが表示されます。
 
-![Node Badges](/img/game-event-system/flow-graph/game-event-node-connector/node-status.png)
+![ノードバッジ](/img/game-event-system/flow-graph/game-event-node-connector/node-status.png)
 
-### Badge Reference
+### バッジ・リファレンス
 
-| Icon | Badge      | Meaning                         | Applies To   |
+| アイコン | バッジ      | 意味                         | 対象ノード   |
 | ---- | ---------- | ------------------------------- | ------------ |
-| 🧩    | **Cond**   | Visual condition tree active    | All nodes    |
-| ⏱️    | **2.5s**   | Start delay (seconds)           | All nodes    |
-| ⏳    | **3.0s**   | Blocking duration (seconds)     | Chain only   |
-| ⚓    | **Wait**   | Wait for async completion       | Chain only   |
-| ⬆️    | **+5**     | Execution priority              | Trigger only |
-| 🔗    | **Pass**   | Passing arguments to next node  | All nodes    |
-| 📌    | **Static** | Arguments blocked (static call) | All nodes    |
+| 🧩    | **Cond**   | ビジュアル条件ツリーがアクティブ    | 全ノード    |
+| ⏱️    | **2.5s**   | 開始遅延（秒）           | 全ノード    |
+| ⏳    | **3.0s**   | ブロッキング期間（秒）     | チェーンのみ   |
+| ⚓    | **Wait**   | 非同期完了を待機       | チェーンのみ   |
+| ⬆️    | **+5**     | 実行優先度              | トリガーのみ |
+| 🔗    | **Pass**   | 次のノードへ引数を渡す  | 全ノード    |
+| 📌    | **Static** | 引数がブロックされている（静的呼び出し） | 全ノード    |
 
 ---
 
-### Badge Examples
+### バッジの例
 
-**Chain Node with Delay + Duration**:
+**遅延 ＋ 期間が設定されたチェーンノード**:
 ```
-⏱️ 1.0s   ← Wait 1 second before starting
-⏳ 3.0s   ← Then block for 3 seconds
-```
-
-**Trigger Node with Condition + Priority**:
-```
-🧩 Cond   ← Only fires if condition passes
-⬆️ +10    ← Executes before other triggers
+⏱️ 1.0s   ← 開始前に1秒待機
+⏳ 3.0s   ← その後、3秒間ブロッキング
 ```
 
-**Any Node with Argument Passing**:
+**条件 ＋ 優先度が設定されたトリガーノード**:
 ```
-🔗 Pass   ← Forwards event data to next node
+🧩 Cond   ← 条件を満たした場合のみ発行
+⬆️ +10    ← 他のトリガーより先に実行
+```
+
+**引数渡しが有効なノード**:
+```
+🔗 Pass   ← イベントデータを次のノードへ転送
 ```
 
 ---
 
-## 🎨 Visual Examples
+## 🎨 視覚的な例
 
-### Example 1: Perfect Match Chain
+### 例 1: 完全一致のチェーン
 
-![Node Perfect Match](/img/game-event-system/flow-graph/game-event-node-connector/node-perfect-match.png)
+![ノード完全一致](/img/game-event-system/flow-graph/game-event-node-connector/node-perfect-match.png)
 
-**Colors**:
+**色**:
 
-- Line 1: 🟢 Green (perfect match)
-- Line 2: 🟡 Yellow (sender discarded safely)
-
----
-
-### Example 2: Type Conversion Warning
-
-![Node Compatible](/img/game-event-system/flow-graph/game-event-node-connector/node-compatible.png)
-
-**Color**: 🟠 Orange (int → float conversion)
-
-**Risk**: Precision change, but works
+- Line 1: 🟢 緑 (完全一致)
+- Line 2: 🟡 黄色 (送信元は安全に破棄)
 
 ---
 
-### Example 3: Pass Argument
+### 例 2: 型変換の警告
 
-![Node Compatible](/img/game-event-system/flow-graph/game-event-node-connector/node-pass-arg.png)
+![ノード互換あり](/img/game-event-system/flow-graph/game-event-node-connector/node-compatible.png)
 
-**Colors**: 🟢 Green (void → int)
+**色**: 🟠 オレンジ (int → float 変換)
 
-**No-Blocking:** ignore argument to match
+**リスク**: 精度の変化はありますが、動作します。
+
+---
+
+### 例 3: 引数の無視 (Pass Argument OFF)
+
+![ノード引数渡しOFF](/img/game-event-system/flow-graph/game-event-node-connector/node-pass-arg.png)
+
+**色**: 🟢 緑 (void → int)
+
+**非ブロッキング:** 一致させるために引数を無視。
 
 ------
 
-### Example 4: Parallel Trigger Fan-Out
+### 例 4: 並列トリガーのファンアウト
 
-![Node Compatible](/img/game-event-system/flow-graph/game-event-node-connector/node-trigger.png)
+![ノードトリガー](/img/game-event-system/flow-graph/game-event-node-connector/node-trigger.png)
 
-**All connections:** Green (void → void), executing immediately in parallel
-
----
-
-## 💡 Best Practices
-
-### Use Pass Argument Wisely
-
-**When to Pass (ON)**:
-- Next node needs the event data
-- Building data pipelines
-- Forwarding damage info, scores, etc.
-
-**When to Block (OFF)**:
-- Connecting incompatible types
-- Generic notifications (no data needed)
-- Simplifying complex type chains
+**すべての接続:** 緑 (void → void)、即座に並列実行。
 
 ---
 
-### Color-Code Your Flows
+## 💡 ベストプラクティス
 
-**Green-Heavy Graphs**: Well-typed.
+### 引数渡しの賢い使い方
 
-**Yellow Connections**: Acceptable when intentionally discarding data.
+**渡す場合 (ON)**:
+- 次のノードがイベントデータを必要としている場合
+- データパイプラインを構築する場合
+- ダメージ情報やスコアなどを転送する場合
 
-**Orange Lines**: Review for correctness—ensure conversions are intentional.
-
-**Red Blocks**: Fix immediately—will fail at runtime.
-
----
-
-### Organize by Type
-
-**Group similar signature nodes** together:
-- Void events in one area
-- Data events in another
-- Async chains separate from triggers
-
-**Why**: Makes type compatibility easier to visualize.
+**ブロックする場合 (OFF)**:
+- 互換性のない型同士を接続する場合
+- 一般的な通知（データ不要）の場合
+- 複雑な型の連鎖を簡略化する場合
 
 ---
 
-## ❓ Common Questions
+### フローを色で判断する
 
-### Why is my connection red?
+**緑が多いグラフ**: 型定義が適切になされています。
 
-**Cause**: Type mismatch that cannot be resolved.
+**黄色の接続**: 意図的にデータを破棄している場合は許容されます。
 
-**Fix**: 
-1. Check if target needs sender but source doesn't provide it
-2. Disable "Pass Argument" on target node
-3. Insert intermediate conversion node
+**オレンジの線**: 正確性を確認してください。変換が意図したものであることを再確認してください。
 
----
-
-### Can I connect different numeric types?
-
-**Yes**: The system auto-converts `int`, `float`, `double`, `long`.
-
-**Result**: 🟠 Orange connection with conversion warning.
-
-**Caution**: Watch for precision loss (float → int).
+**赤のブロック**: 即座に修正してください。実行時に失敗します。
 
 ---
 
-### What does yellow mean?
+### 型ごとに整理する
 
-**Meaning**: Safe connection with **data discard**.
+**似たシグネチャのノードをグループ化**しましょう：
+- Voidイベントは一つのエリアに
+- データ付きイベントは別のエリアに
+- 非同期チェーンはトリガーとは別に
 
-**Example**: Sending `<int>` to `<void>` discards the integer.
+**理由**: 型の互換性が視覚的に判断しやすくなります。
 
-**Safe?**: Yes—no runtime errors, just unused data.
+---
 
-:::tip Quick Legend Access
+## ❓ よくある質問
 
-While working in the Flow Graph Editor, the **Legend Panel** (right side) shows all node types, port colors, and connection meanings. Hover over any legend item for detailed tooltips.
+### なぜ接続が赤くなるのですか？
+
+**原因**: 解決できない型の不一致です。
+
+**修正方法**: 
+1. ターゲットが送信元を必要としているが、ソースが提供していないか確認。
+2. ターゲットノードの "Pass Argument" を無効にする。
+3. 中間に変換ノードを挿入する。
+
+---
+
+### 異なる数値型を接続できますか？
+
+**はい**: システムは `int`, `float`, `double`, `long` 間で自動変換します。
+
+**結果**: 変換警告を伴う 🟠 オレンジの接続になります。
+
+**注意**: 精度損失（float → int）に注意してください。
+
+---
+
+### 黄色はどういう意味ですか？
+
+**意味**: **データ破棄**を伴う安全な接続です。
+
+**例**: `<int>` を `<void>` に送ると、整数データは破棄されます。
+
+**安全ですか？**: はい。実行時エラーは発生せず、単にデータが使われないだけです。
+
+:::tip クイック凡例アクセス
+
+フローグラフエディタでの作業中、右側の**凡例パネル (Legend Panel)** にすべてのノードタイプ、ポートの色、接続の意味が表示されます。凡例項目にホバーすると詳細なツールチップを確認できます。
 
 :::
 
-:::warning Runtime Errors
+:::warning 実行時エラー
 
-🔴 **Red connections** are blocked during creation to prevent runtime crashes. If you need to connect incompatible types, disable "Pass Argument" on the target node—this forces a 🟢 Green connection by ignoring input data.
+🔴 **赤色の接続**は、実行時のクラッシュを防ぐために作成時にブロックされます。どうしても互換性のない型を接続する必要がある場合は、ターゲットノードの "Pass Argument" を無効にしてください。これにより入力データが無視され、🟢 緑色の接続として強制できます。
 
 :::

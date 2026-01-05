@@ -1,172 +1,172 @@
 ﻿---
-sidebar_label: 'Runtime Monitor'
+sidebar_label: 'ランタイムモニター'
 
 sidebar_position: 2
 ---
 
-# Runtime Monitor
+# ランタイムモニター (Runtime Monitor)
 
-The **Game Event Monitor** is a powerful real-time debugging and analysis tool that provides comprehensive insights into your event system's behavior during runtime. It helps you identify performance bottlenecks, track event flows, monitor listener relationships, and debug complex event chains.
+**ゲームイベントモニター (Game Event Monitor)** は、実行中のイベントシステムの挙動を包括的に把握できる、強力なリアルタイム・デバッグおよび分析ツールです。パフォーマンスのボトルネックの特定、イベントフローの追跡、リスナー間の関係性の監視、複雑なイベントチェーンのデバッグをサポートします。
 
 ------
 
-## 🎯 Why Use the Runtime Monitor?
+## 🎯 ランタイムモニターを使用する理由
 
-### Powerful Capabilities
+### 強力な機能
 
-The Runtime Monitor transforms the way you develop and debug event-driven games:
+ランタイムモニターは、イベント駆動型ゲームの開発とデバッグの方法を劇的に進化させます。
 
-- **🔍 Real-Time Visibility** - See exactly when and how events are triggered as they happen
-- **⚡ Performance Profiling** - Identify slow listeners and optimize execution times
-- **📊 Statistical Analysis** - Track event frequency, patterns, and usage trends
-- **🔗 Flow Visualization** - Understand complex trigger and chain relationships at a glance
-- **⚠️ Automatic Warnings** - Catch performance issues and potential problems early
-- **👂 Listener Inspector** - Monitor all active subscriptions and their sources
-- **📝 Event Logs** - Complete execution history with stack traces for debugging
+- **🔍 リアルタイムの可視化** - イベントがいつ、どのようにトリガーされたかを正確に把握。
+- **⚡ パフォーマンス・プロファイリング** - 処理の遅いリスナーを特定し、実行時間を最適化。
+- **📊 統計分析** - イベントの頻度、パターン、使用傾向を追跡。
+- **🔗 フローの可視化** - 複雑なトリガーやチェーンの関係を一目で理解。
+- **⚠️ 自動警告** - パフォーマンスの問題や潜在的な不具合を早期に発見。
+- **👂 リスナー・インスペクター** - すべてのアクティブな購読（サブスクリプション）とそのソースを監視。
+- **📝 イベントログ** - デバッグ用のスタックトレースを含む完全な実行履歴。
 
-### What This Means for Your Development
+### 開発におけるメリット
 
-:::tip Development Benefits
+:::tip 開発上の利点
 
-- **Faster Debugging**: Instantly see which events fired and in what order
-- **Performance Optimization**: Identify and fix slow listeners before they impact gameplay
-- **Architecture Understanding**: Visualize event flows to maintain clean system design
-- **Proactive Problem Detection**: Catch issues like memory leaks and recursive calls automatically
-- **Team Collaboration**: Share visual representations of event flows with team members 
+- **デバッグの高速化**: どのイベントがどの順序で発行されたかを即座に確認。
+- **パフォーマンスの最適化**: ゲームプレイに影響を与える前に、遅いリスナーを特定して修正。
+- **アーキテクチャの把握**: イベントフローを視覚化し、クリーンなシステム設計を維持。
+- **問題の予防**: メモリリークや再帰呼び出しなどの問題を自動的に検出。
+- **チーム間の連携**: イベントフローの視覚的表現をチームメンバーと共有。
 
 :::
 
 ------
 
-## 🚀 Opening the Monitor
+## 🚀 モニターを開く
 
-The utility is located within the **[Game Event System](../visual-workflow/game-event-system)**, you can access through the following method:
+このユーティリティは **[Game Event System](../visual-workflow/game-event-system)** 内にあり、以下の方法でアクセスできます：
 
-**From the System Dashboard:**
+**システムダッシュボードから:**
 
 ```tex
-Game Event System Window → Click "Game Event Monitor"
+Game Event System Window → "Game Event Monitor" をクリック
 ```
 
 ![alt text](/img/game-event-system/tools/runtime-monitor/hub-core-tools.png)
 
-:::info Window Management
+:::info ウィンドウの管理
 
-The monitor window can be docked alongside your other Unity editor windows for convenient access during play mode. I recommend docking it near your Console or Inspector windows. 
+モニターウィンドウは、プレイモード中にアクセスしやすいよう、他のUnityエディタウィンドウと一緒にドッキングできます。Console（コンソール）やInspector（インスペクター）ウィンドウの近くにドッキングすることをお勧めします。
 
 :::
 
 ------
 
-## 📱 Interface Overview
+## 📱 インターフェースの概要
 
-### Initial Window State
+### ウィンドウの初期状態
 
-When you first open the Game Event Monitor, you'll see the window in its **stopped state** (not in Play Mode):
+ゲームイベントモニターを最初に開いたとき、ウィンドウは **停止状態 (Stopped State)** （プレイモード以外）で表示されます：
 
 ![Monitor Window - Stopped State](/img/game-event-system/tools/runtime-monitor/monitor-stopped.png)
 
-**Key Elements in Stopped State:**
+**停止状態の主な要素:**
 
-- **Header Bar** - Displays the Game Event System logo and window title
-- **Status Indicator** - Shows "○ Stopped" in gray (not in Play Mode)
-- **Debugger Toggle** - Button to enable/disable event tracking
-- **Tab Navigation** - 8 main tabs (grayed out until Play Mode)
-- **Play Mode Prompt** - Central message guiding you to enter Play Mode
+- **ヘッダーバー** - Game Event Systemのロゴとウィンドウタイトルを表示。
+- **ステータスインジケーター** - グレーで "○ Stopped" と表示（プレイモード外）。
+- **デバッガートグル** - イベント追跡の有効/無効を切り替えるボタン。
+- **タブナビゲーション** - 8つのメインタブ（プレイモードに入るまでグレーアウト）。
+- **プレイモードのプロンプト** - プレイモードに入るよう促すメッセージ。
 
-:::warning Requires Play Mode 
+:::warning プレイモードが必要です
 
-The Runtime Monitor only collects and displays data during **Play Mode**. All monitoring features are disabled in Edit Mode to avoid performance overhead. 
+ランタイムモニターは **プレイモード (Play Mode)** 中にのみデータを収集・表示します。パフォーマンスへの影響を避けるため、エディットモード（編集モード）ではすべての監視機能が無効になります。
 
 :::
 
 ------
 
-### Window Components
+### ウィンドウのコンポーネント
 
-The monitor interface consists of several key areas:
+モニターのインターフェースは、以下の主要なエリアで構成されています：
 
-#### 1. Header Bar
+#### 1. ヘッダーバー
 
-Located at the top of the window, the header contains:
+ウィンドウの上部にあり、以下の要素が含まれます：
 
-- **🎮 Logo & Title** - Visual branding and window identification
+- **🎮 ロゴとタイトル** - ブランドロゴとウィンドウの識別。
 
-- Status Badge
+- ステータスバッジ
 
-   \- Shows current state:
+   \- 現在の状態を表示します：
 
-  - **Running** (green) - Play Mode is active, monitoring events
-  - **Stopped** (gray) - Edit Mode, no monitoring
+  - **Running** (緑) - プレイモードがアクティブで、イベントを監視中。
+  - **Stopped** (グレー) - エディットモードで、監視は行われていません。
 
-- Debugger Toggle
+- デバッガートグル
 
-   \- Controls whether events are being tracked:
+   \- イベントの追跡を制御します：
 
-  - **Debugger ON** (green) - Actively recording events
-  - **Debugger OFF** (red) - Not recording (saves performance)
+  - **Debugger ON** (緑) - イベントをアクティブに記録中。
+  - **Debugger OFF** (赤) - 記録を停止中（パフォーマンスを節約）。
 
-#### 2. Navigation Toolbar
+#### 2. ナビゲーションツールバー
 
-Below the header, you'll find the main navigation tabs:
+ヘッダーの下に、メインのナビゲーションタブがあります：
 
-| Tab             | Icon | Purpose                               |
+| タブ             | アイコン | 目的                               |
 | --------------- | ---- | ------------------------------------- |
-| **Dashboard**   | 📊    | Overview of all monitoring data       |
-| **Performance** | ⚡    | Execution time analysis and profiling |
-| **Recent**      | 📝    | Chronological event log               |
-| **Statistics**  | 📈    | Event frequency and usage patterns    |
-| **Warnings**    | ⚠    | Performance issues and problems       |
-| **Listeners**   | 👂    | Active subscriptions overview         |
-| **Automation**  | 🔗    | Trigger and chain flow visualization  |
-| **Details**     | 🔍    | Deep dive into selected events        |
+| **Dashboard**   | 📊    | すべての監視データの概要               |
+| **Performance** | ⚡    | 実行時間の分析とプロファイリング       |
+| **Recent**      | 📝    | 時系列のイベントログ                   |
+| **Statistics**  | 📈    | イベントの頻度と使用パターンの分析     |
+| **Warnings**    | ⚠    | パフォーマンス上の問題や警告の表示     |
+| **Listeners**   | 👂    | アクティブな購読状況の概要             |
+| **Automation**  | 🔗    | トリガーとチェーンのフロー可視化       |
+| **Details**     | 🔍    | 選択したイベントの深掘り分析           |
 
-#### 3. Search & Controls
+#### 3. 検索とコントロール
 
-On the right side of the toolbar:
+ツールバーの右側：
 
-- **Search Field** - Filter events across all tabs
-- **Clear Menu** - Options to clear different data types
+- **検索フィールド** - すべてのタブにわたってイベントをフィルタリング。
+- **クリアメニュー** - 各種データを消去するためのオプション。
 
 ------
 
-## 📊 Dashboard Tab
+## 📊 ダッシュボード (Dashboard) タブ
 
-The **Dashboard** provides a high-level overview of your entire event system's health and activity.
+**Dashboard** は、イベントシステム全体の健全性とアクティビティのハイレベルな概要を提供します。
 
 ![Dashboard Tab - Running State](/img/game-event-system/tools/runtime-monitor/monitor-dashboard.png)
 
-### Metric Cards
+### メトリックカード
 
-At the top, four metric cards display key statistics:
+上部の4つのカードには、主要な統計情報が表示されます：
 
-#### 📊 Total Events
+#### 📊 Total Events (合計イベント数)
 
-- **What it shows**: Number of unique events in your game
-- **Includes**: All events across all active databases
-- **Use case**: Understand the scale of your event system
+- **内容**: ゲーム内に存在するユニークなイベントの数。
+- **対象**: すべてのアクティブなデータベースに含まれる全イベント。
+- **用途**: イベントシステムの規模を把握。
 
-#### 📝 Total Logs
+#### 📝 Total Logs (ログ合計)
 
-- **What it shows**: Number of event executions recorded
-- **Updates**: In real-time as events fire
-- **Use case**: Track overall system activity
+- **内容**: 記録されたイベントの実行回数。
+- **更新**: イベントが発行されるたびにリアルタイムで更新。
+- **用途**: システム全体の活動量を追跡。
 
-#### ⚡ Monitored
+#### ⚡ Monitored (監視対象)
 
-- **What it shows**: Number of events with performance data
-- **Criteria**: Only events that have been triggered
-- **Use case**: See which events have profiling info
+- **内容**: パフォーマンスデータを持つイベントの数。
+- **基準**: 少なくとも一度トリガーされたイベントのみカウント。
+- **用途**: どのイベントにプロファイリング情報があるかを確認。
 
-#### ⚠ Warnings
+#### ⚠ Warnings (警告数)
 
-- **What it shows**: Count of active performance warnings
-- **Color**: Red if any warnings exist
-- **Use case**: Quick problem detection
+- **内容**: アクティブなパフォーマンス警告の数。
+- **色**: 警告が存在する場合は赤色に変化。
+- **用途**: 問題の早期発見。
 
-### Active Databases Section
+### アクティブなデータベースセクション
 
-Displays all currently loaded Game Event Databases:
+現在ロードされているゲームイベントデータベースを表示します：
 
 ```tex
 📁 Active Databases (2)
@@ -174,190 +174,189 @@ Displays all currently loaded Game Event Databases:
 └─ UIEvents            [18 Events]
 ```
 
-**Information Displayed:**
+**表示される情報:**
 
-- Database name and asset reference
-- Total event count per database
-- **PRIMARY** badge for the main database
-- Click database name to select it in Project window
+- データベース名とアセットへの参照。
+- データベースごとの合計イベント数。
+- メインデータベースを示す **PRIMARY** バッジ。
+- データベース名をクリックすると、Projectウィンドウでそのアセットを選択。
 
-### Performance Overview
+### パフォーマンスの概要 (Performance Overview)
 
-Visual representation of event execution health:
+イベント実行の健全性を視覚的に表現します：
 
-**Performance Levels:**
+**パフォーマンスレベル:**
 
-- **✓ Good** (Green) - Execution time < 1ms
-- **⚠ Warning** (Yellow) - Execution time 1-10ms
-- **❌ Critical** (Red) - Execution time > 10ms
+- **✓ Good** (緑) - 実行時間 1ms 未満。
+- **⚠ Warning** (黄) - 実行時間 1-10ms。
+- **❌ Critical** (赤) - 実行時間 10ms 以上。
 
-**Visual Breakdown:**
+**視覚的内訳:**
 
-- Color-coded bar showing distribution
-- Percentage of events in each category
-- Average execution time across all events
-- Click "View All →" to jump to Performance tab
+- 各レベルの分布を示すカラーコードバー。
+- カテゴリごとのイベントの割合（％）。
+- 全イベントの平均実行時間。
+- 「View All →」をクリックするとPerformanceタブへジャンプ。
 
-:::tip Performance Target
+:::tip パフォーマンスの目標
 
-Aim for keeping 90%+ of your events in the "Good" category for smooth gameplay. Events in "Critical" should be optimized immediately. 
+スムーズなゲームプレイのために、90%以上のイベントを "Good" カテゴリに維持することを目指してください。"Critical" にあるイベントは即座に最適化する必要があります。
 
 :::
 
-### Recent Activity
+### 最近のアクティビティ (Recent Activity)
 
-Shows the last 15 events that fired:
+最後に発行された15件のイベントを表示します：
 
-**Each Entry Displays:**
+**各エントリの表示項目:**
 
-- **[Timestamp]** - When the event was raised (HH:MM:SS.mmm)
-- **Event Name** - The event that was triggered
-- **Event Type** - Generic type (e.g., `GameEvent<int>`)
+- **[Timestamp]** - イベントが発行された時間 (時:分:秒.ミリ秒)。
+- **Event Name** - トリガーされたイベント名。
+- **Event Type** - ジェネリック型 (例: `GameEvent<int>`)。
 
-**Quick Actions:**
+**クイックアクション:**
 
-- Click any entry to view full details
-- Entries update in real-time during Play Mode
-- Click "View All →" to see complete history
+- エントリをクリックすると詳細情報を表示。
+- プレイモード中にリアルタイムで更新。
+- 「View All →」をクリックすると、すべての履歴（Recentタブ）を表示。
 
-### Quick Warnings
+### クイック警告 (Quick Warnings)
 
-If any warnings are active, they appear at the bottom:
+アクティブな警告がある場合、下部に表示されます：
 
-**Warning Types:**
+**警告の種類:**
 
-- 🔥 **Performance** - Events executing too slowly
-- ⚠️ **High Frequency** - Events firing too often
-- 💾 **Memory** - Potential memory issues
-- 🔄 **Recursive** - Possible infinite loops
+- 🔥 **Performance** - 実行が遅すぎるイベント。
+- ⚠️ **High Frequency** - 発行頻度が高すぎるイベント。
+- 💾 **Memory** - 潜在的なメモリの問題（GCなど）。
+- 🔄 **Recursive** - 無限ループの可能性がある再帰呼び出し。
 
-**For Each Warning:**
+**警告ごとの情報:**
 
-- Severity indicator (color-coded)
-- Clear description of the issue
-- Number of affected events
-- Click "View All →" to see full list
+- 重要度を示すカラーアイコン。
+- 問題の明確な説明。
+- 影響を受けているイベントの数。
+- 「View All →」をクリックすると全リストを表示。
 
 ------
 
-## ⚡ Performance Tab
+## ⚡ パフォーマンス (Performance) タブ
 
-Detailed performance profiling for every event that has been triggered.
+トリガーされたすべてのイベントに関する、詳細なパフォーマンスプロファイリングを提供します。
 
 ![Performance Tab - Running State](/img/game-event-system/tools/runtime-monitor/monitor-performance.png)
 
-### Sorting Controls
+### ソートコントロール
 
-At the top of the tab, you can sort the performance data:
+タブの上部で、パフォーマンスデータを並べ替えることができます：
 
-**Sort Options:**
+**ソートオプション:**
 
-- **Avg Time** ⬇️ - Average execution time (default, descending)
-- **Max Time** - Maximum recorded execution time
-- **Exec Count** - Number of times executed
-- **Listeners** - Average number of listeners
+- **Avg Time** ⬇️ - 平均実行時間（デフォルト、降順）。
+- **Max Time** - 最大実行時間。
+- **Exec Count** - 実行回数。
+- **Listeners** - 平均リスナー数。
 
-**Sort Direction:**
+**ソート順:**
 
-- ⬇️ Descending (high to low)
-- ⬆️ Ascending (low to high)
-- Click the same button again to toggle direction
+- ⬇️ 降順（高い順）。
+- ⬆️ 昇順（低い順）。
+- 同じボタンを再度クリックすると昇順/降順が切り替わります。
 
-### Performance Table
+### パフォーマンステーブル
 
-Each row displays comprehensive metrics for a single event:
+各行には、単一イベントの包括的なメトリクスが表示されます：
 
-| Column         | Description                    | Color Coding                           |
+| カラム         | 説明                           | カラーコード                           |
 | -------------- | ------------------------------ | -------------------------------------- |
-| **Icon**       | Performance level indicator    | 🟢 Good / 🟡 Warning / 🔴 Critical        |
-| **Event Name** | Full name of the event         | Blue (clickable)                       |
-| **Avg Time**   | Average execution duration     | Green < 1ms, Yellow 1-10ms, Red > 10ms |
-| **Min Time**   | Fastest execution recorded     | Gray                                   |
-| **Max Time**   | Slowest execution recorded     | Red if > 10ms                          |
-| **Count**      | Total number of executions     | White                                  |
-| **Listeners**  | Average number of listeners    | White                                  |
-| **GC**         | Garbage collection allocations | Red if > 0, Gray if 0                  |
-| **👂**          | View listeners button          | Opens Listeners tab                    |
+| **アイコン**    | パフォーマンスレベル表示       | 🟢 Good / 🟡 Warning / 🔴 Critical        |
+| **Event Name** | イベントのフルネーム           | 青（クリック可能）                       |
+| **Avg Time**   | 平均実行時間                   | 緑 < 1ms, 黄 1-10ms, 赤 > 10ms         |
+| **Min Time**   | 最速実行時間の記録             | グレー                                   |
+| **Max Time**   | 最遅実行時間の記録             | 10msを超えると赤色                      |
+| **Count**      | 合計実行回数                   | 白                                   |
+| **Listeners**  | 平均リスナー数                 | 白                                   |
+| **GC**         | ガベージコレクション発生量     | 0より大きいと赤、0ならグレー           |
+| **👂**          | リスナー表示ボタン             | Listenersタブを開く                    |
 
-### Reading Performance Data
+### パフォーマンスデータの読み方
 
-**Example Row:**
+**行の例:**
 
 ```tex
 🟢 PlayerHealthChanged  1.2ms  0.8ms  3.5ms  Count: 156  Listeners: 4  GC: 0  [👂]
 ```
 
-**Interpretation:**
+**解釈:**
 
-- ✅ Event is performing well (green icon)
-- Executes in 1.2ms on average (acceptable)
-- Fastest execution was 0.8ms
-- Slowest execution was 3.5ms
-- Has been triggered 156 times
-- Has 4 active listeners
-- No GC allocations (excellent!)
+- ✅ イベントは良好に動作しています（緑アイコン）。
+- 平均実行時間は 1.2ms（許容範囲）。
+- 最速実行は 0.8ms、最遅実行は 3.5ms。
+- 156回トリガーされました。
+- 4つのアクティブリスナーがあります。
+- GC（ガベージコレクション）の発生はありません（素晴らしい！）。
 
-:::warning Performance Red Flags
+:::warning パフォーマンスの危険信号
 
-- **Avg Time > 5ms**: Should be optimized
-- **Max Time > 16ms**: Will cause frame drops
-- **GC > 0**: Creating garbage, refactor to avoid allocations
-- **High Listener Count**: Consider consolidating listeners 
+- **平均時間が 5ms 以上**: 最適化を検討すべき。
+- **最大時間が 16ms 以上**: フレーム落ち（スタッター）の原因になります。
+- **GC が 0 より大きい**: ゴミを生成しています。アロケーションを避けるようリファクタリングしてください。
+- **リスナー数が多い**: リスナーの統合を検討してください。
 
 :::
 
-### Quick Actions
+### クイックアクション
 
-- **👂 Button**: Jump to Listeners tab for this specific event
-- **Click Row**: Select event to view in Details tab
-- **Search**: Filter events by name in real-time
+- **👂 ボタン**: そのイベント専用の Listeners タブへジャンプ。
+- **行をクリック**: イベントを選択し、Details タブで詳細を表示。
+- **検索**: 名前でリアルタイムにイベントをフィルタリング。
 
 ------
 
-## 📝 Recent Events Tab
+## 📝 最近のイベント (Recent Events) タブ
 
-Complete chronological log of all event executions.
+すべてのイベント実行の完全な時系列ログです。
 
 ![Recent Events Tab - Running State](/img/game-event-system/tools/runtime-monitor/monitor-recent.png)
 
-### Control Options
+### コントロールオプション
 
-At the top of the tab:
+タブの上部にあるコントロール：
 
-**Toggle Options:**
+**トグルオプション:**
 
-- ☑️ **Auto Scroll** - Automatically scrolls to newest events
-- ☐ **Show Stack Trace** - Displays call stack for each event
+- ☑️ **Auto Scroll** - 新しいイベントが追加された際に自動スクロール。
+- ☐ **Show Stack Trace** - 各イベントのコールスタックを表示。
 
-**Status Indicator:**
+**ステータス表示:**
 
-- "Showing X of Y" - Displays how many events are visible
+- "Showing X of Y" - 表示されている件数。
 
-**Actions:**
+**アクション:**
 
-- **🗑 Clear Logs** - Removes all logged events
+- **🗑 Clear Logs** - 記録されたすべてのイベントログを消去。
 
-### Log Entry Format
+### ログエントリの形式
 
-Each log entry shows:
+各ログエントリの表示内容：
 
 ```tex
 [14:23:45.123]  F:1250  PlayerTakeDamage  <GameEvent<GameObject, DamageInfo>>  [Details]
   📍 Called by: EnemyController.Attack()
 ```
 
-**Entry Components:**
+**エントリの構成要素:**
 
-- **[Timestamp]** - Precise time of execution (HH:MM:SS.mmm)
-- **F:####** - Frame number when event fired
-- **Event Name** - Name of the triggered event
-- **[Type]** - Generic type signature
-- **[Details]** - Button to view full information
-- **📍 Caller Info** - Method that raised the event
+- **[Timestamp]** - 正確な実行時間 (時:分:秒.ミリ秒)。
+- **F:####** - イベントが発行されたフレーム番号。
+- **Event Name** - トリガーされたイベントの名前。
+- **[Type]** - ジェネリック型のシグネチャ。
+- **[Details]** - 詳細情報を表示するボタン。
+- **📍 Caller Info** - イベントを発行したメソッド。
 
-### Stack Trace View
+### スタックトレースビュー
 
-When **Show Stack Trace** is enabled, each entry expands to show:
+**Show Stack Trace** が有効な場合、各エントリが展開されて以下のように表示されます：
 
 ```tex
 at GameEventSystem.GameEvent.Raise()
@@ -366,276 +365,269 @@ at EnemyController.Attack() in Assets/Scripts/Enemy.cs:line 89
 ...
 ```
 
-**Use Cases:**
+**ユースケース:**
 
-- Track down where events are being triggered
-- Debug unexpected event calls
-- Understand execution flow
-- Identify performance bottlenecks in calling code
+- イベントがどこでトリガーされているかを特定。
+- 予期しないイベント呼び出しのデバッグ。
+- 実行フローの把握。
+- 呼び出し元コード内のパフォーマンスボトルネックの特定。
 
-### Search & Filter
+### 検索とフィルタリング
 
-Use the search box to filter logs by:
+検索ボックスを使用して、ログをフィルタリングできます：
 
-- Event name (e.g., "Player")
-- Event type (e.g., "GameObject")
-- Partial matches work
+- イベント名（例: "Player"）
+- イベント型（例: "GameObject"）
+- 部分一致をサポート。
 
-:::tip Debugging Workflow
+:::tip デバッグワークフロー
 
-1. Enable **Auto Scroll** to see events as they happen
-2. When you spot an issue, disable auto scroll
-3. Enable **Show Stack Trace** to see call hierarchy
-4. Click **Details** to view full event information
-5. Use this data to track down and fix the problem 
+1. **Auto Scroll** を有効にして、イベントの発生をリアルタイムで追跡。
+2. 問題を見つけたら Auto Scroll をオフにする。
+3. **Show Stack Trace** を有効にして呼び出し階層を確認。
+4. **Details** をクリックしてイベントの完全な情報を表示。
+5. これらのデータを使用して問題を特定し、修正。
 
 :::
 
 ------
 
-## 📈 Statistics Tab
+## 📈 統計 (Statistics) タブ
 
-Analyze event usage patterns and frequency over time.
+時間の経過に伴うイベントの使用パターンと頻度を分析します。
 
 ![Statistics Tab - Running State](/img/game-event-system/tools/runtime-monitor/monitor-statistics.png)
 
-### Sorting Controls
+### ソートコントロール
 
-Sort statistics by different metrics:
+異なるメトリクスで統計をソートできます：
 
-**Sort Options:**
+**ソートオプション:**
 
-- **Count** ⬇️ - Total number of triggers (default)
-- **Frequency** - Triggers per second
-- **Last Trigger** - Most recently fired events
+- **Count** ⬇️ - 合計実行回数（デフォルト）。
+- **Frequency** - 1秒あたりの発行回数。
+- **Last Trigger** - 最近発行されたイベント順。
 
-### Statistics Table
+### 統計テーブル
 
-Each row displays usage metrics:
+各行には使用状況のメトリクスが表示されます：
 
-| Column           | Description                   | Interpretation            |
+| カラム           | 説明                           | 解釈                      |
 | ---------------- | ----------------------------- | ------------------------- |
-| **Event Name**   | Name of the event             | Blue, clickable           |
-| **Count**        | Total executions              | Green, higher = more used |
-| **Freq/sec**     | Triggers per second           | Red if > 60/sec           |
-| **Avg Interval** | Average time between triggers | In seconds                |
-| **Last Trigger** | Time since last execution     | Relative time             |
-| **View Logs**    | See all logs for this event   | Opens Details tab         |
+| **Event Name**   | イベント名                     | 青色、クリック可能        |
+| **Count**        | 合計実行回数                   | 緑色、多いほど頻繁に使用   |
+| **Freq/sec**     | 1秒あたりのトリガー回数         | 60回/秒を超えると赤色      |
+| **Avg Interval** | トリガー間の平均時間           | 秒単位                    |
+| **Last Trigger** | 最後の実行からの経過時間       | 相対時間                  |
+| **View Logs**    | そのイベントの全ログを表示     | Detailsタブを開く         |
 
-### Understanding Frequency Data
+### 頻度データの理解
 
-**Example Row:**
+**行の例:**
 
 ```tex
 PlayerMoved  Count: 2,450  Freq/sec: 30.2/s  Avg Interval: 0.033s  Last Trigger: 2s ago  [View Logs]
 ```
 
-**Analysis:**
+**分析:**
 
-- Event has fired 2,450 times total
-- Triggering ~30 times per second (every frame at 30 FPS)
-- Average of 0.033 seconds between triggers
-- Last fired 2 seconds ago
+- 合計2,450回発行されました。
+- 1秒間に約30回トリガーされています（30 FPS環境では毎フレーム）。
+- トリガー間の平均間隔は0.033秒。
+- 最後に発行されたのは2秒前。
 
-**Frequency Interpretation:**
+**頻度の解釈:**
 
-- **< 1/sec**: Rare events (boss spawns, level transitions)
-- **1-10/sec**: Regular events (ability cooldowns, pickups)
-- **10-60/sec**: High frequency (movement, input polling)
-- **> 60/sec**: ⚠️ Very high, may need optimization
+- **< 1/秒**: 低頻度イベント（ボスのスポーン、レベル遷移など）。
+- **1-10/秒**: 通常のイベント（アビリティのクールダウン、アイテム回収など）。
+- **10-60/秒**: 高頻度イベント（移動、入力ポーリングなど）。
+- **> 60/秒**: ⚠️ 非常に高頻度。最適化が必要な可能性があります。
 
-:::warning High Frequency 
+:::warning 高頻度警告
 
-​		Warning Events firing at > 60/sec appear in **red**. While this isn't always a problem, it may indicate:
+1秒間に60回を超える頻度で発行されるイベントは **赤色** で表示されます。必ずしも問題ではありませんが、以下を示唆している可能性があります：
 
-- Redundant event raises
-- Events in Update() that should be in FixedUpdate()
-- Unnecessary event traffic that could be batched 
+- 冗長なイベントの発行。
+- FixedUpdateで処理すべきイベントがUpdateで行われている。
+- バッチ処理可能な不要なイベントトラフィック。
 
 :::
 
-### Use Cases
+### ユースケース
 
-**Identify Unused Events:**
+**未使用のイベントの特定:**
+- **Count** を昇順にソート。
+- 回数が極端に少ないイベントは、デッドコード（不要なコード）である可能性があります。
 
-- Sort by **Count** ascending
-- Events with low counts may be dead code
+**パフォーマンスホットスポットの発見:**
+- **Frequency** を降順にソート。
+- 高頻度イベントは、高度に最適化されている必要があります。
 
-**Find Performance Hotspots:**
+**イベントタイミングのデバッグ:**
+- **Avg Interval** をチェックしてイベントのパターンを把握。
+- 不規則な間隔はバグを示唆している場合があります。
 
-- Sort by **Frequency** descending
-- High-frequency events should be highly optimized
-
-**Debug Event Timing:**
-
-- Check **Avg Interval** to understand event patterns
-- Irregular intervals may indicate bugs
-
-**Track Recent Activity:**
-
-- Sort by **Last Trigger** descending
-- See which events are currently active
+**最近のアクティビティの追跡:**
+- **Last Trigger** を降順にソート。
+- 現在どのアクティビティが動いているかを確認。
 
 ------
 
-## ⚠️ Warnings Tab
+## ⚠️ 警告 (Warnings) タブ
 
-Automatic detection of performance issues and potential problems.
+パフォーマンス上の問題や潜在的な不具合を自動的に検出します。
 
 ![Warnings Tab - Running State](/img/game-event-system/tools/runtime-monitor/monitor-warnings.png)
 
-### Warning Categories
+### 警告のカテゴリ
 
-The system automatically detects several types of issues:
+システムは以下の問題を自動的に検出します：
 
-#### 🔥 Performance Issues
+#### 🔥 パフォーマンスの問題 (Performance Issues)
 
-**Slow Execution:**
+**実行の遅延:**
 
 ```tex
 ❌ CRITICAL
 Slow Event Execution
-Events are taking too long to execute (> 10ms average)
-Affected Events (3): PlayerUpdate, EnemyAI, PhysicsSync
+実行に時間がかかりすぎています（平均 10ms 以上）
+対象イベント (3): PlayerUpdate, EnemyAI, PhysicsSync
 ```
 
-**Detection Criteria:**
+**検出基準:**
 
-- Average execution time > 10ms
-- Maximum execution time > 16ms (one frame at 60 FPS)
+- 平均実行時間 > 10ms。
+- 最大実行時間 > 16ms（60 FPSにおける1フレーム分）。
 
-**Impact:** Can cause frame drops and stuttering
+**影響:** フレーム落ちやスタッターの原因になります。
 
-**Solution:** Optimize listener code, move heavy work to coroutines
+**解決策:** リスナーのコードを最適化し、重い処理をコルーチンへ移動。
 
-#### ⚡ High Frequency Warnings
+#### ⚡ 高頻度警告 (High Frequency Warnings)
 
-**Excessive Triggering:**
+**過剰なトリガー:**
 
 ```tex
 ⚠️ WARNING  
 High Frequency Events
-Events are firing more than 60 times per second
-Affected Events (2): OnMouseMove, OnColliderCheck
+イベントが1秒間に60回以上発行されています
+対象イベント (2): OnMouseMove, OnColliderCheck
 ```
 
-**Detection Criteria:**
+**検出基準:**
 
-- Triggers per second > 60
+- 1秒あたりのトリガー数 > 60。
 
-**Impact:** CPU overhead, potential unnecessary work
+**影響:** CPUのオーバーヘッド、不必要な処理の発生。
 
-**Solution:** Batch updates, use throttling, consider alternative patterns
+**解決策:** アップデートのバッチ化、スロットリング（間引き処理）の使用、設計の見直し。
 
-#### 💾 Memory Warnings
+#### 💾 メモリ警告 (Memory Warnings)
 
-**GC Allocations:**
+**GCアロケーションの検出:**
 
 ```tex
 ⚠️ WARNING
 Garbage Collection Detected
-Events are causing GC allocations during execution
-Affected Events (5): SpawnParticle, CreateUI, LoadAsset
+実行中にGCアロケーション（ゴミの生成）が発生しています
+対象イベント (5): SpawnParticle, CreateUI, LoadAsset
 ```
 
-**Detection Criteria:**
+**検出基準:**
 
-- GC allocations > 0 per execution
+- 1回の実行あたりの GC アロケーション > 0。
 
-**Impact:** Garbage collection pauses, frame drops
+**影響:** ガベージコレクションによる一時停止（スパイク）、フレーム落ち。
 
-**Solution:** Use object pooling, avoid creating new objects in hot paths
+**解決策:** オブジェクトプーリングの使用、ホットパス（頻繁に呼ばれる処理）での新規オブジェクト生成の回避。
 
-#### 🔄 Recursive Call Detection
+#### 🔄 再帰呼び出しの検出 (Recursive Call Detection)
 
-**Potential Infinite Loops:**
+**無限ループの可能性:**
 
 ```tex
 ❌ CRITICAL
 Possible Recursive Event
-Event may be triggering itself, creating a loop
-Affected Events (1): OnValueChanged
+イベントが自身をトリガーし、ループを作成している可能性があります
+対象イベント (1): OnValueChanged
 ```
 
-**Detection Criteria:**
+**検出基準:**
 
-- Event raised from within its own listener
-- Stack trace shows recursion
+- 自身のリスナー内からイベントが発行されている。
+- スタックトレースが再帰を示している。
 
-**Impact:** Stack overflow, Unity freeze
+**影響:** スタックオーバーフロー、Unityのフリーズ。
 
-**Solution:** Add recursion guards, redesign event flow
+**解決策:** 再帰ガード（フラグ）の追加、イベントフローの再設計。
 
-### Warning Card Layout
+### 警告カードのレイアウト
 
-Each warning displays:
+各警告には以下が表示されます：
 
-**Header:**
+**ヘッダー:**
+- 重要度を示すアイコン（🔥/⚠️/ℹ️）。
+- 警告の種類（例: "Slow Execution"）。
+- 重要度バッジ (CRITICAL / WARNING / INFO)。
 
-- Icon (🔥/⚠️/ℹ️) indicating severity
-- Warning type (e.g., "Slow Execution")
-- Severity badge (CRITICAL / WARNING / INFO)
+**本文:**
+- 問題の明確な説明。
+- 影響の説明。
+- 対象イベントの数。
 
-**Body:**
+**イベントリスト:**
+- 影響を受けているイベントを最大5つ表示。
+- それぞれに **[View]** ボタンがあり、詳細を調査可能。
+- 5つ以上ある場合は "...and X more" と表示。
 
-- Clear description of the problem
-- Impact explanation
-- Affected event count
+### 重要度レベル
 
-**Event List:**
-
-- Shows up to 5 affected events
-- Each with **[View]** button to inspect
-- "...and X more" if > 5 events affected
-
-### Severity Levels
-
-| Level        | Color    | Priority  | Action Required     |
+| レベル        | カラー    | 優先度  | 必要なアクション     |
 | ------------ | -------- | --------- | ------------------- |
-| **CRITICAL** | 🔴 Red    | Immediate | Fix before shipping |
-| **WARNING**  | 🟡 Yellow | Important | Should be optimized |
-| **INFO**     | 🔵 Blue   | Optional  | Informational only  |
+| **CRITICAL** | 🔴 赤    | 最優先 | リリース前に修正必須 |
+| **WARNING**  | 🟡 黄    | 重要 | 最適化を推奨       |
+| **INFO**     | 🔵 青    | 低 | 情報提供のみ       |
 
-### No Warnings State
+### 警告がない状態
 
-When everything is working well:
+すべてが正常に動作している場合：
 
 ```tex
 ✅ All Good!
-No performance issues or warnings detected.
+パフォーマンスの問題や警告は検出されませんでした。
 ```
 
-:::tip Best Practice 
+:::tip ベストプラクティス
 
-Check the Warnings tab regularly during development. Addressing warnings early prevents performance problems from accumulating and becoming harder to fix later. 
+開発中は定期的に Warnings タブを確認してください。早期に警告に対処することで、パフォーマンスの問題が蓄積し、後から修正が困難になるのを防げます。
 
 :::
 
-## 👂 Listeners Tab
+## 👂 リスナー (Listeners) タブ
 
-Comprehensive overview of all active event subscriptions.
+すべてのアクティブなイベント購読状況を包括的に把握できます。
 
 ![Listeners Tab - Running State](/img/game-event-system/tools/runtime-monitor/monitor-listeners.png)
 
-### Listener Cards
+### リスナーカード
 
-Each event with active listeners is displayed as an expandable card:
+アクティブなリスナーを持つ各イベントが、展開可能なカードとして表示されます：
 
-**Card Header:**
+**カードヘッダー:**
 
 ```tex
-EventName  ⭐ (if persistent)     Total: 12
+EventName  ⭐ (常駐の場合)     Total: 12
 ```
 
-- **Event Name**: Name of the event (blue, bold)
-- **⭐ Icon**: Appears for persistent events (survives scene loads)
-- **Total Count**: Sum of all listener types (green)
+- **Event Name**: イベント名（青色、太字）。
+- **⭐ アイコン**: 常駐（Persistent）イベントの場合に表示（シーンを跨いで生存）。
+- **Total Count**: すべてのリスナータイプの合計（緑色）。
 
-### Listener Type Breakdown
+### リスナータイプの詳細
 
-Each card shows 6 blocks representing different listener types:
+各カードには、異なるリスナータイプを表す6つのブロックが表示されます：
 
-#### Visual Layout
+#### 視覚的レイアウト
 
 ```tex
 ┌─────────────┬─────────────┬─────────────┬─────────────┬─────────────┬─────────────┐
@@ -644,27 +636,27 @@ Each card shows 6 blocks representing different listener types:
 └─────────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────┘
 ```
 
-#### Block Types
+#### ブロックの種類
 
-| Block              | Description                     | Source             |
-| ------------------ | ------------------------------- | ------------------ |
-| **Basic (Insp)**   | Basic listeners from Inspector  | 🔵 Blue (Inspector) |
-| **Basic (API)**    | Basic listeners from code       | ⚫ Dark (API)       |
-| **Priority (API)** | Priority listeners from code    | ⚫ Dark (API)       |
-| **Cond (API)**     | Conditional listeners from code | ⚫ Dark (API)       |
-| **Persist (Insp)** | Persistent from Inspector       | 🔵 Blue (Inspector) |
-| **Persist (API)**  | Persistent from code            | ⚫ Dark (API)       |
+| ブロック           | 説明                               | ソース             |
+| ------------------ | ---------------------------------- | ------------------ |
+| **Basic (Insp)**   | インスペクターからの基本リスナー     | 🔵 青 (Inspector)  |
+| **Basic (API)**    | コードからの基本リスナー           | ⚫ 黒 (API)        |
+| **Priority (API)** | コードからの優先度付きリスナー     | ⚫ 黒 (API)        |
+| **Cond (API)**     | コードからの条件付きリスナー       | ⚫ 黒 (API)        |
+| **Persist (Insp)** | インスペクターからの常駐リスナー     | 🔵 青 (Inspector)  |
+| **Persist (API)**  | コードからの常駐リスナー           | ⚫ 黒 (API)        |
 
-#### Color Coding
+#### カラーコード
 
-- **🔵 Blue Blocks**: Configured in Unity Inspector (GameEventManager)
-- **⚫ Dark Blocks**: Registered via code (`AddListener`, `AddPriorityListener`, etc.)
-- **Faded/Gray**: No listeners of this type (count = 0)
-- **White Numbers**: Active listeners present
+- **🔵 青色ブロック**: Unityインスペクター（GameEventManager）で設定されたもの。
+- **⚫ 黒色ブロック**: コード（`AddListener`, `AddPriorityListener`等）で登録されたもの。
+- **薄い/グレー**: そのタイプのリスナーは存在しません（カウント = 0）。
+- **白文字の数字**: 現在アクティブなリスナーの数。
 
-### Understanding the Data
+### データの理解
 
-**Example Card:**
+**カードの例:**
 
 ```tex
 PlayerHealthChanged     Total: 8
@@ -672,75 +664,69 @@ PlayerHealthChanged     Total: 8
 Basic(Insp): 2  Basic(API): 1  Priority(API): 3  Cond(API): 1  Persist(Insp): 0  Persist(API): 1
 ```
 
-**Interpretation:**
+**解釈:**
 
-- 8 total listeners subscribed to this event
-- 2 basic listeners configured in GameEventManager
-- 1 basic listener added via code
-- 3 priority listeners (code-based, with custom priorities)
-- 1 conditional listener (code-based, executes conditionally)
-- 1 persistent listener (code-based, survives scene changes)
+- 合計8つのリスナーがこのイベントを購読しています。
+- 2つはGameEventManagerで設定された基本リスナー。
+- 1つはコードで追加された基本リスナー。
+- 3つは優先度付きリスナー（コードベース）。
+- 1つは条件付きリスナー（コードベース）。
+- 1つは常駐リスナー（コードベース、シーン遷移を跨ぐ）。
 
-### Special Indicators
+### 特殊なインジケーター
 
-**Persistent Event Card:**
+**常駐 (Persistent) イベントカード:**
+- 名前の横に **⭐ スターアイコン** が表示されます。
+- ツールチップ: "Persistent Event"。
+- `Basic (Insp)` は常に 0 となり、代わりに `Persist (Insp)` にインスペクター上のリスナー数が表示されます。
 
-- Has a **⭐ star icon** next to the name
-- Tooltip: "Persistent Event"
-- `Basic (Insp)` count shows as 0
-- `Persist (Insp)` shows the Inspector listener count instead
+**選択されたイベント:**
+- カードの背景が青色にハイライトされます。
+- 詳細を表示するために選択されている状態を示します。
 
-**Selected Event:**
+### ユースケース
 
-- Card has blue highlight background
-- Indicates this event is selected for detailed viewing
+**購読トラブルのデバッグ:**
+- リスナーが正しく登録されているか確認。
+- リスナーが適切に削除されているか確認。
+- 解除忘れによるメモリリークの特定。
 
-### Use Cases
+**アーキテクチャの分析:**
+- インスペクター経由とコード経由のリスナーのバランスを確認。
+- 購読数が多すぎるイベント（最適化が必要な候補）を特定。
+- システム全体のリスナー分布を把握。
 
-**Debugging Subscription Issues:**
+**パフォーマンス計画:**
+- リスナー数が多いほど、イベント発行時のCPU負荷が高くなります。
+- 複数のリスナーを1つに統合できるか検討。
+- すべてのリスナーが本当に必要か評価。
 
-- Verify listeners are properly registered
-- Check if listeners are being removed correctly
-- Identify memory leaks from forgotten subscriptions
+:::tip メモリリークの検出
 
-**Architecture Analysis:**
-
-- See the balance between Inspector and code-based listeners
-- Identify heavily-subscribed events that may need optimization
-- Understand listener distribution across your system
-
-**Performance Planning:**
-
-- High listener counts mean more CPU time per event
-- Consider consolidating multiple listeners into one
-- Evaluate if all listeners are necessary
-
-:::tip Memory Leak Detection 
-
-If you see listener counts growing over time (especially during scene transitions), you may have a memory leak. Objects should properly unsubscribe in `OnDisable()` or `OnDestroy()`. 
+時間の経過とともにリスナー数が増え続けている場合（特にシーン遷移後）、メモリリークが発生している可能性があります。オブジェクトは `OnDisable()` または `OnDestroy()` で適切に `RemoveListener` を行う必要があります。
 
 :::
 
 ------
 
-## 🔗 Automation Tab
+## 🔗 オートメーション (Automation) タブ
 
-Visual representation of trigger and chain event flows.
+トリガーやチェーンイベントのフローを視覚的に表現します。
 
-### View Modes
+### 表示モード
 
-**Toggle Options:**
+**トグルオプション:**
 
-- ☑️ **Tree View** - Shows only root events with full hierarchy
-- ☐ **Flat View** - Shows all events with automation, no hierarchy
+- ☑️ **Tree View** - ルートイベントから始まる完全な階層を表示。
+- ☐ **Flat View** - すべてのオートメーションをフラットなリストで表示（階層なし）。
 
-### Tree View (Recommended)
+### ツリービュー (推奨)
 
 ![Automation Tab - Full Tree](/img/game-event-system/tools/runtime-monitor/monitor-automation-tree.png)
 
-Displays automation flows starting from root events (events that are not triggered by other events):
+ルートイベント（他のイベントからトリガーされていない起点となるイベント）から始まるフローを表示します：
 
-**Tree Structure**
+**ツリー構造の例**
 
 ```tex
 ▶ RootEvent                                      🎯 Source
@@ -751,13 +737,13 @@ Displays automation flows starting from root events (events that are not trigger
         └─ 🔗 ChainNode3
 ```
 
-### Flat View
+### フラットビュー
 
 ![Automation Tab - Flat Tree](/img/game-event-system/tools/runtime-monitor/monitor-automation-flat.png)
 
-Displays automation flows as a chronological list, flattening the hierarchy to show events linked linearly.
+階層を無視し、イベントがどのように繋がっているかをリニアなリストとして表示します。
 
-**Flat Structure**
+**フラット構造の例**
 
 ```tex
 ▶ RootEvent                                      🎯 Source
@@ -776,38 +762,36 @@ Displays automation flows as a chronological list, flattening the hierarchy to s
   └─ 🔗 ChainNode3                                
 ```
 
-### Understanding the Visualization
+### 視覚情報の理解
 
-#### Node Types
+#### ノードの種類
 
-| Icon  | Type    | Description                            | Color    |
+| アイコン  | タイプ    | 説明                                   | カラー    |
 | ----- | ------- | -------------------------------------- | -------- |
-| **▶** | Root    | Source event (not triggered by others) | 🔵 Cyan   |
-| **🕹️** | Trigger | Parallel fan-out node                  | 🟢 Green  |
-| **🔗** | Chain   | Sequential blocking node               | 🟠 Orange |
+| **▶** | Root    | 起点となるイベント（他から呼ばれていない） | 🔵 シアン |
+| **🕹️** | Trigger | 並列ファンアウトノード                   | 🟢 緑     |
+| **🔗** | Chain   | 直列ブロッキングノード                   | 🟠 オレンジ |
 
-#### Node Information
+#### ノード情報
 
-Each node displays:
+各ノードに表示される内容：
 
-**Left Side:**
+**左側:**
+- ツリーの接続線 (└─)
+- タイプアイコン (▶/🕹️/🔗)
+- イベント名（タイプごとに色分け）
+- イベント GUID（デバッグ用に薄く表示）
 
-- Tree connector line (└─)
-- Type icon (▶/🕹️/🔗)
-- Event name (colored by type)
-- Event GUID (faded, for debugging)
+**右側のステータスアイコン:**
+- **🎯 Source** - 起点（ルート）イベント。
+- **🧩** - 条件関数が設定されています。
+- **⏱ Xs Wait** - 実行前に X 秒の遅延があります。
+- **⏳ Xs Wait** - 実行後に X 秒間待機（ブロック）します。
+- **⏩** - 非同期処理の完了を待機します。
 
-**Right Side Status Icons:**
+### フローパターンの読み方
 
-- **🎯 Source** - This is a root event
-- **🧩** - Has a condition function
-- **⏱ Xs Wait** - Has a delay before execution
-- **⏳ Xs Wait** - Has a duration after execution
-- **⏩** - Waits for async completion
-
-### Reading Flow Patterns
-
-#### Simple Fan-Out (Triggers)
+#### シンプルなファンアウト (Triggers)
 
 ```tex
 ▶ ButtonClicked
@@ -815,10 +799,11 @@ Each node displays:
   └─ 🕹️ ShowFeedback
   └─ 🕹️ LogAnalytics
 ```
+**パターン**: 並列実行
+**挙動**: ボタンがクリックされると、これら3つのイベントが同時に発行されます。
+**用途**: 独立した副作用の同時実行。
 
-**Pattern**: Parallel execution **Behavior**: All three events fire simultaneously when button clicks **Use Case**: Independent side effects
-
-#### Sequential Chain
+#### シーケンシャルチェーン (Chains)
 
 ```tex
 ▶ StartCutscene
@@ -826,16 +811,14 @@ Each node displays:
      └─ 🔗 LoadScene   ⏱ 0s Wait  ⏳ 2s Wait
         └─ 🔗 FadeIn   ⏱ 0.5s Wait
 ```
+**パターン**: 遅延を伴う直列実行
+**挙動**: 
+1. FadeOut が実行され、1秒待機。
+2. LoadScene が実行され、2秒待機。
+3. 0.5秒の遅延後、FadeIn が実行。
+**用途**: カットシーン、チュートリアル、ロードシーケンス。
 
-**Pattern**: Sequential with delays **Behavior**:
-
-1. FadeOut executes, waits 1 second
-2. LoadScene executes, waits 2 seconds
-3. After 0.5 second delay, FadeIn executes
-
-**Use Case**: Cutscenes, tutorials, loading sequences
-
-#### Complex Hybrid
+#### 複雑なハイブリッド
 
 ```tex
 ▶ EnemyDefeated
@@ -845,109 +828,73 @@ Each node displays:
      └─ 🔗 SaveGame     
   └─ 🕹️ SpawnLoot       🧩
 ```
+**パターン**: 並列と直列の混合
+**挙動**: 
+- 音楽/SE は即座に発行（並列）。
+- 報酬表示は1秒後に行われ、その後にゲーム保存（直列）。
+- アイテムドロップは条件を満たした場合のみ発生（条件付き並列）。
 
-**Pattern**: Mix of parallel and sequential **Behavior**:
+### ステータスアイコン・リファレンス
 
-- Music/sound effects fire immediately (parallel)
-- Rewards shown after 1 second, then saves game (sequential)
-- Loot spawns conditionally (parallel with condition)
-
-### Event Flow Analysis
-
-**Example Real-World Flow:**
-
-```tex
-▶ OnPlayerDeath
-  └─ 🕹️ StopPlayerInput
-  └─ 🕹️ DisablePlayerCollider
-  └─ 🔗 PlayDeathAnimation    ⏳ 2s Wait
-     └─ 🔗 ShowDeathUI         ⏱ 0.5s Wait  ⏳ 3s Wait
-        └─ 🔗 RespawnPlayer    🧩
-           └─ 🕹️ ResetPlayerState
-           └─ 🕹️ UpdateCheckpoint
-```
-
-**Flow Breakdown:**
-
-1. **Immediate Actions** (Triggers):
-   - Stop player input
-   - Disable collision
-2. **Death Animation** (Chain):
-   - Play animation
-   - Wait 2 seconds for animation to complete
-3. **Show UI** (Chain):
-   - Wait 0.5 seconds (transition delay)
-   - Show death screen
-   - Wait 3 seconds (player can see screen)
-4. **Conditional Respawn** (Chain with condition 🧩):
-   - Only if player has lives remaining
-   - Respawn player at checkpoint
-5. **Cleanup** (Triggers):
-   - Reset player stats
-   - Save new checkpoint
-
-### Status Icon Reference
-
-| Icon         | Meaning       | Details                                        |
+| アイコン         | 意味          | 詳細                                           |
 | ------------ | ------------- | ---------------------------------------------- |
-| **🎯 Source** | Root event    | Not triggered by any other event               |
-| **🧩**        | Conditional   | Has a condition check (may not execute)        |
-| **⏱ Xs**     | Start Delay   | Waits X seconds before executing               |
-| **⏳ Xs**     | Duration Wait | Waits X seconds after executing (blocks chain) |
-| **⏩**        | Async Wait    | Waits for coroutine/async completion           |
+| **🎯 Source** | ルートイベント | 他のどのイベントからもトリガーされていない起点    |
+| **🧩**        | 条件付き      | 条件チェックがあり、実行されない可能性があります |
+| **⏱ Xs**     | 開始遅延      | 実行前に X 秒待機します                         |
+| **⏳ Xs**     | 継続待機      | 実行後に X 秒待機します（後続をブロック）       |
+| **⏩**        | 非同期待機    | コルーチンや async 処理の完了を待機します       |
 
-### Recursive Detection
+### 再帰の検出
 
-If an event triggers itself (directly or indirectly), the tree stops at the recursive node to prevent infinite display:
+イベントが自身をトリガーしている場合（直接的または間接的）、無限表示を防ぐためにツリーは再帰ノードで停止します：
 
 ```tex
 ▶ OnValueChanged
   └─ 🔗 UpdateValue
-     └─ 🔗 OnValueChanged  ⚠️ (Recursive - stopped)
+     └─ 🔗 OnValueChanged  ⚠️ (Recursive - 停止)
 ```
 
-:::warning Recursion Warning 
+:::warning 再帰警告
 
-Recursive event flows appear in the **Warnings** tab as potential infinite loops. Always use guards in your code to prevent actual recursion. 
+再帰的なイベントフローは **Warnings** タブに「無限ループの可能性」として表示されます。実際の再帰を防ぐために、常にコード内でガード（フラグ管理）を行ってください。
 
 :::
 
 ------
 
-## 🔍 Details Tab
+## 🔍 詳細 (Details) タブ
 
-Deep dive into individual event information and execution history.
+個別のイベント情報や実行履歴を深掘りして調査します。
 
 ![Details Tab - Log View](/img/game-event-system/tools/runtime-monitor/monitor-details-log.png)
 
-### Navigation
+### ナビゲーション
 
-The Details tab opens automatically when you:
+以下のアクションで、Details タブが自動的に開きます：
 
-- Click **[Details]** button from Recent Events
-- Click **[View Logs]** button from Statistics
-- Click **[View]** button from Warnings
+- Recent Events タブの **[Details]** ボタンをクリック。
+- Statistics タブの **[View Logs]** ボタンをクリック。
+- Warnings タブの **[View]** ボタンをクリック。
 
-At the top:
+タブ上部：
+- **← Back to [Previous Tab]** - 前にいたタブへ戻る。
 
-- **← Back to [Previous Tab]** - Return to where you came from
+### ログ詳細ビュー (Log Details View)
 
-### Log Details View
+特定のログエントリを表示しているとき：
 
-When viewing a specific log entry:
+**イベント情報カード:**
 
-**Event Information Card:**
-
-| Field          | Description                             |
+| フィールド      | 説明                                     |
 | -------------- | --------------------------------------- |
-| **Event Name** | Full name of the event                  |
-| **Event Type** | Generic type (e.g., `GameEvent<float>`) |
-| **Time**       | Precise timestamp (HH:MM:SS.mmm)        |
-| **Frame**      | Frame number when executed              |
-| **Arguments**  | Argument values passed                  |
-| **Called By**  | Method that raised the event            |
+| **Event Name** | イベントのフルネーム                     |
+| **Event Type** | ジェネリック型 (例: `GameEvent<float>`)  |
+| **Time**       | 正確なタイムスタンプ (時:分:秒.ミリ秒)   |
+| **Frame**      | 発行されたフレーム番号                   |
+| **Arguments**  | 渡された引数の値                         |
+| **Called By**  | イベントを発行したメソッド               |
 
-**Stack Trace Section:**
+**スタックトレースセクション:**
 
 ```tex
 Stack Trace:
@@ -958,46 +905,43 @@ at EnemyController.Update() in Assets/Scripts/EnemyController.cs:line 52
 ...
 ```
 
-**Use Cases:**
+**ユースケース:**
+- イベントの起点（オリジン）を追跡。
+- 予期しないイベント呼び出しのデバッグ。
+- 呼び出しチェーンの把握。
+- 呼び出し元コードのボトルネック特定。
 
-- Track down where events originate
-- Debug unexpected event calls
-- Understand call chains
-- Identify performance bottlenecks
-
-### Event Statistics View
+### イベント統計ビュー (Event Statistics View)
 
 ![Details Tab - Statistics View](/img/game-event-system/tools/runtime-monitor/monitor-details-stats.png)
 
-When viewing all logs for a specific event:
+特定のイベントのすべてのログを表示しているとき：
 
-**Header:**
-
+**ヘッダー:**
 ```tex
 Event: PlayerHealthChanged     Total: 245 triggers
 ```
 
-**Usage Statistics Card:**
+**使用統計カード (Usage Statistics):**
 
-| Metric            | Description                        |
+| メトリック        | 説明                               |
 | ----------------- | ---------------------------------- |
-| **Trigger Count** | Total executions                   |
-| **Frequency**     | Triggers per second                |
-| **Avg Interval**  | Time between triggers              |
-| **Last Trigger**  | Relative time since last execution |
+| **Trigger Count** | 合計実行回数                       |
+| **Frequency**     | 1秒あたりの発行回数                 |
+| **Avg Interval**  | トリガー間の平均時間               |
+| **Last Trigger**  | 最後の実行からの相対時間           |
 
-**Performance Metrics Card** (if available):
+**パフォーマンスメトリクスカード** (利用可能な場合):
 
-| Metric       | Description                | Color            |
+| メトリック   | 説明                       | カラー          |
 | ------------ | -------------------------- | ---------------- |
-| **Avg Time** | Average execution duration | Green/Yellow/Red |
-| **Max Time** | Slowest execution          | White            |
-| **Min Time** | Fastest execution          | Gray             |
-| **GC Alloc** | Garbage collections        | Red if > 0       |
+| **Avg Time** | 平均実行時間               | 緑/黄/赤         |
+| **Max Time** | 最遅実行時間               | 白               |
+| **Min Time** | 最速実行時間               | グレー           |
+| **GC Alloc** | GC（ゴミ生成）アロケーション | 0より多いと赤色  |
 
-**Recent Logs:**
-
-Shows the last 50 executions of this event in reverse chronological order:
+**最近のログ:**
+このイベントの最新50件の実行を新しい順に表示します：
 
 ```tex
 [14:52:33.145]  F:3201  PlayerHealthChanged  <GameEvent<float>>  [Details]
@@ -1005,68 +949,60 @@ Shows the last 50 executions of this event in reverse chronological order:
 
 [14:52:31.089]  F:3180  PlayerHealthChanged  <GameEvent<float>>  [Details]
   📍 Called by: HealthRegen.Tick()
-
-...
 ```
 
-### Use Cases
+### ユースケース
 
-**Debugging Event Issues:**
+**イベント問題のデバッグ:**
+1. Recent Events タブへ移動。
+2. 問題のあるエントリを見つける。
+3. **[Details]** をクリックしてスタックトレースを確認。
+4. 呼び出し元のコードを特定。
+5. 問題を修正。
 
-1. Go to Recent Events tab
-2. Find problematic event execution
-3. Click **[Details]** to see stack trace
-4. Identify calling code
-5. Fix the issue
+**パフォーマンス分析:**
+1. Statistics タブへ移動。
+2. 遅いイベントの **[View Logs]** をクリック。
+3. パフォーマンスメトリクスを確認。
+4. 実行パターンをチェック。
+5. データに基づいて最適化。
 
-**Performance Analysis:**
-
-1. Go to Statistics tab
-2. Click **[View Logs]** on slow event
-3. Review performance metrics
-4. Check execution patterns
-5. Optimize based on data
-
-**Event Flow Understanding:**
-
-1. Trigger an event chain
-2. View logs for each event
-3. Verify execution order
-4. Check timing between events
-5. Validate behavior
+**イベントフローの理解:**
+1. イベントチェーンをトリガーする。
+2. 各イベントのログを確認。
+3. 実行順序を検証。
+4. イベント間のタイミングをチェック。
+5. 挙動が正しいか検証。
 
 ------
 
-## 🛠️ Advanced Features
+## 🛠️ 高度な機能
 
-### Debugger Control
+### デバッガーコントロール
 
-**Debugger Toggle Button** (in header):
+**デバッガートグルボタン**（ヘッダー部）：
 
-- **● Debugger ON** (green) - Actively recording all event data
-- **○ Debugger OFF** (red) - Not recording (saves performance)
+- **● Debugger ON** (緑) - すべてのイベントデータの記録を有効化。
+- **○ Debugger OFF** (赤) - 記録を停止（パフォーマンスを節約）。
 
-**When to Disable:**
+**オフにするべき状況:**
+- パフォーマンスが重要なゲームプレイテスト中。
+- ゲームプレイ動画の録画中。
+- エディタのオーバーヘッドを最小限にしたいとき。
+- モニタリングが不要なとき。
 
-- During performance-critical gameplay testing
-- When recording gameplay footage
-- To reduce Editor overhead
-- When you don't need monitoring
+:::info パフォーマンスへの影響
 
-:::info Performance Impact 
-
-The debugger has minimal overhead (~0.1-0.5ms per event), but disabling it during final performance testing gives you the most accurate metrics. 
+デバッガーの負荷は極めて最小限（1イベントあたり約 0.1～0.5ms）ですが、最終的なパフォーマンス計測時にはオフにすることで最も正確な数値を測定できます。
 
 :::
 
-### Clear Data Options
+### データの消去 (Clear) オプション
 
-Click the **🗑 Clear** button to access options:
+**🗑 Clear** ボタンをクリックして以下のオプションにアクセスできます：
 
-**Clear Menu:**
-
-- **Clear Logs Only** - Removes event execution history
-- **Clear Statistics Only** - Resets trigger counts and frequency data
-- **Clear Performance Data** - Resets execution time measurements
-- **Clear All Data** - Complete reset (requires confirmation
-
+**クリアメニュー:**
+- **Clear Logs Only** - イベントの実行履歴ログのみを消去。
+- **Clear Statistics Only** - トリガー回数や頻度データをリセット。
+- **Clear Performance Data** - 実行時間の測定値をリセット。
+- **Clear All Data** - 全データを完全にリセット（確認が必要です）。

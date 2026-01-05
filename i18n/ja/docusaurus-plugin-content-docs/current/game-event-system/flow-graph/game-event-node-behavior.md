@@ -1,5 +1,5 @@
 ﻿---
-sidebar_label: 'Configure Node Behavior'
+sidebar_label: 'ノード動作の設定'
 sidebar_position: 3
 ---
 
@@ -9,127 +9,124 @@ import TabItem from '@theme/TabItem';
 
 
 
-# Game Event Node Behavior
+# ゲームイベントノードの振る舞い (Game Event Node Behavior)
 
-While the graph shows connections, the **Node Behavior Configuration Window** controls the detailed execution logic of each individual node.
+グラフが接続（繋がり）を示すのに対し、**ノード動作設定ウィンドウ**は、個々のノードの詳細な実行ロジックを制御します。
 
-**Access**: Double-click any node in the flow graph to open the configuration window for node behavior.
+**アクセス方法**: フローグラフ内の任意のノードをダブルクリックすると、そのノードの動作設定ウィンドウが開きます。
 
-![Node Configuration Window](/img/game-event-system/flow-graph/game-event-node-behavior/node-config-window.png)
+![ノード設定ウィンドウ](/img/game-event-system/flow-graph/game-event-node-behavior/node-config-window.png)
 
 ---
 
-## 🎯 Window Overview
+## 🎯 ウィンドウの概要
 
-The configuration window is divided into three main sections:
+設定ウィンドウは主に3つのセクションに分かれています：
 
-| Section                | Purpose                                     | Applies To                |
+| セクション                | 目的                                     | 適用対象                |
 | ---------------------- | ------------------------------------------- | ------------------------- |
-| **Node Information**   | View event details and type                 | All nodes                 |
-| **Node Condition**     | Visual logic gate for execution control     | All nodes                 |
-| **Node Configuration** | Timing, priority, and data passing settings | All nodes (type-specific) |
+| **ノード情報 (Node Information)**   | イベントの詳細と型の確認                     | すべてのノード                 |
+| **ノード条件 (Node Condition)**     | 実行を制御するビジュアルロジックゲート         | すべてのノード                 |
+| **ノード設定 (Node Configuration)** | タイミング、優先度、データ受け渡しの設定       | すべてのノード（型により異なる） |
 
-## 📋 Node Information
+## 📋 ノード情報
 
-Displays read-only details about the selected node.
+選択されたノードに関する読み取り専用の詳細を表示します。
 
-![Node Information Card](/img/game-event-system/flow-graph/game-event-node-behavior/node-info.png)
+![ノード情報カード](/img/game-event-system/flow-graph/game-event-node-behavior/node-info.png)
 
-**Event Name**: The Game Event this node will raise.
+**イベント名 (Event Name)**: このノードが発行するゲームイベント。
 
-**Node Type**: Trigger (parallel) or Chain (sequential).
+**ノードタイプ (Node Type)**: トリガー（並列）またはチェーン（直列）。
 
-**Event GUID**: Unique identifier for internal tracking.
+**イベント GUID**: 内部追跡用のユニークな識別子。
 
-**Use Case**: Verify you're editing the correct node before making changes.
+**ユースケース**: 変更を加える前に、正しいノードを編集しているか確認するために使用します。
 
 ------
 
-## 🧩 Node Condition (Flow Gate)
+## 🧩 ノード条件 (フローゲート)
 
-Each node has its own **visual condition tree** that controls whether it executes.
+各ノードは独自の**ビジュアル条件ツリー**を持っており、それによって実行するかどうかを制御できます。
 
-![Node Condition Tree](/img/game-event-system/flow-graph/game-event-node-behavior/node-config-condition.png)
+![ノード条件ツリー](/img/game-event-system/flow-graph/game-event-node-behavior/node-config-condition.png)
 
-### How It Works
+### 仕組み
 
-**If condition evaluates to FALSE**:
+**条件が FALSE と判定された場合**:
 
-- Node does **not** fire
-- Flow stops down this branch
-- Connected child nodes are skipped
+- ノードは発行されません。
+- このブランチ以降のフローは停止します。
+- 接続されている子ノードはスキップされます。
 
-**If condition evaluates to TRUE**:
+**条件が TRUE と判定された場合**:
 
-- Node fires normally
-- Flow continues to children
+- ノードは通常通り発行されます。
+- 子ノードへフローが継続します。
 
 ---
 
-### Condition Context
+### 条件のコンテキスト
 
-You have access to:
+以下のデータにアクセスできます：
 
-**Event Argument** (`Arg`): Data from the incoming event
-
+**イベント引数** (`Arg`): 入力イベントからのデータ。
 ```
-Example: Arg.amount > 50
-```
-
-**Sender** (`Sender`): Source object (for sender events)
-
-```
-Example: Sender.tag == "Enemy"
+例: Arg.amount > 50
 ```
 
-**Scene Objects**: Any GameObject/Component in the scene
-
+**送信元** (`Sender`): ソースオブジェクト（Sender付きイベントの場合）。
 ```
-Example: Player.Health < 20
+例: Sender.tag == "Enemy"
+```
+
+**シーンオブジェクト**: シーン内の任意の GameObject/Component。
+```
+例: Player.Health < 20
 ```
 
 ---
 
-### Visual Builder
+### ビジュアルビルダー
 
-The condition system uses the same **Visual Condition Tree** as **Event Behaviors**.
+条件システムは、**イベントビヘイビア**と同じ**ビジュアル条件ツリー**を使用します。
 
-**Full Documentation**: See **[Visual Condition Tree](../visual-workflow/visual-condition-tree.md)** for complete guide on:
+**詳細なドキュメント**: 以下については **[ビジュアル条件ツリー](../visual-workflow/visual-condition-tree.md)** ガイドを参照してください。
 
-- Building logic gates (AND/OR groups)
-- Source types (Event Argument, Scene Type, Random, Constant)
-- Comparison operators
-- Type validation
-- Best practices
+- ロジックゲート（AND/OR グループ）の構築
+- ソースタイプ（イベント引数、シーンタイプ、ランダム、定数）
+- 比較演算子
+- 型の検証
+- ベストプラクティス
 
-:::tip Reusable Logic
-The visual condition system is identical across:
+:::tip ロジックの再利用
+このビジュアル条件システムは、以下の場所で共通して使用されています。
 
-- **Event Behaviors** (in Event Inspector)
-- **Flow Nodes** (this window)
+- **イベントビヘイビア**（イベントインスペクター内）
+- **フローノード**（このウィンドウ）
 
-Learn it once, use it everywhere!
+一度覚えれば、どこでも活用できます！
 :::
 
 ---
 
-### Practical Example
+### 具体的な例
 
-**Scenario**: Only play "Low Health Warning" when health is critical.
+**シナリオ**: 体力がピンチの時だけ「Low Health Warning（体力低下警告）」を再生する。
 
-**Condition Tree**:
+**条件ツリー**:
 
 ```mermaid
 graph LR
 
-	A(📂 AND Group):::root
+	A(📂 AND グループ):::root
     
-    C1(⚔️ Damage > 20):::cond
-    C2(💔 Health < 30):::cond
-    C3(🛡️ Has Shield: No):::cond
+    C1(⚔️ ダメージ > 20):::cond
+    C2(💔 体力 < 30):::cond
+    C3(🛡️ シールドあり: No):::cond
     
-    R([✅ Result: TRUE]):::success
-    F([❌ Result: FALSE]):::fail
+    R([✅ 結果: TRUE]):::success
+    F([❌ 結果: FALSE]):::fail
 
     A --> C1
     
@@ -149,74 +146,70 @@ graph LR
     linkStyle default stroke:#94a3b8,stroke-width:2px,color:#94a3b8
 ```
 
-**Result**: Sound only plays when **all three** conditions pass.
+**結果**: **3つの条件すべて**を満たした場合にのみ、音が再生されます。
 
 ---
 
-## ⚙️ Node Configuration
+## ⚙️ ノード設定
 
-Settings that control **timing**, **priority**, and **data flow**.
+**タイミング**、**優先度**、および**データフロー**を制御する設定です。
 
-### General Settings (All Nodes)
+### 一般設定（全ノード共通）
 
-![Node Config General](/img/game-event-system/flow-graph/game-event-node-behavior/node-config-general.png)
+![ノード設定一般](/img/game-event-system/flow-graph/game-event-node-behavior/node-config-general.png)
 
 <details>
-<summary>Start Delay</summary>
+<summary>開始遅延 (Start Delay)</summary>
 
-**Unit**: Seconds (float)
+**単位**: 秒 (float)
 
-**Effect**: Node waits this duration **before** raising its event.
+**効果**: ノードは、イベントを発行する**前**に、指定された時間だけ待機します。
 
-**Use Cases**:
+**ユースケース**:
+- 爆発を時間差で発生させる（0.2秒間隔など）
+- イベントに対する遅延反応
+- タイミングを合わせたシーケンス
 
-- Staggered explosions (0.2s apart)
-- Delayed reactions to events
-- Timed sequences
-
-**Example**:
-
+**例**:
 ```
-🔘 Raise: OnButtonPressed
+🔘 発行: OnButtonPressed
 │
 ├─► ⏱️ 0.5s ──┐
 │             ▼
-│            🎵 PlayClickSound        ✅ Executed
+│            🎵 クリック音を再生        ✅ 実行
 │
 ├─► ⏱️ 1.0s ────────┐
 │                   ▼
-│                  💬 ShowConfirmation  ✅ Executed
+│                  💬 確認画面を表示      ✅ 実行
 │
 └─► ⏱️ 2.0s ──────────────────┐
                               ▼
-                             🚪 CloseMenu        ✅ Finalized
+                             🚪 メニューを閉じる    ✅ 完了
 ```
 
-**Visual Indicator**: Badge shows ⏱️ **0.5s** at bottom of node.
+**ビジュアル表示**: ノードの下部に ⏱️ **0.5s** というバッジが表示されます。
 
 </details>
 
 <details>
-<summary>Pass Argument</summary>
+<summary>引数を渡す (Pass Argument)</summary>
 
-**Type**: Boolean toggle
+**タイプ**: トグルスイッチ
 
-**Effect**: Controls whether event data flows to this node.
+**効果**: イベントデータがこのノードに流れるかどうかを制御します。
 
 ---
 
-### ✅ Checked (Pass Argument: ON)
+### ✅ チェックあり (Pass Argument: ON)
 
-Node receives data from previous event (if types are compatible).
+ノードは前のイベントからデータを受け取ります（型に互換性がある場合）。
 
-**When to Use**:
+**いつ使用するか**:
+- ダメージ情報を転送する場合
+- スコアや値を引き継ぐ場合
+- データパイプライン
 
-- Forwarding damage info
-- Passing scores/values
-- Data pipelines
-
-**Example**:
-
+**例**:
 ```mermaid
 graph LR
 
@@ -225,102 +218,100 @@ graph LR
     classDef action fill:#0f766e,stroke:#042f2e,stroke-width:2px,color:#ffffff
     classDef result fill:#059669,stroke:#064e3b,stroke-width:2px,color:#ffffff,font-weight:bold
 
-    A("🔢 OnScoreChanged(int)"):::event --> B(["⚙️ Pass Argument: ON"]):::setting
+    A("🔢 OnScoreChanged(int)"):::event --> B(["⚙️ 引数を渡す: ON"]):::setting
     B --> C("📱 UpdateUI(int)"):::action
-    C --> D(["📩 Receives Actual Score"]):::result
+    C --> D(["📩 実際のスコアを受け取る"]):::result
 
     linkStyle default stroke:#94a3b8,stroke-width:2px
 ```
 
-**Connection Color**: Depends on type compatibility (Green/Yellow/Orange).
+**接続の色**: 型の互換性に依存します（緑/黄色/オレンジ）。
 
 ---
 
-### ❌ Unchecked (Pass Argument: OFF)
+### ❌ チェックなし (Pass Argument: OFF)
 
-Node fires as **static call** with default/null arguments.
+ノードはデフォルト値または null 引数を使用して、**静的呼び出し（Static Call）**として発行されます。
 
-**When to Use**:
+**いつ使用するか**:
+- 互換性のない型同士を接続する場合
+- 一般的な通知（データ不要）
+- 型安全な接続を強制する場合
 
-- Connecting incompatible types
-- Generic notifications (no data needed)
-- Forcing type-safe connections
-
-**Example**:
-
+**例**:
 ```
-🚀 Event: OnDamageReceived(DamageInfo)
-│   (Payload: { amount: 20.0, ... })
+🚀 イベント: OnDamageReceived(DamageInfo)
+│   (ペイロード: { amount: 20.0, ... })
 │
-🛡️ Filter: [ Pass Argument: OFF ]
-│   (Logic: Trigger Only / Data Dropped)
+🛡️ フィルター: [ 引数を渡す: OFF ]
+│   (ロジック: トリガーのみ / データは破棄)
 │
-└─► 🔊 Callback: PlayGenericSound()
+└─► 🔊 コールバック: PlayGenericSound()
 │
-🎯 Result: Sound plays reliably without needing DamageInfo data.
+🎯 結果: DamageInfo データを必要とせずに、確実に音が再生されます。
 ```
 
-**Connection Color**: Always 🟢 **Green** (forced safe).
+**接続の色**: 常に 🟢 **緑**（強制的に安全）になります。
 
 ---
 
-### Impact on Connections
+### 接続への影響
 
-**Pass Argument** directly affects connection line colors:
+**Pass Argument** の設定は、接続線の色に直接影響します：
 
-| Pass    | Source Type | Target Type | Result                    |
+| 引数を渡す | ソースの型 | ターゲットの型 | 結果                    |
 | ------- | ----------- | ----------- | ------------------------- |
-| **OFF** | Any         | Any         | 🟢 Green (always safe)     |
-| **ON**  | `<int>`     | `<int>`     | 🟢 Green (perfect match)   |
-| **ON**  | `<int>`     | `<void>`    | 🟡 Yellow (data discarded) |
-| **ON**  | `<int>`     | `<float>`   | 🟠 Orange (conversion)     |
-| **ON**  | `<int>`     | `<string>`  | 🔴 Red (blocked)           |
+| **OFF** | 任意         | 任意         | 🟢 緑（常に安全）           |
+| **ON**  | `<int>`     | `<int>`     | 🟢 緑（完全一致）           |
+| **ON**  | `<int>`     | `<void>`    | 🟡 黄色（データ破棄）       |
+| **ON**  | `<int>`     | `<float>`   | 🟠 オレンジ（変換）         |
+| **ON**  | `<int>`     | `<string>`  | 🔴 赤（ブロック）           |
 
-**Recommendation**: Use **OFF** when connecting incompatible types to avoid red connections.
+**推奨**: 互換性のない型を接続して線が赤くなった場合は、**OFF** に設定して回避してください。
 
 </details>
 
 ---
 
-### Type-Specific Settings
+### 型固有の設定
 
-Configuration options change based on node type (Trigger vs Chain).
+ノードのタイプ（トリガーかチェーンか）によって、設定オプションが変わります。
 
 <details>
-<summary>Trigger Node</summary>
+<summary>トリガーノード (Trigger Node)</summary>
 
-## Trigger Node (🟠 Orange)
+## トリガーノード (🟠 オレンジ)
 
-**Execution**: Parallel (fan-out) - fires and immediately continues.
+**実行方式**: 並列（ファンアウト） - 発行後、即座に次へ進みます。
 
-![Trigger Node Settings](/img/game-event-system/flow-graph/game-event-node-behavior/node-config-trigger.png)
-
----
-
-### Priority
-
-**Type**: Integer (default: 0)
-
-**Rule**: **Higher number = Earlier execution**
-
-**Use Case**: Control execution order when multiple Triggers connect to the same parent.
+![トリガーノード設定](/img/game-event-system/flow-graph/game-event-node-behavior/node-config-trigger.png)
 
 ---
 
-### How Priority Works
+### 優先度 (Priority)
 
-**Scenario**: Three Triggers connected to one Root node.
+**タイプ**: 整数（デフォルト: 0）
+
+**ルール**: **数値が大きいほど、先に実行されます**。
+
+**ユースケース**: 複数のトリガーが同じ親ノードに接続されている場合、その実行順序を制御します。
+
+---
+
+### 優先度の仕組み
+
+**シナリオ**: 1つのルートノードに3つのトリガーが接続されている場合。
 
 ```mermaid
 graph LR
 
-    ROOT(["⚡ Root Event"]):::root
+    ROOT(["⚡ ルートイベント"]):::root
 
-    ROOT ==>|① 1st - Priority: 10| A1("🔊 Play Sound"):::action
-    ROOT ==>|② 2nd - Priority: 5 | A2("✨ Spawn VFX"):::action
-    ROOT ==>|③ 3rd - Priority: 0 | A3("📱 Update UI"):::action
+    ROOT ==>|① 最初 - 優先度: 10| A1("🔊 SEを再生"):::action
+    ROOT ==>|② 次に - 優先度: 5 | A2("✨ VFXを生成"):::action
+    ROOT ==>|③ 最後 - 優先度: 0 | A3("📱 UIを更新"):::action
 
-    subgraph Queue ["Execution Order (High to Low)"]
+    subgraph Queue ["実行順序 (高から低)"]
     A1
     A2
     A3
@@ -334,213 +325,195 @@ graph LR
     linkStyle default stroke:#64748b,stroke-width:2px,color:#64748b,font-weight:bold
 ```
 
-**Execution Order**: 10 → 5 → 0 (high to low)
+**実行順**: 10 → 5 → 0 (高い順)
 
 ---
 
-### Priority Values
+### 優先度の値
 
-| Value        | Meaning          | Use Case                                 |
+| 値        | 意味          | ユースケース                                 |
 | ------------ | ---------------- | ---------------------------------------- |
-| **Positive** | Higher priority  | Critical actions (sound, input blocking) |
-| **0**        | Default priority | Normal actions                           |
-| **Negative** | Lower priority   | Cleanup, logging, analytics              |
+| **プラス** | 高い優先度  | 重要なアクション（音、入力のブロック） |
+| **0**        | デフォルト | 通常のアクション                           |
+| **マイナス** | 低い優先度   | クリーンアップ、ログ出力、分析用データ送信              |
 
-**Example Use Cases**:
-
-- **+100**: Block player input
-- **+50**: Play critical sound
-- **0**: Standard VFX
-- **-50**: Log to analytics
-- **-100**: Cleanup temporary objects
+**具体的なユースケース**:
+- **+100**: プレイヤーの入力をブロック
+- **+50**: 重要なSEを再生
+- **0**: 標準的なVFX
+- **-50**: 分析ログの送信
+- **-100**: 一時オブジェクトのクリーンアップ
 
 ---
 
-### Visual Indicator
+### ビジュアル表示
 
-Badge shows ⬆️ **+10** at bottom of node.
+ノードの下部に ⬆️ **+10** というバッジが表示されます。
 
 </details>
 
 <details>
-<summary>Chain Node</summary>
+<summary>チェーンノード (Chain Node)</summary>
 
-## Chain Node (🟢 Green)
+## チェーンノード (🟢 緑)
 
-**Execution**: Sequential (blocking) - fires and waits before continuing.
+**実行方式**: 直列（ブロッキング） - 発行後、完了を待ってから次へ進みます。
 
-![Chain Node Settings](/img/game-event-system/flow-graph/game-event-node-behavior/node-config-chain.png)
-
----
-
-### Duration
-
-**Type**: Seconds (float)
-
-**Effect**: Forces graph to **pause** at this node for specified time **after** event fires.
-
-**Use Case**: Wait for animations, timed sequences, cooldowns.
+![チェーンノード設定](/img/game-event-system/flow-graph/game-event-node-behavior/node-config-chain.png)
 
 ---
 
-### Duration Examples
+### 期間 (Duration)
 
-**Animation Wait**:
+**タイプ**: 秒 (float)
 
+**効果**: イベント発行**後**、指定された時間だけグラフをこのノードで**一時停止（ポーズ）**させます。
+
+**ユースケース**: アニメーションの待機、タイミングを合わせたシーケンス、クールダウン。
+
+---
+
+### 期間の例
+
+**アニメーション待機**:
 ```
-🖼️ T+0.0s | Initiation
+🖼️ T+0.0s | 開始
 ⚔️ PlayAttackAnimation()
 │
-┆  (Δ 1.5s Delay: Animation Duration)
+┆  (Δ 1.5s 遅延: アニメーションの長さ)
 ▼
-🖼️ T+1.5s | Execution
+🖼️ T+1.5s | 実行
 💥 DealDamage()
 │
-📊 Result: 1.5s total duration | ✅ Chain Completed
+📊 結果: 合計期間 1.5s | ✅ チェーン完了
 ```
 
-**Timed Sequence**:
-
+**タイミングを合わせたシーケンス**:
 ```
-🖼️ T+0.0s | Activation
+🖼️ T+0.0s | アクティブ化
 ⚠️ ShowWarning()
 │
-┆  (Δ 3.0s Display Duration)
+┆  (Δ 3.0s 表示期間)
 ▼
-🖼️ T+3.0s | Cleanup
+🖼️ T+3.0s | クリーンアップ
 🙈 HideWarning()
 │
-📊 Lifecycle: 3.0s Active | ✅ Auto-Cleanup Completed
+📊 ライフサイクル: 3.0s 有効 | ✅ 自動クリーンアップ完了
 ```
 
-**Visual Indicator**: Badge shows ⏳ **3.0s** at bottom of node.
+**ビジュアル表示**: ノードの下部に ⏳ **3.0s** というバッジが表示されます。
 
 ---
 
-### Wait for Completion
+### 完了を待機 (Wait for Completion)
 
-**Type**: Boolean toggle
+**タイプ**: トグルスイッチ
 
-**Effect**: Graph waits for **async operations** to finish before continuing.
+**効果**: **非同期操作**が完了するのを待ってから、グラフを次へ進めます。
 
-**Requirements**: Event listener must return `Task` or `IEnumerator`.
+**要件**: イベントリスナーが `Task` または `IEnumerator` を返す必要があります。
 
 ---
 
-### Async Support
+### 非同期サポート
 
-**Coroutines** (`IEnumerator`):
-
+**コルーチン** (`IEnumerator`):
 ```csharp
 public IEnumerator OnLoadLevel()
 {
     yield return SceneManager.LoadSceneAsync("Level2");
-    Debug.Log("Load complete");
+    Debug.Log("ロード完了");
 }
 ```
 
 **Async/Await** (`Task`):
-
 ```csharp
 public async Task OnDownloadData()
 {
     await DownloadFromServer();
-    Debug.Log("Download complete");
+    Debug.Log("ダウンロード完了");
 }
 ```
 
-**Flow Behavior**:
-
+**フローの挙動**:
 ```mermaid
 graph LR
     %% 节点定义
-    A("🔄 Start Loading"):::event
-    B(["⏳ Async Processing"]):::wait
-    C("✅ Show Success UI"):::action
+    A("🔄 ロード開始"):::event
+    B(["⏳ 非同期処理中"]):::wait
+    C("✅ 成功UIを表示"):::action
 
     %% 逻辑路径
-    A ==>|Wait: ON| B
-    B -- "OnTaskComplete" --> C
+    A ==>|待機: ON| B
+    B -- "タスク完了時" --> C
 
-    %% --- 样式定义 (保持实心质感 & 适配黑白主题) ---
-    %% Event: 深蓝色实心 + 亮蓝边框
+    %% --- 样式定义 ---
     classDef event fill:#1e40af,stroke:#3b82f6,stroke-width:2px,color:#ffffff,font-weight:bold
-    
-    %% Wait: 琥珀色实心胶囊。用颜色暗示这是一个“中间状态”
     classDef wait fill:#b45309,stroke:#d97706,stroke-width:2px,color:#ffffff,font-style:italic
-    
-    %% Action: 深绿色实心 + 亮绿边框
     classDef action fill:#0f766e,stroke:#10b981,stroke-width:2px,color:#ffffff
 
-    %% 全局连线：中性灰色，在黑白背景下表现稳定
     linkStyle default stroke:#64748b,stroke-width:2px,color:#64748b,font-size:11px
 ```
-
-Without "Wait for Completion", `ShowSuccessMessage` would fire immediately (before loading finishes).
+「完了を待機」をオフにすると、`ShowSuccessMessage` は（ロードが終わる前の）即座に発行されます。
 
 ---
 
-### Duration + Wait Combined
+### 期間 (Duration) ＋ 待機の組み合わせ
 
-**Both settings work together**:
+**両方の設定は連動します**:
 
-**Scenario A: Task < Duration (Minimum Floor)**
-
-*Example: The cutscene finishes quickly (1.5s), but we want to maintain the 2.0s pacing.*
-
+**シナリオ A: タスク < 期間 (最小時間の保証)**
+*例: カットシーンはすぐに終わる(1.5s)が、全体のテンポを保つために2.0sは待機させたい。*
 ```csharp
-🖼️ T+0.0s | Initiation
-🎬 PlayCutscene() ➔ [Task Starts]
+🖼️ T+0.0s | 開始
+🎬 PlayCutscene() ➔ [タスク開始]
 │
-├─ ⏱️ 1.5s: [Task Completed Internally]
-│  ⏳ Status: Still Waiting (Safety Floor active)
+├─ ⏱️ 1.5s: [内部的にタスク完了]
+│  ⏳ ステータス: 待機継続 (セーフティフロアがアクティブ)
 │
-└─ 🏁 T+2.0s: Logic Continues
+└─ 🏁 T+2.0s: ロジック継続
 │
-📊 Result: Exact 2.0s duration (Pacing Maintained)
+📊 結果: 正確に 2.0s の継続時間 (テンポを維持)
 ```
 
-**Scenario B: Task > Duration (Async Wait)**
-
-*Example: The cutscene takes longer (5.0s) due to loading. The system waits for the task to finish.*
-
+**シナリオ B: タスク > 期間 (非同期待機)**
+*例: ロードの影響でカットシーンに時間がかかる(5.0s)。システムはタスクが終わるまで待ちます。*
 ```
-🖼️ T+0.0s | Initiation
-🎬 PlayCutscene() ➔ [Task Starts]
+🖼️ T+0.0s | 開始
+🎬 PlayCutscene() ➔ [タスク開始]
 │
-├─ ⏱️ 2.0s: [Safety Floor Reached]
-│  ⏳ Status: Task still running... (Async Wait active)
+├─ ⏱️ 2.0s: [設定された期間に到達]
+│  ⏳ ステータス: タスクがまだ進行中... (非同期待機がアクティブ)
 │
-└─ 🏁 T+5.0s: [Task Finally Completed] ➔ Logic Continues
+└─ 🏁 T+5.0s: [タスクがついに完了] ➔ ロジック継続
 │
-📊 Result: 5.0s duration (Full Completion Guaranteed)
+📊 結果: 5.0s の継続時間 (完全な完了を保証)
 ```
 
-**Visual Indicators**: 
-
-- ⏳ **2.0s** (duration badge)
-- ⚓ **Wait** (completion badge)
+**ビジュアル表示**: 
+- ⏳ **2.0s** (期間バッジ)
+- ⚓ **Wait** (完了待機バッジ)
 
 </details>
 
 ---
 
-## 💡 Configuration Examples
+## 💡 設定例
 
-### Example 1: Delayed Trigger Sequence
+### 例 1: 遅延を伴うトリガーシーケンス
 
-**Goal**: Play 3 sounds with staggered timing.
+**目標**: 3つの音をタイミングをずらして再生する。
 
 ```mermaid
 graph LR
 
-	ROOT(["💥 Raise: OnExplosion"]):::trigger
+	ROOT(["💥 発行: OnExplosion"]):::trigger
 
-    ROOT -->|Immediate| S1("🔊 Sound 1 <br/> Priority: 10"):::action
-    ROOT -->|Wait 0.3s| S2("🔊 Sound 2 <br/> Priority: 5"):::action
-    ROOT -->|Wait 0.6s| S3("🔊 Sound 3 <br/> Priority: 0"):::action
+    ROOT -->|即座| S1("🔊 音 1 <br/> 優先度: 10"):::action
+    ROOT -->|0.3秒待機| S2("🔊 音 2 <br/> 優先度: 5"):::action
+    ROOT -->|0.6秒待機| S3("🔊 音 3 <br/> 優先度: 0"):::action
 
-    subgraph Timeline ["Execution Schedule"]
+    subgraph Timeline ["実行スケジュール"]
     S1
     S2
     S3
@@ -556,154 +529,133 @@ graph LR
 
 ---
 
-### Example 2: Conditional Chain with Wait
+### 例 2: 待機を伴う条件付きチェーン
 
-**Goal**: Load level only if player completed tutorial.
+**目標**: プレイヤーがチュートリアルを終えている場合のみ、レベルをロードする。
 
 ```mermaid
 graph LR
-    %% 节点定义：保持实心配色，增加亮色边框适配黑白模式
     A("🏆 OnLevelComplete"):::event
-    B("🔍 Check Tutorial"):::cond
-    C("🔄 Load Next Level"):::action
-    D(["⏳ Waiting..."]):::wait
-    E("✨ Show Level Start"):::action
+    B("🔍 チュートリアル確認"):::cond
+    C("🔄 次のレベルをロード"):::action
+    D(["⏳ 待機中..."]):::wait
+    E("✨ レベル開始表示"):::action
 
-    %% 串行路径：将元数据(条件/时间)放在连线上
     A --> B
     B --> C
     C --> D
     D --> E
 
-    %% --- 样式定义 (保持实心质感) ---
-    %% Event: 深蓝
     classDef event fill:#1e40af,stroke:#3b82f6,stroke-width:2px,color:#ffffff,font-weight:bold
-    
-    %% Condition: 琥珀色
     classDef cond fill:#b45309,stroke:#d97706,stroke-width:2px,color:#ffffff
-    
-    %% Action: 深绿
     classDef action fill:#0f766e,stroke:#10b981,stroke-width:2px,color:#ffffff
-    
-    %% Wait: 虚线胶囊感，代表中间态
     classDef wait fill:#78350f,stroke:#b45309,stroke-width:1px,color:#ffffff,font-style:italic
 
-    %% 连线：中性灰，在黑白主题下表现稳定
     linkStyle default stroke:#64748b,stroke-width:2px,color:#64748b,font-size:11px
 ```
 
-**Flow**:
-
-1. Level completes
-2. Check condition (passes if tutorial done)
-3. Start async load, wait for completion
-4. Show level start UI
-
----
-
-## 🔄 Quick Node Type Conversion
-
-Changed your mind about node type? **No need to delete and recreate!**
-
-**How To**:
-
-1. Right-click the node in graph
-2. Select **"Convert to Trigger"** or **"Convert to Chain"**
-
-**What's Preserved**:
-
-- ✅ Event assignment
-- ✅ Connections
-- ✅ Start Delay
-- ✅ Pass Argument
-- ✅ Conditions
-
-**What Changes**:
-
-- Trigger → Chain: Priority removed, Duration/Wait added
-- Chain → Trigger: Duration/Wait removed, Priority added
+**フロー**:
+1. レベル完了。
+2. 条件チェック（チュートリアル済みなら通過）。
+3. 非同期ロードを開始し、完了まで待機。
+4. レベル開始UIを表示。
 
 ---
 
-## ❓ Troubleshooting
+## 🔄 ノードタイプのクイック変換
 
-### Node Doesn't Fire
+ノードのタイプを変更したくなりましたか？ **削除して作り直す必要はありません！**
 
-**Checklist**:
+**手順**:
+1. グラフ上のノードを右クリック。
+2. **"Convert to Trigger"** または **"Convert to Chain"** を選択。
 
-1. ✅ Is condition enabled and passing?
-2. ✅ Is parent node firing?
-3. ✅ Is connection intact?
-4. ✅ Is graph enabled in toolbar?
+**引き継がれる設定**:
+- ✅ 割り当てられたイベント
+- ✅ 接続関係
+- ✅ 開始遅延
+- ✅ 引数を渡す設定
+- ✅ 条件ツリー
 
-**Debug**: Add temporary condition-less node to test flow.
-
----
-
-### "Pass Argument" Grayed Out
-
-**Cause**: Event type is `void` (no arguments to pass).
-
-**Solution**: This is expected—void events have no data to forward.
+**変更される点**:
+- トリガー → チェーン: 優先度が削除され、期間/完了待機が追加されます。
+- チェーン → トリガー: 期間/完了待機が削除され、優先度が追加されます。
 
 ---
 
-### Duration Not Working
+## ❓ トラブルシューティング
 
-**Common Issues**:
+### ノードが発行されない
 
-- Node type is Trigger (duration only works on Chain nodes)
-- Duration set to 0
-- "Wait for Completion" blocking longer than duration
+**チェックリスト**:
+1. ✅ 条件が有効で、パス（TRUE）していますか？
+2. ✅ 親ノードは正しく発行されていますか？
+3. ✅ 接続は切れていませんか？
+4. ✅ ツールバーでグラフ自体が有効（Active）になっていますか？
 
-**Solution**: Verify node type and check both duration and wait settings.
-
----
-
-### Async Not Waiting
-
-**Cause**: "Wait for Completion" is unchecked.
-
-**Solution**: Enable "Wait for Completion" toggle.
-
-**Requirement**: Event listener must return `Task` or `IEnumerator`.
+**デバッグ**: フローをテストするために、一時的に条件のないノードを追加してみてください。
 
 ---
 
-## 📖 Next Steps
+### "Pass Argument" がグレーアウトしている
 
-Now that you can configure individual nodes, learn advanced patterns:
+**原因**: イベントの型が `void` です（渡すべき引数が存在しません）。
 
-**[Advanced Logic Patterns](./advanced-logic-patterns.md)**  
-
-Build complex orchestrations with best practices
-
-**[Visual Condition Tree](../visual-workflow/visual-condition-tree.md)**  
-
-Master the condition builder (full reference)
+**解決策**: これは正常な動作です。Voidイベントには転送するデータがありません。
 
 ---
 
-:::tip Configuration Workflow
+### 期間 (Duration) が機能しない
 
-**Best Practice**: Configure nodes as you build, not after.
+**よくある原因**:
+- ノードタイプがトリガーである（期間はチェーンノードでのみ機能します）。
+- 期間が 0 に設定されている。
+- 「完了を待機」によるブロッキングが期間よりも長い。
 
-1. Add node to graph
-2. Double-click to configure
-3. Set conditions first (prevents unwanted execution)
-4. Add timing settings
-5. Test in isolation before connecting
+**解決策**: ノードタイプを確認し、期間と待機の両方の設定をチェックしてください。
+
+---
+
+### 非同期処理を待ってくれない
+
+**原因**: 「完了を待機 (Wait for Completion)」にチェックが入っていません。
+
+**解決策**: 「完了を待機」トグルを有効にしてください。
+
+**要件**: リスナーは `Task` または `IEnumerator` を返す必要があります。
+
+---
+
+## 📖 次のステップ
+
+個々のノードの設定ができるようになったら、次は高度なパターンを学びましょう：
+
+**[高度なロジックパターン](./advanced-logic-patterns.md)**  
+ベストプラクティスに基づいた複雑なオーケストレーションの構築。
+
+**[ビジュアル条件ツリー](../visual-workflow/visual-condition-tree.md)**  
+条件ビルダーのマスター（完全リファレンス）。
+
+---
+
+:::tip 設定ワークフロー
+
+**ベストプラクティス**: 後回しにせず、ノードを構築しながら設定を行いましょう。
+
+1. ノードをグラフに追加。
+2. ダブルクリックして設定を開く。
+3. まず条件（Condition）を設定する（予期せぬ実行を防止）。
+4. タイミング設定を追加。
+5. 接続する前に、単体で動作をテストする。
 
 :::
 
-:::info Auto-Save
+:::info 自動保存
 
-Changes save automatically when you:
+変更は以下の場合に自動的に保存されます：
+- ウィンドウを閉じたとき
+- 別のノードに切り替えたとき
+- ウィンドウの外をクリックしたとき
 
-- Close the window
-- Switch to another node
-- Click outside the window
-
-No manual save button needed!
-
+手動の保存ボタンは不要です！
 :::

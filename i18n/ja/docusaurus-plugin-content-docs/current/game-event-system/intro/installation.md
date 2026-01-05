@@ -1,5 +1,5 @@
 ﻿---
-sidebar_label: 'Installation'
+sidebar_label: 'インストール'
 sidebar_position: 3
 ---
 
@@ -11,168 +11,167 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 
 
-# Installation
+# インストール
 
-Welcome aboard! Setting up the **Game Event System** is a streamlined process designed to get you up and running in less than 5 seconds.
+ようこそ! **Game Event System**のセットアップは、5秒以内に稼働させることができるよう設計された合理化されたプロセスです。
 
  <VideoGif src="/video/game-event-system/installation.mp4" />
 
  :::tip 
 
-The video above shows the entire process from import to initialization. For a detailed breakdown of each step, see the guide below. 
+上記のビデオは、インポートから初期化までの全プロセスを示しています。各ステップの詳細な説明については、以下のガイドを参照してください。 
 
 ::: 
 
 ------
 
-## ✅ Prerequisites
+## ✅ 前提条件
 
-Before installing, ensure your project meets the minimum requirements:
+インストール前に、プロジェクトが最小要件を満たしていることを確認してください:
 
-| Requirement           | Minimum Version   | Recommended             |
+| 要件           | 最小バージョン   | 推奨             |
 | :-------------------- | :---------------- | :---------------------- |
-| **Unity Version**     | **2021.3 LTS**    | **2022.3 LTS** or newer |
-| **Scripting Backend** | Mono or IL2CPP    | IL2CPP (for Production) |
-| **API Compatibility** | .NET Standard 2.1 | .NET Standard 2.1       |
+| **Unityバージョン**     | **2021.3 LTS**    | **2022.3 LTS**以降 |
+| **スクリプティングバックエンド** | MonoまたはIL2CPP    | IL2CPP(本番環境用) |
+| **API互換性** | .NET Standard 2.1 | .NET Standard 2.1       |
 
 ---
 
-## Step 1: Import the Package
+## ステップ1: パッケージのインポート
 
-Depending on how you acquired the plugin, choose the appropriate import method:
+プラグインの入手方法に応じて、適切なインポート方法を選択してください:
 
 <Tabs>
-  <TabItem value="store" label="Via Package Manager" default>
+  <TabItem value="store" label="パッケージマネージャー経由" default>
 
-  1.  Open Unity and go to **Window > Package Manager**.
-  2.  Select **"My Assets"** from the dropdown.
-  3.  Search for **"Game Event System"**.
-  4.  Click **Download**, then **Import**.
-  5.  When the file list appears, ensure **all files** are selected and click **Import**.
+  1.  Unityを開き、**Window > Package Manager**に移動します。
+  2.  ドロップダウンから**「My Assets」**を選択します。
+  3.  **「Game Event System」**を検索します。
+  4.  **Download**をクリックし、次に**Import**をクリックします。
+  5.  ファイルリストが表示されたら、**すべてのファイル**が選択されていることを確認し、**Import**をクリックします。
 
   </TabItem>
-  <TabItem value="custom" label="Via .unitypackage">
+  <TabItem value="custom" label=".unitypackage経由">
 
-  1.  Locate the `.unitypackage` file on your computer.
-  2.  **Drag and drop** the file directly into your Unity **Project View**.
-  3.  (Or go to **Assets > Import Package > Custom Package...**)
-  4.  When the file list appears, ensure **all files** are selected and click **Import**.
+  1.  コンピューター上の`.unitypackage`ファイルを見つけます。
+  2.  ファイルを直接Unityの**Project View**に**ドラッグ&ドロップ**します。
+  3.  (または**Assets > Import Package > Custom Package...**に移動します)
+  4.  ファイルリストが表示されたら、**すべてのファイル**が選択されていることを確認し、**Import**をクリックします。
 
   </TabItem>
 </Tabs>
 
-:::info Compilation Time
-After importing, Unity will trigger a recompilation. This is normal. Wait for the loading bar to finish before proceeding.
+:::info コンパイル時間
+インポート後、Unityは再コンパイルをトリガーします。これは正常です。先に進む前にローディングバーが終了するまで待機してください。
 :::
 
 ---
 
-## Step 2: Open the System Dashboard
+## ステップ2: システムダッシュボードを開く
 
-Once imported, access the main hub via the Unity toolbar:
-
+インポートが完了したら、Unityツールバーからメインハブにアクセスします:
 ```text
 Tools > TinyGiants > Game Event System
 ```
 
-:::tip Auto-Open
+:::tip 自動オープン
 
-The first import will automatically open the GameEventSystem window
+初回インポート時には、GameEventSystemウィンドウが自動的に開きます
 
 :::
 
-### 🔍 Automatic Environment Check
+### 🔍 自動環境チェック
 
-Upon opening, the **System Information** panel (located at the bottom of the dashboard) will automatically scan your project environment.
+開くと、**System Information**パネル(ダッシュボードの下部に配置)が自動的にプロジェクト環境をスキャンします。
 
 ![alt text](/img/game-event-system/intro/installation/install-step-2-sysinfo.png)
 
-It verifies key compatibility metrics in real-time:
+リアルタイムで主要な互換性メトリクスを検証します:
 
-- **Unity Version**: Validates if you are on a supported version (Green check for 2021.3+).
-- **Render Pipeline**: Auto-detects **Built-in**, **URP**, or **HDRP**. The plugin is compatible with all three.
-- **Scripting Backend**: Displays whether you are running on **Mono** or **IL2CPP**.
+- **Unityバージョン**: サポートされているバージョン(2021.3+で緑色のチェック)かどうかを検証します。
+- **レンダーパイプライン**: **Built-in**、**URP**、または**HDRP**を自動検出します。プラグインは3つすべてに対応しています。
+- **スクリプティングバックエンド**: **Mono**または**IL2CPP**のどちらで実行しているかを表示します。
 
-:::tip Smart Detection
-You don't need to configure anything manually. If you see Green Checks in this panel, your environment is ready.
+:::tip スマート検出
+手動で何かを設定する必要はありません。このパネルに緑色のチェックが表示されていれば、環境の準備は完了です。
 :::
 
 ------
 
-## Step 3: Initialize the System
+## ステップ3: システムの初期化
 
-When you first open the window, the system detects that your scene is missing the required managers.
+ウィンドウを初めて開くと、シーンに必要なマネージャーが不足していることをシステムが検出します。
 
-### 1. The "Uninitialized" State
+### 1. 「未初期化」状態
 
-You will see a warning banner at the top of the dashboard:
+ダッシュボードの上部に警告バナーが表示されます:
 
-> ⚠️ **Please initialize the system first.**
+> ⚠️ **最初にシステムを初期化してください。**
 
-*(The action button will appear **Dark Blue**)*
+*(アクションボタンは**ダークブルー**で表示されます)*
 
 ![alt text](/img/game-event-system/intro/installation/install-step-3-uninitialized.png)
 
-### 2. One-Click Setup
+### 2. ワンクリックセットアップ
 
-Click the **"Initialize Event System"** button.
+**「Initialize Event System」**ボタンをクリックします。
 
-The system performs the following automated tasks:
+システムは以下の自動タスクを実行します:
 
-1. Creates a **Game Event Manager** GameObject (Singleton) in your scene.
-2. Generates the default **GameEventDatabase** asset (if missing).
-3. Generates the default **FlowContainer** asset (if missing).
-4. Compiles the necessary C# generic types.
+1. シーンに**Game Event Manager** GameObject(シングルトン)を作成します。
+2. (欠落している場合)デフォルトの**GameEventDatabase**アセットを生成します。
+3. (欠落している場合)デフォルトの**FlowContainer**アセットを生成します。
+4. 必要なC#ジェネリック型をコンパイルします。
 
-### 3. Success!
+### 3. 成功!
 
-The button will turn **Green**, and the status text will read **"System Ready"**.
+ボタンが**緑色**に変わり、ステータステキストに**「System Ready」**と表示されます。
 
 ![alt text](/img/game-event-system/intro/installation/install-step-3-success.png)
 
 ---
 
-## Step 4: Verify the Hierarchy & Components
+## ステップ4: ヒエラルキー&コンポーネントの確認
 
-To ensure everything is working correctly, look at your **Scene Hierarchy**. You should see a new GameObject:
+すべてが正しく動作していることを確認するには、**Scene Hierarchy**を確認してください。新しいGameObjectが表示されるはずです:
 
 > **🔹 Game Event Manager**
 
 ![alt text](/img/game-event-system/intro/installation/install-step-4-managers.png)
 
-### The Component Stack
+### コンポーネントスタック
 
-Select this object. In the Inspector, you will see it is pre-configured with a suite of manager components. Each component is a singleton-based manager responsible for a specific part of the event lifecycle.
+このオブジェクトを選択します。インスペクターには、一連のマネージャーコンポーネントが事前設定されていることがわかります。各コンポーネントは、イベントライフサイクルの特定部分を担当するシングルトンベースのマネージャーです。
 
 ![alt text](/img/game-event-system/intro/installation/install-step-4-manager.png)
 
-| Component                      | Responsibility       | Key Features                                                 |
+| コンポーネント                      | 責任       | 主要機能                                                 |
 | :----------------------------- | :------------------- | :----------------------------------------------------------- |
-| **GameEventManager**           | 👑 **The Core Brain** | Manages database loading, event lookups, and static state resets. This is the only mandatory component |
-| **GameEventPersistentManager** | **Persistence**      | Manages events marked as "Persistent" that must survive scene transitions via `DontDestroyOnLoad` |
-| **GameEventFlowManager**       | **Visual Scripting** | The execution engine for the Flow Graph. It coordinates the logic between Triggers and Chains |
-| **GameEventSchedulerManager**  | **Time Logic**       | Handles time-based operations like `RaiseDelayed` and `RaiseRepeating` |
-| **GameEventTriggerManager**    | **Fan-Out Logic**    | Manages "Trigger" nodes. When one event raises, it can trigger multiple target events simultaneously (Parallel) |
-| **GameEventChainManager**      | **Sequential Logic** | Manages "Chain" nodes. Executes a series of events in order, supporting wait times and conditional breaks (serial) |
+| **GameEventManager**           | 👑 **コアブレイン** | データベースのロード、イベントルックアップ、静的状態のリセットを管理します。これが唯一の必須コンポーネントです |
+| **GameEventPersistentManager** | **永続性**      | `DontDestroyOnLoad`を介してシーン遷移に耐える必要がある「永続的」とマークされたイベントを管理します |
+| **GameEventFlowManager**       | **ビジュアルスクリプティング** | フローグラフの実行エンジン。トリガーとチェーン間のロジックを調整します |
+| **GameEventSchedulerManager**  | **時間ロジック**       | `RaiseDelayed`や`RaiseRepeating`などの時間ベース操作を処理します |
+| **GameEventTriggerManager**    | **ファンアウトロジック**    | 「トリガー」ノードを管理します。1つのイベントが発火すると、複数のターゲットイベントを同時にトリガーできます(並列) |
+| **GameEventChainManager**      | **順次ロジック** | 「チェーン」ノードを管理します。待機時間と条件付きブレイクをサポートして、一連のイベントを順番に実行します(直列) |
 
-:::warning Modularity & Safety
-This architecture is modular. Technically, you **can delete** specific managers (e.g., if you don't use Flow Graphs, you could remove the Flow, Trigger, and Chain managers) to minimize the scene footprint.
+:::warning モジュラー性と安全性
+このアーキテクチャはモジュラーです。技術的には、特定のマネージャーを**削除できます**(例: フローグラフを使用しない場合、Flow、Trigger、Chainマネージャーを削除してシーンのフットプリントを最小化できます)。
 
-However, I **strongly recommend keeping the full stack attached**. These components:
-1. Have **zero overhead** when idle (no Update loops).
-2. Are required for the **Visual Workflow** to function.
-3. Prevent "Missing Component" runtime errors if you later decide to use a Delayed Raise or a Flow Graph.
+ただし、**フルスタックを付けたままにしておく**ことを**強くお勧めします**。これらのコンポーネントは:
+1. アイドル時に**オーバーヘッドがゼロ**(Updateループなし)。
+2. **ビジュアルワークフロー**が機能するために必要です。
+3. 後でDelayed RaiseやFlow Graphを使用することにした場合に、「Missing Component」実行時エラーを防ぎます。
 
 :::
 
 ------
 
-## 🏁 Ready to Go!
+## 🏁 準備完了!
 
-Your system is now fully initialized and ready for production.
+システムは現在完全に初期化され、本番環境に対応できる状態です。
 
-### Where to go next?
+### 次のステップは?
 
-- **🎮 Create your first event**: Jump to the **[Game Event Creator](../visual-workflow/game-event-creator.md)** guide.
-- **👀 See a working demo**: Open the **[00 Quick Start](../examples/00-quick-start.md)** example scene.
-- **📚 Understand the tool**: Read about **[Game Event System](../visual-workflow/game-event-system.md)**.
+- **🎮 最初のイベントを作成**: **[Game Event Creator](../visual-workflow/game-event-creator.md)**ガイドにジャンプします。
+- **👀 動作デモを見る**: **[00 Quick Start](../examples/00-quick-start.md)**サンプルシーンを開きます。
+- **📚 ツールを理解する**: **[Game Event System](../visual-workflow/game-event-system.md)**について読みます。

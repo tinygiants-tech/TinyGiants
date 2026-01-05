@@ -1,89 +1,89 @@
 ﻿---
-sidebar_label: '13 Runtime API'
+sidebar_label: '13 런타임 API'
 sidebar_position: 14
 ---
 
 import VideoGif from '@site/src/components/Video/VideoGif';
 
-# 13 Runtime API: Code-First Workflow
+# 13 런타임 API: 코드 중심의 워크플로우 (Code-First Workflow)
 
 <!-- <VideoGif src="/video/game-event-system/13-runtime-api.mp4" /> -->
 
-## 📋 Overview
+## 📋 개요 (Overview)
 
-Previous demos (01-11) demonstrated the **Visual Workflow**—binding listeners in Inspector, configuring conditions in Behavior windows, and building flow graphs visually. This approach is perfect for designers and rapid prototyping. However, programmers often prefer **full control in code** for complex systems, dynamic behavior, or when visual tools become limiting.
+이전 데모(01-11)에서는 인스펙터에서 리스너를 바인딩하고, 비헤이비어(Behavior) 윈도우에서 조건을 설정하며, 비주얼 도구로 플로우 그래프를 구축하는 **비주얼 워크플로우(Visual Workflow)**를 살펴보았습니다. 이 방식은 디자이너나 신속한 프로토타이핑에 적합합니다. 그러나 프로그래머는 복잡한 시스템이나 동적인 동작을 구현할 때, 또는 비주얼 도구의 제약을 벗어나고 싶을 때 **코드에서의 완전한 제어**를 선호하는 경우가 많습니다.
 
-**Demo 13 proves a critical architectural principle:** Every feature you've seen in the visual workflow has a **complete, type-safe C# API**. This demo revisits all 11 previous scenarios, removing all Inspector bindings and Graph configurations, replacing them with runtime code.
+**데모 13은 중요한 아키텍처 원칙을 증명합니다.** 비주얼 워크플로우에서 보았던 모든 기능은 **완전하고 타입 안정성(Type-safe)이 보장된 C# API**를 제공합니다. 이 데모는 이전 11가지 시나리오를 다시 다루되, 인스펙터 바인딩과 그래프 설정을 모두 제거하고 이를 런타임 코드로 대체하는 방법을 보여줍니다.
 
-:::tip 💡 What You'll Learn
-- How to register/remove listeners programmatically (`AddListener`, `RemoveListener`)
-- Dynamic priority control (`AddPriorityListener`)
-- Runtime condition registration (`AddConditionalListener`)
-- Scheduling APIs (`RaiseDelayed`, `RaiseRepeating`, `Cancel`)
-- Building Flow Graphs in code (`AddTriggerEvent`, `AddChainEvent`)
-- Persistent listener management (`AddPersistentListener`)
-- Lifecycle management (`OnEnable`, `OnDisable`, cleanup patterns)
+:::tip 💡 학습 내용
+- 프로그래밍 방식으로 리스너 등록/제거 (`AddListener`, `RemoveListener`)
+- 동적 우선순위 제어 (`AddPriorityListener`)
+- 런타임 조건부 리스너 등록 (`AddConditionalListener`)
+- 스케줄링 API (`RaiseDelayed`, `RaiseRepeating`, `Cancel`)
+- 코드로 플로우 그래프 구축 (`AddTriggerEvent`, `AddChainEvent`)
+- 지속성(Persistent) 리스너 관리 (`AddPersistentListener`)
+- 라이프사이클 관리 (`OnEnable`, `OnDisable`, 정리 패턴)
 
 :::
 
 ---
 
-## 🎬 Demo Structure
+## 🎬 데모 구조 (Demo Structure)
 ```
 📁 Assets/TinyGiants/GameEventSystem/Demo/13_RuntimeAPI/
 │
-├── 📁 01_VoidEvent             ➔ 🔘 [ Code-based void event binding ]
-├── 📁 02_BasicTypesEvent       ➔ 🔢 [ Generic event registration ]
-├── 📁 03_CustomTypeEvent       ➔ 💎 [ Custom class binding ]
-├── 📁 04_CustomSenderTypeEvent ➔ 👥 [ Dual-generic listeners ]
+├── 📁 01_VoidEvent             ➔ 🔘 [ 코드 기반 보이드 이벤트 바인딩 ]
+├── 📁 02_BasicTypesEvent       ➔ 🔢 [ 제네릭 이벤트 등록 ]
+├── 📁 03_CustomTypeEvent       ➔ 💎 [ 사용자 정의 클래스 바인딩 ]
+├── 📁 04_CustomSenderTypeEvent ➔ 👥 [ 이중 제네릭 리스너 ]
 │
-├── 📁 05_PriorityEvent         ➔ 🥇 [ Priority management in code ]
-├── 📁 06_ConditionalEvent      ➔ 🛡️ [ Predicate-based filtering ]
-├── 📁 07_DelayedEvent          ➔ ⏱️ [ Scheduling & cancellation ]
-├── 📁 08_RepeatingEvent        ➔ 🔄 [ Loop management & callbacks ]
+├── 📁 05_PriorityEvent         ➔ 🥇 [ 코드로 관리하는 우선순위 ]
+├── 📁 06_ConditionalEvent      ➔ 🛡️ [ 프레디케이트 기반 필터링 ]
+├── 📁 07_DelayedEvent          ➔ ⏱️ [ 스케줄링 및 취소 ]
+├── 📁 08_RepeatingEvent        ➔ 🔄 [ 루프 관리 및 콜백 ]
 │
-├── 📁 09_PersistentEvent       ➔ 🛡️ [ Cross-scene listener survival ]
-├── 📁 10_TriggerEvent          ➔ 🕸️ [ Parallel graph construction ]
-└── 📁 11_ChainEvent            ➔ ⛓️ [ Sequential pipeline building ]
+├── 📁 09_PersistentEvent       ➔ 🛡️ [ 씬 교차 리스너 생존 ]
+├── 📁 10_TriggerEvent          ➔ 🕸️ [ 병렬 그래프 구축 ]
+└── 📁 11_ChainEvent            ➔ ⛓️ [ 순차적 파이프라인 구축 ]
 ```
 
-**Key Difference from 01-11:**
-- **Scene Setup:** Identical (same turrets, targets, UI buttons)
-- **Visual Configuration:** ❌ REMOVED (no Behavior window configs, no Flow Graphs)
-- **Code Implementation:** All logic moved to `OnEnable`/`OnDisable`/lifecycle methods
+**01-11과의 핵심 차이점:**
+- **씬 구성:** 동일함 (터렛, 타겟, UI 버튼 모두 동일)
+- **비주얼 설정:** ❌ 모두 제거됨 (비헤이비어 윈도우 설정 및 플로우 그래프 없음)
+- **코드 구현:** 모든 로직이 `OnEnable`/`OnDisable` 및 라이프사이클 메서드로 이동됨
 
 ---
 
-## 🔄 Visual vs Code Paradigm Shift
+## 🔄 비주얼 vs 코드 패러다임 전환
 
-| Feature                | Visual Workflow (01-11)                 | Code Workflow (Demo 13)                                      |
+| 기능 | 비주얼 워크플로우 (01-11) | 코드 워크플로우 (데모 13) |
 | ---------------------- | --------------------------------------- | ------------------------------------------------------------ |
-| **Listener Binding**   | Drag & drop in Behavior window          | `event.AddListener(Method)` in `OnEnable`                    |
-| **Conditional Logic**  | Condition Tree in Inspector             | `event.AddConditionalListener(Method, Predicate)`            |
-| **Execution Priority** | Drag to reorder in Behavior window      | `event.AddPriorityListener(Method, priority)`                |
-| **Delay/Repeat**       | Delay nodes in Behavior window          | `event.RaiseDelayed(seconds)`, `event.RaiseRepeating(interval, count)` |
-| **Flow Graphs**        | Visual connections in Flow Graph window | `event.AddTriggerEvent(target, ...)`, `event.AddChainEvent(target, ...)` |
-| **Cleanup**            | Automatic when GameObject destroyed     | **Manual** in `OnDisable`/`OnDestroy`                        |
+| **리스너 바인딩** | 비헤이비어 윈도우에서 드래그 앤 드롭 | `OnEnable`에서 `event.AddListener(Method)` 호출 |
+| **조건부 로직** | 인스펙터의 조건 트리(Condition Tree) | `event.AddConditionalListener(Method, Predicate)` |
+| **실행 우선순위** | 비헤이비어 윈도우에서 순서 변경 | `event.AddPriorityListener(Method, priority)` |
+| **지연/반복** | 비헤이비어 윈도우의 지연 노드 | `event.RaiseDelayed(seconds)`, `event.RaiseRepeating(interval, count)` |
+| **플로우 그래프** | 플로우 그래프 윈도우의 시각적 연결 | `event.AddTriggerEvent(target, ...)`, `event.AddChainEvent(target, ...)` |
+| **정리(Cleanup)** | 게임 오브젝트 파괴 시 자동 처리 | `OnDisable`/`OnDestroy`에서 **수동으로 처리** |
 
-:::warning ⚠️ Critical Lifecycle Rule
+:::warning ⚠️ 중요한 라이프사이클 규칙
 
-**Manual registration = Manual cleanup**. Every `AddListener` in `OnEnable` MUST have corresponding `RemoveListener` in `OnDisable`. Failure to cleanup causes:
+**수동 등록 = 수동 정리**. `OnEnable`에서 호출한 모든 `AddListener`는 반드시 `OnDisable`에서 대응하는 `RemoveListener`를 호출해야 합니다. 정리를 소홀히 하면 다음과 같은 문제가 발생합니다:
 
-- Memory leaks
-- Duplicate listener execution
-- Listeners executing on destroyed objects (NullReferenceException)
+- 메모리 누수 (Memory leaks)
+- 중복된 리스너 실행
+- 이미 파괴된 오브젝트에서 리스너 실행 (NullReferenceException 발생)
 
 :::
 
 ---
 
-## 📚 API Scenarios
+## 📚 API 시나리오
 
-### 01 Void Event: Basic Registration
+### 01 Void Event: 기본 등록
 
-**Visual → Code Translation:**
-- ❌ Inspector: Drag `OnEventReceived` into Behavior window
-- ✅ Code: Call `AddListener` in `OnEnable`
+**비주얼 → 코드 변환:**
+- ❌ 인스펙터: `OnEventReceived`를 비헤이비어 윈도우에 드래그
+- ✅ 코드: `OnEnable`에서 `AddListener` 호출
 
 **RuntimeAPI_VoidEventRaiser.cs:**
 ```csharp
@@ -92,11 +92,11 @@ using TinyGiants.GameEventSystem.Runtime;
 public class RuntimeAPI_VoidEventRaiser : MonoBehaviour
 {
     [GameEventDropdown] 
-    public GameEvent voidEvent;  // ← Still uses asset reference
+    public GameEvent voidEvent;  // ← 여전히 에셋 참조를 사용함
 
     public void RaiseBasicEvent()
     {
-        if (voidEvent) voidEvent.Raise();  // ← Identical to visual workflow
+        if (voidEvent) voidEvent.Raise();  // ← 비주얼 워크플로우와 동일함
     }
 }
 ```
@@ -112,38 +112,38 @@ public class RuntimeAPI_VoidEventReceiver : MonoBehaviour
 
     [SerializeField] private Rigidbody targetRigidbody;
 
-    // ✅ REGISTER: When enabled
+    // ✅ 등록: 활성화될 때
     private void OnEnable()
     {
-        voidEvent.AddListener(OnEventReceived);  // ← Replaces Inspector binding
+        voidEvent.AddListener(OnEventReceived);  // ← 인스펙터 바인딩을 대체함
     }
 
-    // ✅ CLEANUP: When disabled
+    // ✅ 정리: 비활성화될 때
     private void OnDisable()
     {
-        voidEvent.RemoveListener(OnEventReceived);  // ← MANDATORY cleanup
+        voidEvent.RemoveListener(OnEventReceived);  // ← 정리 작업 필수
     }
     
-    // Listener method (same as visual workflow)
+    // 리스너 메서드 (비주얼 워크플로우와 동일)
     public void OnEventReceived()
     {
-        // Apply physics...
+        // 물리 작용 적용...
         targetRigidbody.AddForce(Vector3.up * 5f, ForceMode.Impulse);
     }
 }
 ```
 
-**Key Points:**
-- 🎯 **Event Asset:** Still referenced via `[GameEventDropdown]`
-- 🔗 **Registration:** `AddListener(MethodName)` in `OnEnable`
-- 🧹 **Cleanup:** `RemoveListener(MethodName)` in `OnDisable`
-- ⚡ **Signature:** Method must match event type (`void` for `GameEvent`)
+**주요 포인트:**
+- 🎯 **이벤트 에셋:** 여전히 `[GameEventDropdown]`을 통해 참조합니다.
+- 🔗 **등록:** `OnEnable`에서 `AddListener(메서드명)`을 호출합니다.
+- 🧹 **정리:** `OnDisable`에서 `RemoveListener(메서드명)`을 호출합니다.
+- ⚡ **시그니처:** 메서드 시그니처가 이벤트 타입과 일치해야 합니다 (GameEvent의 경우 `void`).
 
 ---
 
-### 02 Basic Types: Generic Registration
+### 02 Basic Types: 제네릭 등록
 
-**Demonstrates:** Type inference for generic events
+**데모 내용:** 제네릭 이벤트에 대한 타입 추론
 
 **RuntimeAPI_BasicTypesEventRaiser.cs:**
 ```csharp
@@ -154,7 +154,7 @@ public class RuntimeAPI_VoidEventReceiver : MonoBehaviour
 
 public void RaiseString()
 {
-    messageEvent.Raise("Hello World");  // ← Type inferred from event
+    messageEvent.Raise("Hello World");  // ← 이벤트로부터 타입 추론
 }
 
 public void RaiseVector3()
@@ -167,7 +167,7 @@ public void RaiseVector3()
 ```csharp
 private void OnEnable()
 {
-    // Compiler infers <string>, <Vector3>, etc. from method signatures
+    // 컴파일러가 메서드 시그니처로부터 <string>, <Vector3> 등을 추론함
     messageEvent.AddListener(OnMessageReceived);     // void(string)
     movementEvent.AddListener(OnMoveReceived);       // void(Vector3)
     spawnEvent.AddListener(OnSpawnReceived);         // void(GameObject)
@@ -188,16 +188,16 @@ public void OnSpawnReceived(GameObject prefab) { /* ... */ }
 public void OnMaterialReceived(Material mat) { /* ... */ }
 ```
 
-**Key Points:**
-- ✅ **Type Safety:** Compiler enforces signature match
-- ✅ **Auto-Inference:** No manual type specification needed
-- ⚠️ **Mismatch Error:** `void(int)` cannot bind to `GameEvent<string>`
+**주요 포인트:**
+- ✅ **타입 안정성:** 컴파일러가 시그니처 일치 여부를 강제합니다.
+- ✅ **자동 추론:** 수동으로 타입을 지정할 필요가 없습니다.
+- ⚠️ **불일치 오류:** `void(int)`는 `GameEvent<string>`에 바인딩할 수 없습니다.
 
 ---
 
-### 03 Custom Type: Complex Data Binding
+### 03 Custom Type: 복합 데이터 바인딩
 
-**Demonstrates:** Auto-generated generic classes
+**데모 내용:** 자동 생성된 제네릭 클래스 활용
 
 **RuntimeAPI_CustomTypeEventRaiser.cs:**
 ```csharp
@@ -208,7 +208,7 @@ public void OnMaterialReceived(Material mat) { /* ... */ }
 public void DealPhysicalDamage()
 {
     DamageInfo info = new DamageInfo(10f, false, DamageType.Physical, hitPoint, "Player01");
-    physicalDamageEvent.Raise(info);  // ← Custom class as argument
+    physicalDamageEvent.Raise(info);  // ← 사용자 정의 클래스를 인자로 전달
 }
 ```
 
@@ -216,7 +216,7 @@ public void DealPhysicalDamage()
 ```csharp
 private void OnEnable()
 {
-    // Bind multiple events to same handler
+    // 동일한 핸들러에 여러 이벤트를 바인딩할 수 있음
     physicalDamageEvent.AddListener(OnDamageReceived);
     fireDamageEvent.AddListener(OnDamageReceived);
     criticalStrikeEvent.AddListener(OnDamageReceived);
@@ -231,45 +231,45 @@ private void OnDisable()
 
 public void OnDamageReceived(DamageInfo info)
 {
-    // Parse custom class fields
+    // 사용자 정의 클래스 필드 파싱
     float damage = info.amount;
     DamageType type = info.type;
     bool isCrit = info.isCritical;
     
-    // Apply logic based on data...
+    // 데이터 기반 로직 실행...
 }
 ```
 
-**Key Points:**
-- 📦 **Auto-Generated:** `GameEvent<DamageInfo>` class created by plugin
-- 🔗 **Multiple Bindings:** Same method can listen to multiple events
-- ⚡ **Data Access:** Full access to custom class properties
+**주요 포인트:**
+- 📦 **자동 생성:** 플러그인이 `GameEvent<DamageInfo>` 클래스를 자동으로 생성합니다.
+- 🔗 **다중 바인딩:** 하나의 메서드로 여러 이벤트를 리스닝할 수 있습니다.
+- ⚡ **데이터 접근:** 사용자 정의 클래스의 프로퍼티에 자유롭게 접근 가능합니다.
 
 ---
 
-### 04 Custom Sender: Dual-Generic Listeners
+### 04 Custom Sender: 이중 제네릭 리스너
 
-**Demonstrates:** Accessing event source context
+**데모 내용:** 이벤트 소스의 컨텍스트 접근
 
 **RuntimeAPI_CustomSenderTypeEventRaiser.cs:**
 ```csharp
-// Physical sender: GameObject
+// 물리적 송신자: GameObject
 [GameEventDropdown] public GameEvent<GameObject, DamageInfo> turretEvent;
 
-// Logical sender: Custom class
+// 논리적 송신자: 사용자 정의 클래스
 [GameEventDropdown] public GameEvent<PlayerStats, DamageInfo> systemEvent;
 
 public void RaiseTurretDamage()
 {
     DamageInfo info = new DamageInfo(15f, false, DamageType.Physical, hitPoint, "Turret");
-    turretEvent.Raise(this.gameObject, info);  // ← Pass sender as first arg
+    turretEvent.Raise(this.gameObject, info);  // ← 송신자를 첫 번째 인자로 전달
 }
 
 public void RaiseSystemDamage()
 {
     PlayerStats admin = new PlayerStats("DragonSlayer_99", 99, 1);
     DamageInfo info = new DamageInfo(50f, true, DamageType.Void, hitPoint, "Admin");
-    systemEvent.Raise(admin, info);  // ← Custom class as sender
+    systemEvent.Raise(admin, info);  // ← 사용자 정의 클래스를 송신자로 전달
 }
 ```
 
@@ -287,34 +287,34 @@ private void OnDisable()
     systemEvent.RemoveListener(OnSystemAttackReceived);
 }
 
-// Signature: void(GameObject, DamageInfo)
+// 시그니처: void(GameObject, DamageInfo)
 public void OnTurretAttackReceived(GameObject sender, DamageInfo args)
 {
-    Vector3 attackerPos = sender.transform.position;  // ← Access sender GameObject
-    // React to physical attacker...
+    Vector3 attackerPos = sender.transform.position;  // ← 송신자 GameObject에 접근
+    // 물리 공격자에 반응...
 }
 
-// Signature: void(PlayerStats, DamageInfo)
+// 시그니처: void(PlayerStats, DamageInfo)
 public void OnSystemAttackReceived(PlayerStats sender, DamageInfo args)
 {
-    string attackerName = sender.playerName;  // ← Access sender data
+    string attackerName = sender.playerName;  // ← 송신자 데이터에 접근
     int factionId = sender.factionId;
-    // React to logical attacker...
+    // 논리적 공격자에 반응...
 }
 ```
 
-**Key Points:**
-- 🎯 **Context Awareness:** Listeners know WHO triggered the event
-- 🔀 **Flexible Senders:** GameObject OR custom class
-- ⚡ **Signature Match:** Method params MUST match event generics
+**주요 포인트:**
+- 🎯 **컨텍스트 인식:** 리스너가 이벤트를 트리거한 주체(WHO)가 누구인지 알 수 있습니다.
+- 🔀 **유연한 송신자:** GameObject 또는 사용자 정의 클래스 모두 가능합니다.
+- ⚡ **시그니처 일치:** 메서드 파라미터는 반드시 이벤트의 제네릭과 일치해야 합니다.
 
 ---
 
-### 05 Priority: Execution Order Control
+### 05 Priority: 실행 순서 제어
 
-**Visual → Code Translation:**
-- ❌ Inspector: Drag to reorder listeners in Behavior window
-- ✅ Code: Specify `priority` parameter (higher = earlier)
+**비주얼 → 코드 변환:**
+- ❌ 인스펙터: 비헤이비어 윈도우에서 리스너 순서 드래그
+- ✅ 코드: `priority` 파라미터 지정 (값이 높을수록 먼저 실행)
 
 **RuntimeAPI_PriorityEventReceiver.cs:**
 ```csharp
@@ -323,18 +323,18 @@ public void OnSystemAttackReceived(PlayerStats sender, DamageInfo args)
 
 private void OnEnable()
 {
-    // ✅ ORDERED: High priority executes FIRST
-    orderedHitEvent.AddPriorityListener(ActivateBuff, priority: 100);  // Runs 1st
-    orderedHitEvent.AddPriorityListener(ResolveHit, priority: 50);     // Runs 2nd
+    // ✅ 정렬됨: 높은 우선순위가 먼저 실행됨
+    orderedHitEvent.AddPriorityListener(ActivateBuff, priority: 100);  // 1순위 실행
+    orderedHitEvent.AddPriorityListener(ResolveHit, priority: 50);     // 2순위 실행
     
-    // ❌ CHAOTIC: Wrong order intentionally
-    chaoticHitEvent.AddPriorityListener(ResolveHit, priority: 80);     // Runs 1st (too early!)
-    chaoticHitEvent.AddPriorityListener(ActivateBuff, priority: 40);   // Runs 2nd (too late!)
+    // ❌ 무질서: 의도적으로 잘못된 순서 지정
+    chaoticHitEvent.AddPriorityListener(ResolveHit, priority: 80);     // 1순위 (너무 빠름!)
+    chaoticHitEvent.AddPriorityListener(ActivateBuff, priority: 40);   // 2순위 (너무 늦음!)
 }
 
 private void OnDisable()
 {
-    // MUST remove priority listeners specifically
+    // 우선순위 리스너는 전용 제거 메서드를 사용해야 함
     orderedHitEvent.RemovePriorityListener(ActivateBuff);
     orderedHitEvent.RemovePriorityListener(ResolveHit);
     
@@ -344,28 +344,28 @@ private void OnDisable()
 
 public void ActivateBuff(GameObject sender, DamageInfo args)
 {
-    _isBuffActive = true;  // ← Must run BEFORE ResolveHit
+    _isBuffActive = true;  // ← ResolveHit 보다 먼저 실행되어야 함
 }
 
 public void ResolveHit(GameObject sender, DamageInfo args)
 {
-    float damage = _isBuffActive ? args.amount * 5f : args.amount;  // ← Checks buff state
+    float damage = _isBuffActive ? args.amount * 5f : args.amount;  // ← 버프 상태 확인
 }
 ```
 
-**Key Points:**
-- 🔢 **Priority Values:** Higher numbers = earlier execution
-- ⚠️ **Order Matters:** `ActivateBuff(100) → ResolveHit(50)` = CRIT HIT
-- ❌ **Wrong Order:** `ResolveHit(80) → ActivateBuff(40)` = Normal hit
-- 🧹 **Cleanup:** Use `RemovePriorityListener` (not `RemoveListener`)
+**주요 포인트:**
+- 🔢 **우선순위 값:** 숫자가 클수록 실행 순서가 빠릅니다.
+- ⚠️ **순서의 중요성:** `ActivateBuff(100) → ResolveHit(50)`는 치명타(Crit)를 발생시킵니다.
+- ❌ **잘못된 순서:** `ResolveHit(80) → ActivateBuff(40)`는 일반 데미지를 줍니다.
+- 🧹 **정리:** `RemovePriorityListener`를 사용하십시오 (`RemoveListener` 아님).
 
 ---
 
-### 06 Conditional: Predicate-Based Filtering
+### 06 Conditional: 프레디케이트 기반 필터링
 
-**Visual → Code Translation:**
-- ❌ Inspector: Visual Condition Tree in Behavior window
-- ✅ Code: Predicate function passed to `AddConditionalListener`
+**비주얼 → 코드 변환:**
+- ❌ 인스펙터: 비헤이비어 윈도우의 시각적 조건 트리
+- ✅ 코드: `AddConditionalListener`에 전달되는 프레디케이트(Predicate) 함수
 
 **RuntimeAPI_ConditionalEventReceiver.cs:**
 ```csharp
@@ -373,8 +373,8 @@ public void ResolveHit(GameObject sender, DamageInfo args)
 
 private void OnEnable()
 {
-    // Register with condition function
-    // OpenVault ONLY called if CanOpen returns true
+    // 조건 함수와 함께 등록
+    // CanOpen이 true를 반환할 때만 OpenVault가 호출됨
     requestAccessEvent.AddConditionalListener(OpenVault, CanOpen);
 }
 
@@ -383,8 +383,8 @@ private void OnDisable()
     requestAccessEvent.RemoveConditionalListener(OpenVault);
 }
 
-// ✅ CONDITION FUNCTION (Predicate)
-// Replaces visual Condition Tree
+// ✅ 조건 함수 (프레디케이트)
+// 시각적 조건 트리를 대체함
 public bool CanOpen(AccessCard card)
 {
     return securityGrid.IsPowerOn && (
@@ -394,41 +394,41 @@ public bool CanOpen(AccessCard card)
     );
 }
 
-// ✅ ACTION (Only executes if condition passed)
+// ✅ 액션 (조건이 통과될 때만 실행됨)
 public void OpenVault(AccessCard card)
 {
-    // Assumes all conditions met
+    // 모든 조건이 충족되었다고 가정함
     Debug.Log($"ACCESS GRANTED to {card.holderName}");
     StartCoroutine(OpenDoorSequence());
 }
 ```
 
-**Key Points:**
-- ✅ **Predicate Function:** Returns `bool`, takes event args
-- 🔒 **Gate Keeper:** Action ONLY runs if predicate returns `true`
-- 🧹 **Cleanup:** Use `RemoveConditionalListener` (not `RemoveListener`)
-- ⚡ **Evaluation:** Predicate runs BEFORE action method
+**주요 포인트:**
+- ✅ **프레디케이트 함수:** `bool`을 반환하며 이벤트 인자를 파라미터로 받습니다.
+- 🔒 **게이트 키퍼:** 프레디케이트가 `true`를 반환할 때만 액션이 실행됩니다.
+- 🧹 **정리:** `RemoveConditionalListener`를 사용하십시오.
+- ⚡ **평가 시점:** 프레디케이트는 액션 메서드 실행 직전에 평가됩니다.
 
 ---
 
-### 07 Delayed: Scheduling & Cancellation
+### 07 Delayed: 스케줄링 및 취소
 
-**Visual → Code Translation:**
-- ❌ Behavior: "Action Delay = 5.0s" in Inspector
-- ✅ Code: `event.RaiseDelayed(5f)` returns `ScheduleHandle`
+**비주얼 → 코드 변환:**
+- ❌ 비헤이비어: 인스펙터에서 "Action Delay = 5.0s" 설정
+- ✅ 코드: `ScheduleHandle`을 반환하는 `event.RaiseDelayed(5f)` 호출
 
 **RuntimeAPI_DelayedEventRaiser.cs:**
 ```csharp
 [GameEventDropdown] public GameEvent explodeEvent;
 
-private ScheduleHandle _handle;  // ← Track the scheduled task
+private ScheduleHandle _handle;  // ← 예약된 태스크 추적용
 
 public void ArmBomb()
 {
-    // Schedule event 5 seconds later
-    _handle = explodeEvent.RaiseDelayed(5f);  // ← Returns handle
+    // 5초 후에 이벤트 예약
+    _handle = explodeEvent.RaiseDelayed(5f);  // ← 핸들 반환
     
-    Debug.Log("Bomb armed! 5 seconds to defuse...");
+    Debug.Log("폭탄이 가동되었습니다! 해체까지 5초...");
 }
 
 public void CutRedWire() => ProcessCut("Red");
@@ -438,30 +438,30 @@ private void ProcessCut(string color)
 {
     if (color == _safeWireColor)
     {
-        // Cancel the scheduled explosion
-        explodeEvent.CancelDelayed(_handle);  // ← Use handle to cancel
-        Debug.Log("DEFUSED! Event cancelled.");
+        // 예약된 폭발 이벤트 취소
+        explodeEvent.CancelDelayed(_handle);  // ← 핸들을 사용하여 취소
+        Debug.Log("해체 성공! 이벤트가 취소되었습니다.");
     }
     else
     {
-        Debug.LogWarning("Wrong wire! Clock still ticking...");
+        Debug.LogWarning("잘못된 선입니다! 시계는 계속 돌아갑니다...");
     }
 }
 ```
 
-**Key Points:**
-- ⏱️ **Scheduling:** `RaiseDelayed(seconds)` queues event
-- 📍 **Handle:** Store return value to cancel later
-- 🛑 **Cancellation:** `CancelDelayed(handle)` removes from queue
-- ⚠️ **Timing:** Event executes AFTER delay if not cancelled
+**주요 포인트:**
+- ⏱️ **스케줄링:** `RaiseDelayed(초)`는 이벤트를 큐에 등록합니다.
+- 📍 **핸들:** 나중에 취소할 수 있도록 반환 값을 저장합니다.
+- 🛑 **취소:** `CancelDelayed(핸들)`은 큐에서 이벤트를 제거합니다.
+- ⚠️ **타이밍:** 취소되지 않으면 지연 시간 이후에 이벤트가 실행됩니다.
 
 ---
 
-### 08 Repeating: Loop Management & Callbacks
+### 08 Repeating: 루프 관리 및 콜백
 
-**Visual → Code Translation:**
-- ❌ Behavior: "Repeat Interval = 1.0s, Repeat Count = 5" in Inspector
-- ✅ Code: `event.RaiseRepeating(interval, count)` with callbacks
+**비주얼 → 코드 변환:**
+- ❌ 비헤이비어: 인스펙터에서 "Repeat Interval = 1.0s, Repeat Count = 5" 설정
+- ✅ 코드: 콜백을 포함한 `event.RaiseRepeating(interval, count)` 호출
 
 **RuntimeAPI_RepeatingEventRaiser.cs:**
 ```csharp
@@ -471,26 +471,26 @@ private ScheduleHandle _handle;
 
 public void ActivateBeacon()
 {
-    // Start loop: 1s interval, 5 times
+    // 루프 시작: 1초 간격, 5회
     _handle = finitePulseEvent.RaiseRepeating(interval: 1.0f, count: 5);
     
-    // ✅ HOOK: Triggered every iteration
+    // ✅ 훅(HOOK): 매 반복마다 트리거됨
     _handle.OnStep += (currentCount) => 
     {
-        Debug.Log($"Pulse #{currentCount} emitted");
+        Debug.Log($"펄스 #{currentCount} 방출됨");
     };
     
-    // ✅ HOOK: Triggered when loop finishes naturally
+    // ✅ 훅: 루프가 정상적으로 종료될 때 트리거됨
     _handle.OnCompleted += () => 
     {
-        Debug.Log("Beacon sequence completed");
+        Debug.Log("비컨 시퀀스 완료");
         UpdateUI("IDLE");
     };
     
-    // ✅ HOOK: Triggered when cancelled manually
+    // ✅ 훅: 수동으로 취소되었을 때 트리거됨
     _handle.OnCancelled += () => 
     {
-        Debug.Log("Beacon interrupted");
+        Debug.Log("비컨 중단됨");
         UpdateUI("ABORTED");
     };
 }
@@ -499,47 +499,47 @@ public void StopSignal()
 {
     if (_handle != null)
     {
-        finitePulseEvent.CancelRepeating(_handle);  // ← Stops loop
+        finitePulseEvent.CancelRepeating(_handle);  // ← 루프 중지
     }
 }
 ```
 
-**Key Points:**
-- 🔁 **Finite Loop:** `RaiseRepeating(1.0f, 5)` = 5 pulses at 1s intervals
-- ∞ **Infinite Loop:** `RaiseRepeating(1.0f, -1)` = endless until cancelled
-- 📡 **Callbacks:** `OnStep`, `OnCompleted`, `OnCancelled` events
-- 🛑 **Manual Stop:** `CancelRepeating(handle)` for infinite loops
+**주요 포인트:**
+- 🔁 **유한 루프:** `RaiseRepeating(1.0f, 5)` = 1초 간격으로 5회 실행
+- ∞ **무한 루프:** `RaiseRepeating(1.0f, -1)` = 취소될 때까지 무한 실행
+- 📡 **콜백:** `OnStep`, `OnCompleted`, `OnCancelled` 이벤트 활용 가능
+- 🛑 **수동 중지:** 무한 루프의 경우 `CancelRepeating(핸들)` 필수
 
 ---
 
-### 09 Persistent: Cross-Scene Listener Survival
+### 09 Persistent: 씬 교차 리스너 생존
 
-**Visual → Code Translation:**
-- ❌ Inspector: Check "Persistent Event" in Behavior window
-- ✅ Code: `AddPersistentListener` in `Awake` + `DontDestroyOnLoad`
+**비주얼 → 코드 변환:**
+- ❌ 인스펙터: 비헤이비어 윈도우에서 "Persistent Event" 체크
+- ✅ 코드: `Awake`에서 `AddPersistentListener` 호출 + `DontDestroyOnLoad`
 
 **RuntimeAPI_PersistentEventReceiver.cs:**
 ```csharp
-[GameEventDropdown] public GameEvent fireAEvent;  // Persistent
-[GameEventDropdown] public GameEvent fireBEvent;  // Standard
+[GameEventDropdown] public GameEvent fireAEvent;  // 지속성 이벤트
+[GameEventDropdown] public GameEvent fireBEvent;  // 일반 이벤트
 
 private void Awake()
 {
-    DontDestroyOnLoad(gameObject);  // ← Survive scene loads
+    DontDestroyOnLoad(gameObject);  // ← 씬 로드 시 생존
     
-    // ✅ PERSISTENT LISTENER (Survives scene reload)
+    // ✅ 지속성 리스너 (씬 리로드 후에도 생존)
     fireAEvent.AddPersistentListener(OnFireCommandA);
 }
 
 private void OnDestroy()
 {
-    // MUST remove persistent listeners manually
+    // 지속성 리스너는 반드시 수동으로 제거해야 함
     fireAEvent.RemovePersistentListener(OnFireCommandA);
 }
 
 private void OnEnable()
 {
-    // ❌ STANDARD LISTENER (Dies with scene)
+    // ❌ 일반 리스너 (씬과 함께 소멸)
     fireBEvent.AddListener(OnFireCommandB);
 }
 
@@ -550,36 +550,36 @@ private void OnDisable()
 
 public void OnFireCommandA() 
 { 
-    Debug.Log("Persistent listener survived scene reload"); 
+    Debug.Log("지속성 리스너가 씬 리로드 후에도 생존했습니다."); 
 }
 
 public void OnFireCommandB() 
 { 
-    Debug.Log("Standard listener (will break after reload)"); 
+    Debug.Log("일반 리스너 (리로드 후 연결 끊김)"); 
 }
 ```
 
-**Key Points:**
-- 🧬 **Singleton Pattern:** `DontDestroyOnLoad` + persistent listener
-- ✅ **Survives Reload:** `AddPersistentListener` binds to global registry
-- ❌ **Standard Dies:** `AddListener` bindings destroyed with scene
-- 🧹 **Cleanup:** Use `OnDestroy` for persistent, `OnDisable` for standard
+**주요 포인트:**
+- 🧬 **싱글톤 패턴:** `DontDestroyOnLoad`와 지속성 리스너의 조합
+- ✅ **리로드 생존:** `AddPersistentListener`는 전역 레지스트리에 바인딩됩니다.
+- ❌ **일반 소멸:** `AddListener` 바인딩은 씬과 함께 파괴됩니다.
+- 🧹 **정리:** 지속성은 `OnDestroy`에서, 일반은 `OnDisable`에서 정리합니다.
 
 ---
 
-### 10 Trigger Event: Building Parallel Graphs in Code
+### 10 Trigger Event: 코드로 병렬 그래프 구축
 
-**Visual → Code Translation:**
-- ❌ Flow Graph: Visual nodes and connections
-- ✅ Code: `AddTriggerEvent(target, ...)` in `OnEnable`
+**비주얼 → 코드 변환:**
+- ❌ 플로우 그래프: 시각적 노드 및 연결
+- ✅ 코드: `OnEnable`에서 `AddTriggerEvent(target, ...)` 호출
 
 **RuntimeAPI_TriggerEventRaiser.cs:**
 ```csharp
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onCommand;      // Root
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onActiveBuff;   // Branch A
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onTurretFire;   // Branch B
-[GameEventDropdown] public GameEvent<DamageInfo> onHoloData;                 // Branch C (type conversion)
-[GameEventDropdown] public GameEvent onGlobalAlarm;                          // Branch D (void)
+[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onCommand;      // 루트
+[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onActiveBuff;   // 분기 A
+[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onTurretFire;   // 분기 B
+[GameEventDropdown] public GameEvent<DamageInfo> onHoloData;                 // 분기 C (타입 변환)
+[GameEventDropdown] public GameEvent onGlobalAlarm;                          // 분기 D (보이드)
 
 private TriggerHandle _buffAHandle;
 private TriggerHandle _fireAHandle;
@@ -588,45 +588,45 @@ private TriggerHandle _alarmHandle;
 
 private void OnEnable()
 {
-    // ✅ BUILD PARALLEL GRAPH IN CODE
+    // ✅ 코드로 병렬 그래프 구축
     
-    // Branch A: Buff (Priority 100, Conditional)
+    // 분기 A: 버프 (우선순위 100, 조건부)
     _buffAHandle = onCommand.AddTriggerEvent(
         targetEvent: onActiveBuff,
         delay: 0f,
-        condition: (sender, args) => sender == turretA,  // ← Only Turret A
+        condition: (sender, args) => sender == turretA,  // ← 터렛 A만 해당
         passArgument: true,
-        priority: 100  // ← High priority
+        priority: 100  // ← 높은 우선순위
     );
     
-    // Branch B: Fire (Priority 50, Conditional)
+    // 분기 B: 발사 (우선순위 50, 조건부)
     _fireAHandle = onCommand.AddTriggerEvent(
         targetEvent: onTurretFire,
         delay: 0f,
         condition: (sender, args) => sender == turretA,
         passArgument: true,
-        priority: 50  // ← Lower priority (runs after buff)
+        priority: 50  // ← 낮은 우선순위 (버프 후 실행)
     );
     
-    // Branch C: Holo Data (Type conversion, Delayed)
+    // 분기 C: 홀로 데이터 (타입 변환, 지연)
     _holoHandle = onCommand.AddTriggerEvent(
-        targetEvent: onHoloData,  // ← GameEvent<DamageInfo> (no sender)
-        delay: 1f,  // ← 1 second delay
+        targetEvent: onHoloData,  // ← GameEvent<DamageInfo> (송신자 없음)
+        delay: 1f,  // ← 1초 지연
         passArgument: true
     );
     
-    // Branch D: Global Alarm (Void conversion)
+    // 분기 D: 글로벌 알람 (보이드 변환)
     _alarmHandle = onCommand.AddTriggerEvent(
-        targetEvent: onGlobalAlarm  // ← GameEvent (void, no args)
+        targetEvent: onGlobalAlarm  // ← GameEvent (인자 없음)
     );
     
-    // ✅ HOOK: Callback when trigger fires
-    _buffAHandle.OnTriggered += () => Debug.Log("Buff triggered via code graph");
+    // ✅ 훅: 트리거가 실행될 때의 콜백
+    _buffAHandle.OnTriggered += () => Debug.Log("코드로 구축된 그래프에 의해 버프 트리거됨");
 }
 
 private void OnDisable()
 {
-    // ✅ CLEANUP: MANDATORY for dynamic triggers
+    // ✅ 정리: 동적 트리거에는 필수 작업
     onCommand.RemoveTriggerEvent(_buffAHandle);
     onCommand.RemoveTriggerEvent(_fireAHandle);
     onCommand.RemoveTriggerEvent(_holoHandle);
@@ -634,45 +634,45 @@ private void OnDisable()
 }
 ```
 
-**Graph Visualization (Code-Defined):**
+**그래프 시각화 (코드 정의):**
 ```
-📡 Root: onCommand.Raise(sender, info)
+📡 루트: onCommand.Raise(sender, info)
 │
-├─ 🔱 [ Branch: Unit A ] ➔ 🛡️ Guard: `Sender == Turret_A`
-│  ├─ 💎 [Prio: 100] ➔ 🛡️ onActiveBuff()      ✅ High-Priority Sync
-│  └─ ⚡ [Prio: 50 ] ➔ 🔥 onTurretFire()      ✅ Sequential Action
+├─ 🔱 [ 분기: Unit A ] ➔ 🛡️ 조건: `Sender == Turret_A`
+│  ├─ 💎 [Prio: 100] ➔ 🛡️ onActiveBuff()      ✅ 고우선순위 동기화
+│  └─ ⚡ [Prio: 50 ] ➔ 🔥 onTurretFire()      ✅ 순차적 액션
 │
-├─ 🔱 [ Branch: Analytics ] ➔ 🔢 Signature: `<DamageInfo>`
-│  └─ ⏱️ [ Delay: 1.0s ] ➔ 📽️ onHoloData()    ✅ Delayed Data Relay
+├─ 🔱 [ 분기: Analytics ] ➔ 🔢 시그니처: `<DamageInfo>`
+│  └─ ⏱️ [ Delay: 1.0s ] ➔ 📽️ onHoloData()    ✅ 지연된 데이터 중계
 │
-└─ 🔱 [ Branch: Global ] ➔ 🔘 Signature: `<void>`
-   └─ 🚀 [ Instant ] ➔ 🚨 onGlobalAlarm()     ✅ Immediate Signal
+└─ 🔱 [ 분기: Global ] ➔ 🔘 시그니처: `<void>`
+   └─ 🚀 [ 즉시 ] ➔ 🚨 onGlobalAlarm()        ✅ 즉각적인 신호
 ```
 
-**Key Points:**
-- 🌳 **Parallel Execution:** All branches evaluate simultaneously
-- 🔢 **Priority:** Controls execution order within passing branches
-- ✅ **Conditions:** Predicate functions filter by sender/args
-- 🔄 **Type Conversion:** Automatic argument adaptation
-- 📡 **Callbacks:** `OnTriggered` event per handle
-- 🧹 **Cleanup:** `RemoveTriggerEvent(handle)` REQUIRED
+**주요 포인트:**
+- 🌳 **병렬 실행:** 모든 분기가 동시에 평가됩니다.
+- 🔢 **우선순위:** 조건을 통과한 분기들 사이의 실행 순서를 제어합니다.
+- ✅ **조건:** 프레디케이트 함수를 통해 송신자/인자를 필터링합니다.
+- 🔄 **타입 변환:** 자동으로 인자를 맞춰서 전달합니다.
+- 📡 **콜백:** 핸들당 `OnTriggered` 이벤트 제공
+- 🧹 **정리:** `RemoveTriggerEvent(핸들)` 작업이 반드시 필요합니다.
 
 ---
 
-### 11 Chain Event: Building Sequential Pipelines in Code
+### 11 Chain Event: 코드로 순차적 파이프라인 구축
 
-**Visual → Code Translation:**
-- ❌ Flow Graph: Linear node sequence
-- ✅ Code: `AddChainEvent(target, ...)` in `OnEnable`
+**비주얼 → 코드 변환:**
+- ❌ 플로우 그래프: 선형 노드 시퀀스
+- ✅ 코드: `OnEnable`에서 `AddChainEvent(target, ...)` 호출
 
 **RuntimeAPI_ChainEventRaiser.cs:**
 ```csharp
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnStartSequenceEvent;  // Root
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnSystemCheckEvent;    // Step 1
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnChargeEvent;         // Step 2
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnFireEvent;           // Step 3
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnCoolDownEvent;       // Step 4
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnArchiveEvent;        // Step 5
+[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnStartSequenceEvent;  // 루트
+[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnSystemCheckEvent;    // 1단계
+[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnChargeEvent;         // 2단계
+[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnFireEvent;           // 3단계
+[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnCoolDownEvent;       // 4단계
+[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnArchiveEvent;        // 5단계
 
 private ChainHandle _checkHandle;
 private ChainHandle _chargeHandle;
@@ -682,159 +682,159 @@ private ChainHandle _archiveHandle;
 
 private void OnEnable()
 {
-    // ✅ BUILD SEQUENTIAL CHAIN IN CODE
+    // ✅ 코드로 순차적 체인 구축
     
-    // Step 1: System Check (Conditional gate)
+    // 1단계: 시스템 체크 (조건부 게이트)
     _checkHandle = OnStartSequenceEvent.AddChainEvent(
         targetEvent: OnSystemCheckEvent,
         delay: 0f,
         duration: 0f,
-        condition: (sender, args) => chainEventReceiver.IsSafetyCheckPassed,  // ← Gate
+        condition: (sender, args) => chainEventReceiver.IsSafetyCheckPassed,  // ← 게이트
         passArgument: true,
         waitForCompletion: false
     );
     
-    // Step 2: Charge (1 second duration)
+    // 2단계: 충전 (1초 지속 시간)
     _chargeHandle = OnStartSequenceEvent.AddChainEvent(
         targetEvent: OnChargeEvent,
         delay: 0f,
-        duration: 1f,  // ← Chain pauses here for 1s
+        duration: 1f,  // ← 체인이 여기서 1초간 머무름
         passArgument: true
     );
     
-    // Step 3: Fire (Instant)
+    // 3단계: 발사 (즉시)
     _fireHandle = OnStartSequenceEvent.AddChainEvent(
         targetEvent: OnFireEvent,
         passArgument: true
     );
     
-    // Step 4: Cool Down (0.5s delay + 1s duration + wait for completion)
+    // 4단계: 쿨다운 (0.5초 지연 + 1초 지속 + 완료 대기)
     _cooldownHandle = OnStartSequenceEvent.AddChainEvent(
         targetEvent: OnCoolDownEvent,
-        delay: 0.5f,  // ← Pre-delay
-        duration: 1f,  // ← Duration after action
+        delay: 0.5f,  // ← 사전 지연
+        duration: 1f,  // ← 액션 후 지속 시간
         passArgument: true,
-        waitForCompletion: true  // ← Waits for receiver coroutines
+        waitForCompletion: true  // ← 리시버의 코루틴 종료를 대기함
     );
     
-    // Step 5: Archive (Arguments blocked)
+    // 5단계: 아카이브 (인자 차단)
     _archiveHandle = OnStartSequenceEvent.AddChainEvent(
         targetEvent: OnArchiveEvent,
-        passArgument: false  // ← Downstream receives null/default
+        passArgument: false  // ← 하위 단계는 null/기본값을 받음
     );
 }
 
 private void OnDisable()
 {
-    // ✅ CLEANUP: MANDATORY for dynamic chains
+    // ✅ 정리: 동적 체인에는 필수 작업
     OnStartSequenceEvent.RemoveChainEvent(_checkHandle);
     OnStartSequenceEvent.RemoveChainEvent(_chargeHandle);
     OnStartSequenceEvent.RemoveChainEvent(_fireHandle);
     OnStartSequenceEvent.RemoveChainEvent(_cooldownHandle);
     OnStartSequenceEvent.RemoveChainEvent(_archiveHandle);
     
-    // Alternative: OnStartSequenceEvent.RemoveAllChainEvents();
+    // 대안: OnStartSequenceEvent.RemoveAllChainEvents();
 }
 ```
 
-**Pipeline Visualization (Code-Defined):**
+**파이프라인 시각화 (코드 정의):**
 ```
 🚀 [ ROOT ] OnStartSequenceEvent
 │
-├─ 🛡️ [ GUARD ] ➔ Safety Check
-│  └─► ⚙️ OnSystemCheckEvent             ✅ Condition Passed
+├─ 🛡️ [ GUARD ] ➔ 보안 체크
+│  └─► ⚙️ OnSystemCheckEvent             ✅ 조건 통과됨
 │
-├─ ⏱️ [ FLOOR ] ➔ Duration: 1.0s
-│  └─► ⚡ OnChargeEvent                  ✅ Minimum Pacing Met
+├─ ⏱️ [ FLOOR ] ➔ 지속 시간: 1.0s
+│  └─► ⚡ OnChargeEvent                  ✅ 최소 페이싱 유지
 │
-├─ 🚀 [ INSTANT ] ➔ Immediate Trigger
-│  └─► 🔥 OnFireEvent                    ✅ Executed
+├─ 🚀 [ INSTANT ] ➔ 즉각적 트리거
+│  └─► 🔥 OnFireEvent                    ✅ 실행됨
 │
-├─ ⌛ [ ASYNC ] ➔ Delay: 0.5s | Dur: 1.0s | Wait: ON
-│  └─► ❄️ OnCoolDownEvent                ✅ Async Recovery Done
+├─ ⌛ [ ASYNC ] ➔ 지연: 0.5s | 지속: 1.0s | 대기: ON
+│  └─► ❄️ OnCoolDownEvent                ✅ 비동기 회복 완료
 │
-└─ 🧹 [ FILTER ] ➔ Block Arguments
-   └─► 💾 OnArchiveEvent                 ✅ Data Cleaned & Saved
+└─ 🧹 [ FILTER ] ➔ 인자 차단
+   └─► 💾 OnArchiveEvent                 ✅ 데이터 정제 및 저장
 ```
 
-**Key Points:**
-- 🔗 **Sequential Execution:** Steps run one-by-one, not parallel
-- ✅ **Conditional Gate:** Failed condition terminates entire chain
-- ⏱️ **Duration:** Chain pauses for specified time
-- 🕐 **Wait For Completion:** Blocks until receiver coroutines finish
-- 🔒 **Argument Blocking:** `passArgument: false` sends default values
-- 🧹 **Cleanup:** `RemoveChainEvent(handle)` or `RemoveAllChainEvents()`
+**주요 포인트:**
+- 🔗 **순차 실행:** 단계들이 병렬이 아닌 하나씩 차례로 실행됩니다.
+- ✅ **조건 게이트:** 조건을 실패하면 전체 체인이 즉시 종료됩니다.
+- ⏱️ **지속 시간(Duration):** 체인이 지정된 시간 동안 해당 단계에 머무릅니다.
+- 🕐 **완료 대기(Wait For Completion):** 리시버의 비동기 작업(코루틴)이 끝날 때까지 대기합니다.
+- 🔒 **인자 차단:** `passArgument: false`로 설정하면 하위에 기본값만 전송합니다.
+- 🧹 **정리:** `RemoveChainEvent(핸들)` 또는 `RemoveAllChainEvents()`가 필수적입니다.
 
 ---
 
-## 🔑 API Reference Summary
+## 🔑 API 참조 요약
 
-### Listener Registration
+### 리스너 등록 (Listener Registration)
 
-| Method                                      | Use Case                  | Cleanup Method                      |
+| 메서드 | 용도 | 정리 메서드 |
 | ------------------------------------------- | ------------------------- | ----------------------------------- |
-| `AddListener(method)`                       | Standard binding          | `RemoveListener(method)`            |
-| `AddPriorityListener(method, priority)`     | Execution order control   | `RemovePriorityListener(method)`    |
-| `AddConditionalListener(method, predicate)` | Predicate-based filtering | `RemoveConditionalListener(method)` |
-| `AddPersistentListener(method)`             | Cross-scene survival      | `RemovePersistentListener(method)`  |
+| `AddListener(method)`                       | 표준 바인딩 | `RemoveListener(method)`            |
+| `AddPriorityListener(method, priority)`     | 실행 순서 제어 | `RemovePriorityListener(method)`    |
+| `AddConditionalListener(method, predicate)` | 프레디케이트 기반 필터링 | `RemoveConditionalListener(method)` |
+| `AddPersistentListener(method)`             | 씬 교차 생존 | `RemovePersistentListener(method)`  |
 
-### Event Raising
+### 이벤트 발생 (Event Raising)
 
-| Method                            | Use Case             | Returns          |
+| 메서드 | 용도 | 반환값 |
 | --------------------------------- | -------------------- | ---------------- |
-| `Raise()`                         | Immediate execution  | `void`           |
-| `Raise(arg)`                      | With single argument | `void`           |
-| `Raise(sender, arg)`              | With sender context  | `void`           |
-| `RaiseDelayed(seconds)`           | Scheduled execution  | `ScheduleHandle` |
-| `RaiseRepeating(interval, count)` | Loop execution       | `ScheduleHandle` |
+| `Raise()`                         | 즉시 실행 | `void`           |
+| `Raise(arg)`                      | 단일 인자 포함 | `void`           |
+| `Raise(sender, arg)`              | 송신자 컨텍스트 포함 | `void`           |
+| `RaiseDelayed(seconds)`           | 예약 실행 | `ScheduleHandle` |
+| `RaiseRepeating(interval, count)` | 루프 실행 | `ScheduleHandle` |
 
-### Schedule Management
+### 스케줄 관리 (Schedule Management)
 
-| Method                    | Use Case                   |
+| 메서드 | 용도 |
 | ------------------------- | -------------------------- |
-| `CancelDelayed(handle)`   | Stop pending delayed event |
-| `CancelRepeating(handle)` | Stop active loop           |
-| `handle.OnStep`           | Loop iteration callback    |
-| `handle.OnCompleted`      | Loop completion callback   |
-| `handle.OnCancelled`      | Cancellation callback      |
+| `CancelDelayed(handle)`   | 대기 중인 지연 이벤트 중지 |
+| `CancelRepeating(handle)` | 활성 루프 중지 |
+| `handle.OnStep`           | 루프 반복 시 콜백 |
+| `handle.OnCompleted`      | 루프 완료 시 콜백 |
+| `handle.OnCancelled`      | 취소 시 콜백 |
 
-### Flow Graph Construction
+### 플로우 그래프 구축 (Flow Graph Construction)
 
-| Method                         | Use Case        | Returns         |
+| 메서드 | 용도 | 반환값 |
 | ------------------------------ | --------------- | --------------- |
-| `AddTriggerEvent(target, ...)` | Parallel branch | `TriggerHandle` |
-| `RemoveTriggerEvent(handle)`   | Remove branch   | `void`          |
-| `AddChainEvent(target, ...)`   | Sequential step | `ChainHandle`   |
-| `RemoveChainEvent(handle)`     | Remove step     | `void`          |
-| `RemoveAllChainEvents()`       | Clear all steps | `void`          |
+| `AddTriggerEvent(target, ...)` | 병렬 분기 생성 | `TriggerHandle` |
+| `RemoveTriggerEvent(handle)`   | 분기 제거 | `void`           |
+| `AddChainEvent(target, ...)`   | 순차 단계 생성 | `ChainHandle`   |
+| `RemoveChainEvent(handle)`     | 단계 제거 | `void`           |
+| `RemoveAllChainEvents()`       | 모든 단계 제거 | `void`           |
 
 ---
 
-## ⚠️ Critical Best Practices
+## ⚠️ 핵심 베스트 프랙티스
 
-### ✅ DO
+### ✅ 권장 사항 (DO)
 ```csharp
 private void OnEnable()
 {
-    myEvent.AddListener(OnReceived);  // ← Register
+    myEvent.AddListener(OnReceived);  // ← 등록
 }
 
 private void OnDisable()
 {
-    myEvent.RemoveListener(OnReceived);  // ← ALWAYS cleanup
+    myEvent.RemoveListener(OnReceived);  // ← 반드시 정리!
 }
 ```
 
-### ❌ DON'T
+### ❌ 금지 사항 (DON'T)
 ```csharp
 private void Start()
 {
-    myEvent.AddListener(OnReceived);  // ← Registered in Start...
+    myEvent.AddListener(OnReceived);  // ← Start에서 등록...
 }
-// ❌ NO OnDisable cleanup → MEMORY LEAK
+// ❌ OnDisable 정리가 없음 → 메모리 누수 발생
 ```
 
-### Handle Management
+### 핸들 관리 (Handle Management)
 ```csharp
 private ScheduleHandle _handle;
 
@@ -845,50 +845,51 @@ public void StartLoop()
 
 public void StopLoop()
 {
-    if (_handle != null) myEvent.CancelRepeating(_handle);  // ← Use stored handle
+    if (_handle != null) myEvent.CancelRepeating(_handle);  // ← 저장된 핸들 사용
 }
 ```
 
-### Lifecycle Patterns
+### 라이프사이클 패턴
 
-| Lifecycle Method | Use For                                    |
+| 라이프사이클 메서드 | 사용 용도 |
 | ---------------- | ------------------------------------------ |
-| `Awake`          | Persistent listeners + `DontDestroyOnLoad` |
-| `OnEnable`       | Standard listeners, triggers, chains       |
-| `OnDisable`      | Remove standard listeners                  |
-| `OnDestroy`      | Remove persistent listeners                |
+| `Awake`          | 지속성 리스너 등록 + `DontDestroyOnLoad` |
+| `OnEnable`       | 표준 리스너, 트리거, 체인 등록 |
+| `OnDisable`      | 표준 리스너 제거 |
+| `OnDestroy`      | 지속성 리스너 제거 |
 
 ---
 
-## 🎯 When to Choose Code vs Visual
+## 🎯 코드 vs 비주얼 워크플로우 선택 기준
 
-### Choose Visual Workflow When:
-- ✅ Designers need direct control
-- ✅ Rapid iteration is priority
-- ✅ Logic is relatively static
-- ✅ Visual debugging is beneficial
-- ✅ Team collaboration across disciplines
+### 비주얼 워크플로우를 선택할 때:
+- ✅ 디자이너가 직접 제어해야 하는 경우
+- ✅ 신속한 반복 작업(Iteration)이 우선인 경우
+- ✅ 로직이 상대적으로 고정적인 경우
+- ✅ 시각적 디버깅이 유리한 경우
+- ✅ 여러 직군 간의 협업이 필요한 경우
 
-### Choose Code Workflow When:
-- ✅ Logic is highly dynamic (runtime graph building)
-- ✅ Conditions require complex C# code
-- ✅ Integration with existing code systems
-- ✅ Advanced scheduling patterns
-- ✅ Programmatic listener management
-- ✅ Version control of logic (code diffs clearer than .asset diffs)
+### 코드 워크플로우를 선택할 때:
+- ✅ 로직이 매우 동적인 경우 (런타임 그래프 구축)
+- ✅ 복잡한 C# 코드가 필요한 조건문
+- ✅ 기존 코드 시스템과의 연동이 필요한 경우
+- ✅ 고급 스케줄링 패턴이 필요한 경우
+- ✅ 프로그래밍 방식의 리스너 관리
+- ✅ 로직의 버전 관리 (에셋 변경보다 코드 차이점이 더 명확함)
 
-### Hybrid Approach:
+### 하이브리드 접근법:
 
-- 🎨 **Visual:** Event definitions, simple bindings
-- 💻 **Code:** Complex conditions, dynamic graphs, runtime scheduling
-- **Example:** Define events visually, but build Trigger/Chain graphs in code for procedural systems
+- 🎨 **비주얼:** 이벤트 정의, 간단한 바인딩
+- 💻 **코드:** 복잡한 조건, 동적 그래프, 런타임 스케줄링
+- **예시:** 이벤트는 비주얼로 정의하되, 절차적 시스템을 위해 트리거/체인 그래프는 코드로 구축
 
 ---
 
-## 📚 Related Documentation
+## 📚 관련 문서
 
-- **[Raising and Scheduling](../scripting/raising-and-scheduling.md)** - Complete scheduling API guide
-- **[Listening Strategies](../scripting/listening-strategies.md)** - Listener patterns and best practices
-- **[Programmatic Flow](../scripting/programmatic-flow.md)** - Building Trigger/Chain graphs via code
-- **[Best Practices](../scripting/best-practices.md)** - Code patterns and anti-patterns
-- **[API Reference](../scripting/api-reference.md)** - Complete method signatures
+- **[이벤트 발생 및 스케줄링](../scripting/raising-and-scheduling.md)** - 전체 스케줄링 API 가이드
+- **[리스닝 전략](../scripting/listening-strategies.md)** - 리스너 패턴 및 베스트 프랙티스
+- **[프로그래밍 방식의 흐름 제어](../scripting/programmatic-flow.md)** - 코드를 통한 트리거/체인 그래프 구축
+- **[베스트 프랙티스](../scripting/best-practices.md)** - 코드 패턴 및 안티 패턴
+- **[API 참조](../scripting/api-reference.md)** - 전체 메서드 시그니처
+```

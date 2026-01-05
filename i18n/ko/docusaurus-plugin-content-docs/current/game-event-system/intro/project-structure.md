@@ -1,107 +1,107 @@
 ﻿---
-sidebar_label: 'Project Structure'
+sidebar_label: '프로젝트 구조'
 sidebar_position: 2
 ---
 
-# Project Structure
+# 프로젝트 구조 (Project Structure)
 
-Understanding the file structure is crucial for maintaining a clean project lifecycle, ensuring safe upgrades, and managing version control effectively.
+파일 구조를 이해하는 것은 깨끗한 프로젝트 라이프사이클을 유지하고, 안전한 업그레이드를 보장하며, 효과적인 버전 관리를 수행하는 데 매우 중요합니다.
 
-The **Game Event System** adheres to a strict **"Logic vs. Data" Separation Principle**.
-This architecture ensures that updating the plugin (Core Logic) **never overwrites** your created events, graphs, or generated code (User Data).
+**게임 이벤트 시스템(Game Event System)**은 엄격한 **"로직과 데이터의 분리 원칙(Logic vs. Data Separation Principle)"**을 준수합니다.
+이 아키텍처는 플러그인(코어 로직)을 업데이트하더라도 여러분이 생성한 이벤트, 그래프 또는 생성된 코드(사용자 데이터)가 **절대로 덮어씌워지지 않도록** 보장합니다.
 
 ---
 
-## 📂 The Directory Tree
+## 📂 디렉토리 트리 (Directory Tree)
 
-Below is the standard hierarchy. I use distinct icons to indicate the nature of each folder:
+아래는 표준 계층 구조입니다. 각 폴더의 성격을 나타내기 위해 고유한 아이콘을 사용했습니다:
 
-*   🛡️ **Immutable Core**: Never modify, move, or rename.
-*   💾 **Mutable Data**: Your project data. Safe to commit, safe to modify.
-*   🗑️ **Disposable**: Safe to delete for optimization.
+*   🛡️ **불변의 코어 (Immutable Core)**: 수정, 이동 또는 이름을 변경하지 마십시오.
+*   💾 **가변 데이터 (Mutable Data)**: 프로젝트 데이터입니다. 커밋 및 수정이 안전합니다.
+*   🗑️ **삭제 가능 (Disposable)**: 최적화를 위해 삭제해도 안전합니다.
 
 ```bash
 Assets/
-├── 📁 TinyGiants/                  # [CORE LOGIC] The immutable plugin root
+├── 📁 TinyGiants/                  # [CORE LOGIC] 불변의 플러그인 루트
 │   └── 📁 GameEventSystem/
-│       ├── 📁 API/                 # 🛡️ Interfaces & Public APIs
-│       ├── 📁 Demo/                # 🗑️ Example Scenes & Assets (Safe to delete)
-│       ├── 📁 Editor/              # 🛡️ Custom Inspectors & Window Logic
-│       │   └── 📁 Icons/           # 🗑️ UI Textures (Delete for <1.2MB builds)
-│       ├── 📁 Runtime/             # 🛡️ Core Engine & Event Types
+│       ├── 📁 API/                 # 🛡️ 인터페이스 및 퍼블릭 API
+│       ├── 📁 Demo/                # 🗑️ 예제 씬 및 에셋 (삭제 가능)
+│       ├── 📁 Editor/              # 🛡️ 커스텀 인스펙터 및 윈도우 로직
+│       │   └── 📁 Icons/           # 🗑️ UI 텍스처 (1.2MB 미만 빌드를 위해 삭제 가능)
+│       ├── 📁 Runtime/             # 🛡️ 코어 엔진 및 이벤트 타입
 │       ├── 📄 LICENSE.txt
 │       └── 📄 Readme.txt
 │
-└── 📁 TinyGiantsData/              # [USER DATA] Your generated content sanctuary
+└── 📁 TinyGiantsData/              # [USER DATA] 생성된 콘텐츠 보호 구역
     └── 📁 GameEventSystem/
-        ├── 📁 CodeGen/             # 💾 Auto-Generated C# Classes
-        │   ├── 📁 Basic/           # 🛡️ Primitive Types (Required)
-        │   └── 📁 Custom/          # 💾 Your Custom Types (Auto-regenerated)
-        ├── 📁 Database/            # 💾 Your Event Database Assets (.asset)
-        └── 📁 FlowGraph/           # 💾 Your Visual Flow Graphs (.asset)
+        ├── 📁 CodeGen/             # 💾 자동 생성된 C# 클래스
+        │   ├── 📁 Basic/           # 🛡️ 기본 타입 (필수 항목)
+        │   └── 📁 Custom/          # 💾 커스텀 타입 (자동 재생성됨)
+        ├── 📁 Database/            # 💾 이벤트 데이터베이스 에셋 (.asset)
+        └── 📁 FlowGraph/           # 💾 시각적 플로우 그래프 에셋 (.asset)
 ```
 
-:::info Architecture Note
-**TinyGiants** contains the tool itself (The Hammer).
-**TinyGiantsData** contains what you build with it (The House).
+:::info 아키텍처 참고
+**TinyGiants**는 도구 그 자체(망치)를 포함합니다.
+**TinyGiantsData**는 그 도구로 여러분이 지은 결과물(집)을 포함합니다.
 :::
 
 ------
 
-## ⛔ CRITICAL: The "Plugins" Folder Warning
+## ⛔ 중요: "Plugins" 폴더 주의사항
 
-:::danger DO NOT MOVE TO "PLUGINS"
-You **MUST NOT** move the TinyGiants or TinyGiantsData folders into the standard Assets/Plugins/ directory.
+:::danger "PLUGINS"로 이동 금지
+TinyGiants 또는 TinyGiantsData 폴더를 표준 Assets/Plugins/ 디렉토리로 **절대로 이동해서는 안 됩니다.**
 :::
 
-### Why is this critical?
+### 왜 이토록 중요한가요?
 
-1. **Compilation Order (Scripting Phase)**:
-   Unity compiles the Plugins folder **before** your standard game scripts (Assembly-CSharp).
-   - Our plugin needs to reference *your* custom classes (e.g., PlayerStats, InventoryItem) to generate events for them.
-   - If the plugin sits in Plugins, it **cannot see your gameplay code**, leading to "Type Not Found" errors.
-2. **Relative Path Dependencies**:
-   The automated Code Generator and Database Manager rely on specific relative paths to locate assets. Breaking this structure may cause the "Hub" to lose track of your databases.
-3. **Asset Protection Mechanism**:
-   The plugin includes a background AssetProtector service. If it detects these folders being moved to Plugins, it will attempt to warn you or block the operation to prevent project corruption.
+1. **컴파일 순서 (스크립팅 단계)**:
+   유니티는 일반 게임 스크립트(Assembly-CSharp)보다 Plugins 폴더를 **먼저** 컴파일합니다.
+   - 이 플러그인은 이벤트를 생성하기 위해 *여러분의* 커스텀 클래스(예: PlayerStats, InventoryItem)를 참조해야 합니다.
+   - 플러그인이 Plugins에 위치하면 **여러분의 게임플레이 코드를 인식할 수 없게 되어**, "Type Not Found(타입을 찾을 수 없음)" 오류가 발생합니다.
+2. **상대 경로 의존성**:
+   자동화된 코드 생성기와 데이터베이스 매니저는 에셋을 찾기 위해 특정 상대 경로에 의존합니다. 이 구조를 깨뜨리면 "Hub"에서 여러분의 데이터베이스를 추적하지 못할 수 있습니다.
+3. **에셋 보호 메커니즘**:
+   플러그인에는 백그라운드 AssetProtector 서비스가 포함되어 있습니다. 이 폴더들이 Plugins로 이동되는 것이 감지되면, 프로젝트 손상을 방지하기 위해 경고를 보내거나 해당 작업을 차단하려고 시도합니다.
 
 ------
 
-## 💾 Version Control (Git/SVN) Strategy
+## 💾 버전 관리 (Git/SVN) 전략
 
-For teams working with Source Control, here is the recommended configuration:
+소스 제어(Source Control)를 사용하는 팀을 위한 권장 설정은 다음과 같습니다:
 
-| Folder Path                  | Strategy   | Reasoning                                                    |
+| 폴더 경로 | 전략 | 이유 |
 | ---------------------------- | ---------- | ------------------------------------------------------------ |
-| TinyGiants/                  | **Commit** | Contains the core plugin code required for the project to run. |
-| TinyGiantsData/.../Database  | **Commit** | Contains your actual Event Assets. Critical data.            |
-| TinyGiantsData/.../FlowGraph | **Commit** | Contains your visual logic graphs. Critical data.            |
-| TinyGiantsData/.../CodeGen   | **Commit** | **Recommended.** While these *can* be regenerated, committing them ensures the project compiles immediately for other team members without needing to run the Wizard first. |
+| TinyGiants/                  | **커밋** | 프로젝트 실행에 필요한 코어 플러그인 코드가 포함되어 있습니다. |
+| TinyGiantsData/.../Database  | **커밋** | 실제 이벤트 에셋들이 포함되어 있습니다. 매우 중요한 데이터입니다. |
+| TinyGiantsData/.../FlowGraph | **커밋** | 시각적 로직 그래프가 포함되어 있습니다. 매우 중요한 데이터입니다. |
+| TinyGiantsData/.../CodeGen   | **커밋** | **권장.** 다시 생성할 수도 있지만, 커밋해 두면 다른 팀원들이 위자드를 실행할 필요 없이 프로젝트가 즉시 컴파일됩니다. |
 
 ------
 
-## 🧹 Optimization Guide: Deployment Strategy
+## 🧹 최적화 가이드: 배포 전략
 
-The Game Event System is modular. Depending on your project stage, you can strip it down to reduce build size.
+게임 이벤트 시스템은 모듈식입니다. 프로젝트 단계에 따라 빌드 크기를 줄이기 위해 불필요한 부분을 제거할 수 있습니다.
 
-### Deployment Tiers
+### 배포 계층 (Deployment Tiers)
 
-Use this table to decide what to keep:
+아래 표를 참고하여 무엇을 남길지 결정하십시오:
 
-| Tier            | Folder to Delete                 | Size Savings | Consequence                                                  |
+| 계층 | 삭제할 폴더 | 절약 크기 | 결과 |
 | --------------- | -------------------------------- | ------------ | ------------------------------------------------------------ |
-| **Development** | *Keep Everything*                | 0 MB         | Full experience with Demos and high-res UI.                  |
-| **Production**  | TinyGiants/GameEventSystem/Demo/ | ~10 MB       | Removes examples. **Safe** for all projects once you know the basics. |
-| **Minimalist**  | .../Editor/Icons/                | ~4 MB        | **UI degrades.** Custom icons disappear; Windows use default Unity styling. Logic remains 100% functional. |
+| **개발(Dev)** | *모두 유지* | 0 MB | 데모 및 고해상도 UI를 포함한 모든 기능을 사용합니다. |
+| **프로덕션** | TinyGiants/GameEventSystem/Demo/ | ~10 MB | 예제를 제거합니다. 기초를 익힌 후에는 모든 프로젝트에서 **안전하게** 삭제할 수 있습니다. |
+| **미니멀리스트** | .../Editor/Icons/ | ~4 MB | **UI 품질 저하.** 커텀 아이콘이 사라지고 윈도우가 유니티 기본 스타일을 사용합니다. 로직 기능은 100% 정상 작동합니다. |
 
-### 📉 Extreme Compression (< 1.2 MB)
+### 📉 극한의 압축 (< 1.2 MB)
 
-If you are building for ultra-lightweight platforms (e.g., Instant Games), you can achieve the **Minimalist** tier.
+인스턴트 게임과 같은 초경량 플랫폼용으로 빌드하는 경우 **미니멀리스트** 계층을 적용할 수 있습니다.
 
-1. Delete the **Demo** folder.
-2. Delete the **Icons** folder.
-3. Ensure your **CodeGen/Custom** folder only contains event types you actually use. You can use the **[Cleanup Tools](../tools/codegen-and-cleanup.md)** to remove unused generated classes.
+1. **Demo** 폴더를 삭제합니다.
+2. **Icons** 폴더를 삭제합니다.
+3. **CodeGen/Custom** 폴더에 실제로 사용하는 이벤트 타입만 포함되어 있는지 확인합니다. **[정리 도구](../tools/codegen-and-cleanup.md)**를 사용하여 사용하지 않는 생성된 클래스들을 제거할 수 있습니다.
 
 :::tip
-For most PC/Mobile projects, **Level 1 (Deleting Demo)** is sufficient. I recommend keeping the **Icons** folder to maintain a pleasant workflow for your designers.
+대부분의 PC/모바일 프로젝트의 경우 **레벨 1(Demo 삭제)**만으로도 충분합니다. 디자이너들의 쾌적한 작업 환경을 위해 **Icons** 폴더는 유지하는 것을 권장합니다.
 :::

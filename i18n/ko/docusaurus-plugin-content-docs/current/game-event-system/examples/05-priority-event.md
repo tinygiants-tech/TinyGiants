@@ -1,309 +1,309 @@
 ﻿---
-sidebar_label: '05 Priority Event'
+sidebar_label: '05 우선순위 이벤트'
 sidebar_position: 6
 ---
 
 import VideoGif from '@site/src/components/Video/VideoGif';
 
-# 05 Priority Event: Execution Order Matters
+# 05 우선순위 이벤트: 실행 순서의 중요성
 
 <!-- <VideoGif src="/video/game-event-system/05-priority-event.mp4" /> -->
 
-## 📋 Overview
+## 📋 개요
 
-In game logic, **sequence matters**. When multiple actions respond to a single event, their execution order can dramatically change the outcome. This demo demonstrates how visual Editor configuration—without any code changes—can turn a weak hit into a devastating critical strike.
+게임 로직에서 **순서는 매우 중요합니다**. 단일 이벤트에 여러 액션이 반응할 때, 그 실행 순서에 따라 결과가 극적으로 달라질 수 있습니다. 이 데모는 코드 변경 없이 에디터 설정만으로 일반 공격을 강력한 크리티컬 히트로 바꾸는 방법을 보여줍니다.
 
-:::tip 💡 What You'll Learn
-- Why execution order affects gameplay logic
-- How to configure listener priority in the Behavior Window
-- The "Buff-Then-Attack" pattern in action
-- How to debug order-dependent logic issues
+:::tip 💡 배울 내용
+- 실행 순서가 게임플레이 로직에 미치는 영향
+- 비헤이비어 창(Behavior Window)에서 리스너 우선순위를 설정하는 방법
+- "버프 후 공격(Buff-Then-Attack)" 패턴의 실제 작동 방식
+- 순서 의존적 로직 문제를 디버깅하는 방법
 
 :::
 
 ---
 
-## 🎬 Demo Scene
+## 🎬 데모 씬
 ```
 Assets/TinyGiants/GameEventSystem/Demo/05_PriorityEvent/05_PriorityEvent.unity
 ```
 
-### Scene Composition
+### 씬 구성
 
-**UI Layer (Canvas):**
-- 🎮 **Two Attack Buttons** - Located at the bottom of the screen
-  - "Raise (Chaotic Hit)" → Triggers `PriorityEventRaiser.FireChaoticSequence()` (incorrect order)
-  - "Raise (Ordered Hit)" → Triggers `PriorityEventRaiser.FireOrderedSequence()` (correct order)
+**UI 레이어 (Canvas):**
+- 🎮 **두 개의 공격 버튼** - 화면 하단에 위치
+  - "Raise (Chaotic Hit)" ➔ `PriorityEventRaiser.FireChaoticSequence()` 호출 (잘못된 순서)
+  - "Raise (Ordered Hit)" ➔ `PriorityEventRaiser.FireOrderedSequence()` 호출 (올바른 순서)
 
-**Game Logic Layer (Demo Scripts):**
-- 📤 **PriorityEventRaiser** - GameObject with the raiser script
-  - Manages turret aiming and projectile firing
-  - Holds references to two events: `OnChaoticHit` and `OnOrderedHit`
-  - Both events use the same `GameEvent<GameObject, DamageInfo>` type
+**게임 로직 레이어 (데모 스크립트):**
+- 📤 **PriorityEventRaiser** - 발생기 스크립트가 포함된 게임 오브젝트
+  - 터렛 조준 및 발사체 발사를 관리합니다.
+  - `OnChaoticHit` 및 `OnOrderedHit` 두 이벤트에 대한 참조를 보유합니다.
+  - 두 이벤트 모두 동일한 `GameEvent<GameObject, DamageInfo>` 타입을 사용합니다.
 
-- 📥 **PriorityEventReceiver** - GameObject with the receiver script
-  - Has TWO listener methods bound to each event:
-    - **ActivateBuff** - Enables critical damage mode
-    - **ResolveHit** - Calculates damage based on current buff state
-  - The order of these methods determines the combat outcome
+- 📥 **PriorityEventReceiver** - 수신기 스크립트가 포함된 게임 오브젝트
+  - 각 이벤트에 바인딩된 두 개의 리스너 메서드를 가집니다:
+    - **ActivateBuff**: 크리티컬 데미지 모드를 활성화합니다.
+    - **ResolveHit**: 현재 버프 상태에 따라 데미지를 계산합니다.
+  - 이 메서드들의 실행 순서가 전투 결과를 결정합니다.
 
-**Visual Feedback Layer (Demo Objects):**
-- 🎯 **SentryTurret** - The attacker
-  - Changes from grey to **gold** when buffed
-  - Spawns particle aura effect when activated
-- 🎯 **TargetDummy** - The victim capsule
-  - Has Rigidbody for knockback physics
-- 💥 **VFX Systems** - Different effects for normal vs critical hits
-  - Normal: Small smoke puff
-  - Critical: Large explosion + camera shake
-- 🏠 **Plane** - Ground surface
+**시각적 피드백 레이어 (데모 오브젝트):**
+- 🎯 **SentryTurret** - 공격자
+  - 버프가 활성화되면 회색에서 **황금색**으로 변합니다.
+  - 활성화 시 파티클 오라 효과를 생성합니다.
+- 🎯 **TargetDummy** - 타겟 더미(캡슐)
+  - 물리적 노크백을 위한 리지드바디를 가집니다.
+- 💥 **VFX 시스템** - 일반 히트와 크리티컬 히트에 따른 서로 다른 효과
+  - 일반: 작은 연기 효과
+  - 크리티컬: 거대한 폭발 + 카메라 흔들림
+- 🏠 **Plane** - 바닥 지면
 
 ---
 
-## 🎮 How to Interact
+## 🎮 상호작용 방법
 
-### The Experiment Setup
+### 실험 설정
 
-Both buttons fire the same physical projectile, but trigger different events with **different listener order configurations**.
+두 버튼 모두 동일한 물리 발사체를 발사하지만, **리스너 순서 설정이 서로 다른** 별개의 이벤트를 트리거합니다.
 
-### Step 1: Enter Play Mode
+### 1단계: 플레이 모드 진입
 
-Press the **Play** button in Unity.
+유니티의 **Play** 버튼을 눌러 데모를 시작합니다.
 
-### Step 2: Test the Wrong Order (Chaotic Hit)
+### 2단계: 잘못된 순서 테스트 (Chaotic Hit)
 
-**Click "Raise (Chaotic Hit)" (Left Button):**
+**왼쪽의 "Raise (Chaotic Hit)" 클릭:**
 
-**What Happens:**
-1. 🎯 Turret aims and fires projectile
-2. 💥 Projectile hits target
-3. 🔴 **PROBLEM:** Damage calculated FIRST (ResolveHit executes)
-   - Result: `-10` weak damage (grey text)
-   - Effect: Small smoke VFX
-4. ✨ Buff activates SECOND (ActivateBuff executes)
-   - Turret turns gold with particle aura
-   - **Too late!** The damage was already calculated
+**발생하는 일:**
+1. 🎯 터렛이 조준하고 발사체를 발사합니다.
+2. 💥 발사체가 타겟에 명중합니다.
+3. 🔴 **문제 발생:** 데미지 계산이 **먼저** 이루어집니다 (ResolveHit 실행).
+   - 결과: `-10`의 약한 데미지 (회색 텍스트)
+   - 효과: 작은 연기 VFX
+4. ✨ 버프 활성화가 **나중에** 이루어집니다 (ActivateBuff 실행).
+   - 터렛이 황금색으로 변하며 파티클 오라가 나타납니다.
+   - **이미 늦었습니다!** 데미지 계산은 이미 끝난 상태입니다.
 
-**Console Output:**
+**콘솔 출력:**
 ```
 [Receiver] (B) RESOLVE: No buff detected. Weak hit. (Check Priority Order!)
 [Receiver] (A) BUFF ACTIVATED! Systems at 300% power.
 ```
 
-**Result:** ❌ Normal hit because buff wasn't active when damage was calculated
+**결과:** ❌ 데미지 계산 시점에 버프가 활성화되지 않았으므로 일반 히트가 발생합니다.
 
 ---
 
-### Step 3: Test the Correct Order (Ordered Hit)
+### 3단계: 올바른 순서 테스트 (Ordered Hit)
 
-**Click "Raise (Ordered Hit)" (Right Button):**
+**우측의 "Raise (Ordered Hit)" 클릭:**
 
-**What Happens:**
-1. 🎯 Turret aims and fires projectile
-2. 💥 Projectile hits target
-3. ✨ **CORRECT:** Buff activates FIRST (ActivateBuff executes)
-   - Turret turns gold with particle aura
-   - Internal `_isBuffActive` flag set to `true`
-4. 🔴 Damage calculated SECOND (ResolveHit executes)
-   - Checks buff flag: **ACTIVE!**
-   - Result: `CRIT! -50` (orange text, 5x damage multiplier)
-   - Effect: Massive explosion VFX + camera shake
+**발생하는 일:**
+1. 🎯 터렛이 조준하고 발사체를 발사합니다.
+2. 💥 발사체가 타겟에 명중합니다.
+3. ✨ **정상 작동:** 버프 활성화가 **먼저** 이루어집니다 (ActivateBuff 실행).
+   - 터렛이 황금색으로 변하며 파티클 오라가 나타납니다.
+   - 내부 `_isBuffActive` 플래그가 `true`로 설정됩니다.
+4. 🔴 데미지 계산이 **두 번째**로 이루어집니다 (ResolveHit 실행).
+   - 버프 플래그를 확인합니다: **활성화됨(ACTIVE)!**
+   - 결과: `CRIT! -50` (주황색 텍스트, 5배 데미지 배율)
+   - 효과: 거대한 폭발 VFX + 카메라 흔들림
 
-**Console Output:**
+**콘솔 출력:**
 ```
 [Receiver] (A) BUFF ACTIVATED! Systems at 300% power.
 [Receiver] (B) RESOLVE: Buff detected! CRITICAL EXPLOSION.
 ```
 
-**Result:** ✅ Critical hit because buff was active when damage was calculated
+**결과:** ✅ 데미지 계산 시점에 버프가 활성화되어 있었으므로 크리티컬 히트가 발생합니다.
 
 ---
 
-## 🏗️ Scene Architecture
+## 🏗️ 씬 아키텍처
 
-### The "Buff-Then-Attack" Problem
+### "버프 후 공격" 문제
 
-This is a common pattern in game development:
+이는 게임 개발에서 흔히 발생하는 패턴입니다:
 ```
-⚡ Event Raised: OnHit
+⚡ 이벤트 발생: OnHit
 │
-├─ 🥇 1st Action: [Priority 10]
-│  └─ 🛡️ ActivateBuff() ➔ Sets `_isBuffActive = true` 🟢
+├─ 🥇 1순위 액션: [우선순위 10]
+│  └─ 🛡️ ActivateBuff() ➔ `_isBuffActive = true` 설정 🟢
 │
-└─ 🥈 2nd Action: [Priority 5]
+└─ 🥈 2순위 액션: [우선순위 5]
    └─ ⚔️ ResolveHit()  ➔ If (_isBuffActive) ? 💥 CRIT : 🛡️ NORMAL
 │
-🎯 Result: CRITICAL HIT (Logic resolved with updated state)
+🎯 결과: 크리티컬 히트 (업데이트된 상태를 기반으로 로직 해결)
 ```
 
-**The Challenge:**
-If `ResolveHit` runs before `ActivateBuff`, the flag hasn't been set yet, resulting in normal damage even though the buff is "attached" to the same event!
+**과제:**
+만약 `ResolveHit`이 `ActivateBuff`보다 먼저 실행되면, 동일한 이벤트에 버프가 "연결"되어 있음에도 불구하고 플래그가 아직 설정되지 않아 일반 데미지가 발생하게 됩니다.
 
 ---
 
-### Event Definitions
+### 이벤트 정의 (Event Definitions)
 
-Both events use the same type but have different behavior configurations:
+두 이벤트는 동일한 타입을 사용하지만 비헤이비어 설정이 다릅니다:
 
 ![Game Event Editor](/img/game-event-system/examples/05-priority-event/demo-05-editor.png)
 
-| Event Name     | Type                                | Listener Order                        |
+| 이벤트 이름 | 타입 | 리스너 순서 |
 | -------------- | ----------------------------------- | ------------------------------------- |
-| `OnChaoticHit` | `GameEvent<GameObject, DamageInfo>` | ❌ ResolveHit → ActivateBuff (Wrong)   |
-| `OnOrderedHit` | `GameEvent<GameObject, DamageInfo>` | ✅ ActivateBuff → ResolveHit (Correct) |
+| `OnChaoticHit` | `GameEvent<GameObject, DamageInfo>` | ❌ ResolveHit → ActivateBuff (잘못됨) |
+| `OnOrderedHit` | `GameEvent<GameObject, DamageInfo>` | ✅ ActivateBuff → ResolveHit (올바름) |
 
-:::note 🔧 Same Type, Different Order
+:::note 🔧 동일한 타입, 다른 순서
 
-Both events are `GameEvent<GameObject, DamageInfo>`. The only difference is the **listener execution order** configured in the [Behavior Window](../visual-workflow/game-event-behavior.md).
+두 이벤트 모두 `GameEvent<GameObject, DamageInfo>` 타입입니다. 유일한 차이점은 [비헤이비어 창](../visual-workflow/game-event-behavior.md)에서 설정된 **리스너 실행 순서**입니다.
 
 :::
 
 ---
 
-### Behavior Configuration Comparison
+### 비헤이비어 설정 비교
 
-The critical difference is in the **Behavior Window** configuration.
+결정적인 차이는 **비헤이비어 창** 설정에 있습니다.
 
-#### ❌ Wrong Order (OnChaoticHit)
+#### ❌ 잘못된 순서 (OnChaoticHit)
 
 ![Chaotic Behavior](/img/game-event-system/examples/05-priority-event/demo-05-behavior-chaotic.png)
 
-**Execution Sequence:**
-1. `ResolveHit` (Top position - executes first)
-2. `ActivateBuff` (Bottom position - executes second)
+**실행 시퀀스:**
+1. `ResolveHit` (상단 위치 - 먼저 실행)
+2. `ActivateBuff` (하단 위치 - 나중에 실행)
 
-**Result:** Damage calculated before buff applied = Normal Hit
+**결과:** 버프 적용 전 데미지 계산 = 일반 히트
 
-#### ✅ Correct Order (OnOrderedHit)
+#### ✅ 올바른 순서 (OnOrderedHit)
 
 ![Ordered Behavior](/img/game-event-system/examples/05-priority-event/demo-05-behavior-ordered.png)
 
-**Execution Sequence:**
-1. `ActivateBuff` (Top position - executes first)
-2. `ResolveHit` (Bottom position - executes second)
+**실행 시퀀스:**
+1. `ActivateBuff` (상단 위치 - 먼저 실행)
+2. `ResolveHit` (하단 위치 - 나중에 실행)
 
-**Result:** Buff applied before damage calculated = Critical Hit
+**결과:** 데미지 계산 전 버프 적용 = 크리티컬 히트
 
-:::tip 🎯 Drag & Drop Reordering
+:::tip 🎯 드래그 앤 드롭으로 순서 변경
 
-You can change the execution order by **dragging the handle** (`≡`) on the left side of each listener in the Behavior Window. This is a visual, no-code way to modify gameplay logic!
+비헤이비어 창에서 각 리스너 왼쪽의 **핸들**(`≡`)을 드래그하여 실행 순서를 변경할 수 있습니다. 이는 코드 수정 없이 게임플레이 로직을 수정하는 시각적인 방법입니다!
 
 :::
 
 ---
 
-### Sender Setup (PriorityEventRaiser)
+### 송신자 설정 (PriorityEventRaiser)
 
-Select the **PriorityEventRaiser** GameObject in the Hierarchy:
+하이어라키에서 **PriorityEventRaiser** 게임 오브젝트를 선택하십시오:
 
 ![PriorityEventRaiser Inspector](/img/game-event-system/examples/05-priority-event/demo-05-inspector.png)
 
-**Event Channels:**
-- `Ordered Hit Event`: `OnOrderedHit` (configured correctly)
-  - Tooltip: "Apply Buff → Then Fire"
-- `Chaotic Hit Event`: `OnChaoticHit` (configured incorrectly)
-  - Tooltip: "Fire → Then Apply Buff (Too late!)"
+**이벤트 채널:**
+- `Ordered Hit Event`: `OnOrderedHit` (올바르게 설정됨)
+  - 툴팁: "Apply Buff → Then Fire"
+- `Chaotic Hit Event`: `OnChaoticHit` (잘못 설정됨)
+  - 툴팁: "Fire → Then Apply Buff (Too late!)"
 
-**Settings:**
-- `Turret Head`: SentryTurret/Head (Transform for aiming)
-- `Turret Muzzle Position`: Head/MuzzlePoint (projectile spawn)
-- `Projectile Prefab`: Projectile visual effect
-- `Muzzle Flash VFX`: Particle system for firing
-- `Hit Target`: TargetDummy (Transform)
+**설정:**
+- `Turret Head`: 조준을 위한 Transform
+- `Turret Muzzle Position`: 발사체 생성 위치
+- `Projectile Prefab`: 발사체 시각 효과
+- `Muzzle Flash VFX`: 발사 시 파티클 시스템
+- `Hit Target`: 타겟 더미 Transform
 
 ---
 
-### Receiver Setup (PriorityEventReceiver)
+### 수신자 설정 (PriorityEventReceiver)
 
-Select the **PriorityEventReceiver** GameObject in the Hierarchy:
+하이어라키에서 **PriorityEventReceiver** 게임 오브젝트를 선택하십시오:
 
 ![PriorityEventReceiver Inspector](/img/game-event-system/examples/05-priority-event/demo-05-receiver.png)
 
-**Visual Configuration:**
+**시각적 설정:**
 - `Turret Root`: SentryTurret (Transform)
-- `Turret Renderers`: Array of 1 renderer (the turret body)
-- `Normal Mat`: Grey material (default state)
-- `Buffed Mat`: Gold material (buffed state)
-- `Buff Aura Prefab`: Cyan particle effect for buff visualization
+- `Turret Renderers`: 렌더러 배열 (터렛 바디)
+- `Normal Mat`: 회색 마텔리얼 (기본 상태)
+- `Buffed Mat`: 황금색 마테리얼 (버프 상태)
+- `Buff Aura Prefab`: 버프 시각화를 위한 시안색 파티클 효과
 
-**VFX Configuration:**
-- `Hit Normal VFX`: Small smoke particle system
-- `Hit Crit VFX`: Large explosion particle system
-- `Floating Text Prefab`: Damage number display
+**VFX 설정:**
+- `Hit Normal VFX`: 작은 연기 파티클 시스템
+- `Hit Crit VFX`: 거대한 폭발 파티클 시스템
+- `Floating Text Prefab`: 데미지 숫자 표시기
 
-**Target References:**
-- `Hit Target`: TargetDummy (Transform)
-- `Target Rigidbody`: TargetDummy (Rigidbody for knockback)
+**대상 참조:**
+- `Hit Target`: 타겟 더미 Transform
+- `Target Rigidbody`: 노크백을 위한 리지드바디
 
 ---
 
-## 💻 Code Breakdown
+## 💻 코드 분석
 
-### 📤 PriorityEventRaiser.cs (Sender)
+### 📤 PriorityEventRaiser.cs (이벤트 송신자)
 ```csharp
 using UnityEngine;
 using TinyGiants.GameEventSystem.Runtime;
 
 public class PriorityEventRaiser : MonoBehaviour
 {
-    [Header("Event Channels")]
-    [Tooltip("Configured in Editor: Apply Buff -> Then Fire.")]
+    [Header("이벤트 채널")]
+    [Tooltip("에디터 설정: 버프 적용 -> 그 후 발사")]
     [GameEventDropdown] public GameEvent<GameObject, DamageInfo> orderedHitEvent;
 
-    [Tooltip("Configured in Editor: Fire -> Then Apply Buff (Too late!).")]
+    [Tooltip("에디터 설정: 발사 -> 그 후 버프 적용 (너무 늦음!)")]
     [GameEventDropdown] public GameEvent<GameObject, DamageInfo> chaoticHitEvent;
 
     private GameEvent<GameObject, DamageInfo> _pendingEvent;
 
     /// <summary>
-    /// Button A: Starts attack sequence that triggers the "Ordered" event.
+    /// 버튼 A: "Ordered" 이벤트를 트리거하는 공격 시퀀스를 시작합니다.
     /// </summary>
     public void FireOrderedSequence()
     {
         if (orderedHitEvent == null) return;
         _pendingEvent = orderedHitEvent;
         _isAttacking = true;
-        Debug.Log("[Sender] Initiating ORDERED attack sequence...");
+        Debug.Log("[Sender] 정렬된(ORDERED) 공격 시퀀스 시작...");
     }
 
     /// <summary>
-    /// Button B: Starts attack sequence that triggers the "Chaotic" event.
+    /// 버튼 B: "Chaotic" 이벤트를 트리거하는 공격 시퀀스를 시작합니다.
     /// </summary>
     public void FireChaoticSequence()
     {
         if (chaoticHitEvent == null) return;
         _pendingEvent = chaoticHitEvent;
         _isAttacking = true;
-        Debug.Log("[Sender] Initiating CHAOTIC attack sequence...");
+        Debug.Log("[Sender] 혼란스러운(CHAOTIC) 공격 시퀀스 시작...");
     }
 
     private void FireProjectile()
     {
-        // ... Projectile creation logic ...
+        // ... 발사체 생성 로직 ...
         
         shell.Initialize(hitTarget.position, 15f, () => 
         {
             DamageInfo info = new DamageInfo(10f, false, DamageType.Physical, 
                                             hitTarget.position, "Sentry Turret");
             
-            // Raise whichever event was queued (Ordered or Chaotic)
+            // 대기 중인 이벤트(Ordered 또는 Chaotic)를 발생시킵니다.
             if(_pendingEvent != null) 
                 _pendingEvent.Raise(this.gameObject, info);
             
-            Debug.Log($"[Sender] Impact! Event '{_pendingEvent?.name}' Raised.");
+            Debug.Log($"[Sender] 명중! 이벤트 '{_pendingEvent?.name}' 발생.");
         });
     }
 }
 ```
 
-**Key Points:**
-- 🎯 **Same Sender Code** - Both events use identical raise logic
-- 📦 **Event Selection** - `_pendingEvent` determines which event fires
-- 🔇 **Order Agnostic** - Sender has no knowledge of listener order
+**핵심 포인트:**
+- 🎯 **동일한 송신자 코드** - 두 이벤트 모두 동일한 발생(Raise) 로직을 사용합니다.
+- 📦 **이벤트 선택** - `_pendingEvent` 변수가 어떤 이벤트를 발생시킬지 결정합니다.
+- 🔇 **순서 무관성** - 송신자는 리스너의 실행 순서에 대해 알지 못합니다.
 
 ---
 
-### 📥 PriorityEventReceiver.cs (Listener)
+### 📥 PriorityEventReceiver.cs (이벤트 리스너)
 ```csharp
 using UnityEngine;
 using System.Collections;
@@ -314,21 +314,21 @@ public class PriorityEventReceiver : MonoBehaviour
     [SerializeField] private Material buffedMat;
     [SerializeField] private ParticleSystem buffAuraPrefab;
     
-    private bool _isBuffActive; // The critical state flag
+    private bool _isBuffActive; // 핵심 상태 플래그
 
     /// <summary>
-    /// [Listener Method A]
-    /// Activates the buff state and visual effects.
+    /// [리스너 메서드 A]
+    /// 버프 상태와 시각 효과를 활성화합니다.
     /// 
-    /// PRIORITY IMPACT:
-    /// - If configured ABOVE ResolveHit: Buff applies BEFORE damage calculation → CRITICAL HIT
-    /// - If configured BELOW ResolveHit: Buff applies AFTER damage calculation → NORMAL HIT
+    /// 우선순위의 영향:
+    /// - ResolveHit 보다 위에 설정된 경우: 데미지 계산 전 버프 적용 → 크리티컬 히트
+    /// - ResolveHit 보다 아래에 설정된 경우: 데미지 계산 후 버프 적용 → 일반 히트
     /// </summary>
     public void ActivateBuff(GameObject sender, DamageInfo args)
     {
-        _isBuffActive = true; // <-- THE CRITICAL STATE CHANGE
+        _isBuffActive = true; // <-- 핵심 상태 변경 지점
         
-        // Visual feedback: Gold material + particle aura
+        // 시각적 피드백: 황금색 마테리얼 + 파티클 오라
         foreach (var r in turretRenderers) 
             if(r) r.material = buffedMat;
 
@@ -340,16 +340,15 @@ public class PriorityEventReceiver : MonoBehaviour
             _activeBuffEffect.Play();
         }
 
-        Debug.Log("<color=cyan>[Receiver] (A) BUFF ACTIVATED! " +
-                  "Systems at 300% power.</color>");
+        Debug.Log("<color=cyan>[Receiver] (A) 버프 활성화! 시스템 출력 300%.</color>");
     }
     
     /// <summary>
-    /// [Listener Method B]
-    /// Calculates damage and spawns VFX based on CURRENT buff state.
+    /// [리스너 메서드 B]
+    /// 현재 버프 상태를 기반으로 데미지를 계산하고 VFX를 생성합니다.
     /// 
-    /// LOGIC: Checks _isBuffActive at the EXACT MOMENT of execution.
-    /// For correct behavior, ActivateBuff must execute BEFORE this method.
+    /// 로직: 실행되는 "정확한 순간"의 _isBuffActive 상태를 확인합니다.
+    /// 올바른 동작을 위해 ActivateBuff가 이 메서드보다 먼저 실행되어야 합니다.
     /// </summary>
     public void ResolveHit(GameObject sender, DamageInfo args)
     {
@@ -357,27 +356,25 @@ public class PriorityEventReceiver : MonoBehaviour
         bool isCrit = false;
         ParticleSystem vfxToPlay;
 
-        // Check the flag at THIS EXACT MOMENT
+        // 실행되는 바로 이 순간의 플래그를 확인합니다.
         if (_isBuffActive)
         {
-            // CRITICAL PATH
-            finalDamage *= 5f; // 5x damage multiplier
+            // 크리티컬 경로
+            finalDamage *= 5f; // 5배 데미지 배율
             isCrit = true;
             vfxToPlay = hitCritVFX;
             
             StartCoroutine(ShakeCameraRoutine(0.2f, 0.4f));
-            Debug.Log("<color=green>[Receiver] (B) RESOLVE: Buff detected! " +
-                      "CRITICAL EXPLOSION.</color>");
+            Debug.Log("<color=green>[Receiver] (B) RESOLVE: 버프 감지! 크리티컬 폭발.</color>");
         }
         else
         {
-            // NORMAL PATH
+            // 일반 경로
             vfxToPlay = hitNormalVFX;
-            Debug.Log("<color=red>[Receiver] (B) RESOLVE: No buff detected. " +
-                      "Weak hit. (Check Priority Order!)</color>");
+            Debug.Log("<color=red>[Receiver] (B) RESOLVE: 버프 없음. 일반 히트. (우선순위 확인 필요!)</color>");
         }
 
-        // Spawn appropriate VFX
+        // 적절한 VFX 생성
         if (vfxToPlay != null)
         {
             var vfx = Instantiate(vfxToPlay, args.hitPoint, Quaternion.identity);
@@ -385,7 +382,7 @@ public class PriorityEventReceiver : MonoBehaviour
             Destroy(vfx.gameObject, 2.0f);
         }
 
-        // Apply physics and UI feedback
+        // 물리 및 UI 피드백 적용
         ApplyPhysicsKnockback(args, isCrit);
         ShowFloatingText(finalDamage, isCrit, hitTarget.position);
         
@@ -395,55 +392,55 @@ public class PriorityEventReceiver : MonoBehaviour
     private IEnumerator ResetRoutine()
     {
         yield return new WaitForSeconds(1.5f);
-        _isBuffActive = false; // Reset for next attack
-        // ... Reset visuals ...
+        _isBuffActive = false; // 다음 공격을 위해 리셋
+        // ... 비주얼 리셋 ...
     }
 }
 ```
 
-**Key Points:**
-- 🎯 **State Dependency** - `ResolveHit` behavior depends entirely on `_isBuffActive` flag
-- ⏱️ **Timing Critical** - The flag must be set BEFORE damage calculation
-- 🔀 **Order-Dependent Logic** - Same code, different results based on execution order
-- 🎨 **Visual Feedback** - Different VFX, text size, and effects for each path
+**핵심 포인트:**
+- 🎯 **상태 의존성** - `ResolveHit`의 동작은 전적으로 `_isBuffActive` 플래그에 의존합니다.
+- ⏱️ **타이밍의 중요성** - 데미지 계산 전에 플래그가 설정되어야 합니다.
+- 🔀 **순서 의존적 로직** - 동일한 코드라도 실행 순서에 따라 결과가 달라집니다.
+- 🎨 **시각적 피드백** - 각 경로에 따라 서로 다른 VFX, 텍스트 크기 및 효과를 제공합니다.
 
 ---
 
-## 🔑 Key Takeaways
+## 🔑 핵심 요약
 
-| Concept                    | Implementation                                               |
+| 개념 | 구현 방식 |
 | -------------------------- | ------------------------------------------------------------ |
-| 🎯 **Execution Order**      | Listener order directly affects gameplay logic               |
-| 🎨 **Visual Configuration** | Drag-and-drop in Behavior Window—no code changes             |
-| 🔀 **State Management**     | Order matters when listeners modify shared state             |
-| 🐛 **Debug Pattern**        | Console logs help identify order-related bugs                |
-| 🔄 **Gameplay Design**      | Enable/disable order controls combo systems, buff stacking, etc. |
+| 🎯 **실행 순서** | 리스너 순서가 게임플레이 로직에 직접적인 영향을 미침 |
+| 🎨 **시각적 설정** | 코드 변경 없이 비헤이비어 창에서 드래그 앤 드롭으로 설정 가능 |
+| 🔀 **상태 관리** | 리스너가 공유 상태를 수정할 때 실행 순서가 매우 중요함 |
+| 🐛 **디버그 패턴** | 콘솔 로그를 통해 순서 관련 버그를 쉽게 식별 가능 |
+| 🔄 **게임플레이 설계** | 순서 제어를 통해 콤보 시스템, 버프 중첩 등을 구현 가능 |
 
-:::note 🎓 Design Insight
+:::note 🧠 디자인 인사이트
 
-Execution order is critical for:
+실행 순서는 다음의 경우에 매우 중요합니다:
 
-- **Buff systems** - Apply modifiers before calculating effects
-- **Combo chains** - Validate conditions before triggering next action
-- **Shield mechanics** - Check absorption before applying damage
-- **Trigger sequences** - Ensure prerequisites are met before executing dependent logic
+- **버프 시스템** - 효과를 계산하기 전에 수정 사항을 먼저 적용해야 함
+- **콤보 체인** - 다음 액션을 트리거하기 전에 조건을 먼저 검증해야 함
+- **쉴드 메커니즘** - 데미지를 적용하기 전에 흡수량을 먼저 확인해야 함
+- **트리거 시퀀스** - 의존적인 로직을 실행하기 전에 전제 조건이 충족되었는지 확인해야 함
 
-Always test both orders to ensure your logic works as intended!
+로직이 의도한 대로 작동하는지 확인하기 위해 항상 두 가지 순서를 모두 테스트해 보십시오!
 
 :::
 
 ---
 
-## 🎯 What's Next?
+## 🎯 다음 단계는?
 
-You've mastered execution order. Now let's explore **conditional event triggering** to make events smarter.
+실행 순서를 마스터했습니다. 이제 이벤트를 더 똑똑하게 만드는 **조건부 이벤트 트리거링**을 살펴보겠습니다.
 
-**Next Chapter**: Learn about conditional logic in **[06 Conditional Event](./06-conditional-event.md)**
+**다음 장**: **[06 조건부 이벤트](./06-conditional-event.md)**에서 조건부 로직에 대해 배워보세요.
 
 ---
 
-## 📚 Related Documentation
+## 📚 관련 문서
 
-- **[Game Event Behavior](../visual-workflow/game-event-behavior.md)** - Detailed guide to listener configuration
-- **[Best Practices](../scripting/best-practices.md)** - Patterns for order-dependent logic
-- **[Listening Strategies](../scripting/listening-strategies.md)** - Advanced callback patterns
+- **[게임 이벤트 비헤이비어](../visual-workflow/game-event-behavior.md)** - 리스너 설정에 대한 상세 가이드
+- **[베스트 프랙티스](../scripting/best-practices.md)** - 순서 의존적 로직을 위한 패턴
+- **[리스닝 전략](../scripting/listening-strategies.md)** - 고급 콜백 패턴

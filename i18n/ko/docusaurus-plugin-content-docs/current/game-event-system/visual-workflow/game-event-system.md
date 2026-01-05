@@ -1,151 +1,151 @@
 ﻿---
-sidebar_label: 'System Dashboard'
+sidebar_label: '시스템 대시보드'
 sidebar_position: 1
 ---
 
-# System Dashboard
+# 시스템 대시보드
 
-The **Game Event System Window** (The system dashboard) is your central command center. It is designed to provide a high-level overview of the plugin's status, quick access to core tools, and real-time environment telemetry.
+**게임 이벤트 시스템 창**(시스템 대시보드)은 여러분의 중앙 제어 센터입니다. 플러그인의 상태를 한눈에 파악하고, 핵심 도구에 빠르게 접근하며, 실시간 환경 정보를 확인할 수 있도록 설계되었습니다.
 
-Instead of hunting through project folders or menus, The dashboard brings every critical operation into a single, organized interface—all in one place.
+프로젝트 폴더나 메뉴를 뒤지는 대신, 대시보드는 모든 중요한 작업을 하나의 정리된 인터페이스로 모아 한곳에서 처리할 수 있게 해줍니다.
 
-## 🚀 Accessing the Dashboard
+## 🚀 대시보드 접속하기
 
-Open the dashboard via the Unity top menu:
+유니티 상단 메뉴를 통해 대시보드를 열 수 있습니다:
 
 ```text
 Tools > TinyGiants > Game Event System
 ```
 
-:::tip First Time Setup
-If this is your first time opening the dashboard, you'll be guided through an automatic initialization process. See **[Installation](../intro/installation.md)** for details.
+:::tip 최초 설정
+대시보드를 처음 여는 경우, 자동 초기화 프로세스가 안내됩니다. 자세한 내용은 **[설치](../intro/installation.md)**를 참조하세요.
 :::
 
 ------
 
-## 🗺️ Interface Overview
+## 🗺️ 인터페이스 개요
 
-The dashboard is divided into specific functional zones. Below is a detailed breakdown of each section.
+대시보드는 특정 기능 영역으로 나뉘어 있습니다. 아래는 각 섹션에 대한 상세 분석입니다.
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-system/system-dashboard-full.png)
 
-### 1. 🚀 Initialization & Status
+### 1. 🚀 초기화 및 상태
 
-Located on the **Middle-Left**, this bar acts as the **Global Health Indicator** for the system.
+**중앙 좌측**에 위치한 이 바는 시스템의 **전반적인 상태 지표** 역할을 합니다.
 
-- **Green Check**: The system is fully initialized. Core managers and databases are present.
-- **Blue Action Button**: Critical components are missing (e.g., if the Manager object was accidentally deleted from the scene).
+- **녹색 체크**: 시스템이 완전히 초기화되었습니다. 코어 매니저와 데이터베이스가 존재합니다.
+- **파란색 실행 버튼**: 필수 컴포넌트가 누락되었습니다 (예: 매니저 오브젝트가 씬에서 실수로 삭제된 경우).
 
-:::tip Quick Repair
-If this bar turns Blue during development, simply click it to **Auto-Repair** the scene dependencies immediately. For the initial setup guide, refer to **[Installation](../intro/installation.md)**.
+:::tip 빠른 복구
+개발 중 이 바가 파란색으로 변하면, 클릭하여 씬 의존성을 즉시 **자동 복구**할 수 있습니다. 최초 설정 가이드는 **[설치](../intro/installation.md)**를 참조하십시오.
 :::
 
 ------
 
-### 2. ⚡ Core Workflow Tools
+### 2. ⚡ 핵심 워크플로우 도구
 
-Located in the **Editor & Monitor** section, these are your daily drivers.
+**에디터 및 모니터** 섹션에 위치하며, 매일 사용하는 주요 도구들입니다.
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-system/hub-core-tools.png)
 
-| Tool                                                    | Description                                                  |
+| 도구 | 설명 |
 | ------------------------------------------------------- | ------------------------------------------------------------ |
-| [**📝 Game Event Editor**](./game-event-editor.md)       | Opens the main management window to batch operations (create, delete, search, filter, and edit events). This is where you will spend 80% of your time. |
-| [**📊 Game Event Monitor**](../tools/runtime-monitor.md) | Opens the runtime debugger. Use this during Play Mode to watch event execution in real-time, inspect listener call stacks, profile performance bottlenecks, and visualize flow graph automation exectuion. |
+| [**📝 게임 이벤트 에디터**](./game-event-editor.md) | 이벤트 일괄 작업(생성, 삭제, 검색, 필터링 및 편집)을 위한 메인 관리 창을 엽니다. 작업 시간의 80%를 이곳에서 보내게 될 것입니다. |
+| [**📊 게임 이벤트 모니터**](../tools/runtime-monitor.md) | 런타임 디버거를 엽니다. 플레이 모드에서 이벤트 실행을 실시간으로 확인하고, 리스너 콜스택 조사, 성능 병목 현상 프로파일링, 플로우 그래프 자동화 실행을 시각화할 때 사용합니다. |
 
 ------
 
-### 3. ⚙️ Code Maintenance Tools
+### 3. ⚙️ 코드 유지관리 도구
 
-Located in the **Tools & Utilities** section, these utilities manage the underlying C# generation system.
+**도구 및 유틸리티** 섹션에 위치하며, 기반이 되는 C# 생성 시스템을 관리합니다.
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-system/hub-code-tools.png)
 
-| Tool                                                         | Description                                                  |
+| 도구 | 설명 |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [**📜 Generate Game Event Code**](../tools/codegen-and-cleanup.md) | Manually triggers the code generator. Use this if you have added a new custom type (e.g., `GameEvent<MyCustomData>`) and need the concrete class generated immediately. |
-| [**✂️ Clean Game Event Code**](../tools/codegen-and-cleanup.md) | Scan your project, find all GameEvent classes, and safely delete them to keep the project tidy. |
-| [**🧹 Clean All Game Event Code**](../tools/codegen-and-cleanup.md) | A hard reset. Removes **ALL** generated code (except basic types). Use this only if you are reinstalling or refactoring significantly. |
+| [**📜 게임 이벤트 코드 생성**](../tools/codegen-and-cleanup.md) | 코드 생성기를 수동으로 실행합니다. 새로운 커스텀 타입(예: `GameEvent<MyCustomData>`)을 추가하고 즉시 구체 클래스 생성이 필요한 경우 사용합니다. |
+| [**✂️ 게임 이벤트 코드 정리**](../tools/codegen-and-cleanup.md) | 프로젝트를 스캔하여 모든 GameEvent 클래스를 찾고, 프로젝트를 깔끔하게 유지하기 위해 안전하게 삭제합니다. |
+| [**🧹 모든 게임 이벤트 코드 삭제**](../tools/codegen-and-cleanup.md) | 하드 리셋입니다. 기본 타입을 제외한 **모든** 생성된 코드를 삭제합니다. 재설치나 대규모 리팩토링 시에만 사용하십시오. |
 
-:::tip Automation
-The system is designed to auto-generate code when you create events via the Wizard. You rarely need to click "Generate" manually unless you are doing custom scripting work.
+:::tip 자동화
+시스템은 위자드(Wizard)를 통해 이벤트를 생성할 때 코드를 자동으로 생성하도록 설계되었습니다. 커스텀 스크립팅 작업을 하지 않는 한 수동으로 "Generate"를 클릭할 일은 거의 없습니다.
 :::
 
 ------
 
-### 4. ℹ️ System Telemetry
-Located on the **Right**, this panel monitors your project environment in real-time.
+### 4. ℹ️ 시스템 원격 측정
+**우측**에 위치한 이 패널은 프로젝트 환경을 실시간으로 모니터링합니다.
 
-It automatically validates your **Unity Version**, **Render Pipeline**, and **Scripting Backend** compatibility.
+**유니티 버전**, **렌더 파이프라인**, **스크립팅 백엔드** 호환성을 자동으로 검증합니다.
 
-:::tip Environment Check
-For a detailed explanation of what these metrics mean and how they affect the plugin, please refer to the **[Automatic Environment Check](../intro/installation.md#step-2-open-the-system-dashboard)** section in the Installation guide.
+:::tip 환경 체크
+이 지표들의 의미와 플러그인에 미치는 영향에 대한 자세한 설명은 설치 가이드의 **[자동 환경 체크](../intro/installation.md#step-2-open-the-system-dashboard)** 섹션을 참조하십시오.
 :::
 
 ------
 
-### 5. 📂 Quick Access
+### 5. 📂 빠른 접근
 
-Stop digging through the Project window. The **Quick Access** panel provides direct shortcuts to critical folders and assets.
+프로젝트 창을 뒤지는 수고를 덜어줍니다. **빠른 접근** 패널은 주요 폴더와 에셋으로 바로 가는 단축키를 제공합니다.
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-system/quick-access.png)
 
-| Tool                | Description                                                  |
+| 도구 | 설명 |
 | ------------------- | ------------------------------------------------------------ |
-| 📘 **Documentation** | Opens this local documentation.                              |
-| 📜 **API Scripts**   | Selects the API folder in the Project View.                  |
-| **🗄️ Databases**     | Selects the folder containing default database asset files.  |
-| **🕸️ Flow Graph**    | Selects the folder containing default visual-graph asset files. |
-| ⚙️ **CodeGen**       | Jumps to the generated code folder                           |
-| **🎮 Demo Scenes**   | Quickly locate the examples folder.                          |
+| 📘 **문서** | 이 로컬 문서를 엽니다. |
+| 📜 **API 스크립트** | 프로젝트 뷰에서 API 폴더를 선택합니다. |
+| **🗄️ 데이터베이스** | 기본 데이터베이스 에셋 파일이 포함된 폴더를 선택합니다. |
+| **🕸️ 플로우 그래프** | 기본 비주얼 그래프 에셋 파일이 포함된 폴더를 선택합니다. |
+| ⚙️ **코드 생성** | 생성된 코드 폴더로 이동합니다. |
+| **🎮 데모 씬** | 예제 폴더를 빠르게 찾습니다. |
 
 ------
 
-### 6. 🌐  Support & Community
+### 6. 🌐 지원 및 커뮤니티
 
-I believe in strong support. Use this panel to connect with us.
+강력한 지원을 약속합니다. 이 패널을 통해 저희와 소통하세요.
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-system/support-community.png)
 
-| Tool                    | Description                                                  |
+| 도구 | 설명 |
 | ----------------------- | ------------------------------------------------------------ |
-| **💬 Discord Community** | Join our active server for real-time help and showcase.      |
-| **📺 Video Tutorials**   | Watch step-by-step guides on YouTube.                        |
-| **📧 Email Support**     | Please provide a complete description of the problem you encountered and provide detailed environmental information, I will reply to you within 24 hours every day if I am available. |
-| **🛒 Asset Store**       | If you enjoy the plugin, a 5-star review helps us immensely! 🌟 |
+| **💬 디스코드 커뮤니티** | 실시간 도움을 받고 제작물을 공유할 수 있는 활발한 서버에 참여하세요. |
+| **📺 비디오 튜토리얼** | 유튜브에서 단계별 가이드를 시청하세요. |
+| **📧 이메일 지원** | 발생한 문제에 대한 상세한 설명과 환경 정보를 제공해 주시면, 가능한 경우 매일 24시간 이내에 답변해 드립니다. |
+| **🛒 에셋 스토어** | 플러그인이 마음에 드신다면 별 5개 리뷰가 큰 도움이 됩니다! 🌟 |
 
-:::tip Community First
+:::tip 커뮤니티 우선
 
-Before emailing, check the **Discord #faq** channel—90% of common issues have existing solutions posted by the community!
+이메일을 보내기 전에 **디스코드 #faq** 채널을 확인하세요. 일반적인 문제의 90%는 커뮤니티에 이미 게시된 해결책이 있습니다!
 
 :::
 
 ------
 
-## 📝 Release Notes
+## 📝 릴리스 노트
 
-This panel highlights the foundational pillars of **Game Event System v1.0.0**. This major release introduces a robust ecosystem for event-driven architecture, featuring:
+이 패널은 **Game Event System v1.0.0**의 토대가 되는 기능들을 강조합니다. 이번 주요 릴리스는 이벤트 기반 아키텍처를 위한 강력한 생태계를 도입했습니다:
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-system/release-notes.png)
 
-- **Core & Logic**: ScriptableObject-driven backend with high-performance Expression Tree compilation.
-- **Visual Orchestration**: A powerful Node Graph for managing complex event dependencies and hybrid execution.
-- **Workflow Automation**: Automated code generation, smart Inspector bindings, and batch processing tools.
-- **Diagnostics**: Real-time monitors and performance profiling for deep system visibility.
+- **코어 및 로직**: 고성능 익스프레션 트리(Expression Tree) 컴파일을 지원하는 스크립터블 오브젝트 기반 백엔드.
+- **시각적 오케스트레이션**: 복잡한 이벤트 의존성 및 하이브리드 실행 관리를 위한 강력한 노드 그래프.
+- **워크플로우 자동화**: 자동 코드 생성, 스마트 인스펙터 바인딩 및 일괄 처리 도구.
+- **진단**: 시스템 내부를 깊이 있게 파악하기 위한 실시간 모니터 및 성능 프로파일링.
 
-:::tip View Details
+:::tip 상세 보기
 
-Click **"View Full Details"** to explore the full technical changelog across all 7 major categories.
+**"View Full Details"**를 클릭하여 7가지 주요 카테고리에 대한 전체 기술 변경 로그를 확인하세요.
 
 :::
 
 ------
 
-## 🛠️ Troubleshooting
+## 🛠️ 문제 해결
 
-:::caution[Pre-flight Check]
+:::caution[사전 확인]
 
-Before troubleshooting, ensure there are no **Red Compiler Errors** in your Unity Console, as they will disable all editor-script functionality.
+문제 해결을 시도하기 전에 유니티 콘솔에 **빨간색 컴파일 에러**가 없는지 확인하십시오. 에러가 있으면 모든 에디터 스크립트 기능이 비활성화됩니다.
 
 :::
 
@@ -153,58 +153,57 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
 <Tabs>
-<TabItem value="dashboard" label="❌ Dashboard Won't Open" default>
+<TabItem value="dashboard" label="❌ 대시보드가 열리지 않음" default>
 
-> **Symptom:** The menu item is grayed out or the window fails to appear.
+> **증상:** 메뉴 항목이 비활성화되어 있거나 창이 나타나지 않습니다.
 
-| Solution                | Action                                                       |
+| 해결책 | 조치 |
 | ----------------------- | ------------------------------------------------------------ |
-| **Check Compilation**   | Fix all script errors in the Console first.                  |
-| **Clear Library Cache** | Close Unity → Delete Library/ folder → Reopen project to force re-index. |
-| **Re-import Plugin**    | If scripts are missing, re-import the package from the Asset Store. |
+| **컴파일 확인** | 콘솔의 모든 스크립트 에러를 먼저 수정하세요. |
+| **라이브러리 캐시 삭제** | 유니티 종료 → Library/ 폴더 삭제 → 프로젝트를 다시 열어 강제 재인덱싱. |
+| **플러그인 재임포트** | 스크립트가 누락된 경우 에셋 스토어에서 패키지를 다시 임포트하세요. |
 
 </TabItem>
-<TabItem value="alert" label="🔵 Status Indicator Issues">
+<TabItem value="alert" label="🔵 상태 지표 문제">
 
-> **Symptom:** Clicking "Initialize" does not turn the status icon green.
+> **증상:** "Initialize"를 클릭해도 상태 아이콘이 녹색으로 변하지 않습니다.
 
-| Solution             | Action                                                       |
+| 해결책 | 조치 |
 | -------------------- | ------------------------------------------------------------ |
-| **Check Exceptions** | Look for any "Initialization Failed" errors in the Console   |
-| **Naming Conflicts** | Ensure no other GameObject is named `GameEventManager` in your active scene |
-| **Prefab Overrides** | If the manager is part of a prefab, ensure the instance isn't blocked by missing references. Delete the instance and re-initialize |
+| **예외 확인** | 콘솔에서 "Initialization Failed" 관련 에러가 있는지 확인하세요. |
+| **이름 충돌** | 활성화된 씬에 `GameEventManager`라는 이름의 다른 GameObject가 없는지 확인하세요. |
+| **프리팹 오버라이드** | 매니저가 프리팹의 일부인 경우, 누락된 참조로 인해 인스턴스가 차단되지 않았는지 확인하세요. 인스턴스를 삭제하고 다시 초기화하세요. |
 
 </TabItem>
-<TabItem value="telemetry" label="🚩 Telemetry Alerts">
+<TabItem value="telemetry" label="🚩 원격 측정 알림">
 
-> **Symptom:** System requirements show a Red Cross ❌ in the telemetry panel.
+> **증상:** 원격 측정 패널의 시스템 요구 사항에 빨간색 X ❌ 표시가 나타납니다.
 
-| Issue | Fix / Requirement |
+| 문제 | 수정 / 요구 사항 |
 | :--- | :--- |
-| **Unity Version** | Upgrade to **Unity 2020.3 LTS** or higher. |
-| **API Level** | Switch to **.NET Standard 2.0** or **.NET 4.x** in Player Settings. |
-| **IL2CPP Warning** | Ensure "Stripping Level" is not set to "High" to avoid losing generic metadata. |
+| **유니티 버전** | **Unity 2020.3 LTS** 이상으로 업그레이드하세요. |
+| **API 레벨** | Player Settings에서 **.NET Standard 2.0** 또는 **.NET 4.x**로 전환하세요. |
+| **IL2CPP 경고** | 제네릭 메타데이터 손실을 방지하기 위해 "Stripping Level"이 "High"로 설정되지 않았는지 확인하세요. |
 
 </TabItem>
 </Tabs>
 
 ------
 
-## Next Steps
+## 다음 단계
 
-**🎨 Manage Existing Events**: Learn the [Edit Game Event](./game-event-editor.md) window features 
+**🎨 기존 이벤트 관리**: [게임 이벤트 편집](./game-event-editor.md) 창 기능 알아보기 
 
-**📝 Create Your First Event**: Follow the [Create Game Event](./game-event-creator.md) guide 
+**📝 첫 번째 이벤트 생성**: [게임 이벤트 생성](./game-event-creator.md) 가이드 따르기 
 
-**🎯 Raise Your First Event**: View the [Raise Game Event](./game-event-creator.md) guide 
+**🎯 첫 번째 이벤트 발생**: [게임 이벤트 발생](./game-event-creator.md) 가이드 보기 
 
-**🕸️ Build Visual Flows**: Orchestrate complex event chains [Game Event Node Editor](../flow-graph/game-event-node-editor.md)
+**🕸️ 시각적 플로우 구축**: 복잡한 이벤트 체인 오케스트레이션 [게임 이벤트 노드 에디터](../flow-graph/game-event-node-editor.md)
 
-**📊 Debug in Play Mode**: Monitor runtime execution [Runtime Monitor](../tools/runtime-monitor.md)
+**📊 플레이 모드에서 디버깅**: 런타임 실행 모니터링 [런타임 모니터](../tools/runtime-monitor.md)
 
 ------
 
-:::tip[Pro Tip]
-For the best experience, **Dock the Dashboard** as a tab next to your Inspector. This allows for instant access to search and debugging tools without disrupting your layout.
+:::tip[전문가 팁]
+최상의 경험을 위해 **대시보드를 인스펙터 옆에 탭으로 고정**하세요. 레이아웃을 방해하지 않으면서 검색 및 디버깅 도구에 즉시 접근할 수 있습니다.
 :::
-

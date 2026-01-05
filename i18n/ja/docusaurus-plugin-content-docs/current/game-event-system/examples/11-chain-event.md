@@ -1,398 +1,397 @@
 ﻿---
-sidebar_label: '11 Chain Event'
+sidebar_label: '11 チェーンイベント'
 sidebar_position: 12
 ---
 
 import VideoGif from '@site/src/components/Video/VideoGif';
 
-# 11 Chain Event: Sequential Execution Pipeline
+# 11 チェーンイベント：直列実行パイプライン
 
 <!-- <VideoGif src="/video/game-event-system/11-chain-event.mp4" /> -->
 
-## 📋 Overview
+## 📋 概要
 
-While Trigger Events execute in **parallel** with conditional filtering, Chain Events execute in **strict sequential order**—one step at a time, like a production pipeline. If any node in the chain fails its condition, delays, or encounters an error, the entire sequence pauses or terminates. This is perfect for cutscenes, weapon launch sequences, tutorial steps, or any workflow where order matters.
+トリガーイベントが条件付きフィルタリングを伴う**並列 (Parallel)** 実行を行うのに対し、チェーンイベントは**厳格な直列 (Sequential)** 順序、つまり製造ラインのように一歩ずつステップを実行します。チェーン内のいずれかのノードで条件に失敗したり、遅延が発生したり、エラーに遭遇したりすると、シーケンス全体が一時停止または終了します。これは、カットシーン、武器の発射シークエンス、チュートリアルのステップ、または順序が重要なあらゆるワークフローに最適です。
 
-:::tip 💡 What You'll Learn
-- The difference between Chain (sequential) and Trigger (parallel) execution
-- How to use condition nodes as validation gates
-- Delay nodes for timed pauses in sequences
-- Wait-for-completion for asynchronous operations
-- Early termination patterns when conditions fail
+:::tip 💡 学べること
+- チェーン（直列）実行とトリガー（並列）実行の違い
+- 条件ノードを検証ゲートとして使用する方法
+- シーケンス内での時間差一時停止のための遅延ノード
+- 非同期操作のための「完了まで待機 (Wait for Completion)」
+- 条件失敗時の早期終了パターン
 
 :::
 
 ---
 
-## 🎬 Demo Scene
+## 🎬 デモシーン
 ```
 Assets/TinyGiants/GameEventSystem/Demo/11_ChainEvent/11_ChainEvent.unity
 ```
 
-### Scene Composition
+### シーン構成
 
-**Visual Elements:**
-- 🔴 **Turret_A (Left)** - Red launcher
-- 🔵 **Turret_B (Right)** - Blue launcher
-- 🎯 **TargetDummy** - Center capsule target
-- 📺 **HoloDisplay** - Status display panel
-  - Shows "SAFELOCK READY" when safety is off
-  - Shows "SAFELOCK ACTIVED" when safety is on
+**視覚的要素:**
+- 🔴 **Turret_A (左)** - 赤色のランチャー
+- 🔵 **Turret_B (右)** - 青色のランチャー
+- 🎯 **TargetDummy** - 中央にあるターゲット（カプセル）
+- 📺 **HoloDisplay** - ステータス表示パネル
+  - セーフティがオフのとき「SAFELOCK READY」を表示
+  - セーフティがオンのとき「SAFELOCK ACTIVED」を表示
 
-**UI Layer (Canvas):**
-- 🎮 **Three Buttons** - Bottom of the screen
-  - "Launch A" → Triggers `ChainEventRaiser.RequestLaunchA()`
-  - "Launch B" → Triggers `ChainEventRaiser.RequestLaunchB()`
-  - "Toggle SafeLock" (Orange) → Triggers `ChainEventReceiver.ToggleSafetyLock()`
+**UIレイヤー (Canvas):**
+- 🎮 **3つのボタン** - 画面下部
+  - 「Launch A」➔ `ChainEventRaiser.RequestLaunchA()` を実行
+  - 「Launch B」➔ `ChainEventRaiser.RequestLaunchB()` を実行
+  - 「Toggle SafeLock」 (オレンジ) ➔ `ChainEventReceiver.ToggleSafetyLock()` を実行
 
-**Game Logic Layer:**
-- 📤 **ChainEventRaiser** - Sequence initiator
-  - Only references **ONE** entry point: `0_StartSequence`
-  - No knowledge of downstream pipeline steps
+**ゲームロジックレイヤー:**
+- 📤 **ChainEventRaiser** - シーケンスの開始者
+  - **ただ一つの**エントリポイント `0_StartSequence` のみを参照
+  - 下流のパイプラインステップについては一切関知しません
   
-- 📥 **ChainEventReceiver** - Step executor
-  - Contains 5 methods for each pipeline stage
-  - Exposes `IsSafetyCheckPassed` property for condition validation
-  - Contains `isSafetyLockDisengaged` flag (toggle-able)
+- 📥 **ChainEventReceiver** - 各ステップの実行者
+  - パイプラインの各ステージに対応する 5 つのメソッドを保持
+  - 条件検証用の `IsSafetyCheckPassed` プロパティを公開
+  - 切り替え可能な `isSafetyLockDisengaged` フラグを保持
 
 ---
 
-## 🎮 How to Interact
+## 🎮 操作方法
 
-### The 5-Step Launch Protocol
+### 5ステップの発射プロトコル
 
-One root event (`0_StartSequence`) triggers a sequential pipeline with validation, delays, and async waiting.
-
----
-
-### Step 1: Enter Play Mode
-
-Press the **Play** button in Unity.
-
-**Initial State:**
-- Safety lock: **DISENGAGED** (default)
-- HoloDisplay: "SAFELOCK READY"
-- Both turrets idle
+一つのルートイベント (`0_StartSequence`) が、検証、遅延、非同期待機を伴う直列パイプラインをトリガーします。
 
 ---
 
-### Step 2: Test Successful Launch (Safety Off)
+### ステップ 1: プレイモードに入る
 
-**Current State Check:**
-- Ensure HoloDisplay shows "SAFELOCK READY"
-- If not, click "Toggle SafeLock" to turn safety **OFF**
+Unity の **Play** ボタンを押します。
 
-**Click "Launch A":**
+**初期状態:**
+- セーフティロック: **解除 (DISENGAGED)** (デフォルト)
+- ホロディスプレイ: 「SAFELOCK READY」
+- 両方のタレットが待機中
 
-**Sequential Execution:**
+---
 
-**[Step 1: System Check]** - Immediate
-- 🔍 Condition Node evaluates `ChainEventReceiver.IsSafetyCheckPassed` property
-- Property checks `isSafetyLockDisengaged` flag
-- Result: **TRUE** ✅
-- Console: `[Chain Step 1] Turret_A Checking...`
-- **Chain proceeds to Step 2**
+### ステップ 2: 発射成功テスト (セーフティ OFF)
 
-**[Step 2: Charge]** - 1.0s Delay
-- ⏱️ Delay Node pauses execution for **1.0 second**
-- VFX: Charging particle effect spawns at turret
-- Console: `[Chain Step 2] Turret_A Charging...`
-- Graph waits exactly 1.0s before continuing
-- **After delay, chain proceeds to Step 3**
+**現在の状態確認:**
+- ホロディスプレイに「SAFELOCK READY」と表示されていることを確認します。
+- 表示されていない場合は、「Toggle SafeLock」をクリックしてセーフティを **OFF** にします。
 
-**[Step 3: Fire]** - Immediate
-- 🚀 Projectile instantiated and launched toward target
-- Muzzle flash VFX at turret
-- Console: `[Chain Step 3] Turret_A FIRED payload: 500`
-- Projectile travels to target
-- **Chain immediately proceeds to Step 4**
+**「Launch A」をクリック:**
 
-**[Step 4: Cool Down]** - Wait For Completion
-- 💨 Steam VFX particle system spawns
-- 🕐 **Wait Node** - Graph pauses until VFX completes (2.0s)
-- Console: `[Chain Step 4] Turret_A Cooldowning.`
-- Unlike delay (fixed time), this waits for actual VFX completion
-- **After steam finishes, chain proceeds to Step 5**
+**直列実行の流れ:**
 
-**[Step 5: Archive]** - Immediate (Arguments Blocked)
-- 📝 Final logging step
-- **PassArgument = FALSE** in graph → receives default/null values
-- Console: `[Chain Step 5] Archived. Data Status: CLEAN`
-- Turret unlocked for next use
-- **Chain completes successfully ✅**
+**[Step 1: System Check (システムチェック)]** - 即時
+- 🔍 条件ノードが `ChainEventReceiver.IsSafetyCheckPassed` プロパティを評価
+- プロパティが `isSafetyLockDisengaged` フラグを確認
+- 結果: **TRUE** ✅
+- コンソール: `[Chain Step 1] Turret_A Checking...`
+- **チェーンは Step 2 へ進行**
 
-**Timeline:**
+**[Step 2: Charge (チャージ)]** - 1.0秒の遅延
+- ⏱️ 遅延ノードが実行を **1.0秒間** 一時停止
+- VFX: タレットでチャージ用のパーティクルエフェクトが発生
+- コンソール: `[Chain Step 2] Turret_A Charging...`
+- グラフは次へ進む前に正確に 1.0秒待機
+- **遅延後、チェーンは Step 3 へ進行**
+
+**[Step 3: Fire (発射)]** - 即時
+- 🚀 弾丸がインスタンス化され、ターゲットに向かって発射
+- タレットでマズルフラッシュのVFXが発生
+- コンソール: `[Chain Step 3] Turret_A FIRED payload: 500`
+- 弾丸がターゲットへ到達
+- **チェーンは即座に Step 4 へ進行**
+
+**[Step 4: Cool Down (クールダウン)]** - 完了まで待機
+- 💨 蒸気のVFXパーティクルが生成
+- 🕐 **待機ノード** - グラフはVFXが完了するまで一時停止 (2.0秒)
+- コンソール: `[Chain Step 4] Turret_A Cooldowning.`
+- 遅延（固定時間）とは異なり、これは実際のVFXの終了を待ちます
+- **蒸気が消えた後、チェーンは Step 5 へ進行**
+
+**[Step 5: Archive (アーカイブ)]** - 即時 (引数ブロック)
+- 📝 最終的なログ記録ステップ
+- グラフで **PassArgument = FALSE** に設定されているため、デフォルト値/nullを受け取ります
+- コンソール: `[Chain Step 5] Archived. Data Status: CLEAN`
+- 次の使用のためにタレットがアンロック
+- **チェーンが正常に完了 ✅**
+
+**タイムライン:**
 ```
-0.0s  → Step 1: System Check (instant)
-0.0s  → Step 2: Charge starts
-1.0s  → Step 3: Fire (after charge delay)
-1.0s  → Step 4: CoolDown starts
-3.0s  → Step 5: Archive (after steam VFX ~2s)
-3.0s  → Sequence complete
+0.0s  ➔ Step 1: System Check (即時)
+0.0s  ➔ Step 2: Charge 開始
+1.0s  ➔ Step 3: Fire (チャージ遅延後)
+1.0s  ➔ Step 4: CoolDown 開始
+3.0s  ➔ Step 5: Archive (蒸気VFX完了後 ~2秒)
+3.0s  ➔ シーケンス完了
 ```
 
-**Result:** ✅ Full 5-step launch sequence executed successfully.
+**結果:** ✅ 5ステップの発射シーケンスがすべて正常に実行されました。
 
 ---
 
-### Step 3: Test Failed Launch (Safety On)
+### ステップ 3: 発射失敗テスト (セーフティ ON)
 
-**Click "Toggle SafeLock":**
-- Safety flag changes: `isSafetyLockDisengaged = false`
-- HoloDisplay updates: "SAFELOCK ACTIVED"
-- UI button color changes to orange (visual warning)
-- Console: `[Chain Settings] Safety Lock Disengaged: False`
+**「Toggle SafeLock」をクリック:**
+- セーフティフラグが変化: `isSafetyLockDisengaged = false`
+- ホロディスプレイの更新: 「SAFELOCK ACTIVED」
+- UIボタンの色がオレンジに変化（視覚的な警告）
+- コンソール: `[Chain Settings] Safety Lock Disengaged: False`
 
-**Click "Launch B":**
+**「Launch B」をクリック:**
 
-**Sequential Execution:**
+**直列実行の流れ:**
 
-**[Step 1: System Check]** - **FAILS** ❌
-- 🔍 Condition Node evaluates `ChainEventReceiver.IsSafetyCheckPassed`
-- Property checks `isSafetyLockDisengaged` → finds **FALSE**
-- Property executes failure feedback:
-  - 🚨 Red alarm vignette flashes 3 times
-  - Alarm sound plays
-  - Console: `[Chain Blocked] Safety Check Failed. Sequence stopped immediately.`
-- Condition returns **FALSE**
-- **🛑 CHAIN TERMINATES HERE**
+**[Step 1: System Check]** - **失敗** ❌
+- 🔍 条件ノードが `ChainEventReceiver.IsSafetyCheckPassed` を評価
+- プロパティが `isSafetyLockDisengaged` を確認し、**FALSE** を検出
+- プロパティが失敗時のフィードバックを実行:
+  - 🚨 赤いアラームビネットが3回点滅
+  - アラーム音が再生
+  - コンソール: `[Chain Blocked] Safety Check Failed. Sequence stopped immediately.`
+- 条件が **FALSE** を返す
+- **🛑 チェーンはここで終了**
 
-**[Steps 2-5]** - **NEVER EXECUTE**
-- ❌ No charging VFX
-- ❌ No projectile fired
-- ❌ No steam cooldown
-- ❌ No archive log
+**[Steps 2-5]** - **一度も実行されません**
+- ❌ チャージVFXなし
+- ❌ 弾丸の発射なし
+- ❌ 蒸気のクールダウンなし
+- ❌ アーカイブログなし
 
-**Result:** ❌ Launch aborted at gate. Steps 2-5 never ran.
+**結果:** ❌ ゲート（Step 1）で発射が中止されました。Step 2～5は実行されませんでした。
 
-:::danger 🔴 Critical Chain Behavior
+:::danger 🔴 チェーン実行の重要な特性
 
-When a Chain node's condition fails:
+チェーンノードの条件が失敗した場合：
 
-1. **Immediate Termination** - Execution stops at that node
-2. **No Downstream Execution** - Subsequent nodes never run
-3. **No Partial Completion** - All-or-nothing behavior
-4. **Early Cleanup** - Resources unlocked immediately
+1. **即時終了** - 実行はそのノードで止まります
+2. **下流は実行されない** - 後続のノードは一切実行されません
+3. **部分的な完了はなし** - 「全か無か」の挙動です
+4. **早期のクリーンアップ** - リソースは即座に解放されます
 
-This is fundamentally different from Trigger Events, where failed conditions just skip individual branches while others continue.
+これは、失敗した条件が個別のブランチのみをスキップし、他は継続するトリガーイベントとは根本的に異なります。
 
 :::
 
 ---
 
-## 🏗️ Scene Architecture
+## 🏗️ シーンのアーキテクチャ
 
-### Chain vs Trigger: The Fundamental Difference
+### チェーン vs トリガー：根本的な違い
 
-**Trigger Event (Parallel):**
+**トリガーイベント (並列):**
 ```
-⚡ Root Event: OnInteraction
+⚡ ルートイベント: OnInteraction
 │
-├─ 🔱 Branch A: [ 🛡️ Guard: `HasKey == true` ]
-│  └─ 🚀 Action: OpenDoor() ➔ ✅ Condition Passed: Executing...
+├─ 🔱 Branch A: [ 🛡️ ガード: `HasKey == true` ]
+│  └─ 🚀 Action: OpenDoor() ➔ ✅ 条件パス: 実行中...
 │
-├─ 🔱 Branch B: [ 🛡️ Guard: `PlayerLevel >= 10` ]
-│  └─ 🚀 Action: GrantBonusXP() ➔ ❌ Condition Failed: Branch Skipped
+├─ 🔱 Branch B: [ 🛡️ ガード: `PlayerLevel >= 10` ]
+│  └─ 🚀 Action: GrantBonusXP() ➔ ❌ 条件失敗: ブランチをスキップ
 │
-└─ 🔱 Branch C: [ 🛡️ Guard: `Always True` ]
-   └─ 🚀 Action: PlaySound("Click") ➔ ✅ Condition Passed: Executing...
+└─ 🔱 Branch C: [ 🛡️ ガード: `Always True` ]
+   └─ 🚀 Action: PlaySound("Click") ➔ ✅ 条件パス: 実行中...
 │
-📊 Summary: 2 Paths Executed | 1 Path Skipped | ⚡ Timing: Concurrent
-```
-
-**Chain Event (Sequential):**
-```
-🏆 Initiation: Root Event
-│
-├─ 1️⃣ [ Step 1 ] ➔ 🛡️ Guard: `Condition A`
-│  └─ ⏳ Status: WAIT for completion... ✅ Success
-│
-├─ 2️⃣ [ Step 2 ] ➔ 🛡️ Guard: `Condition B`
-│  └─ ⏳ Status: WAIT for completion... ✅ Success
-│
-├─ 3️⃣ [ Step 3 ] ➔ 🛡️ Guard: `Condition C`
-│  └─ ⏳ Status: WAIT for completion... ❌ FAILED!
-│
-└─ 🛑 [ TERMINATED ] ➔ Logic Chain Halts
-   └─ ⏭️ Step 4: [ SKIPPED ]
-│
-📊 Final Result: Aborted at Step 3 | ⏳ Mode: Strict Blocking
+📊 概要: 2つのパスを実行 | 1つのパスをスキップ | ⚡ タイミング: 同時進行
 ```
 
-**When to Use Each:**
+**チェーンイベント (直列):**
+```
+🏆 開始: ルートイベント
+│
+├─ 1️⃣ [ Step 1 ] ➔ 🛡️ ガード: `Condition A`
+│  └─ ⏳ ステータス: 完了まで待機... ✅ 成功
+│
+├─ 2️⃣ [ Step 2 ] ➔ 🛡️ ガード: `Condition B`
+│  └─ ⏳ ステータス: 完了まで待機... ✅ 成功
+│
+├─ 3️⃣ [ Step 3 ] ➔ 🛡️ ガード: `Condition C`
+│  └─ ⏳ ステータス: 完了まで待機... ❌ 失敗！
+│
+└─ 🛑 [ 終了 ] ➔ ロジックチェーンが停止
+   └─ ⏭️ Step 4: [ スキップ ]
+│
+📊 最終結果: Step 3 で中止 | ⏳ モード: 厳格なブロッキング
+```
 
-| Pattern           | Use Chain                          | Use Trigger          |
+**使い分けの基準:**
+
+| パターン | チェーンを使用 | トリガーを使用 |
 | ----------------- | ---------------------------------- | -------------------- |
-| **Cutscene**      | ✅ Sequential shots                 | ❌ Steps out of order |
-| **Combat System** | ❌ Rigid order not needed           | ✅ Parallel systems   |
-| **Tutorial**      | ✅ Must finish step 1 before step 2 | ❌ Steps can overlap  |
-| **Weapon Charge** | ✅ Charge → Fire → Cooldown         | ❌ Order matters      |
-| **Achievement**   | ❌ Independent checks               | ✅ Multiple triggers  |
+| **カットシーン** | ✅ シーケンシャルな演出 | ❌ 順序がバラバラになる |
+| **戦闘システム** | ❌ 厳格な順序は不要 | ✅ システムの並列実行 |
+| **チュートリアル** | ✅ Step 1 の後に Step 2 | ❌ ステップが重なる |
+| **武器チャージ** | ✅ チャージ ➔ 発射 ➔ 冷却 | ❌ 順序が重要 |
+| **実績解除** | ❌ 独立したチェック | ✅ 複数のトリガー |
 
 ---
 
-### Event Definitions
+### イベント定義 (Event Definitions)
 
 ![Game Event Editor](/img/game-event-system/examples/11-chain-event/demo-11-editor.png)
 
-| Event Name        | Type                                | Role              | Step  |
+| イベント名        | 型                                  | 役割              | ステップ |
 | ----------------- | ----------------------------------- | ----------------- | ----- |
-| `0_StartSequence` | `GameEvent<GameObject, DamageInfo>` | **Root** (Gold)   | Entry |
-| `1_SystemCheck`   | `GameEvent<GameObject, DamageInfo>` | **Chain** (Green) | 1     |
-| `2_Charge`        | `GameEvent<GameObject, DamageInfo>` | **Chain** (Green) | 2     |
-| `3_Fire`          | `GameEvent<GameObject, DamageInfo>` | **Chain** (Green) | 3     |
-| `4_CoolDown`      | `GameEvent<GameObject, DamageInfo>` | **Chain** (Green) | 4     |
-| `5_Archive`       | `GameEvent<GameObject, DamageInfo>` | **Chain** (Green) | 5     |
+| `0_StartSequence` | `GameEvent<GameObject, DamageInfo>` | **Root** (ゴールド) | 入口 |
+| `1_SystemCheck`   | `GameEvent<GameObject, DamageInfo>` | **Chain** (グリーン) | 1     |
+| `2_Charge`        | `GameEvent<GameObject, DamageInfo>` | **Chain** (グリーン) | 2     |
+| `3_Fire`          | `GameEvent<GameObject, DamageInfo>` | **Chain** (グリーン) | 3     |
+| `4_CoolDown`      | `GameEvent<GameObject, DamageInfo>` | **Chain** (グリーン) | 4     |
+| `5_Archive`       | `GameEvent<GameObject, DamageInfo>` | **Chain** (グリーン) | 5     |
 
-**Key Insight:**
-- **Root** raises the chain
-- **Chain nodes** auto-trigger sequentially
-- Code only calls `.Raise()` on root—graph handles rest
+**重要な洞察:**
+- **ルート (Root)** がチェーンを起動します
+- **チェーンノード (Chain nodes)** は順番に自動トリガーされます
+- コードはルートで `.Raise()` を呼ぶだけ。残りはグラフが処理します
 
 ---
 
-### Flow Graph Configuration
+### フローグラフの設定
 
-Click **"Flow Graph"** button to visualize the sequential pipeline:
+直列パイプラインを視覚化するには **"Flow Graph"** ボタンをクリックします：
 
 ![Flow Graph Overview](/img/game-event-system/examples/11-chain-event/demo-11-graph.png)
 
-**Graph Structure (Left to Right):**
+**グラフ構造 (左から右へ):**
 
-**Node 1: 0_StartSequence (Root, Red)**
-- Entry point raised by code
-- Type: `GameEvent<GameObject, DamageInfo>`
-- Connects to first chain node
+**Node 1: 0_StartSequence (Root, 赤)**
+- コードから発行されるエントリポイント
+- 型: `GameEvent<GameObject, DamageInfo>`
+- 最初のリレーノードに接続
 
-**Node 2: 1_SystemCheck (Chain, Green)**
-- ✅ **Condition Node** - Gate keeper
-- **Condition:** `ChainEventReceiver.IsSafetyCheckPassed == true`
-  - Evaluates scene object property at runtime
-  - If false → **chain breaks immediately**
-- **Action:** `ChainEventReceiver.OnSystemCheck(sender, args)`
-- Green checkmark icon indicates condition enabled
-- PassArgument: ✓ Pass (full data forwarded)
+**Node 2: 1_SystemCheck (Chain, 緑)**
+- ✅ **条件ノード** - ゲートキーパー
+- **条件:** `ChainEventReceiver.IsSafetyCheckPassed == true`
+  - 実行時にシーンオブジェクトのプロパティを評価
+  - false の場合 ➔ **チェーンは即座に切断されます**
+- **アクション:** `ChainEventReceiver.OnSystemCheck(sender, args)`
+- 緑色のチェックマークアイコンは条件が有効であることを示します
+- PassArgument: ✓ パス (すべてのデータを転送)
 
-**Node 3: 2_Charge (Chain, Green)**
-- ⏱️ **Delay Node** - Timed pause
-- **Delay:** `1.0` seconds (shown as ⏱️ 1s icon)
-- **Action:** `ChainEventReceiver.OnStartCharging(sender, args)`
-- Graph freezes here for exactly 1 second
-- PassArgument: ✓ Pass
+**Node 3: 2_Charge (Chain, 緑)**
+- ⏱️ **遅延ノード** - 時間による一時停止
+- **遅延:** `1.0` 秒 (⏱️ 1s アイコンとして表示)
+- **アクション:** `ChainEventReceiver.OnStartCharging(sender, args)`
+- グラフはここで正確に 1秒間停止します
+- PassArgument: ✓ パス
 
-**Node 4: 3_Fire (Chain, Green)**
-- 🎯 **Action Node** - Standard execution
-- **Action:** `ChainEventReceiver.OnFireWeapon(sender, args)`
-- No delay, no condition
-- Executes immediately after previous step
-- PassArgument: ✓ Pass
+**Node 4: 3_Fire (Chain, 緑)**
+- 🎯 **アクションノード** - 標準的な実行
+- **アクション:** `ChainEventReceiver.OnFireWeapon(sender, args)`
+- 遅延なし、条件なし
+- 前のステップの完了後、即座に実行されます
+- PassArgument: ✓ パス
 
-**Node 5: 4_CoolDown (Chain, Green)**
-- 🕐 **Wait Node** - Async completion
-- **Delay:** `0.5s` (minimum wait)
-- **WaitForCompletion:** ✓ Checked (shown as ⏱️ 1s icon)
-  - Graph waits for receiver coroutine to finish
-  - Not a fixed timer—waits for actual completion signal
-- **Action:** `ChainEventReceiver.OnCoolDown(sender, args)`
-- PassArgument: ✓ Pass
+**Node 5: 4_CoolDown (Chain, 緑)**
+- 🕐 **待機ノード** - 非同期完了待機
+- **遅延:** `0.5s` (最小待機時間)
+- **WaitForCompletion:** ✓ チェックあり (⏱️ 1s アイコンとして表示)
+  - 受信側のコルーチンが終了するのをグラフが待ちます
+  - 固定タイマーではなく、実際の完了信号を待ちます
+- **アクション:** `ChainEventReceiver.OnCoolDown(sender, args)`
+- PassArgument: ✓ パス
 
-**Node 6: 5_Archive (Chain, Green)**
-- 🔒 **Filter Node** - Data sanitization
-- **Action:** `ChainEventReceiver.OnSequenceArchived(sender, args)`
-- **PassArgument:** 🔴 Static (argument blocked)
-  - Even though previous nodes passed full data
-  - This node receives default/null values
-  - Demonstrates data firewall at end of chain
-- Final step—no downstream nodes
+**Node 6: 5_Archive (Chain, 緑)**
+- 🔒 **フィルターノード** - データのサニタイズ（浄化）
+- **アクション:** `ChainEventReceiver.OnSequenceArchived(sender, args)`
+- **PassArgument:** 🔴 静的 (引数をブロック)
+  - 前のノードがすべてのデータを渡していても、このノードはデフォルト値/nullを受け取ります
+  - チェーンの最後でのデータファイアウォールの実演
+- 最終ステップ — この先にノードはありません
 
-**Connection Lines:**
-- 🟢 **Green "CHAIN" lines** - Sequential flow
-  - Each output port connects to next input port
-  - Linear topology—no branching
-  - Execution follows line left-to-right
+**接続線:**
+- 🟢 **緑色の「CHAIN」ライン** - 直列フロー
+  - 各出力ポートが次の入力ポートに接続されます
+  - 線形トポロジー — 分岐はありません
+  - 実行はラインに沿って左から右へ進みます
 
-**Legend:**
-- 🔴 **Root Node** - Entry point (raised by code)
-- 🟢 **Chain Node** - Auto-triggered in sequence
-- ✅ **Checkmark Icon** - Condition enabled
-- ⏱️ **Clock Icon** - Delay or wait configured
-- 🔒 **Static Icon** - Arguments blocked
+**凡例:**
+- 🔴 **Root Node** - エントリポイント (コードから発行)
+- 🟢 **Chain Node** - 順番に自動トリガーされるノード
+- ✅ **チェックマークアイコン** - 条件が有効
+- ⏱️ **時計アイコン** - 遅延または待機が設定済み
+- 🔒 **南京錠アイコン** - 引数がブロックされている
 
-:::tip 🎨 Visual Pipeline Benefits
+:::tip 🎨 ビジュアルパイプラインの利点
 
-The Chain Graph provides instant understanding of:
+チェーングラフは、以下の内容を即座に理解させてくれます：
 
-- **Sequential Order** - Left-to-right flow shows exact execution order
-- **Validation Gates** - Condition nodes act as checkpoints
-- **Timing Control** - Delay/wait icons show pause points
-- **Data Flow** - PassArgument toggles show where data is filtered
-- **Failure Points** - Condition nodes show where chain can break
+- **直列順序** - 左から右への流れが正確な実行順序を示します
+- **検証ゲート** - 条件ノードがチェックポイントとして機能します
+- **タイミング制御** - 遅延/待機のアイコンが停止箇所を示します
+- **データフロー** - PassArgument トグルがどこでデータがフィルタリングされるかを示します
+- **失敗ポイント** - 条件ノードがどこでチェーンが切れるかを示します
 
-This is infinitely cleaner than reading a coroutine with nested `yield return` statements!
+これは、ネストされた `yield return` 文を含むコルーチンを読むよりも遥かにクリーンです！
 
 :::
 
 ---
 
-### Sender Setup (ChainEventRaiser)
+### 発行側の設定 (ChainEventRaiser)
 
-Select the **ChainEventRaiser** GameObject:
+**ChainEventRaiser** GameObject を選択します：
 
 ![ChainEventRaiser Inspector](/img/game-event-system/examples/11-chain-event/demo-11-inspector.png)
 
-**Chain Entry Point:**
+**チェーンエントリポイント:**
 - `Sequence Start Event`: `0_StartSequence`
-  - Tooltip: "The Start Node of the Chain Graph"
-  - Only references the root—downstream is handled by graph
+  - ツールチップ: "チェーングラフの開始ノード"
+  - ルートのみを参照し、下流はグラフによって処理されます
 
-**Turrets:**
-- **Turret A:** Turret_A (GameObject), Head A (Transform)
-- **Turret B:** Turret_B (GameObject), Head B (Transform)
+**タレット:**
+- **Turret A:** 本体と Head (Transform)
+- **Turret B:** 本体と Head (Transform)
 
-**Targeting:**
+**ターゲット:**
 - `Hit Target`: TargetDummy (Transform)
 
-**Critical Observation:**
-Like Trigger demos, sender only knows about **ONE** event. The 5-step pipeline is completely abstracted into the graph.
+**重要なポイント:**
+トリガーのデモと同様に、送信側は**ただ一つ**のイベントしか知りません。5ステップのパイプラインは、グラフの中に完全に抽象化されています。
 
 ---
 
-### Receiver Setup (ChainEventReceiver)
+### 受信側の設定 (ChainEventReceiver)
 
-Select the **ChainEventReceiver** GameObject:
+**ChainEventReceiver** GameObject を選択します：
 
 ![ChainEventReceiver Inspector](/img/game-event-system/examples/11-chain-event/demo-11-receiver.png)
 
-**Scene References:**
-- `Chain Event Raiser`: ChainEventRaiser (for unlock callbacks)
-- `Holo Text`: LogText (TextMeshPro) - displays lock status
+**シーン参照:**
+- `Chain Event Raiser`: アンロック用コールバックのための参照
+- `Holo Text`: ロック状態を表示する TextMeshPro
 
-**Target References:**
+**ターゲット参照:**
 - `Target Dummy`, `Target Rigidbody`
 
-**VFX & Projectiles:**
-- `Projectile Prefab`: Projectile (TurretProjectile)
-- `Charge VFX`: TurretBuffAura (Particle System) - step 2
-- `Fire VFX`: MuzzleFlashVFX (Particle System) - step 3
-- `Steam VFX`: SteamVFX (Particle System) - step 4
+**VFX & 弾丸:**
+- `Projectile Prefab`: 弾丸プレハブ (TurretProjectile)
+- `Charge VFX`: チャージ用エフェクト (Step 2)
+- `Fire VFX`: 発射時マズルフラッシュ (Step 3)
+- `Steam VFX`: クールダウン用蒸気 (Step 4)
 - `Hit Normal/Crit VFX`, `Floating Text Prefab`
 
-**Audio:**
+**オーディオ:**
 - `Hit Clip`, `UI Clip`, `Alarm Clip`
 
-**Screen:**
-- `Screen Group`: AlarmVignette (CanvasGroup) - red flash on failure
+**スクリーン効果:**
+- `Screen Group`: 失敗時の赤いフラッシュ用 CanvasGroup
 
-**Simulation Settings:**
-- ✅ `Is Safety Lock Disengaged`: TRUE (default)
-  - Controls whether Step 1 condition passes
-  - Toggle-able via "Toggle SafeLock" button
+**シミュレーション設定:**
+- ✅ `Is Safety Lock Disengaged`: TRUE (デフォルト)
+  - Step 1 の条件をパスするかどうかを制御
+  - 「Toggle SafeLock」ボタンで切り替え可能
 
 ---
 
-## 💻 Code Breakdown
+## 💻 コード解説
 
-### 📤 ChainEventRaiser.cs (Sender)
+### 📤 ChainEventRaiser.cs (発行側)
 ```csharp
 using UnityEngine;
 using TinyGiants.GameEventSystem.Runtime;
@@ -400,54 +399,54 @@ using TinyGiants.GameEventSystem.Runtime;
 public class ChainEventRaiser : MonoBehaviour
 {
     [Header("Chain Entry Point")]
-    [Tooltip("The Start Node of the Chain Graph.")]
+    [Tooltip("チェーングラフの開始ノード。")]
     [GameEventDropdown]
     public GameEvent<GameObject, DamageInfo> sequenceStartEvent;
 
     [Header("Turrets")] 
     public GameObject turretA;
     public GameObject turretB;
-    // ... head transforms ...
+    // ... ヘッドのTransform参照 ...
 
     private bool _isBusyA;
     private bool _isBusyB;
 
     /// <summary>
-    /// UI Button A: Request Launch for Turret A.
+    /// UI ボタン A: Turret A の発射プロトコルをリクエスト。
     /// 
-    /// CRITICAL: Only raises the ROOT event.
-    /// The Chain Graph orchestrates all 5 downstream steps automatically.
+    /// 重要：ここではルートイベントを発行するだけです。
+    /// チェーングラフが下流の 5 つのステップをすべて自動的に調整します。
     /// </summary>
     public void RequestLaunchA()
     {
         if (sequenceStartEvent == null) return;
 
-        Debug.Log("<color=cyan>[Raiser] Requesting Launch Protocol A...</color>");
+        Debug.Log("<color=cyan>[Raiser] 発射プロトコル A をリクエスト中...</color>");
         _isBusyA = true;
 
-        // Build the data payload
+        // データペイロードの構築
         DamageInfo info = new DamageInfo(500f, true, DamageType.Physical, 
                                         hitTarget.position, "Commander");
         
-        // THE MAGIC: Single .Raise() starts entire 5-step chain
-        // Graph automatically executes:
-        // 1. System Check (with condition)
-        // 2. Charge (with 1s delay)
-        // 3. Fire (immediate)
-        // 4. Cool Down (with wait-for-completion)
-        // 5. Archive (with blocked arguments)
+        // 魔法の1行：単一の .Raise() で 5 ステップのチェーン全体が始まります。
+        // グラフは以下を自動的に実行します：
+        // 1. システムチェック (条件付き)
+        // 2. チャージ (1秒の遅延付き)
+        // 3. 発射 (即時)
+        // 4. クールダウン (完了まで待機)
+        // 5. アーカイブ (引数ブロック)
         sequenceStartEvent.Raise(turretA, info);
     }
 
     /// <summary>
-    /// UI Button B: Request Launch for Turret B.
-    /// Same logic, different turret.
+    /// UI ボタン B: Turret B の発射プロトコルをリクエスト。
+    /// 同じロジックで別のタレットを指定。
     /// </summary>
     public void RequestLaunchB()
     {
         if (sequenceStartEvent == null) return;
 
-        Debug.Log("<color=orange>[Raiser] Requesting Launch Protocol B...</color>");
+        Debug.Log("<color=orange>[Raiser] 発射プロトコル B をリクエスト中...</color>");
         _isBusyB = true;
 
         DamageInfo info = new DamageInfo(200f, false, DamageType.Physical, 
@@ -455,21 +454,21 @@ public class ChainEventRaiser : MonoBehaviour
         sequenceStartEvent.Raise(turretB, info);
     }
 
-    // Unlock methods called by receiver when sequence completes or fails
+    // シーケンスの完了または失敗時に受信側から呼ばれるアンロックメソッド
     public void UnlockTurretA() => _isBusyA = false;
     public void UnlockTurretB() => _isBusyB = false;
 }
 ```
 
-**Key Points:**
-- 🎯 **Single Event Reference** - Only knows root event
-- 📡 **Zero Pipeline Knowledge** - No idea about 5 steps
-- 🔓 **Unlock Callbacks** - Receiver signals completion/failure
-- 🎬 **Maximum Decoupling** - All sequence logic in graph
+**ポイント:**
+- 🎯 **単一イベント参照** - ルートイベントしか知りません。
+- 📡 **パイプラインの知識ゼロ** - 5つのステップの中身は知りません。
+- 🔓 **アンロック用コールバック** - 受信側が完了/失敗を通知。
+- 🎬 **最大のデカップリング** - すべてのシーケンスロジックはグラフ内にあります。
 
 ---
 
-### 📥 ChainEventReceiver.cs (Listener)
+### 📥 ChainEventReceiver.cs (リスナー)
 ```csharp
 using UnityEngine;
 using System.Collections;
@@ -477,16 +476,16 @@ using System.Collections;
 public class ChainEventReceiver : MonoBehaviour
 {
     [Header("Simulation Settings")]
-    [Tooltip("If TRUE, passes check. If FALSE, chain breaks at Step 1.")]
+    [Tooltip("TRUEならチェックをパス。FALSEなら Step 1 でチェーンが切れます。")]
     public bool isSafetyLockDisengaged = true;
 
     /// <summary>
-    /// Property accessed by '1_SystemCheck' Node Condition.
+    /// '1_SystemCheck' ノード条件からアクセスされるプロパティ。
     /// 
-    /// Graph configuration: Scene Object → Property → IsSafetyCheckPassed
+    /// グラフ設定: Scene Object ➔ Property ➔ IsSafetyCheckPassed
     /// 
-    /// CRITICAL: This is evaluated BEFORE the node action executes.
-    /// If this returns false, the chain terminates immediately.
+    /// 重要：これはノードアクションが実行される「前」に評価されます。
+    /// これが false を返すと、チェーンは即座に終了します。
     /// </summary>
     public bool IsSafetyCheckPassed
     {
@@ -496,14 +495,14 @@ public class ChainEventReceiver : MonoBehaviour
 
             if (!isSafetyLockDisengaged)
             {
-                // FAIL PATH: Safety lock is engaged
+                // 失敗ルート：セーフティロックがかかっている
                 result = false;
                 
                 Debug.LogWarning(
-                    "<color=red>[Chain Blocked] Safety Check Failed. " +
-                    "Sequence stopped immediately.</color>");
+                    "<color=red>[Chain Blocked] 安全性チェックに失敗しました。 " +
+                    "シーケンスを即座に停止します。</color>");
                 
-                // Visual feedback for failure
+                // 失敗時の視覚的フィードバック
                 StopCoroutine(nameof(ScreenRoutine));
                 if (screenGroup) StartCoroutine(ScreenRoutine());
             }
@@ -513,7 +512,7 @@ public class ChainEventReceiver : MonoBehaviour
     }
 
     /// <summary>
-    /// Toggles the safety lock status. Bind this to UI Button.
+    /// セーフティロックの状態を切り替えます。UIボタンにバインド。
     /// </summary>
     public void ToggleSafetyLock()
     {
@@ -521,7 +520,7 @@ public class ChainEventReceiver : MonoBehaviour
         
         isSafetyLockDisengaged = !isSafetyLockDisengaged;
         
-        // Update UI
+        // UIの更新
         string text = isSafetyLockDisengaged ? "SAFELOCK READY" : "SAFELOCK ACTIVED";
         if (holoText) holoText.text = text;
 
@@ -530,33 +529,33 @@ public class ChainEventReceiver : MonoBehaviour
 
     /// <summary>
     /// [Chain Step 1] System Check
-    /// Bound to '1_SystemCheck' chain node.
+    /// チェーンノード '1_SystemCheck' に紐付け。
     /// 
-    /// Note: This action runs AFTER the condition passed.
-    /// If condition failed, this method never executes.
+    /// 注：このアクションは条件をパスした「後」に実行されます。
+    /// 条件が失敗した場合、このメソッドは実行されません。
     /// </summary>
     public void OnSystemCheck(GameObject sender, DamageInfo args)
     {
         bool isA = sender != null && sender.name.Contains("Turret_A");
         
-        // If we reach here, condition passed
-        // But we still handle potential edge cases
+        // ここに到達したということは条件をパスしているはずですが、
+        // 万が一のケースも念のため考慮しておきます。
         if (!IsSafetyCheckPassed)
         {
-            // Unlock turret since sequence failed
+            // シーケンスが失敗したためタレットを解放
             if (isA) chainEventRaiser.UnlockTurretA();
             else chainEventRaiser.UnlockTurretB();
         }
 
-        Debug.Log($"[Chain Step 1] {sender.name} Checking...");
+        Debug.Log($"[Chain Step 1] {sender.name} チェック中...");
     }
 
     /// <summary>
     /// [Chain Step 2] Charge
-    /// Bound to '2_Charge' chain node with 1.0s delay.
+    /// 1.0秒の遅延が設定されたノード '2_Charge' に紐付け。
     /// 
-    /// The graph pauses for 1 second BEFORE calling this method.
-    /// When this executes, 1.0s has already elapsed.
+    /// グラフはこのメソッドを呼び出す「前」に1秒間待機します。
+    /// これが実行されたとき、既に1.0秒が経過しています。
     /// </summary>
     public void OnStartCharging(GameObject sender, DamageInfo args)
     {
@@ -569,19 +568,19 @@ public class ChainEventReceiver : MonoBehaviour
             Destroy(vfx.gameObject, 1.2f);
         }
 
-        Debug.Log($"[Chain Step 2] {sender.name} Charging...");
+        Debug.Log($"[Chain Step 2] {sender.name} チャージ中...");
     }
 
     /// <summary>
     /// [Chain Step 3] Fire
-    /// Bound to '3_Fire' chain node.
+    /// チェーンノード '3_Fire' に紐付け。
     /// 
-    /// Spawns projectile and launches toward target.
-    /// This executes immediately after Step 2 completes.
+    /// 弾丸を生成しターゲットへ飛ばします。
+    /// Step 2 の完了直後に実行されます。
     /// </summary>
     public void OnFireWeapon(GameObject sender, DamageInfo args)
     {
-        // Spawn muzzle flash
+        // マズルフラッシュの生成
         if (fireVFX)
         {
             Vector3 spawnPos = sender.transform.position + 
@@ -591,7 +590,7 @@ public class ChainEventReceiver : MonoBehaviour
             Destroy(vfx.gameObject, 2.0f);
         }
 
-        // Launch projectile
+        // 弾丸の発射
         if (projectilePrefab != null)
         {
             var muzzlePos = sender.transform.Find("Head/Barrel/MuzzlePoint");
@@ -600,28 +599,28 @@ public class ChainEventReceiver : MonoBehaviour
 
             shell.Initialize(args.hitPoint, 20f, () =>
             {
-                // Impact callback
+                // 着弾時コールバック
                 if (hitClip) _audioSource.PlayOneShot(hitClip);
                 
-                // Spawn hit VFX, floating text, apply physics...
+                // ヒットエフェクト、数値表示、物理適用など...
                 ParticleSystem vfxToPlay = args.isCritical ? hitCritVFX : hitNormalVFX;
                 
                 if (args.isCritical)
                     StartCoroutine(ShakeCameraRoutine(0.2f, 0.4f));
                 
-                // ... (VFX, physics, text logic) ...
+                // ... (VFX, 物理, テキストロジック) ...
             });
         }
 
-        Debug.Log($"[Chain Step 3] {sender.name} FIRED payload: {args.amount}");
+        Debug.Log($"[Chain Step 3] {sender.name} 発射。ペイロード: {args.amount}");
     }
 
     /// <summary>
     /// [Chain Step 4] Cool Down
-    /// Bound to '4_CoolDown' chain node with WaitForCompletion.
+    /// 「完了まで待機」が設定されたノード '4_CoolDown' に紐付け。
     /// 
-    /// The graph waits for this coroutine to finish before proceeding to Step 5.
-    /// Unlike delay (fixed time), this waits for actual task completion.
+    /// グラフは、このコルーチンが終了するのを待ってから Step 5 へ進みます。
+    /// 固定時間待機とは異なり、タスクの実際の完了を待ちます。
     /// </summary>
     public void OnCoolDown(GameObject sender, DamageInfo args)
     {
@@ -633,36 +632,36 @@ public class ChainEventReceiver : MonoBehaviour
             Destroy(vfx.gameObject, 2.0f);
         }
 
-        Debug.Log($"[Chain Step 4] {sender.name} Cooldowning.");
+        Debug.Log($"[Chain Step 4] {sender.name} クールダウン中。");
     }
 
     /// <summary>
     /// [Chain Step 5] Archive
-    /// Bound to '5_Archive' chain node with PassArgument = FALSE.
+    /// PassArgument = FALSE が設定されたノード '5_Archive' に紐付け。
     /// 
-    /// CRITICAL: Even though previous steps passed full DamageInfo,
-    /// this node receives DEFAULT/NULL values due to graph configuration.
+    /// 重要：前のステップまですべてのデータを渡していましたが、
+    /// グラフ設定により、このノードはデフォルト値/NULLを受け取ります。
     /// 
-    /// Demonstrates data firewall—can sanitize sensitive data at end of chain.
+    /// チェーンの最後で機密データをサニタイズする「データ・ファイアウォール」の実演です。
     /// </summary>
     public void OnSequenceArchived(GameObject sender, DamageInfo args)
     {
         bool isA = sender != null && sender.name.Contains("Turret_A");
 
-        // Unlock turret for next use
+        // 次の使用のためにタレットを解放
         if (isA) chainEventRaiser.UnlockTurretA();
         else chainEventRaiser.UnlockTurretB();
 
-        // Check if data was successfully blocked
+        // データが正常にブロックされたか確認
         bool isClean = (args == null || args.amount == 0);
         string logMsg = isClean ? "<color=cyan>CLEAN</color>" : "<color=red>LEAKED</color>";
 
-        Debug.Log($"[Chain Step 5] Archived. Data Status: {logMsg}");
+        Debug.Log($"[Chain Step 5] アーカイブ完了。データステータス: {logMsg}");
     }
 
     private IEnumerator ScreenRoutine()
     {
-        // Red alarm vignette flash animation
+        // 失敗時の赤いアラームフラッシュアニメーション
         int flashes = 3;
         float flashDuration = 0.5f;
 
@@ -670,7 +669,6 @@ public class ChainEventReceiver : MonoBehaviour
         {
             if (alarmClip) _audioSource.PlayOneShot(alarmClip);
             
-            // Sine wave alpha animation
             float t = 0f;
             while (t < flashDuration)
             {
@@ -687,40 +685,40 @@ public class ChainEventReceiver : MonoBehaviour
 }
 ```
 
-**Key Points:**
-- 🎯 **5 Independent Methods** - Each handles one pipeline stage
-- ✅ **Property for Condition** - `IsSafetyCheckPassed` evaluated by graph
-- ⏱️ **Timing Agnostic** - Methods don't know about delays
-- 🔒 **Data Firewall** - Step 5 receives sanitized data
-- 🎬 **Completion Callbacks** - Unlocks turrets on success/failure
+**ポイント:**
+- 🎯 **5つの独立したメソッド** - 各メソッドがパイプラインの1ステージを担当。
+- ✅ **条件判定用のプロパティ** - グラフから評価される `IsSafetyCheckPassed`。
+- ⏱️ **タイミングを意識しない** - メソッド側は遅延の存在を知りません。
+- 🔒 **データファイアウォール** - Step 5 ではクリーンなデータのみを受け取ります。
+- 🎬 **完了コールバック** - 成功/失敗にかかわらずタレットをアンロック。
 
 ---
 
-## 🔑 Key Takeaways
+## 🔑 重要なまとめ
 
-| Concept                    | Implementation                            |
+| コンセプト              | 実装内容                                     |
 | -------------------------- | ----------------------------------------- |
-| 🔗 **Sequential Execution** | Nodes execute one-by-one in strict order  |
-| ✅ **Validation Gates**     | Condition nodes terminate chain if failed |
-| ⏱️ **Delay Nodes**          | Fixed-time pauses between steps           |
-| 🕐 **Wait Nodes**           | Async completion waiting (not fixed time) |
-| 🔒 **Data Filtering**       | PassArgument controls data flow per node  |
-| 🛑 **Early Termination**    | Failed condition stops entire chain       |
-| 🎯 **All-or-Nothing**       | Chain completes fully or terminates early |
+| 🔗 **直列実行**         | ノードが厳格な順序で一つずつ実行される         |
+| ✅ **検証ゲート**       | 条件失敗時にチェーンを即座に切断するノード     |
+| ⏱️ **遅延ノード**       | ステップ間の固定時間の停止                   |
+| 🕐 **待機ノード**       | 非同期処理の完了を待機（固定時間ではない）     |
+| 🔒 **データフィルタリング** | ノードごとに引数の受け渡しを制御             |
+| 🛑 **早期終了**         | 条件を満たさない場合にチェーン全体を停止       |
+| 🎯 **全か無か**         | チェーンが完走するか、途中で中止されるかの二択 |
 
-:::note 🎓 Design Insight
+:::note 🎓 設計の洞察
 
-Chain Events are perfect for:
+チェーンイベントは以下のようなケースに最適です：
 
-- **Cutscenes** - Shot 1 → Shot 2 → Shot 3 in exact order
-- **Weapon Sequences** - Charge → Fire → Cooldown → Reload
-- **Tutorial Steps** - Must complete step N before step N+1
-- **Crafting Recipes** - Sequential ingredient addition
-- **Boss Phases** - Phase transitions with validation
-- **Spell Casting** - Channeling → Cast → Effect → Recovery
+- **カットシーン** - ショット 1 ➔ ショット 2 ➔ ショット 3 と正確な順序で再生。
+- **武器シーケンス** - チャージ ➔ 発射 ➔ クールダウン ➔ リロード。
+- **チュートリアル** - ステップ N を完了しないと Step N+1 に進めない。
+- **クラフトのレシピ** - 順番通りの材料投入。
+- **ボスフェーズ** - 検証を伴うフェーズ移行。
+- **魔法の詠唱** - チャネリング ➔ 発動 ➔ 効果 ➔ 硬直。
 
-**Chain vs Coroutine:**
-Instead of writing:
+**チェーン vs コルーチン:**
+以下のようなコードを書く代わりに：
 ```csharp
 IEnumerator LaunchSequence()
 {
@@ -733,39 +731,39 @@ IEnumerator LaunchSequence()
 }
 ```
 
-Use a Chain Graph where:
-- Timing is **visible** and **editable** by designers
-- Conditions are **visual checkpoints**, not hidden `if` statements
-- Async waits are **configurable**, not hardcoded
-- Entire pipeline is **debuggable** via graph visualization
+チェーングラフを使用すると：
+- タイミングが**可視化**され、デザイナーが編集可能になります。
+- 条件が隠れた `if` 文ではなく、**視覚的なチェックポイント**になります。
+- 非同期待機がハードコードされず、**設定可能**になります。
+- パイプライン全体がグラフとして**デバッグ可能**になります。
 
 :::
 
-:::warning ⚠️ Chain Gotchas
+:::warning ⚠️ チェーンの注意点
 
-1. **Blocking Behavior:** If Step 3 has a bug and never completes, Steps 4-5 never run
-2. **Condition Timing:** Conditions evaluate BEFORE node action—can't use action's side effects
-3. **No Parallel Branches:** Can't execute Step 2A and Step 2B simultaneously (use Trigger for that)
-4. **Delay Stacking:** Multiple delays add up—3 nodes with 1s each = 3s total wait
-5. **Early Exit Cleanup:** Always unlock resources in condition failure paths
+1. **ブロッキングの挙動:** もし Step 3 にバグがあり完了しない場合、Step 4-5 は永遠に実行されません。
+2. **条件評価のタイミング:** 条件はノードアクションの「前」に評価されます。アクションによって発生した副作用を、同じノードの条件に使うことはできません。
+3. **並列ブランチなし:** Step 2A と Step 2B を同時に実行することはできません（それにはトリガーイベントを使用してください）。
+4. **遅延の累積:** 複数の遅延は加算されます。1秒の遅延ノードが3つあれば、合計3秒の待機になります。
+5. **早期終了時のクリーンアップ:** 条件失敗パスでリソースのアンロック等を忘れないようにしてください。
 
 :::
 
 ---
 
-## 🎯 What's Next?
+## 🎯 次のステップは？
 
-You've mastered sequential chain execution. The examples series continues with more advanced patterns.
+直列チェーン実行をマスターしました。デモシリーズはさらに高度なパターンへと続きます。
 
-**Next Chapter**: Continue exploring advanced demos in **[12 Multi Database](./12-multi-database.md)**
+**次の章**: 高度なデモ **[12 マルチデータベース](./12-multi-database.md)** を見ていきましょう。
 
 ---
 
-## 📚 Related Documentation
+## 📚 関連ドキュメント
 
-- **[Flow Graph Editor](../flow-graph/game-event-node-editor.md)** - Edit Node Flow Graph 
-- **[Node & Connector](../flow-graph/game-event-node-connector.md)** - Understand the visual language of the graph
-- **[Node Behavior](../flow-graph/game-event-node-behavior.md)** - Node configuration and conditions
-- **[Advanced Logic Patterns](../flow-graph/advanced-logic-patterns.md)** - How the system executes Triggers versus Chains
-- **[Programmatic Flow](../scripting/programmatic-flow.md)** - How to Implement Process Control via FlowGraph API
-- **[Best Practices](../scripting/best-practices.md)** - Architectural patterns for complex systems
+- **[フローグラフエディタ](../flow-graph/game-event-node-editor.md)** - ノードフローグラフの編集
+- **[ノードとコネクタ](../flow-graph/game-event-node-connector.md)** - グラフの視覚言語を理解する
+- **[ノードの振る舞い](../flow-graph/game-event-node-behavior.md)** - ノードの設定と条件
+- **[高度なロジックパターン](../flow-graph/advanced-logic-patterns.md)** - システムがトリガーとチェーンをどう実行するか
+- **[プログラムによるフロー制御](../scripting/programmatic-flow.md)** - FlowGraph API によるプロセス制御の実装
+- **[ベストプラクティス](../scripting/best-practices.md)** - 複雑なシステムの設計パターン

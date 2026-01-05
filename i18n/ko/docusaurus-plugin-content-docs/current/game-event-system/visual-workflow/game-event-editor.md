@@ -1,5 +1,5 @@
 ﻿---
-sidebar_label: 'Edit Game Event'
+sidebar_label: '게임 이벤트 편집'
 sidebar_position: 3
 ---
 
@@ -9,154 +9,154 @@ import TabItem from '@theme/TabItem';
 
 
 
-# Game Event Editor
+# 게임 이벤트 에디터 (Game Event Editor)
 
-Your primary workspace for organizing, refining, and maintaining your event library. While the **[Game Event Creator](./game-event-creator.md)** is for birthing new events, the **Editor** is where you manage their entire lifecycle.
+이벤트 라이브러리를 정리, 개선 및 유지관리하기 위한 기본 작업 공간입니다. **[게임 이벤트 생성기](./game-event-creator.md)**가 새로운 이벤트를 생성하기 위한 도구라면, **에디터**는 생성된 이벤트의 전체 라이프사이클을 관리하는 곳입니다.
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-editor/editor-window-full.png)
 
 
 ---
 
-## 🚀 Opening the Editor
+## 🚀 에디터 열기
 
-Access the editor through the following method:
+다음 방법을 통해 에디터에 접속할 수 있습니다:
 
-**From the System Dashboard:**
+**시스템 대시보드에서:**
 
 ```
-Game Event System Window → Click "Game Event Editor"
+게임 이벤트 시스템 창 → "Game Event Editor" 버튼 클릭
 ```
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-editor/hub-core-tools.png)
 
 ---
 
-## 🎛️ Configuration Bar
+## 🎛️ 설정 바 (Configuration Bar)
 
-Located at the top of the window, this bar determines the scope of your work.
+윈도우 상단에 위치한 이 바는 작업 범위를 결정합니다.
 
 <img src="/img/game-event-system/visual-workflow/game-event-editor/editor-config-bar.png" alt="Configuration Bar" className="img-inline" />
 
-### Manager Selection
+### 매니저 선택 (Manager Selection)
 
-**Purpose**: Connect the editor to the active `GameEventManager` in your scene.
+**목적**: 에디터를 현재 씬에서 활성화된 `GameEventManager`에 연결합니다.
 
-**Behavior**:
+**동작**:
 
-- ✅ Auto-detects manager on startup
-- 🔄 Updates when switching scenes
-- 📌 Pin button opens Manager Inspector
+- ✅ 시작 시 매니저를 자동 감지합니다.
+- 🔄 씬을 전환할 때 자동으로 업데이트됩니다.
+- 📌 핀 버튼을 클릭하면 해당 매니저의 인스펙터를 엽니다.
 
-:::tip Multi-Scene Workflow
-If you have multiple scenes open, the editor will target the manager in the **active scene**. Switch scenes to update the connection automatically.
+:::tip 멀티 씬 워크플로우
+여러 씬이 열려 있는 경우, 에디터는 **활성화된 씬(Active Scene)**에 있는 매니저를 타겟팅합니다. 연결을 업데이트하려면 해당 씬을 활성화하십시오.
 :::
 
 ---
 
-### Database Selector
+### 데이터베이스 선택기 (Database Selector)
 
-Switch between different event databases to focus your work.
+작업에 집중할 수 있도록 서로 다른 이벤트 데이터베이스 간을 전환합니다.
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-editor/editor-database-switch.png)
 
-:::tip Only Active Databases Appear
-The dropdown only shows databases marked as **Active** in the **[Game Event Manager](./game-event-manager.md)**. If your database is missing, check its active state in the Manager Inspector.
+:::tip 활성화된 데이터베이스만 표시됩니다
+드롭다운 목록에는 **[게임 이벤트 매니저](./game-event-manager.md)**에서 **Active**로 표시된 데이터베이스만 나타납니다. 데이터베이스가 보이지 않는다면 매니저 인스펙터에서 활성화 상태를 확인하십시오.
 :::
 
 ---
 
-## 🛠️ Toolbar & Display Modes
+## 🛠️ 툴바 및 표시 모드
 
-Powerful filtering and view controls for managing large event libraries.
+대규모 이벤트 라이브러리를 관리하기 위한 강력한 필터링 및 뷰 제어 기능을 제공합니다.
 
 <img src="/img/game-event-system/visual-workflow/game-event-editor/editor-toolbar.png" alt="Editor Toolbar" />
 
-### View Modes
+### 표시 모드 (View Modes)
 
-Toggle between two display strategies:
+두 가지 표시 전략을 전환할 수 있습니다.
 
 
-| Mode          | Icon      | Best For                           | Behavior                                |
+| 모드 | 아이콘 | 용도 | 동작 |
 | ------------- | --------- | ---------------------------------- | --------------------------------------- |
-| **Page Mode** | `1 / 5`   | Large databases (100+ events)      | Shows events in pages (10-100 per page) |
-| **Full Mode** | Grid icon | Small databases or bulk operations | Single scrollable list with all events  |
+| **페이지 모드** | `1 / 5` | 대규모 데이터베이스 (이벤트 100개 이상) | 이벤트를 페이지 단위로 표시 (페이지당 10~100개) |
+| **전체 모드** | 그리드 아이콘 | 소규모 데이터베이스 또는 일괄 작업 | 모든 이벤트를 하나의 스크롤 가능한 목록으로 표시 |
 
-**Switching Modes**:
-- Click the grid icon in the toolbar
-- Your preference is saved between sessions
+**모드 전환**:
+- 툴바의 그리드 아이콘을 클릭합니다.
+- 설정값은 세션 간에 저장됩니다.
 
-**Page Size Options**: 10, 20, 50, or 100 events per page (click the number to change)
+**페이지 크기 옵션**: 페이지당 10, 20, 50, 100개의 이벤트 표시 (숫자를 클릭하여 변경)
 
 ---
 
-### **🧩** Smart Filtering System
+### **🧩** 스마트 필터링 시스템
 
-Three layers of filtering to find exactly what you need:
+필요한 이벤트를 정확히 찾기 위한 세 단계 필터링입니다.
 
 <Tabs>
-<TabItem value="category" label="1️⃣ Category Filter" default>
+<TabItem value="category" label="1️⃣ 카테고리 필터" default>
 
-**Category matching** 
+**카테고리 매칭** 
 
-Show events from a specific category.
+특정 카테고리에 속한 이벤트만 표시합니다.
 
-**Usage**
+**사용법**
 
-- Category: All ➔ 🟦 Shows **All** events
-- Category: Combat ➔ 🟥 Shows only **Combat** events (Damage, Death, Spawn)
-- Category: UI ➔ 🟩 Shows only **UI** events (Click, Hover, Open)
+- Category: All ➔ 🟦 **모든** 이벤트 표시
+- Category: Combat ➔ 🟥 **전투** 관련 이벤트만 표시 (Damage, Death, Spawn 등)
+- Category: UI ➔ 🟩 **UI** 관련 이벤트만 표시 (Click, Hover, Open 등)
 
-:::tip **Source**
+:::tip **출처**
 
-Categories are defined in the event's **Category** field (editable in the list).
-
-:::
-
-</TabItem>
-
-<TabItem value="type" label="2️⃣ Type Filter">
-
-**Signature matching**
-
-Filter events by their underlying C# parameter types.
-
-**Usage**
-
-- Type: All ➔ ⚪ Shows **All** signature types
-- Type: void ➔ 🔘 Shows only **Parameterless** events
-- Type: Int32 ➔ 🔢 Shows only `GameEvent<int>`
-- Type: GameObject ➔ 📦 Shows only **GameObject** reference events
-
-:::tip **Available Types**
-
-The dropdown is **auto-populated** based on the events currently present in your database.
+카테고리는 목록에서 편집 가능한 이벤트의 **Category** 필드에 정의됩니다.
 
 :::
 
 </TabItem>
 
-<TabItem value="search" label="3️⃣ Search Bar">
+<TabItem value="type" label="2️⃣ 타입 필터">
 
-**Fuzzy search**
+**시그니처 매칭**
 
-High-performance, real-time filtering by event name.
+기반이 되는 C# 파라미터 타입별로 이벤트를 필터링합니다.
 
-**Usage**
+**사용법**
 
-- ⌨️ **Search:** damage ➔ 🔍 Displays all events **matching** the substring (case-insensitive)
+- Type: All ➔ ⚪ **모든** 시그니처 타입 표시
+- Type: void ➔ 🔘 **인자 없는** 이벤트만 표시
+- Type: Int32 ➔ 🔢 `GameEvent<int>` 타입만 표시
+- Type: GameObject ➔ 📦 **GameObject** 참조 이벤트만 표시
+
+:::tip **사용 가능한 타입**
+
+드롭다운 목록은 현재 데이터베이스에 존재하는 이벤트들에 따라 **자동으로 채워집니다**.
+
+:::
+
+</TabItem>
+
+<TabItem value="search" label="3️⃣ 검색 바">
+
+**유사 검색 (Fuzzy search)**
+
+이벤트 이름으로 고성능 실시간 필터링을 수행합니다.
+
+**사용법**
+
+- ⌨️ **검색:** damage ➔ 🔍 해당 문자열을 **포함**하는 모든 이벤트 표시 (대소문자 구분 없음)
   - ⚡ `OnDamageTaken`
   - ⚡ `OnDamageDealt`
   - ⚡ `ApplyDamageMultiplier`
 
-**Features**
+**기능**
 
-- 🚀 **Instant Filtering** — Results update immediately as you type.
-- 🔡 **Case-Insensitive** — DAMAGE, Damage, and damage yield the same results.
-- 🧩 **Partial Match** — Matches any part of the name (Prefix, Suffix, or Middle).
+- 🚀 **즉시 필터링** — 입력하는 즉시 결과가 업데이트됩니다.
+- 🔡 **대소문자 무관** — DAMAGE, Damage, damage 모두 동일한 결과를 반환합니다.
+- 🧩 **부분 일치** — 이름의 어느 부분(접두사, 접미사, 중간)이든 일치하면 표시합니다.
 
-:::tip **Clear Search**
-Click the **×** button in the bar or press Esc to reset the view.
+:::tip **검색 초기화**
+바 우측의 **×** 버튼을 클릭하거나 Esc 키를 눌러 뷰를 리셋할 수 있습니다.
 :::
 
 </TabItem>
@@ -165,72 +165,72 @@ Click the **×** button in the bar or press Esc to reset the view.
 
 ---
 
-### 🔀 Multi-Layer Filtering (Combination)
+### 🔀 다중 레이어 필터링 (조합)
 
-All three filters work in tandem using **AND Logic** to help you drill down into the most specific results.
+세 가지 필터는 **AND 로직**으로 함께 작동하여 가장 구체적인 결과를 찾을 수 있도록 돕습니다.
 
-**Example Scenario**
-To find a specific health-related combat event, you might set:
+**예시 시나리오**
+특정 체력 관련 전투 이벤트를 찾으려면 다음과 같이 설정할 수 있습니다:
 
 > 🟦 **Category:** Combat ➕ 🔢 **Type:** Int32 ➕ ⌨️ **Search:** damage
 
-**🎯 Result:**
+**🎯 결과:**
 
-> 🔍 Displays only **Combat**-category, **Integer**-type events with "**damage**" in the name (e.g., OnDamageTaken).
+> 🔍 카테고리가 **Combat**이고, 타입이 **Integer**이며, 이름에 "**damage**"가 포함된 이벤트만 표시됩니다 (예: OnDamageTaken).
 
-### 🧹 Quick Reset
+### 🧹 빠른 리셋
 
-Need to start over? Returning to the full list is instant.
+처음부터 다시 시작해야 하나요? 전체 목록으로 즉시 돌아갈 수 있습니다.
 
-- **Action:** Set Category & Type to **All** + **Clear** the Search Bar.
-- **Shortcut:** Pressing the × button in the search bar and selecting "All" from the dropdowns will immediately restore the full view.
+- **방법:** 카테고리와 타입을 **All**로 설정하고 검색 바를 **비웁니다**.
+- **단축키:** 검색 바의 × 버튼을 누르고 드롭다운에서 "All"을 선택하면 즉시 전체 뷰가 복원됩니다.
 
-:::tip **Pro Tip: Efficiency**
-The system remembers your filter settings even when you switch between different database tabs, ensuring a seamless workflow.
+:::tip **전문가 팁: 효율성**
+시스템은 서로 다른 데이터베이스 탭 사이를 이동할 때도 필터 설정을 기억하여 원활한 워크플로우를 보장합니다.
 :::
 
 ---
 
-## 📝 The Event List
+## 📝 이벤트 목록
 
-Each row represents one event asset with editable properties and action buttons.
+각 행은 편집 가능한 속성과 액션 버튼을 가진 하나의 이벤트 에셋을 나타냅니다.
 
 <img src="/img/game-event-system/visual-workflow/game-event-editor/editor-event-row.png" alt="Event List Row" />
 
-### Editable Fields
+### 편집 가능한 필드
 
 <Tabs>
-<TabItem value="category" label="1️⃣ Category Field" default>
+<TabItem value="category" label="1️⃣ 카테고리 필드" default>
 
-#### Category Field
+#### 카테고리 필드
 
-Organize events into logical groups.
+이벤트를 논리적 그룹으로 정리합니다.
 
-**Usage**:
+**사용법**:
 
-- Click to edit
-- Press Enter or click away to save
-- Changes apply immediately
+- 클릭하여 편집합니다.
+- Enter를 누르거나 다른 곳을 클릭하여 저장합니다.
+- 변경 사항은 즉시 적용됩니다.
 
 </TabItem>
 
-<TabItem value="name" label="2️⃣ Name Field">
+<TabItem value="name" label="2️⃣ 이름 필드">
 
-#### Name Field
+#### 이름 필드
 
-Rename the event asset.
+이벤트 에셋의 이름을 변경합니다.
 
-**Key Feature**: 🔒 **GUID-Protected Renaming**
+**주요 기능**: 🔒 **GUID 보호 이름 변경**
 
-**File Renaming**:
-When you rename an event, the `.asset` file is automatically renamed to match:
+**파일 이름 변경**:
+이벤트 이름을 변경하면 `.asset` 파일 이름도 일치하도록 자동으로 변경됩니다:
 ```
-Before: OnPlayerDied.asset
-After:  OnCharacterDeath.asset
+변경 전: OnPlayerDied.asset
+변경 후: OnCharacterDeath.asset
 ```
 
-:::tip Safe Renaming
-Thanks to Unity's GUID system, you can rename events fearlessly. Nothing breaks! This is one of the system's most powerful features.But it is best not to define events with the same name in the same database, as this habit may introduce unnecessary confusion in the future
+:::tip 안전한 이름 변경
+유니티의 GUID 시스템 덕분에 참조가 깨질 걱정 없이 자유롭게 이름을 바꿀 수 있습니다! 이는 시스템의 가장 강력한 기능 중 하나입니다. 다만, 미래의 혼란을 방지하기 위해 동일한 데이터베이스 내에서 같은 이름을 가진 이벤트를 정의하지 않는 것이 좋습니다.
 :::
 
 </TabItem>
@@ -239,284 +239,284 @@ Thanks to Unity's GUID system, you can rename events fearlessly. Nothing breaks!
 
 ---
 
-### Action Buttons
+### 액션 버튼
 
-Four buttons per row provide quick access to related tools:
+행마다 위치한 4개의 버튼을 통해 관련 도구에 빠르게 접근할 수 있습니다.
 
-#### 📄 Reference Field (Read-Only)
+#### 📄 참조 필드 (읽기 전용)
 
-Shows the actual event asset with its full type signature.
+전체 타입 시그니처와 함께 실제 이벤트 에셋을 보여줍니다.
 
-**Actions**:
+**액션**:
 
-- **Left-Click**: Select and ping asset in Project window
-- **Right-Click**: Context menu with options:
-  - Copy GUID
-  - Copy Name
-  - Ping in Project
-  - Open Asset
+- **클릭**: 프로젝트 창에서 해당 에셋을 선택하고 강조(Ping)합니다.
+- **우클릭**: 다음 옵션이 포함된 컨텍스트 메뉴를 엽니다:
+  - GUID 복사
+  - 이름 복사
+  - 프로젝트에서 찾기 (Ping)
+  - 에셋 열기
 
 ---
 
-#### 🎯 Behavior Button (Color-Coded)
+#### 🎯 비헤이비어 버튼 (색상 표시)
 
-Configure advanced event behaviors (actions, conditions, delays, repeating, looping and persistent).
+고급 이벤트 동작(액션, 조건, 지연, 반복, 루프 및 지속성)을 설정합니다.
 
-**Button States**:
+**버튼 상태**:
 
-| Color    | Icon | Meaning                | Tooltip                |
+| 색상 | 아이콘 | 의미 | 툴팁 |
 | -------- | ---- | ---------------------- | ---------------------- |
-| 🟢 Green  | ✓    | Configured (Inspector) | Has Inspector bindings |
-| 🔵 Blue   | ▶    | Configured (Runtime)   | Has runtime listeners  |
-| 🟡 Orange | ⚠    | Not configured         | No bindings yet        |
+| 🟢 녹색 | ✓ | 설정됨 (인스펙터) | 인스펙터 바인딩이 존재함 |
+| 🔵 파란색 | ▶ | 설정됨 (런타임) | 런타임 리스너가 존재함 |
+| 🟡 주황색 | ⚠ | 설정되지 않음 | 아직 바인딩이 없음 |
 
 :::tip 
 
-Open **[Game Event Behavior Window](./game-event-behavior.md)** to learn about the complete event behavior configuration.
+전체 이벤트 비헤이비어 설정에 대해 알아보려면 **[게임 이벤트 비헤이비어 창](./game-event-behavior.md)**을 확인하십시오.
 
 :::
 
 ---
 
-#### 🔍 Reference Finder
+#### 🔍 레퍼런스 파인더
 
-Discover where this event is used in the current scene.
+현재 씬에서 이 이벤트가 어디에 사용되고 있는지 찾습니다.
 
-**Use Case**: Before deleting an event, check if anything is using it.
+**사용 사례**: 이벤트를 삭제하기 전에, 사용 중인 곳이 있는지 확인하십시오.
 
 :::tip 
 
-You can jump to **[Game Event Reference Window](./game-event-finder.md)** to learn more about its powerful scene reference lookup capabilities.
+강력한 씬 참조 검색 기능에 대해 자세히 알아보려면 **[게임 이벤트 레퍼런스 창](./game-event-finder.md)**으로 이동하십시오.
 
 :::
 
 ---
 
-#### 🗑️ Delete Button
+#### 🗑️ 삭제 버튼
 
-Remove the event asset from the database.
+데이터베이스에서 이벤트 에셋을 제거합니다.
 
-**Behavior**:
-1. Click trash icon
-2. Confirmation dialog appears
-3. Shows event details (name, type, category)
-4. Confirm → Event deleted permanently
+**동작**:
+1. 휴지통 아이콘 클릭
+2. 확인 대화 상자 표시
+3. 이벤트 상세 정보(이름, 타입, 카테고리) 확인
+4. 확인 ➔ 이벤트 영구 삭제
 
-**What Gets Deleted**:
-- ✅ Event asset (`.asset` file)
-- ✅ Sub-asset entry in database
-- ✅ Any associated bindings in Manager
+**삭제되는 항목**:
+- ✅ 이벤트 에셋 (`.asset` 파일)
+- ✅ 데이터베이스 내 하위 에셋 항목
+- ✅ 매니저에 등록된 관련 바인딩
 
-**What Doesn't Break**:
-- ❌ Scene won't break (references become `Missing`)
-- ❌ Scripts won't error (null checks should handle it)
+**영향 범위**:
+- ❌ 씬은 깨지지 않습니다 (참조는 `Missing` 상태가 됨).
+- ❌ 스크립트 에러는 발생하지 않습니다 (null 체크가 되어 있어야 함).
 
-:::danger Cannot Be Undone
-Deletion is permanent. Use the **Reference Finder** first to check usage.
+:::danger 복구 불가
+삭제는 영구적입니다. 삭제 전 반드시 **레퍼런스 파인더**를 사용하여 사용 처리를 확인하십시오.
 :::
 
 ---
 
-## ⚡ Global Actions (Top-Right Toolbar)
+## ⚡ 글로벌 액션 (우측 상단 툴바)
 
-Quick access to related workflows:
+관련 워크플로우에 빠르게 접근합니다.
 
-### 🕸️ Flow Graph
+### 🕸️ 플로우 그래프 (Flow Graph)
 
-Build visual event chains and orchestration logic.
+시각적 이벤트 체인과 오케스트레이션 로직을 구축합니다.
 
-**Button**: "Flow Graph"
+**버튼**: "Flow Graph"
 
-**What It Opens**: **[Game Event Flow Editor](../flow-graph/game-event-node-editor.md)**
+**연결 페이지**: **[게임 이벤트 플로우 에디터](../flow-graph/game-event-node-editor.md)**
 
-**When to Use**:
-- You need Event A to trigger Events B, C, and D
-- You want sequential execution with delays
-- You're building complex conditional branching
-
----
-
-### ➕ New Event
-
-Batch-create multiple events at once.
-
-**Button**: "New Event"
-
-**What It Opens**: **[Game Event Creator](./game-event-creator.md)**
-
-**When to Use**:
-
-- Creating many events of the same or different type
-- Generating events from custom types
-- Bulk event creation workflow
+**사용 시기**:
+- 이벤트 A가 이벤트 B, C, D를 트리거해야 할 때
+- 지연 시간을 포함한 순차적 실행이 필요할 때
+- 복잡한 조건부 분기를 구축할 때
 
 ---
 
-### 🗑️ Delete Events (Batch Mode)
+### ➕ 새 이벤트 (New Event)
 
-For efficient maintenance of large databases, the Editor supports a dedicated batch deletion mode.
+여러 이벤트를 한 번에 일괄 생성합니다.
 
-#### **Entering Batch Mode**
+**버튼**: "New Event"
 
-Click the **Delete Event** button on the far right of the standard toolbar (see image below) to toggle the selection interface.
+**연결 페이지**: **[게임 이벤트 생성기](./game-event-creator.md)**
+
+**사용 시기**:
+
+- 동일하거나 서로 다른 타입의 많은 이벤트를 생성할 때
+- 커스텀 타입으로부터 이벤트를 생성할 때
+- 대량 이벤트 생성 워크플로우가 필요할 때
+
+---
+
+### 🗑️ 이벤트 삭제 (일괄 모드)
+
+대규모 데이터베이스를 효율적으로 유지관리하기 위해 에디터는 전용 일괄 삭제 모드를 지원합니다.
+
+#### **일괄 모드 진입**
+
+표준 툴바의 맨 오른쪽에 있는 **Delete Event** 버튼(아래 이미지 참조)을 클릭하여 선택 인터페이스를 토글합니다.
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-editor/editor-batch-mode.png)
 
-#### **Selection Controls**
+#### **선택 컨트롤**
 
-Once clicked, the toolbar transforms to provide batch operations, and selection checkboxes will appear next to each event row:
+버튼을 클릭하면 툴바가 일괄 작업을 제공하도록 변하며, 각 이벤트 행 옆에 선택 체크박스가 나타납니다.
 
 ![alt text](/img/game-event-system/visual-workflow/game-event-editor/editor-batch-delete.png)
 
-| Action         | Description                                                  |
+| 액션 | 설명 |
 | -------------- | ------------------------------------------------------------ |
-| **Select All** | Checks every event currently visible in the list (respects active filters). |
-| **Delete**     | Opens a final confirmation dialog listing all selected events for permanent removal. |
-| **Cancel**     | Exits batch mode and clears all current selections without making changes. |
+| **Select All** | 목록에 현재 표시된 모든 이벤트를 체크합니다 (활성 필터 적용 상태 유지). |
+| **Delete** | 영구 삭제를 위해 선택된 모든 이벤트 목록을 보여주는 최종 확인 대화 상자를 엽니다. |
+| **Cancel** | 일괄 모드를 종료하고 변경 사항 없이 모든 현재 선택을 해제합니다. |
 
-**Workflow Steps:**
+**워크플로우 단계:**
 
-1. Click **Delete Event** to enter selection mode.
-2. Manually check specific events or use **Select All**.
-3. Click **Delete** to process the removal, or **Cancel** to return to the standard view.
+1. **Delete Event**를 클릭하여 선택 모드로 진입합니다.
+2. 특정 이벤트를 수동으로 체크하거나 **Select All**을 사용합니다.
+3. **Delete**를 클릭하여 제거를 진행하거나, **Cancel**을 눌러 표준 뷰로 돌아갑니다.
 
-:::warning Bulk Deletion Safety
+:::warning 일괄 삭제 주의사항
 
-- **Irreversible:** Bulk deletion cannot be undone.
-- **Filter Sensitivity:** "Select All" only affects events that meet your current filter criteria (Category/Type/Search).
-- **Reordering Disabled:** While in Batch Mode, the drag-and-drop reordering handles (☰) are hidden to prevent accidental moves.
-
-:::
-
----
-
-## 🎨 Row Reordering (Drag & Drop)
-
-Change event order by dragging rows:
-
-**How to Reorder**:
-1. Hover over the handle icon (☰) on the left of any row
-2. Click and drag vertically
-3. Release to drop in new position
-
-**When Available**:
-
-- ✅ No active filters (Category: All, Type: All, Search: empty)
-- ✅ Not in batch selection mode
-
-**When Disabled**:
-
-- ❌ Any filter active (would break visual continuity)
-- ❌ Batch selection mode enabled
-
-**Why Order Matters**:
-Event order affects:
-
-- Display order in dropdowns
-- Alphabetical grouping in some tools
-- Personal organization preference
-
-:::info Order is Database-Specific
-Each database has its own event order. Switching databases preserves their individual ordering.
-:::
-
----
-
-## 📊 Statistics Badge
-
-Located in the header, shows real-time event count:
-
-**Display**: `150 Events` (example)
-
-**What It Counts**:
-- Total events in **currently selected database**
-- Updates immediately when creating/deleting events
-- Reflects filtered count when filters are active
-
----
-
-## ❓ Troubleshooting
-
-This section covers common issues and their solutions. If you encounter a problem not listed here, please check the console for error logs.
-
----
-
-### 1. Events Not Appearing
-**Problem**: You created events, but they are not visible in the event list.
-
-#### **Check Active Database**
-1. Look at the **Database** dropdown menu.
-2. Confirm if the correct database is selected.
-3. Try **switching databases** to refresh the list.
-
-#### **Check Filters**
-*   Set **Category** -> `All`
-*   Set **Type** -> `All`
-*   **Clear** the search bar.
-*   Check if events appear after resetting filters.
-
-#### **Check Manager Status**
-1. Click the **Manager** field -> **Ping Inspector**.
-2. Verify the database is **Active** (green badge).
-3. If it shows **Inactive**, toggle the switch to **Active**.
-
-:::info dynamic compilation
-
-If none of the above checks are abnormal, try modifying any code to trigger a Unity compilation, which will update the database status. Check again in the Editor window to see if the created event has occurred.
-
-:::
-
-:::warning Unknown exception
-
-If you still cannot create it, please contact me
+- **되돌리기 불가:** 일괄 삭제는 취소할 수 없습니다.
+- **필터 영향:** "Select All"은 현재 필터 기준(카테고리/타입/검색)을 충족하는 이벤트에만 영향을 미칩니다.
+- **정렬 비활성화:** 일괄 모드 중에는 실수로 행을 옮기는 것을 방지하기 위해 드래그 앤 드롭 정렬 핸들(☰)이 숨겨집니다.
 
 :::
 
 ---
 
-### 2. Can't Edit Event Properties
-**Problem**: The **Category** or **Name** fields appear grayed out and cannot be edited.
+## 🎨 행 순서 변경 (드래그 앤 드롭)
 
-**Potential Cause**: The event might be part of a **locked asset**, or the database file is set to **read-only**.
+행을 드래그하여 이벤트 순서를 변경할 수 있습니다.
 
-**Solution**:
-*   Verify if the database file in your project is **writable** (not read-only in OS).
-*   Ensure you are not currently in **Prefab Isolation Mode**.
-*   Check if the event asset is **locked/checked out** in your version control system (e.g., Perforce or Git LFS).
+**정렬 방법**:
+1. 행 왼쪽에 있는 핸들 아이콘(☰) 위에 마우스를 올립니다.
+2. 클릭한 채로 수직으로 드래그합니다.
+3. 원하는 위치에서 놓습니다.
+
+**활성화 조건**:
+
+- ✅ 활성 필터가 없는 경우 (Category: All, Type: All, 검색어 비어 있음)
+- ✅ 일괄 삭제 모드가 아닌 경우
+
+**비활성화 조건**:
+
+- ❌ 필터가 하나라도 활성화된 경우 (시각적 연속성을 해칠 수 있음)
+- ❌ 일괄 삭제 모드가 활성화된 경우
+
+**순서가 중요한 이유**:
+이벤트 순서는 다음 사항에 영향을 미칩니다:
+
+- 드롭다운 메뉴에서의 표시 순서
+- 일부 도구에서의 알파벳순 그룹화
+- 개인적인 정리 선호도
+
+:::info 데이터베이스별 독립 순서
+각 데이터베이스는 고유한 이벤트 순서를 가집니다. 데이터베이스를 전환해도 개별 순서는 유지됩니다.
+:::
 
 ---
 
-### 3. Reordering Not Working
-**Problem**: Dragging rows to reorder events is not functioning.
+## 📊 통계 배지 (Statistics Badge)
 
-**Checklist**:
-To enable drag & drop reordering, ensure the following conditions are met:
+헤더에 위치하며, 실시간 이벤트 수를 보여줍니다.
 
-- Are all filters (Category/Type) set to **"All"**?
-- Is the search bar **empty**?
-- Are you **not** in batch selection mode?
+**표시 예시**: `150 Events`
+
+**카운트 대상**:
+- **현재 선택된 데이터베이스**의 전체 이벤트 수
+- 이벤트 생성/삭제 시 즉시 업데이트됨
+- 필터가 활성화된 경우 필터링된 결과 수를 반영함
+
+---
+
+## ❓ 문제 해결
+
+이 섹션은 일반적인 문제와 그 해결 방법을 다룹니다. 여기에 나열되지 않은 문제가 발생하면 콘솔의 에러 로그를 확인하십시오.
+
+---
+
+### 1. 이벤트가 나타나지 않음
+**문제**: 이벤트를 생성했지만 목록에 보이지 않습니다.
+
+#### **활성 데이터베이스 확인**
+1. **Database** 드롭다운 메뉴를 확인합니다.
+2. 올바른 데이터베이스가 선택되었는지 확인합니다.
+3. 목록을 새로고침하기 위해 **데이터베이스를 전환**해 봅니다.
+
+#### **필터 확인**
+*   **Category**를 `All`로 설정합니다.
+*   **Type**을 `All`로 설정합니다.
+*   검색 바를 **비웁니다**.
+*   필터 리셋 후 이벤트가 나타나는지 확인합니다.
+
+#### **매니저 상태 확인**
+1. **Manager** 필드 클릭 -> **Ping Inspector**.
+2. 데이터베이스가 **Active**(녹색 배지) 상태인지 확인합니다.
+3. **Inactive** 상태라면 스위치를 **Active**로 토글합니다.
+
+:::info 동적 컴파일
+
+위의 확인 사항이 모두 정상임에도 보이지 않는다면, 아무 코드나 수정하여 유니티 컴파일을 트리거해 보십시오. 컴파일 후 데이터베이스 상태가 업데이트됩니다. 그 후 에디터 창에서 생성된 이벤트가 나타나는지 다시 확인하십시오.
+
+:::
+
+:::warning 알 수 없는 예외
+
+여전히 생성할 수 없는 경우 개발자에게 문의해 주십시오.
+
+:::
+
+---
+
+### 2. 이벤트 속성 편집 불가
+**문제**: **Category**나 **Name** 필드가 회색으로 표시되어 편집할 수 없습니다.
+
+**잠재적 원인**: 이벤트가 **잠긴 에셋(locked asset)**의 일부이거나, 데이터베이스 파일이 **읽기 전용**으로 설정되어 있을 수 있습니다.
+
+**해결 방법**:
+*   프로젝트의 데이터베이스 파일이 **쓰기 가능**한지 확인하십시오 (OS에서 읽기 전용 여부 확인).
+*   현재 **프리팹 격리 모드(Prefab Isolation Mode)**가 아닌지 확인하십시오.
+*   버전 관리 시스템(예: Perforce 또는 Git LFS)에서 이벤트 에셋이 **잠겨 있거나 체크아웃**되지 않았는지 확인하십시오.
+
+---
+
+### 3. 순서 변경이 작동하지 않음
+**문제**: 행을 드래그하여 이벤트 순서를 바꿀 수 없습니다.
+
+**체크리스트**:
+드래그 앤 드롭 정렬을 사용하려면 다음 조건을 충족해야 합니다:
+
+- 모든 필터(카테고리/타입)가 **"All"**로 설정되어 있습니까?
+- 검색 바가 **비어** 있습니까?
+- 일괄 삭제 모드가 **아닌** 상태입니까?
 
 :::warning
 
-Reordering is only available when viewing the full, unfiltered list.
+순서 변경은 필터링 되지 않은 전체 목록 보기 모드에서만 가능합니다.
 
 :::
 
 ---
 
-### 4. Behavior Button Not Opening
-**Problem**: Clicking the behavior button does not trigger any action.
+### 4. 비헤이비어 버튼이 열리지 않음
+**문제**: 비헤이비어 버튼을 클릭해도 아무런 동작이 일어나지 않습니다.
 
-#### **Check Manager Assignment**
-If the **Manager** field shows `None`:
-1. The **Auto-detect** system should normally find it.
-2. If it fails, **manually drag** the manager object from your scene into the field.
+#### **매니저 할당 확인**
+**Manager** 필드가 `None`인 경우:
+1. 일반적으로 **자동 감지(Auto-detect)** 시스템이 찾아냅니다.
+2. 감지에 실패하면 씬에서 매니저 오브젝트를 필드로 **직접 드래그**하십시오.
 
-#### **Check Console for Errors**
-*   Open the **Console** window (`Ctrl+Shift+C`).
-*   Look for **Red Errors** (exceptions).
-*   Fix any **compilation issues** first, as script errors can prevent UI events from firing.
+#### **콘솔 에러 확인**
+*   **Console** 윈도우를 엽니다 (`Ctrl+Shift+C`).
+*   **빨간색 에러**(예외)가 있는지 확인합니다.
+*   스크립트 에러가 UI 이벤트를 차단할 수 있으므로, **컴파일 문제**를 먼저 해결하십시오.
 
-:::tip Workflow Recommendation
-Keep this window docked alongside your Inspector. When you select an event in the list, the Inspector shows its full asset details—perfect for quick property checks without leaving your workspace.
+:::tip 워크플로우 권장 사항
+이 창을 인스펙터 옆에 탭으로 고정해 두십시오. 목록에서 이벤트를 선택하면 인스펙터에 전체 에셋 상세 정보가 표시되므로, 작업 공간을 벗어나지 않고도 속성을 빠르게 확인할 수 있습니다.
 :::

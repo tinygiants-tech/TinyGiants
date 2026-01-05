@@ -1,318 +1,316 @@
 ﻿---
-sidebar_label: '06 Conditional Event'
+sidebar_label: '06 条件付きイベント'
 sidebar_position: 7
 ---
 
 import VideoGif from '@site/src/components/Video/VideoGif';
 
-# 06 Conditional Event: Visual Logic Builder
+# 06 条件付きイベント：ビジュアルロジックビルダー
 
 <!-- <VideoGif src="/video/game-event-system/06-conditional-event.mp4" /> -->
 
-## 📋 Overview
+## 📋 概要
 
-Usually, checking if a door should open requires code like: `if (powerOn && (isAdmin || isLucky))`. This demo demonstrates the **Visual Condition Tree Builder**, which lets you create complex, nested validation rules directly in the Editor—removing the need for `if/else` checks in your scripts.
+通常、ドアを開けるべきかどうかを判断するには、`if (powerOn && (isAdmin || isLucky))` のようなコードが必要です。このデモでは、スクリプト内に `if/else` チェックを書く必要をなくし、エディタ上で直接、複雑にネストされた検証ルールを作成できる **ビジュアル条件ツリービルダー (Visual Condition Tree Builder)** を実演します。
 
-:::tip 💡 What You'll Learn
-- How to build complex logic trees without code
-- How to reference scene objects in conditions
-- How to use AND/OR groups for branching logic
-- How conditions act as gatekeepers for event callbacks
+:::tip 💡 学べること
+- コードを書かずに複雑なロジックツリーを構築する方法
+- 条件内でシーンオブジェクトを参照する方法
+- 分岐ロジックに AND/OR グループを使用する方法
+- 条件がイベントコールバックの「ゲートキーパー（門番）」として機能する仕組み
 
 :::
 
 ---
 
-## 🎬 Demo Scene
+## 🎬 デモシーン
 ```
 Assets/TinyGiants/GameEventSystem/Demo/06_ConditionalEvent/06_ConditionalEvent.unity
 ```
 
-### Scene Composition
+### シーン構成
 
-**UI Layer (Canvas):**
-- 🎮 **Power Toggle Button** - Top left corner
-  - "Toggle Power (On)" / "Toggle Power (Off)"
-  - Triggers `ConditionalEventRaiser.TogglePower()`
-  - Controls the global `SecurityGrid.IsPowerOn` state
+**UIレイヤー (Canvas):**
+- 🎮 **電源切替ボタン** - 左上隅
+  - 「Toggle Power (On)」 / 「Toggle Power (Off)」
+  - `ConditionalEventRaiser.TogglePower()` をトリガー
+  - グローバルな `SecurityGrid.IsPowerOn` 状態を制御
   
-- 🎮 **Four Access Card Buttons** - Bottom of screen
-  - "Swipe GuestCard" → `ConditionalEventRaiser.SwipeGuestCard()` (Level 1, Visitor dept)
-  - "Swipe StaffCard" → `ConditionalEventRaiser.SwipeStaffCard()` (Level 3, Management dept)
-  - "Swipe AdminCard" → `ConditionalEventRaiser.SwipeAdminCard()` (Level 5, Director dept)
-  - "Attempt Hacking" → `ConditionalEventRaiser.AttemptHacking()` (Level 0, DarkWeb dept)
+- 🎮 **4つのアクセスカードボタン** - 画面下部
+  - 「Swipe GuestCard」➔ `ConditionalEventRaiser.SwipeGuestCard()` (Lv 1, Visitor部門)
+  - 「Swipe StaffCard」➔ `ConditionalEventRaiser.SwipeStaffCard()` (Lv 3, Management部門)
+  - 「Swipe AdminCard」➔ `ConditionalEventRaiser.SwipeAdminCard()` (Lv 5, Director部門)
+  - 「Attempt Hacking」➔ `ConditionalEventRaiser.AttemptHacking()` (Lv 0, DarkWeb部門)
 
-**Game Logic Layer (Demo Scripts):**
-- 📤 **ConditionalEventRaiser** - GameObject with the raiser script
-  - Constructs `AccessCard` objects with different credentials
-  - Raises `OnAccessCard` event for validation
-  - Has NO validation logic—just passes data
+**ゲームロジックレイヤー (デモスクリプト):**
+- 📤 **ConditionalEventRaiser** - 発行側スクリプト
+  - 異なる認証情報を持つ `AccessCard` オブジェクトを構築
+  - 検証のために `OnAccessCard` イベントを発行
+  - 検証ロジック自体は保持せず、単にデータを渡すだけ
+  
+- 📥 **ConditionalEventReceiver** - 受信側スクリプト
+  - 条件付きロジックを **一切持たない** `OpenVault()` メソッドを保持
+  - 呼び出されたら単にドアのアニメーションを再生
+  - 呼び出された＝すべての条件をクリアした、と見なす
 
-- 📥 **ConditionalEventReceiver** - GameObject with the receiver script
-  - Contains `OpenVault()` method with **ZERO** conditional logic
-  - Simply plays door animation when called
-  - Assumes if called, all conditions passed
+- 🔌 **SecurityGrid** - システム状態を保持するシーンオブジェクト
+  - パブリックプロパティ: `IsPowerOn` (bool)
+  - 条件ツリーはこの値をシーンインスタンスから直接読み取る
 
-- 🔌 **SecurityGrid** - Scene object holding system state
-  - Public property: `IsPowerOn` (bool)
-  - Condition tree reads this value directly from scene instance
-
-**Visual Feedback Layer (Demo Objects):**
-- 🚪 **VaultDoorSystem** - Massive double doors
-  - Left and right doors slide open/closed
-  - Status text displays: "LOCKED" / "ACCESS GRANTED" / "CLOSING..."
-  - Steam VFX plays when doors open
-- 💡 **Power Indicator** - Green sphere light
-  - Glows when power is ON
-  - Dims when power is OFF
-- 🖼️ **Screen Vignette** - Fullscreen overlay
-  - Green flash when power turns ON
-  - Red flash when power turns OFF
+**ビジュアルフィードバックレイヤー (デモオブジェクト):**
+- 🚪 **VaultDoorSystem** - 巨大な両開きドア
+  - 左右のドアがスライドして開閉
+  - ステータステキスト表示：「LOCKED」 / 「ACCESS GRANTED」 / 「CLOSING...」
+  - ドア開放時に蒸気のVFXが発生
+- 💡 **電源インジケーター** - 緑色の球体ライト
+  - 電源ON時に点灯、OFF時に消灯
+- 🖼️ **スクリーンビネット** - フルスクリーンオーバーレイ
+  - 電源ON時に緑色、OFF時に赤色にフラッシュ
 
 ---
 
-## 🎮 How to Interact
+## 🎮 操作方法
 
-### The Logic Gate Challenge
+### ロジックゲートの挑戦
 
-The vault opens **ONLY IF** this condition evaluates to `true`:
+金庫は以下の条件が `true` と評価された場合に **のみ** 開きます：
 ```
-[⚡ Power ON]  AND  ([🏅 Admin] Level  OR  [🏷️ Valid Department]  OR  [🎲 Lucky Hacker])
+[⚡ 電源 ON]  AND  ([🏅 管理者] レベル  OR  [🏷️ 有効な部門]  OR  [🎲 ラッキーなハッカー])
 ```
 
-### Step 1: Enter Play Mode
+### ステップ 1: プレイモードに入る
 
-Press the **Play** button in Unity. The vault should show "LOCKED" in red.
-
----
-
-### Step 2: Test with Power ON (Correct Setup)
-
-**Ensure Power is ON:**
-- Look at the top-left button: Should show "Toggle Power (On)"
-- Look at the power indicator (green sphere): Should be glowing
-- Screen vignette flashes green when toggled ON
-
-**Click "Swipe StaffCard":**
-- **Credentials:** Level 3, Department "Management"
-- **Logic Path:**
-  - ✅ Power ON → Pass
-  - ❌ Level 3 < 4 → Fail (Admin check)
-  - ✅ Department "Management" is in whitelist → Pass
-  - **Result:** One branch passed in OR group
-- **Outcome:** 🟢 **ACCESS GRANTED**
-  - Status text turns green
-  - Steam VFX erupts from door base
-  - Doors slide open smoothly
-  - Doors close after 2 seconds
-- **Console:** `[Vault] ACCESS GRANTED to Staff_Alice. Opening doors.`
-
-**Click "Swipe AdminCard":**
-- **Credentials:** Level 5, Department "Director"
-- **Logic Path:**
-  - ✅ Power ON → Pass
-  - ✅ Level 5 >= 4 → Pass (Admin check succeeds immediately)
-  - **Result:** First condition in OR group passed
-- **Outcome:** 🟢 **ACCESS GRANTED**
-
-**Click "Swipe GuestCard":**
-- **Credentials:** Level 1, Department "Visitor"
-- **Logic Path:**
-  - ✅ Power ON → Pass
-  - ❌ Level 1 < 4 → Fail (Admin check)
-  - ❌ Department "Visitor" not in whitelist → Fail
-  - 🎲 Random(0-100) > 70 in nested AND group → ~30% chance
-  - **Result:** Most likely all branches fail
-- **Outcome:** 🔴 **LOCKED** (90% of the time)
-  - Vault remains closed
-  - Status text stays red
-- **Console:** (No receiver log because condition failed)
+Unityの **Play** ボタンを押します。金庫には赤文字で「LOCKED」と表示されているはずです。
 
 ---
 
-### Step 3: Test with Power OFF (Failure Case)
+### ステップ 2: 電源 ON の状態でテスト（正常系）
 
-**Click "Toggle Power" (Turn OFF):**
-- Button text changes to "Toggle Power (Off)"
-- Power indicator dims
-- Screen vignette flashes RED
+**電源が ON であることを確認:**
+- 左上のボタンを確認：「Toggle Power (On)」と表示されていること
+- 電源インジケーター（緑の球体）が点灯していること
+- 切り替え時に画面が緑色にフラッシュすること
 
-**Click "Swipe AdminCard":**
-- **Credentials:** Level 5 (Admin level)
-- **Logic Path:**
-  - ❌ Power OFF → **Fail at root AND condition**
-  - Evaluation stops immediately (short-circuit)
-- **Outcome:** 🔴 **LOCKED**
-  - Even admins cannot bypass the power requirement
-  - Receiver method is NEVER called
-- **Console:** `[Terminal] Scanning...` (but no vault log)
+**「Swipe StaffCard」をクリック:**
+- **認証情報:** レベル 3, 部門「Management」
+- **ロジックパス:**
+  - ✅ 電源 ON ➔ パス
+  - ❌ レベル 3 < 4 ➔ 失敗（Adminチェック）
+  - ✅ 部門「Management」はホワイトリスト内 ➔ パス
+  - **結果:** OR グループ内の1つのブランチがパス
+- **結末:** 🟢 **ACCESS GRANTED**
+  - ステータスが緑色に変化
+  - ドアの足元から蒸気が噴出
+  - ドアがスムーズに開く
+  - 2秒後にドアが閉まる
+- **コンソール:** `[Vault] ACCESS GRANTED to Staff_Alice. Opening doors.`
 
-:::note 🔐 Security Design
+**「Swipe AdminCard」をクリック:**
+- **認証情報:** レベル 5, 部門「Director」
+- **ロジックパス:**
+  - ✅ 電源 ON ➔ パス
+  - ✅ レベル 5 >= 4 ➔ パス（即座にAdminチェック成功）
+  - **結果:** OR グループ内の最初の条件でパス
+- **結末:** 🟢 **ACCESS GRANTED**
 
-The AND logic at the root ensures that **no credential** can bypass the power requirement. This demonstrates how condition trees can enforce hard requirements.
+**「Swipe GuestCard」をクリック:**
+- **認証情報:** レベル 1, 部門「Visitor」
+- **ロジックパス:**
+  - ✅ 電源 ON ➔ パス
+  - ❌ レベル 1 < 4 ➔ 失敗（Adminチェック）
+  - ❌ 部門「Visitor」はホワイトリスト外 ➔ 失敗
+  - 🎲 ネストされた AND グループ内の Random(0-100) > 70 ➔ 約30%の確率
+  - **結果:** ほとんどの場合、すべてのブランチが失敗
+- **結末:** 🔴 **LOCKED** (90%の確率で失敗)
+  - 金庫は閉まったまま
+  - ステータステキストは赤のまま
+- **コンソール:** (条件失敗のため受信側のログは出ない)
+
+---
+
+### ステップ 3: 電源 OFF の状態でテスト（失敗系）
+
+**「Toggle Power」をクリック（OFFにする）:**
+- ボタンが「Toggle Power (Off)」に変化
+- 電源インジケーターが消灯
+- 画面が赤色にフラッシュ
+
+**「Swipe AdminCard」をクリック:**
+- **認証情報:** レベル 5 (管理者レベル)
+- **ロジックパス:**
+  - ❌ 電源 OFF ➔ **ルートの AND 条件で失敗**
+  - 即座に評価が停止（短絡評価/ショートサーキット）
+- **結末:** 🔴 **LOCKED**
+  - 管理者であっても電源の要件をバイパスすることはできない
+  - 受信側のメソッドは一切呼び出されない
+- **コンソール:** `[Terminal] Scanning...` (金庫側のログはなし)
+
+:::note 🔐 セキュリティ設計
+
+ルートにある AND ロジックにより、**いかなる認証情報**であっても電源の要件を回避できないようになっています。これは、条件ツリーがいかにして絶対的な要件を強制できるかを示しています。
 
 :::
 
 ---
 
-## 🏗️ Scene Architecture
+## 🏗️ シーンのアーキテクチャ
 
-### The Condition Tree Structure
+### 条件ツリーの構造
 
-The vault's access logic is implemented as a visual tree in the Behavior Window:
+金庫のアクセスロジックは、Behavior Window 内で視覚的なツリーとして実装されています：
 ```
-🟦 ROOT (AND) ➔ Must pass BOTH major branches
+🟦 ROOT (AND) ➔ 以下の2つの主要なブランチを両方パスする必要がある
 │
-├─ ⚡ SecurityGrid.IsPowerOn == true      ➔ [Power Status Check]
+├─ ⚡ SecurityGrid.IsPowerOn == true      ➔ [電源状態チェック]
 │
-└─ 🟧 Branch 2 (OR) ➔ Must pass AT LEAST ONE below
+└─ 🟧 Branch 2 (OR) ➔ 以下のうち少なくとも1つをパスする必要がある
    │
-   ├─ 🏅 Arg.securityLevel >= 4          ➔ [High Clearance]
-   ├─ 🏷️ Arg.department ∈ [Mgmt, IT]     ➔ [Dept. Validation]
-   ├─ 🎲 Random(0-100) > 90              ➔ [10% Luck Pass]
+   ├─ 🏅 Arg.securityLevel >= 4          ➔ [高い権限]
+   ├─ 🏷️ Arg.department ∈ [Mgmt, IT]     ➔ [部門の検証]
+   ├─ 🎲 Random(0-100) > 90              ➔ [10%の確率でハック成功]
    │
-   └─ 🟦 Nested Group (AND) ➔ Combined low-level check
-      ├─ 🔢 Arg.securityLevel >= 1       ➔ [Basic Access]
-      └─ 🎲 Random(0-100) > 70           ➔ [30% Luck Pass]
+   └─ 🟦 ネストされたグループ (AND) ➔ 低レベルカード向けの複合チェック
+      ├─ 🔢 Arg.securityLevel >= 1       ➔ [有効なカードを所持]
+      └─ 🎲 Random(0-100) > 70           ➔ [30%の運試しパス]
 ```
 
 ---
 
-### Event Definition
+### イベント定義 (Event Definition)
 
 ![Game Event Editor](/img/game-event-system/examples/06-conditional-event/demo-06-editor.png)
 
-| Event Name     | Type                    | Purpose                                           |
+| イベント名      | 型                      | 用途                                              |
 | -------------- | ----------------------- | ------------------------------------------------- |
-| `OnAccessCard` | `GameEvent<AccessCard>` | Validates card credentials through condition tree |
+| `OnAccessCard` | `GameEvent<AccessCard>` | 条件ツリーを通じてカードの認証情報を検証する           |
 
-**The AccessCard Data Structure:**
+**AccessCard データ構造:**
 ```csharp
 [System.Serializable]
 public class AccessCard
 {
-    public string holderName;        // "Staff_Alice", "Admin_Root", etc.
-    public int securityLevel;        // 1=Guest, 3=Staff, 5=Admin
-    public string department;        // "Management", "IT", "Visitor", etc.
+    public string holderName;        // "Staff_Alice", "Admin_Root" 等
+    public int securityLevel;        // 1=ゲスト, 3=スタッフ, 5=管理者
+    public string department;        // "Management", "IT", "Visitor" 等
 }
 ```
 
 ---
 
-### Behavior Configuration with Condition Tree
+### 条件ツリーを使用したビヘイビア設定
 
-Click the **(AccessCard)** icon in the Behavior column to open the Behavior Window:
+Behavior カラムの **(AccessCard)** アイコンをクリックして、Behavior Window を開きます：
 
 ![Condition Tree](/img/game-event-system/examples/06-conditional-event/demo-06-condition-tree.png)
 
-**Root AND Group:**
-- **Condition 1:** Scene Object Reference
-  - Source: `SecurityGrid` GameObject in scene
-  - Property: `IsPowerOn` (bool)
-  - Operator: `==` (Equals)
-  - Target: `true`
-  - **Purpose:** Hard requirement—power must be ON
+**ルートの AND グループ:**
+- **条件 1:** シーンオブジェクト参照
+  - ソース: シーン内の `SecurityGrid` GameObject
+  - プロパティ: `IsPowerOn` (bool)
+  - 演算子: `==` (Equals)
+  - ターゲット: `true`
+  - **目的:** 絶対条件 ➔ 電源が ON でなければならない
 
-**Nested OR Group:**
-The OR group provides multiple valid paths to access:
+**ネストされた OR グループ:**
+OR グループは、アクセスするための複数の有効なパスを提供します：
 
-- **Condition A:** Event Argument Check
-  - Source: `Arg.securityLevel` (int from AccessCard)
-  - Operator: `>=` (Greater Or Equal)
-  - Target: `4`
-  - **Purpose:** Admin-level credentials
+- **条件 A:** イベント引数のチェック
+  - ソース: `Arg.securityLevel` (AccessCard の int)
+  - 演算子: `>=` (Greater Or Equal)
+  - ターゲット: `4`
+  - **目的:** 管理者レベルの認証情報
 
-- **Condition B:** List Membership Check
-  - Source: `Arg.department` (string from AccessCard)
-  - Operator: `In List` (Contained In)
-  - Target: Constant List `["Management", "IT"]`
-  - **Purpose:** Whitelisted departments
+- **条件 B:** リスト包含チェック
+  - ソース: `Arg.department` (AccessCard の string)
+  - 演算子: `In List` (Contained In)
+  - ターゲット: 固定リスト `["Management", "IT"]`
+  - **目的:** ホワイトリストに登録された部門
 
-- **Condition C:** Random Chance
-  - Source: `Random Value` (0-100 range)
-  - Operator: `>` (Greater)
-  - Target: `90`
-  - **Purpose:** 10% lucky bypass for hackers
+- **条件 C:** ランダム確率
+  - ソース: `Random Value` (0-100 の範囲)
+  - 演算子: `>` (Greater)
+  - ターゲット: `90`
+  - **目的:** ハッカー向けの10%のラッキーバイパス
 
-- **Nested AND Group:** Guest Access Logic
-  - Sub-condition 1: `Arg.securityLevel >= 1` (Valid card)
-  - Sub-condition 2: `Random(0-100) > 70` (30% chance)
-  - **Purpose:** Guests have lower chance but must have valid card
+- **ネストされた AND グループ:** ゲスト用アクセスロジック
+  - サブ条件 1: `Arg.securityLevel >= 1` (有効なカード)
+  - サブ条件 2: `Random(0-100) > 70` (30%の確率)
+  - **目的:** ゲストは確率が低いが、有効なカードが必要
 
-:::tip 🎨 Drag & Drop Building
+:::tip 🎨 ドラッグ＆ドロップで構築
 
-You can build this tree visually in the Behavior Window:
+Behavior Window でこのツリーを視覚的に構築できます：
 
-1. Click **"+ Condition"** to add individual checks
-2. Click **"+ Group"** to add AND/OR containers
-3. Drag the `≡` handle to reorder conditions
-4. Switch between AND/OR logic by clicking the group label
+1. **"+ Condition"** をクリックして個別のチェックを追加
+2. **"+ Group"** をクリックして AND/OR コンテナを追加
+3. `≡` ハンドルをドラッグして条件の順序を変更
+4. グループラベルをクリックして AND/OR ロジックを切り替え
 
 :::
 
 ---
 
-### Sender Setup (ConditionalEventRaiser)
+### 発行側の設定 (ConditionalEventRaiser)
 
-Select the **ConditionalEventRaiser** GameObject:
+**ConditionalEventRaiser** GameObject を選択します：
 
 ![ConditionalEventRaiser Inspector](/img/game-event-system/examples/06-conditional-event/demo-06-inspector.png)
 
-**Event Channel:**
+**イベントチャンネル:**
 - `Request Access Event`: `OnAccessCard`
 
-**Scene Reference:**
-- `Security Grid`: SecurityGrid GameObject (for power toggle functionality)
-- `Screen Vignette`: UI overlay for visual power feedback
+**シーン参照:**
+- `Security Grid`: SecurityGrid GameObject (電源切替機能用)
+- `Screen Vignette`: 電源フィードバック用の UI オーバーレイ
 
-**How Cards Work:**
+**各カードの動作:**
 ```csharp
-// Guest Card (Relies on luck)
-SwipeGuestCard() → AccessCard("Guest_Bob", 1, "Visitor")
+// ゲストカード (運に依存)
+SwipeGuestCard() ➔ AccessCard("Guest_Bob", 1, "Visitor")
 
-// Staff Card (Valid department)
-SwipeStaffCard() → AccessCard("Staff_Alice", 3, "Management")
+// スタッフカード (有効な部門)
+SwipeStaffCard() ➔ AccessCard("Staff_Alice", 3, "Management")
 
-// Admin Card (High level)
-SwipeAdminCard() → AccessCard("Admin_Root", 5, "Director")
+// 管理者カード (高レベル)
+SwipeAdminCard() ➔ AccessCard("Admin_Root", 5, "Director")
 
-// Hacker (Pure randomness)
-AttemptHacking() → AccessCard("Unknown_Hacker", 0, "DarkWeb")
+// ハッカー (純粋なランダム性)
+AttemptHacking() ➔ AccessCard("Unknown_Hacker", 0, "DarkWeb")
 ```
 
 ---
 
-### Receiver Setup (ConditionalEventReceiver)
+### 受信側の設定 (ConditionalEventReceiver)
 
-Select the **ConditionalEventReceiver** GameObject:
+**ConditionalEventReceiver** GameObject を選択します：
 
 ![ConditionalEventReceiver Inspector](/img/game-event-system/examples/06-conditional-event/demo-06-receiver.png)
 
-**Vault Visuals:**
-- `Door ROOT`: VaultDoorSystem (Transform)
-- `Left Door`: DoorLeft (Transform) - slides left when opening
-- `Right Door`: DoorRight (Transform) - slides right when opening
-- `Steam VFX Prefab`: Particle system for door opening effect
+**金庫のビジュアル:**
+- `Door ROOT`: 金庫ドアシステムの親 Transform
+- `Left Door`: 左ドア (開くときに左へスライド)
+- `Right Door`: 右ドア (開くときに右へスライド)
+- `Steam VFX Prefab`: ドア開放時の蒸気エフェクト
 
-**Feedback:**
-- `Status Text`: StatusText (TextMeshPro) - displays access status
+**フィードバック:**
+- `Status Text`: アクセス状態を表示する TextMeshPro
 
-**Behavior Binding:**
-- Event: `OnAccessCard`
-- Method: `ConditionalEventReceiver.OpenVault(AccessCard card)`
-- **Condition Tree:** Acts as gatekeeper (configured above)
+**Behavior バインディング:**
+- イベント: `OnAccessCard`
+- メソッド: `ConditionalEventReceiver.OpenVault(AccessCard card)`
+- **条件ツリー:** ゲートキーパーとして機能（上記で設定したもの）
 
-:::note 🎯 Zero-Logic Receiver
+:::note 🎯 ロジック・ゼロの受信側
 
-The `OpenVault()` method contains **NO** conditional checks. It's called **only if** the condition tree evaluates to `true`. This separates validation logic (data layer) from action logic (behavior layer).
+`OpenVault()` メソッドには **一切の** 条件チェックが含まれていません。このメソッドは条件ツリーが `true` と評価された場合に **のみ** 呼び出されます。これにより、検証ロジック（データレイヤー）とアクションロジック（振る舞いレイヤー）が完全に分離されます。
 
 :::
 
 ---
 
-## 💻 Code Breakdown
+## 💻 コード解説
 
-### 📤 ConditionalEventRaiser.cs (Sender)
+### 📤 ConditionalEventRaiser.cs (発行側)
 ```csharp
 using UnityEngine;
 using TinyGiants.GameEventSystem.Runtime;
@@ -327,31 +325,31 @@ public class ConditionalEventRaiser : MonoBehaviour
 
     public void SwipeGuestCard()
     {
-        // Level 1, Dept "Visitor"
-        // Fails level check, fails dept check
-        // Relies on Random > 70 in nested AND group (~30% chance)
+        // レベル 1, 部門 "Visitor"
+        // レベルチェック失敗、部門チェック失敗
+        // ネストされた AND グループの Random > 70 に依存（約30%）
         SendRequest("Guest_Bob", 1, "Visitor");
     }
 
     public void SwipeStaffCard()
     {
-        // Level 3, Dept "Management"
-        // Fails level check (3 < 4)
-        // Passes department check (Management is whitelisted)
+        // レベル 3, 部門 "Management"
+        // レベルチェック失敗 (3 < 4)
+        // 部門チェック成功 (Management はホワイトリスト内)
         SendRequest("Staff_Alice", 3, "Management");
     }
 
     public void SwipeAdminCard()
     {
-        // Level 5
-        // Passes level check immediately (5 >= 4)
+        // レベル 5
+        // 即座にレベルチェック成功 (5 >= 4)
         SendRequest("Admin_Root", 5, "Director");
     }
 
     public void AttemptHacking()
     {
-        // Level 0
-        // Pure reliance on Random > 90 (10% chance)
+        // レベル 0
+        // Random > 90 のみに依存 (10%の確率)
         SendRequest("Unknown_Hacker", 0, "DarkWeb");
     }
 
@@ -359,26 +357,26 @@ public class ConditionalEventRaiser : MonoBehaviour
     {
         if (requestAccessEvent == null) return;
 
-        // Construct the data packet
+        // データパケットの構築
         AccessCard card = new AccessCard(name, level, dept);
         
-        // Raise the event
-        // The condition tree evaluates BEFORE calling the receiver
+        // イベントの発行
+        // 受信側が呼ばれる前に条件ツリーが評価されます
         requestAccessEvent.Raise(card);
         
-        Debug.Log($"[Terminal] Scanning... Name: {name} | Lv: {level} | Dept: {dept}");
+        Debug.Log($"[Terminal] 走査中... 名前: {name} | Lv: {level} | 部門: {dept}");
     }
 }
 ```
 
-**Key Points:**
-- 🎯 **No Validation** - Sender just creates data and raises event
-- 📦 **Data Construction** - Each button creates a unique credential profile
-- 🔇 **Zero Logic** - No knowledge of what conditions must be met
+**ポイント:**
+- 🎯 **検証コードなし** - 発行側は単にデータを作成してイベントを投げるだけ。
+- 📦 **データの構築** - 各ボタンが独自の認証プロフィールを作成します。
+- 🔇 **ロジック・ゼロ** - どのような条件を満たす必要があるかをスクリプト側は知りません。
 
 ---
 
-### 📥 ConditionalEventReceiver.cs (Listener)
+### 📥 ConditionalEventReceiver.cs (受信側)
 ```csharp
 using UnityEngine;
 using TMPro;
@@ -400,7 +398,7 @@ public class ConditionalEventReceiver : MonoBehaviour
 
     private void Start()
     {
-        // Store closed positions for animation
+        // アニメーション用に閉じた位置を保存
         if(leftDoor) _leftClosedPos = leftDoor.localPosition;
         if(rightDoor) _rightClosedPos = rightDoor.localPosition;
         
@@ -408,24 +406,24 @@ public class ConditionalEventReceiver : MonoBehaviour
     }
 
     /// <summary>
-    /// [Event Callback - Condition Gated]
+    /// [イベントコールバック - 条件により保護]
     /// 
-    /// CRITICAL: This method contains NO validation logic!
+    /// 重要：このメソッドには検証ロジックが一切含まれていません！
     /// 
-    /// The GameEvent Condition Tree acts as the gatekeeper.
-    /// If this method executes, it means ALL conditions evaluated to TRUE:
-    /// - Power is ON
-    /// - AND at least one of: Admin level, Valid dept, or Lucky random
+    /// GameEvent の条件ツリーがゲートキーパーとして機能します。
+    /// このメソッドが実行されたということは、すべての条件が TRUE と判定されたことを意味します：
+    /// - 電源が ON である
+    /// - かつ、管理者レベル、有効な部門、またはラッキーなランダム値のいずれか
     /// 
-    /// This separation allows designers to modify access rules in the Editor
-    /// without touching code.
+    /// この分離により、デザイナーはコードを触ることなくエディタ上で
+    /// アクセスルールを自由に変更できます。
     /// </summary>
     public void OpenVault(AccessCard card)
     {
         if (_isOpen) return;
 
-        Debug.Log($"<color=green>[Vault] ACCESS GRANTED to {card.holderName}. " +
-                  "Opening doors.</color>");
+        Debug.Log($"<color=green>[Vault] {card.holderName} にアクセスが許可されました。" +
+                  "ドアを開けます。</color>");
         
         StartCoroutine(OpenSequenceRoutine(card.holderName));
     }
@@ -435,7 +433,7 @@ public class ConditionalEventReceiver : MonoBehaviour
         _isOpen = true;
         UpdateStatusText("ACCESS GRANTED", Color.green);
 
-        // Spawn steam VFX
+        // 蒸気VFXの生成
         if (doorROOT != null && steamVFXPrefab != null)
         {
             Vector3 spawnPos = doorROOT.position;
@@ -446,7 +444,7 @@ public class ConditionalEventReceiver : MonoBehaviour
             Destroy(vfxInstance.gameObject, 2.0f);
         }
         
-        // Open doors (slide outward)
+        // ドアを開く (外側へスライド)
         float t = 0;
         while(t < 1f)
         {
@@ -463,7 +461,7 @@ public class ConditionalEventReceiver : MonoBehaviour
         yield return new WaitForSeconds(2.0f);
         UpdateStatusText("CLOSING...", Color.yellow);
         
-        // Close doors (slide back)
+        // ドアを閉じる (元の位置へスライド)
         t = 0;
         while(t < 1f)
         {
@@ -492,77 +490,77 @@ public class ConditionalEventReceiver : MonoBehaviour
 }
 ```
 
-**Key Points:**
-- 🎯 **Zero Conditional Logic** - No `if` statements checking credentials
-- 🔓 **Trust-Based Execution** - If called, all conditions already passed
-- 🎨 **Pure Presentation** - Just plays door animation and VFX
-- 🏗️ **Separation of Concerns** - Validation (data) vs Action (behavior)
+**ポイント:**
+- 🎯 **条件ロジック・ゼロ** - 認証情報をチェックする `if` 文は存在しません。
+- 🔓 **信頼に基づく実行** - 呼び出された時点で、条件はパス済みであることが保証されます。
+- 🎨 **純粋な演出** - ドアのアニメーションとVFXのみに専念します。
+- 🏗️ **関心の分離** - 検証（データ）とアクション（振る舞い）の分離。
 
 ---
 
-### 🔌 SecurityGrid.cs (Scene State)
+### 🔌 SecurityGrid.cs (シーン状態)
 ```csharp
 using UnityEngine;
 
 public class SecurityGrid : MonoBehaviour
 {
-    // This public property is read by the condition tree
+    // このパブリックプロパティは条件ツリーから読み取られます
     public bool IsPowerOn = true;
 
     public void TogglePower()
     {
         IsPowerOn = !IsPowerOn;
         
-        // Update visuals...
-        Debug.Log($"[Environment] Power System is now: {(IsPowerOn ? "ONLINE" : "OFFLINE")}");
+        // ビジュアルの更新など...
+        Debug.Log($"[Environment] 電源システムは現在: {(IsPowerOn ? "ONLINE" : "OFFLINE")} です。");
     }
 }
 ```
 
-**Key Points:**
-- 🔌 **Public State** - `IsPowerOn` is accessible to condition tree
-- 📍 **Scene Object** - Condition references this specific GameObject instance
-- 🎮 **Runtime Changes** - Toggling power immediately affects condition evaluation
+**ポイント:**
+- 🔌 **パブリックな状態** - `IsPowerOn` は条件ツリーからアクセス可能です。
+- 📍 **シーンオブジェクト** - 条件はこの特定の GameObject インスタンスを参照します。
+- 🎮 **ランタイムでの変更** - 電源の切り替えは、即座に条件の評価結果に反映されます。
 
 ---
 
-## 🔑 Key Takeaways
+## 🔑 重要なまとめ
 
-| Concept                  | Implementation                                         |
+| コンセプト              | 実装内容                                               |
 | ------------------------ | ------------------------------------------------------ |
-| 🎯 **Visual Logic**       | Build complex conditions without writing code          |
-| 🌳 **Tree Structure**     | AND/OR groups allow nested branching logic             |
-| 📍 **Scene References**   | Read properties directly from GameObjects in the scene |
-| 🎲 **Random Conditions**  | Built-in random value source for chance-based logic    |
-| 🔀 **Argument Access**    | Reference event data properties in conditions          |
-| 🚪 **Gatekeeper Pattern** | Conditions control whether callbacks execute           |
+| 🎯 **ビジュアルロジック** | コードを書かずに複雑な条件を構築可能                    |
+| 🌳 **ツリー構造**         | AND/OR グループにより、高度な分岐ロジックが可能         |
+| 📍 **シーン参照**         | シーン内の GameObject のプロパティを直接読み取れる       |
+| 🎲 **ランダム条件**       | 確率ベースのロジック用ソースを標準搭載                  |
+| 🔀 **引数へのアクセス**    | 条件内でイベントデータのプロパティを参照可能            |
+| 🚪 **ゲートキーパー**      | 条件がコールバックを実行するかどうかを厳密に制御する     |
 
-:::note 🎓 Design Insight
+:::note 🎓 設計の洞察
 
-The Visual Condition Tree is perfect for:
+ビジュアル条件ツリーは以下のようなシステムに最適です：
 
-- **Access control systems** - Doors, terminals, restricted areas
-- **Quest requirements** - Check multiple conditions before quest completion
-- **Buff activation** - Only apply effects if prerequisites met
-- **AI behavior** - Decision trees for enemy reactions
-- **Loot systems** - Validate drop conditions (level, luck, location)
+- **アクセス制御システム** - ドア、ターミナル、制限区域
+- **クエスト要件** - クエスト完了前に複数の条件をチェック
+- **バフの有効化** - 前提条件が満たされている場合のみ効果を適用
+- **AI の挙動** - 敵の反応を決定するディシジョンツリー
+- **アイテムドロップ** - ドロップ条件（レベル、運、場所など）の検証
 
-By moving logic into data (the condition tree asset), you enable **designers** to tune gameplay rules without programmer intervention!
+ロジックをデータ（条件ツリーアセット）に移行することで、**デザイナー**がプログラマーの介入なしにゲームプレイのルールを調整できるようになります！
 
 :::
 
 ---
 
-## 🎯 What's Next?
+## 🎯 次のステップは？
 
-You've mastered conditional logic. Now let's explore **time-based event control** with delays and scheduling.
+条件付きロジックをマスターしました。次は、遅延や予約実行による **時間ベースのイベント制御** について見ていきましょう。
 
-**Next Chapter**: Learn about delayed execution in **[07 Delayed Event](./07-delayed-event.md)**
+**次の章**: 遅延実行について学ぶ **[07 遅延イベント](./07-delayed-event.md)**
 
 ---
 
-## 📚 Related Documentation
+## 📚 関連ドキュメント
 
-- **[Visual Condition Tree](../visual-workflow/visual-condition-tree.md)** - Complete guide to condition builder
-- **[Game Event Behavior](../visual-workflow/game-event-behavior.md)** - How to configure action conditions
-- **[Best Practices](../scripting/best-practices.md)** - Patterns for data-driven design
+- **[ビジュアル条件ツリー](../visual-workflow/visual-condition-tree.md)** - 条件ビルダーの完全ガイド
+- **[ゲームイベントビヘイビア](../visual-workflow/game-event-behavior.md)** - アクション条件の設定方法
+- **[ベストプラクティス](../scripting/best-practices.md)** - データ駆動型設計のパターン

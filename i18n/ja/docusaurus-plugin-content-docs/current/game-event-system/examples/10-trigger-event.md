@@ -1,328 +1,327 @@
 ﻿---
-sidebar_label: '10 Trigger Event'
+sidebar_label: '10 トリガーイベント'
 sidebar_position: 11
 ---
 
 import VideoGif from '@site/src/components/Video/VideoGif';
 
-# 10 Trigger Event: Parallel Event Dispatch
+# 10 トリガーイベント：イベントの並列配信
 
 <!-- <VideoGif src="/video/game-event-system/10-trigger-event.mp4" /> -->
 
-## 📋 Overview
+## 📋 概要
 
-In complex games, one action (like "Attack Command") often needs to trigger multiple independent systems: combat logic, sound effects, UI updates, achievements, analytics, etc. Implementing this in code leads to bloated functions with dozens of lines. The **Flow Graph** visualizes this as **parallel dispatch**—one root event fans out to multiple conditional branches, each with its own priority and filtering logic.
+複雑なゲームにおいて、一つのアクション（例：「攻撃命令」）が複数の独立したシステム（戦闘ロジック、SE、UI更新、実績、分析など）をトリガーする必要があることは珍しくありません。これをコードだけで実装すると、関数が数十行にわたって肥大化してしまいます。**フローグラフ (Flow Graph)** は、これを**並列配信 (Parallel Dispatch)** として視覚化します。一つのルートイベントが複数の条件付きブランチに枝分かれし、それぞれが独自の優先度とフィルタリングロジックを持ちます。
 
-:::tip 💡 What You'll Learn
-- How to use the Flow Graph for visual event routing
-- Parallel execution vs sequential priority ordering
-- Conditional branching with node conditions
-- Type conversion and argument filtering in trigger nodes
-- The difference between Trigger Events and Chain Events
+:::tip 💡 学べること
+- ビジュアルなイベントルーティングにフローグラフを使用する方法
+- 並列実行とシーケンシャルな優先順位付けの違い
+- ノード条件を使用した条件分岐
+- トリガーノードにおける型変換と引数のフィルタリング
+- トリガーイベントとチェーンイベントの違い
 
 :::
 
 ---
 
-## 🎬 Demo Scene
+## 🎬 デモシーン
 ```
 Assets/TinyGiants/GameEventSystem/Demo/10_TriggerEvent/10_TriggerEvent.unity
 ```
 
-### Scene Composition
+### シーン構成
 
-**Visual Elements:**
-- 🔴 **Turret_A (Left)** - Red "Smart" turret
-  - Priority Order: Buff (100) → Fire (50)
-  - Result: **Critical Hit**
+**視覚的要素:**
+- 🔴 **Turret_A (左)** - 赤色の「スマート」タレット
+  - 優先順位: バフ (100) → 発射 (50)
+  - 結果: **クリティカルヒット**
   
-- 🔵 **Turret_B (Right)** - Blue "Glitchy" turret
-  - Priority Order: Fire (100) → Buff (30)
-  - Result: **Weak Hit** (buff arrives too late)
+- 🔵 **Turret_B (右)** - 青色の「不具合」タレット
+  - 優先順位: 発射 (100) → バフ (30)
+  - 結果: **通常ヒット** (バフの適用が遅すぎる)
 
-- 🎯 **TargetDummy** - Center capsule target
-  - Receives damage from both turrets
-  - Has Rigidbody for physics reactions
+- 🎯 **TargetDummy** - 中央のターゲット（カプセル）
+  - 両方のタレットからダメージを受けます
+  - 物理反応用の Rigidbody を保持しています
 
-- 📺 **HoloDisplay** - Information panel
-  - Displays damage data logs
-  - Shows "SYSTEM READY" by default
-  - Updates with damage info when triggered
+- 📺 **HoloDisplay** - 情報パネル
+  - ダメージデータのログを表示します
+  - デフォルトは「SYSTEM READY」を表示
+  - トリガー時にダメージ情報を更新します
 
-- 🚨 **AlarmVignette** - Fullscreen red overlay
-  - Flashes when global alarm triggers
-  - Independent of turret-specific branches
+- 🚨 **AlarmVignette** - フルスクリーンの赤色オーバーレイ
+  - グローバルアラーム発生時に点滅します
+  - タレット固有のブランチとは独立しています
 
-**UI Layer (Canvas):**
-- 🎮 **Two Command Buttons** - Bottom of the screen
-  - "Command A" → Triggers `TriggerEventRaiser.CommandTurretA()`
-  - "Command B" → Triggers `TriggerEventRaiser.CommandTurretB()`
+**UIレイヤー (Canvas):**
+- 🎮 **2つのコマンドボタン** - 画面下部
+  - 「Command A」➔ `TriggerEventRaiser.CommandTurretA()` を実行
+  - 「Command B」➔ `TriggerEventRaiser.CommandTurretB()` を実行
 
-**Game Logic Layer:**
-- 📤 **TriggerEventRaiser** - Command issuer
-  - Only references **ONE** root event: `onCommand`
-  - Completely unaware of downstream events
-  - Ultimate decoupling demonstration
+**ゲームロジックレイヤー:**
+- 📤 **TriggerEventRaiser** - 命令の発行者
+  - **ただ一つの**ルートイベント `onCommand` のみを参照
+  - 下流のイベントについては一切関知しません
+  - 究極のデカップリングの実演
 
-- 📥 **TriggerEventReceiver** - Action executor
-  - Contains 5 independent action methods
-  - Flow Graph orchestrates which methods execute when
-  - Methods have different signatures (void, single arg, dual args)
+- 📥 **TriggerEventReceiver** - アクションの実行者
+  - 5つの独立したアクションメソッドを保持
+  - フローグラフがどのメソッドをいつ実行するかを管理
+  - メソッドは異なるシグネチャ（void、単一引数、二重引数）を持ちます
 
 ---
 
-## 🎮 How to Interact
+## 🎮 操作方法
 
-### The Parallel Dispatch Experiment
+### 並列配信の実験
 
-One root event (`onCommand`) splits into multiple parallel branches based on conditions and priorities.
-
----
-
-### Step 1: Enter Play Mode
-
-Press the **Play** button in Unity.
-
-**Initial State:**
-- Two turrets idle (slow rotation sweep)
-- HoloDisplay shows "SYSTEM READY"
-- No alarm vignette visible
+一つのルートイベント (`onCommand`) が、条件と優先度に基づいて複数の並列ブランチに分かれます。
 
 ---
 
-### Step 2: Test Smart Turret (Correct Priority)
+### ステップ 1: プレイモードに入る
 
-**Click "Command A":**
+Unity の **Play** ボタンを押します。
 
-**What Happens:**
-1. 🎯 Red turret rotates toward target (fast tracking)
-2. 🚀 Projectile fires and travels
-3. 💥 **On impact** - Root event raised with `Turret_A` as sender
-
-**Parallel Execution Branches:**
-
-**Branch 1: Turret A Specific (Conditional):**
-- ✅ **onActiveBuff** (Priority 100)
-  - Condition: `sender.name.Contains("Turret_A")` → **TRUE**
-  - Executes FIRST due to highest priority
-  - Turret turns **gold**, buff aura spawns
-  - Sets `_isBuffedA = true`
-  - Console: `[Receiver] (A) SYSTEM OVERCHARGE: Buff Activated for Turret_A.`
-  
-- ✅ **onTurretFire** (Priority 50)
-  - Condition: `sender.name.Contains("Turret_A")` → **TRUE**
-  - Executes SECOND (lower priority than Buff)
-  - Checks `_isBuffedA` → finds it TRUE
-  - Result: **CRIT! -500** damage
-  - Orange floating text, explosion VFX, camera shake
-  - Console: `[Receiver] (B) TURRET HIT: Critical Strike! (500 dmg)`
-
-**Branch 2: Global (Unconditional):**
-- ✅ **onHoloData** (Priority 1s delay)
-  - No condition → always executes
-  - Type conversion: Drops `GameObject` sender, passes only `DamageInfo`
-  - HoloDisplay updates: "Damage DATA Type: Physical, Target: 100"
-  - Console: `[Receiver] (C) HOLO DATA: Recorded 100 damage packet.`
-  
-- ✅ **onGlobalAlarm** (Priority immediate, void)
-  - No condition → always executes
-  - Type conversion: Drops all arguments
-  - Screen flashes red 3 times
-  - Alarm sound plays
-  - Console: `[Receiver] (D) ALARM: HQ UNDER ATTACK! EMERGENCY PROTOCOL!`
-  
-- ✅ **onSecretFire** (Priority 1s delay, argument blocked)
-  - No condition → always executes
-  - **PassArgument = false** → receives default/null values
-  - Console: `[Receiver] (E) SECURE LOG: Data transmission blocked by Graph.`
-
-**Result:** ✅ Smart turret achieves critical hit because buff applied BEFORE damage calculation.
+**初期状態:**
+- 2つのタレットが待機中（ゆっくりとした回転巡回）
+- ホロディスプレイに「SYSTEM READY」と表示
+- アラームビネットは非表示
 
 ---
 
-### Step 3: Test Glitchy Turret (Wrong Priority)
+### ステップ 2: スマートタレットのテスト (正しい優先度)
 
-**Click "Command B":**
+**「Command A」をクリック:**
 
-**What Happens:**
-1. 🎯 Blue turret rotates toward target
-2. 🚀 Projectile fires and travels
-3. 💥 **On impact** - Root event raised with `Turret_B` as sender
+**何が起きるか:**
+1. 🎯 赤タレットがターゲットの方を向きます（高速トラッキング）
+2. 🚀 弾丸が発射され、飛んでいきます
+3. 💥 **着弾時** - `Turret_A` を送信元 (Sender) としてルートイベントが発行されます
 
-**Parallel Execution Branches:**
+**並列実行ブランチ:**
 
-**Branch 1: Turret B Specific (Conditional):**
-- ❌ **onActiveBuff** (Turret A condition)
-  - Condition: `sender.name.Contains("Turret_A")` → **FALSE**
-  - **NOT EXECUTED** - filtered out by condition
+**ブランチ 1: Turret A 専用 (条件付き):**
+- ✅ **onActiveBuff** (優先度 100)
+  - 条件: `sender.name.Contains("Turret_A")` ➔ **TRUE**
+  - 最優先のため「最初」に実行されます
+  - タレットが**ゴールド**になり、バフオーラが生成されます
+  - `_isBuffedA = true` を設定
+  - コンソール: `[Receiver] (A) SYSTEM OVERCHARGE: Buff Activated for Turret_A.`
+  
+- ✅ **onTurretFire** (優先度 50)
+  - 条件: `sender.name.Contains("Turret_A")` ➔ **TRUE**
+  - 「二番目」に実行されます（バフより優先度が低いため）
+  - `_isBuffedA` をチェック ➔ TRUE であることを確認
+  - 結果: **CRIT! -500** ダメージ
+  - オレンジ色の数値、爆発VFX、カメラシェイクが発生
+  - コンソール: `[Receiver] (B) TURRET HIT: Critical Strike! (500 dmg)`
 
-- ✅ **onTurretFire** (Priority 100) - *Different node than Turret A*
-  - Condition: `sender.name.Contains("Turret_B")` → **TRUE**
-  - Executes FIRST (highest priority in Turret B branch)
-  - Checks `_isBuffedB` → finds it **FALSE** (buff hasn't run yet)
-  - Result: **-100** normal damage
-  - Grey floating text, small explosion
-  - Console: `[Receiver] (B) TURRET HIT: Normal Hit. (100 dmg)`
+**ブランチ 2: グローバル (無条件):**
+- ✅ **onHoloData** (優先度 1秒遅延)
+  - 条件なし ➔ 常に実行されます
+  - 型変換: `GameObject` 送信元を破棄し、`DamageInfo` のみを渡します
+  - ホロディスプレイ更新: "Damage DATA Type: Physical, Target: 100"
+  - コンソール: `[Receiver] (C) HOLO DATA: Recorded 100 damage packet.`
+  
+- ✅ **onGlobalAlarm** (優先度 即時, void)
+  - 条件なし ➔ 常に実行されます
+  - 型変換: すべての引数を破棄します
+  - 画面が赤く3回点滅
+  - アラーム音が再生
+  - コンソール: `[Receiver] (D) ALARM: HQ UNDER ATTACK! EMERGENCY PROTOCOL!`
+  
+- ✅ **onSecretFire** (優先度 1秒遅延, 引数ブロック)
+  - 条件なし ➔ 常に実行されます
+  - **PassArgument = false** ➔ デフォルト値/nullを受け取ります
+  - コンソール: `[Receiver] (E) SECURE LOG: Data transmission blocked by Graph.`
 
-- ✅ **onActiveBuff** (Priority 30) - *Different node than Turret A*
-  - Condition: `sender.name.Contains("Turret_B")` → **TRUE**
-  - Executes SECOND (lower priority)
-  - Turret turns **gold**, buff aura spawns
-  - Sets `_isBuffedB = true` **TOO LATE!**
-  - Console: `[Receiver] (A) SYSTEM OVERCHARGE: Buff Activated for Turret_B.`
+**結果:** ✅ ダメージ計算の「前」にバフが適用されたため、スマートタレットはクリティカルヒットを達成しました。
 
-**Branch 2: Global (Unconditional):**
-- Same 3 global nodes execute (onHoloData, onGlobalAlarm, onSecretFire)
-- Independent of which turret fired
+---
 
-**Result:** ❌ Glitchy turret gets normal hit because damage calculated BEFORE buff applied.
+### ステップ 3: 不具合タレットのテスト (誤った優先度)
 
-:::note 🔑 Key Observation
+**「Command B」をクリック:**
 
-Both turrets trigger the same root event (`onCommand`), but:
+**何が起きるか:**
+1. 🎯 青タレットがターゲットの方を向きます
+2. 🚀 弾丸が発射され、飛んでいきます
+3. 💥 **着弾時** - `Turret_B` を送信元としてルートイベントが発行されます
 
-- **Conditional nodes** filter by sender name
-- **Priority order** within each branch determines outcome
-- **Global nodes** execute regardless of sender
-- All branches evaluate **in parallel** (same frame)
+**並列実行ブランチ:**
+
+**ブランチ 1: Turret B 専用 (条件付き):**
+- ❌ **onActiveBuff** (Turret A 用の条件)
+  - 条件: `sender.name.Contains("Turret_A")` ➔ **FALSE**
+  - **実行されません** - 条件によってフィルタリングされました
+
+- ✅ **onTurretFire** (優先度 100) - *Turret A とは別のノード*
+  - 条件: `sender.name.Contains("Turret_B")` ➔ **TRUE**
+  - 「最初」に実行されます（Turret B ブランチ内で最高優先度）
+  - `_isBuffedB` をチェック ➔ **FALSE** (バフがまだ実行されていない)
+  - 結果: **-100** 通常ダメージ
+  - グレーの数値、小さな爆発が発生
+  - コンソール: `[Receiver] (B) TURRET HIT: Normal Hit. (100 dmg)`
+
+- ✅ **onActiveBuff** (優先度 30) - *Turret A とは別のノード*
+  - 条件: `sender.name.Contains("Turret_B")` ➔ **TRUE**
+  - 「二番目」に実行されます（優先度が低いため）
+  - タレットがゴールドになり、バフオーラが生成されます
+  - `_isBuffedB = true` を設定。**遅すぎます！**
+  - コンソール: `[Receiver] (A) SYSTEM OVERCHARGE: Buff Activated for Turret_B.`
+
+**ブランチ 2: グローバル (無条件):**
+- グローバルな3つのノード（onHoloData, onGlobalAlarm, onSecretFire）が同様に実行されます
+- どちらのタレットが発射したかには依存しません
+
+**結果:** ❌ バフが適用される「前」にダメージが計算されたため、不具合タレットは通常ヒットになりました。
+
+:::note 🔑 重要な観察ポイント
+
+どちらのタレットも同じルートイベント (`onCommand`) をトリガーしますが：
+
+- **条件付きノード**が送信元名でフィルタリングを行います
+- 各ブランチ内の**優先順位**が結果を左右します
+- **グローバルノード**は送信元に関係なく実行されます
+- すべてのブランチは**並列**（同じフレーム内）で評価されます
 
 :::
 
 ---
 
-## 🏗️ Scene Architecture
+## 🏗️ シーンのアーキテクチャ
 
-### Parallel vs Sequential Execution
+### 並列実行 vs 直列実行
 
-**Traditional Sequential Code:**
+**従来の直列的なコード:**
 ```csharp
 void OnAttackCommand(GameObject sender, DamageInfo info)
 {
     if (sender.name == "Turret_A") ActivateBuff(sender, info);
     TurretHit(sender, info);
-    if (sender.name == "Turret_A") ActivateBuff(sender, info); // Wrong order!
+    if (sender.name == "Turret_A") ActivateBuff(sender, info); // 順序が間違い！
     HoloDamageData(info);
     GlobalAlarm();
     LogSecretAccess(sender, info);
 }
 ```
 
-**Flow Graph Parallel Dispatch:**
+**フローグラフによる並列配信:**
 ```
-📡 Root: onCommand.Raise(sender, info)
+📡 ルート: onCommand.Raise(sender, info)
 │
-├─ 🔱 [ Conditional Branch: Turret A ] ➔ 🛡️ Guard: `Sender == "Turret_A"`
-│  ├─ 💎 [Prio: 100] ➔ onActiveBuff()   ✅ Executes 1st
-│  └─ ⚡ [Prio: 50 ] ➔ onTurretFire()   ✅ Executes 2nd
+├─ 🔱 [ 条件ブランチ: Turret A ] ➔ 🛡️ ガード: `Sender == "Turret_A"`
+│  ├─ 💎 [Prio: 100] ➔ onActiveBuff()   ✅ 最初に実行
+│  └─ ⚡ [Prio: 50 ] ➔ onTurretFire()   ✅ 次に実行
 │
-├─ 🔱 [ Conditional Branch: Turret B ] ➔ 🛡️ Guard: `Sender == "Turret_B"`
-│  ├─ ⚡ [Prio: 100] ➔ onTurretFire()   ✅ Executes 1st
-│  └─ 💎 [Prio: 30 ] ➔ onActiveBuff()   ✅ Executes 2nd
+├─ 🔱 [ 条件ブランチ: Turret B ] ➔ 🛡️ ガード: `Sender == "Turret_B"`
+│  ├─ ⚡ [Prio: 100] ➔ onTurretFire()   ✅ 最初に実行
+│  └─ 💎 [Prio: 30 ] ➔ onActiveBuff()   ✅ 次に実行
 │
-└─ 🌍 [ Global Branch: Always Run ]   ➔ 🟢 Guard: `None (Always Pass)`
-   ├─ 📽️ onHoloData       ⏱️ Delay: 1.0s | 🔢 Single Arg
-   ├─ 🚨 onGlobalAlarm    ⚡ Immediate   | 🔘 Void (Signal Only)
-   └─ 🕵️ onSecretFire     ⏱️ Delay: 1.0s | 🛡️ Blocked Args
+└─ 🌍 [ グローバルブランチ: 常に実行 ] ➔ 🟢 ガード: `なし (常にパス)`
+   ├─ 📽️ onHoloData       ⏱️ 遅延: 1.0秒 | 🔢 単一引数
+   ├─ 🚨 onGlobalAlarm    ⚡ 即時        | 🔘 Void (信号のみ)
+   └─ 🕵️ onSecretFire     ⏱️ 遅延: 1.0秒 | 🛡️ 引数をブロック
 ```
 
-**Execution Behavior:**
-- All branches evaluate simultaneously (parallel)
-- Conditions filter which nodes execute
-- Priority determines order within passing branches
-- Type conversion happens automatically per node
+**実行の振る舞い:**
+- すべてのブランチが同時に評価されます（並列）
+- 条件によってどのノードが実行されるかフィルタリングされます
+- 優先度によってパスしたブランチ内の順序が決まります
+- 型変換はノードごとに自動的に行われます
 
 ---
 
-### Event Definitions
+### イベント定義 (Event Definitions)
 
 ![Game Event Editor](/img/game-event-system/examples/10-trigger-event/demo-10-editor.png)
 
-| Event Name      | Type                                | Role     | Color |
+| イベント名      | 型                                  | 役割     | カラー |
 | --------------- | ----------------------------------- | -------- | ----- |
-| `onCommand`     | `GameEvent<GameObject, DamageInfo>` | **Root** | Gold  |
-| `onActiveBuff`  | `GameEvent<GameObject, DamageInfo>` | Trigger  | Green |
-| `onTurretFire`  | `GameEvent<GameObject, DamageInfo>` | Trigger  | Green |
-| `onHoloData`    | `GameEvent<DamageInfo>`             | Trigger  | Green |
-| `onGlobalAlarm` | `GameEvent` (void)                  | Trigger  | Green |
-| `onSecretFire`  | `GameEvent<GameObject, DamageInfo>` | Trigger  | Green |
+| `onCommand`     | `GameEvent<GameObject, DamageInfo>` | **ルート** | ゴールド |
+| `onActiveBuff`  | `GameEvent<GameObject, DamageInfo>` | トリガー  | グリーン |
+| `onTurretFire`  | `GameEvent<GameObject, DamageInfo>` | トリガー  | グリーン |
+| `onHoloData`    | `GameEvent<DamageInfo>`             | トリガー  | グリーン |
+| `onGlobalAlarm` | `GameEvent` (void)                  | トリガー  | グリーン |
+| `onSecretFire`  | `GameEvent<GameObject, DamageInfo>` | トリガー  | グリーン |
 
-**Key Insight:**
-- **Root event** (gold): Only one directly raised by code
-- **Trigger events** (green): Automatically triggered by Flow Graph
-- Code only knows about `onCommand`—completely decoupled from downstream logic
+**重要な洞察:**
+- **ルートイベント**（ゴールド）：コードから直接発行される唯一のイベント
+- **トリガーイベント**（グリーン）：フローグラフによって自動的にトリガーされるイベント
+- コード側は `onCommand` しか知りません。下流のロジックからは完全にデカップリングされています。
 
 ---
 
-### Flow Graph Configuration
+### フローグラフの設定
 
-Click **"Flow Graph"** button in the Game Event Editor to open the visual graph:
+Game Event Editor の **"Flow Graph"** ボタンをクリックして、ビジュアルグラフを開きます：
 
 ![Flow Graph Overview](/img/game-event-system/examples/10-trigger-event/demo-10-graph.png)
 
-**Graph Structure:**
+**グラフ構造:**
 
-**Root Node (Left, Red):**
-
+**ルートノード (左側, 赤):**
 - `onCommand <GameObject, DamageInfo>`
-- Entry point for entire graph
-- Single node raised by code
+- グラフ全体の入り口
+- コードから発行される唯一のノード
 
-**Turret A Branch (Top Right, Green):**
-- `onActiveBuff` (Priority: ★100, Condition: Turret_A, Pass: ✓)
-  - Highest priority in branch
-  - Only executes if sender is Turret_A
-- `onTurretFire` (Priority: ★50, Condition: Turret_A, Pass: ✓)
-  - Second priority
-  - Only executes if sender is Turret_A
+**Turret A ブランチ (右上, 緑):**
+- `onActiveBuff` (優先度: ★100, 条件: Turret_A, Pass: ✓)
+  - ブランチ内で最高優先度
+  - 送信元が Turret_A の場合のみ実行
+- `onTurretFire` (優先度: ★50, 条件: Turret_A, Pass: ✓)
+  - 優先順位2位
+  - 送信元が Turret_A の場合のみ実行
 
-**Turret B Branch (Middle Right, Green):**
-- `onTurretFire` (Priority: ★100, Condition: Turret_B, Pass: ✓)
-  - Highest priority in branch
-  - Only executes if sender is Turret_B
-- `onActiveBuff` (Priority: ★30, Condition: Turret_B, Pass: ✓)
-  - Lower priority (executes after Fire!)
-  - Only executes if sender is Turret_B
+**Turret B ブランチ (中央右, 緑):**
+- `onTurretFire` (優先度: ★100, 条件: Turret_B, Pass: ✓)
+  - ブランチ内で最高優先度
+  - 送信元が Turret_B の場合のみ実行
+- `onActiveBuff` (優先度: ★30, 条件: Turret_B, Pass: ✓)
+  - 低優先度（発射の「後」に実行！）
+  - 送信元が Turret_B の場合のみ実行
 
-**Global Branch (Bottom Right, Yellow/Green):**
-- `onHoloData` (Delay: ⏱️1s, Pass: 🔴 Single Arg Only)
-  - Type conversion: `<GameObject, DamageInfo>` → `<DamageInfo>`
-  - Yellow line indicates type compatibility warning
+**グローバルブランチ (右下, 黄/緑):**
+- `onHoloData` (遅延: ⏱️1秒, Pass: 🔴 単一引数のみ)
+  - 型変換: `<GameObject, DamageInfo>` ➔ `<DamageInfo>`
+  - 黄色の線は型互換性の警告を示しています
 - `onGlobalAlarm` (Pass: ⭕ Void)
-  - Type conversion: `<GameObject, DamageInfo>` → `(void)`
-  - Drops all arguments
-- `onSecretFire` (Delay: ⏱️1s, Pass: 🔒 Static/Blocked)
+  - 型変換: `<GameObject, DamageInfo>` ➔ `(void)`
+  - すべての引数を破棄します
+- `onSecretFire` (遅延: ⏱️1秒, Pass: 🔒 静的/ブロック済み)
   - PassArgument = false
-  - Receives default/null values
+  - デフォルト値/nullを受け取ります
 
-**Legend:**
-- 🟢 **Green Lines:** Type match (compatible)
-- 🟡 **Yellow Lines:** Type conversion (compatible with data loss)
-- 🔴 **Red Lines:** Type incompatible (won't connect)
+**凡例:**
+- 🟢 **緑線:** 型が一致（互換性あり）
+- 🟡 **黄線:** 型変換（データ損失があるが互換性あり）
+- 🔴 **赤線:** 型の互換性なし（接続不可）
 
-:::tip 🎨 Visual Graph Benefits
+:::tip 🎨 ビジュアルグラフの利点
 
-The Flow Graph provides instant visual understanding of:
+フローグラフは以下のような内容を即座に視覚的に理解させてくれます：
 
-- Which events trigger which downstream events
-- Execution priorities within branches
-- Type conversions and argument passing
-- Conditional routing logic
-- Parallel execution structure
+- どのイベントがどの下流イベントをトリガーするか
+- 各ブランチ内での実行優先順位
+- 型変換と引数の受け渡し状況
+- 条件付きルーティングロジック
+- 並列実行の構造
 
 :::
 
 ---
 
-### Sender Setup (TriggerEventRaiser)
+### 発行側の設定 (TriggerEventRaiser)
 
-Select the **TriggerEventRaiser** GameObject:
+**TriggerEventRaiser** GameObject を選択します：
 
 ![TriggerEventRaiser Inspector](/img/game-event-system/examples/10-trigger-event/demo-10-inspector.png)
 
-**Game Event:**
+**ゲームイベント:**
 - `Command Event`: `onCommand`
-  - Tooltip: "The ONE event that triggers the whole graph"
-  - Type: `GameEvent<GameObject, DamageInfo>`
+  - ツールチップ: "グラフ全体をトリガーする『唯一』のイベント"
+  - 型: `GameEvent<GameObject, DamageInfo>`
 
 **Turret A (Smart):**
 - `Turret A`: Turret_A (GameObject)
@@ -334,41 +333,41 @@ Select the **TriggerEventRaiser** GameObject:
 - `Turret Head B`: Head (Transform)
 - `Turret Muzzle B`: MuzzlePoint (Transform)
 
-**Shared Resources:**
+**共有リソース:**
 - `Projectile Prefab`, `Muzzle Flash VFX`, `Hit Target`
 
-**Critical Observation:**
-Script only references **ONE** event. It has **NO KNOWLEDGE** of the 5 downstream events. This is ultimate decoupling—the Flow Graph handles all routing logic.
+**重要なポイント:**
+スクリプトは**ただ一つ**のイベントしか参照していません。下流にある5つのイベントについては**一切関知していません**。これこそが究極のデカップリングであり、フローグラフがすべてのルーティングロジックを処理しています。
 
 ---
 
-### Receiver Setup (TriggerEventReceiver)
+### 受信側の設定 (TriggerEventReceiver)
 
-Select the **TriggerEventReceiver** GameObject:
+**TriggerEventReceiver** GameObject を選択します：
 
 ![TriggerEventReceiver Inspector](/img/game-event-system/examples/10-trigger-event/demo-10-receiver.png)
 
-**Target References:**
+**ターゲット参照:**
 - `Target Dummy`, `Target Rigidbody`
 
-**Visual Resources:**
+**ビジュアルリソース:**
 - `Buff VFX Prefab`: TurretBuffAura (Particle System)
 - `Hit Normal VFX`, `Hit Crit VFX`, `Floating Text Prefab`
 
-**Alarm VFX:**
+**アラームVFX:**
 - `Alarm Screen Group`: AlarmVignette (Canvas Group)
 - `Holo Text`: LogText (Text Mesh Pro)
 
-**Turret Configurations:**
-- **Turret A:** Renderers array, Normal material
-- **Turret B:** Renderers array, Normal material
-- **Shared:** Buffed material (gold)
+**タレット設定:**
+- **Turret A:** レンダラー配列, 通常マテリアル
+- **Turret B:** レンダラー配列, 通常マテリアル
+- **共通:** バフ用マテリアル (ゴールド)
 
 ---
 
-## 💻 Code Breakdown
+## 💻 コード解説
 
-### 📤 TriggerEventRaiser.cs (Sender)
+### 📤 TriggerEventRaiser.cs (発行者)
 ```csharp
 using UnityEngine;
 using TinyGiants.GameEventSystem.Runtime;
@@ -376,29 +375,29 @@ using TinyGiants.GameEventSystem.Runtime;
 public class TriggerEventRaiser : MonoBehaviour
 {
     [Header("Game Event")]
-    [Tooltip("The ONE event that triggers the whole graph.")]
+    [Tooltip("グラフ全体をトリガーする唯一のイベント。")]
     [GameEventDropdown]
     public GameEvent<GameObject, DamageInfo> commandEvent;
 
     [Header("Turret A (Smart)")] 
     public GameObject turretA;
-    // ... turret references ...
+    // ... タレットの参照 ...
 
     private bool _isAttackingA;
     private bool _isAttackingB;
 
     /// <summary>
-    /// Button A: Signals Turret A to attack.
-    /// Starts the aiming sequence, which culminates in raising the root event.
+    /// ボタン A: Turret A に攻撃を指示。
+    /// 照準シーケンスを開始し、最終的にルートイベントを発行します。
     /// </summary>
     public void CommandTurretA()
     {
         if (commandEvent == null || turretA == null) return;
-        _isAttackingA = true; // Begin rotation/fire sequence
+        _isAttackingA = true; // 回転/発射シーケンスの開始
     }
 
     /// <summary>
-    /// Button B: Signals Turret B to attack.
+    /// ボタン B: Turret B に攻撃を指示。
     /// </summary>
     public void CommandTurretB()
     {
@@ -408,7 +407,7 @@ public class TriggerEventRaiser : MonoBehaviour
 
     private void FireProjectile(GameObject senderTurret, Transform muzzle)
     {
-        // Spawn muzzle flash, launch projectile...
+        // マズルフラッシュ生成、弾丸発射...
         
         var shell = Instantiate(projectilePrefab, muzzle.position, muzzle.rotation);
         shell.Initialize(hitTarget.position, 20f, () =>
@@ -417,29 +416,29 @@ public class TriggerEventRaiser : MonoBehaviour
             DamageInfo info = new DamageInfo(100f, false, DamageType.Physical, 
                                             hitPos, "Commander");
 
-            // CRITICAL: Raise the ONE root event
-            // The Flow Graph decides everything else:
-            // - Which downstream events trigger
-            // - In what priority order
-            // - With what arguments
+            // 重要: この「一つ」のルートイベントを発行するだけ
+            // それ以外のことはフローグラフが決定します：
+            // - どの日和見イベントをトリガーするか
+            // - どのような優先順位で行うか
+            // - どのような引数を渡すか
             commandEvent.Raise(senderTurret, info);
 
-            Debug.Log($"[Sender] Impact confirmed from {senderTurret.name}. " +
-                     "Event Raised.");
+            Debug.Log($"[Sender] {senderTurret.name} からの着弾を確認。" +
+                     "イベントを発行しました。");
         });
     }
 }
 ```
 
-**Key Points:**
-- 🎯 **Single Event Reference** - Only knows about root event
-- 🔇 **Zero Downstream Knowledge** - No idea about 5 trigger events
-- 📡 **Simple API** - Just `.Raise(sender, data)`
-- 🏗️ **Maximum Decoupling** - Flow Graph handles all routing
+**ポイント:**
+- 🎯 **単一イベント参照** - ルートイベントしか知りません。
+- 🔇 **下流の知識ゼロ** - 5つのトリガーイベントの存在すら知りません。
+- 📡 **シンプルな API** - 単に `.Raise(sender, data)` を呼ぶだけ。
+- 🏗️ **最大のデカップリング** - フローグラフがすべてのルーティングを担います。
 
 ---
 
-### 📥 TriggerEventReceiver.cs (Listener)
+### 📥 TriggerEventReceiver.cs (実行者)
 ```csharp
 using UnityEngine;
 using System.Collections;
@@ -450,23 +449,23 @@ public class TriggerEventReceiver : MonoBehaviour
     private bool _isBuffedB;
 
     /// <summary>
-    /// [Action A] Activate Buff
-    /// Bound to Trigger nodes in Flow Graph (separate nodes for Turret A and B).
+    /// [アクション A] バフの有効化
+    /// フローグラフ内のトリガーノードに紐付け（Turret A と B で個別のノード）。
     /// 
-    /// Priority Impact:
-    /// - Turret A: Priority 100 → Executes BEFORE damage (correct)
-    /// - Turret B: Priority 30 → Executes AFTER damage (wrong!)
+    /// 優先度の影響:
+    /// - Turret A: 優先度 100 ➔ ダメージ計算の「前」に実行（正解）
+    /// - Turret B: 優先度 30 ➔ ダメージ計算の「後」に実行（不正解！）
     /// </summary>
     public void ActivateBuff(GameObject sender, DamageInfo args)
     {
         if (sender == null) return;
         bool isA = sender.name.Contains("Turret_A");
 
-        // Set the critical flag
+        // クリティカルフラグを設定
         if (isA) _isBuffedA = true;
         else _isBuffedB = true;
 
-        // Visual feedback: Gold material + particle aura
+        // ビジュアルフィードバック: ゴールドマテリアル + パーティクルオーラ
         Renderer[] targetRenderers = isA ? renderersA : renderersB;
         foreach (var r in targetRenderers)
             if (r) r.material = mat_Buffed;
@@ -482,21 +481,21 @@ public class TriggerEventReceiver : MonoBehaviour
             else _auraB = vfx;
         }
 
-        Debug.Log($"[Receiver] (A) SYSTEM OVERCHARGE: Buff Activated for {sender.name}.");
+        Debug.Log($"[Receiver] (A) SYSTEM OVERCHARGE: {sender.name} のバフを有効化しました。");
     }
 
     /// <summary>
-    /// [Action B] Turret Hit
-    /// Bound to Trigger nodes in Flow Graph (separate nodes for Turret A and B).
+    /// [アクション B] タレット命中
+    /// フローグラフ内のトリガーノードに紐付け。
     /// 
-    /// Checks buff state AT MOMENT OF EXECUTION.
-    /// Priority determines whether buff is active yet.
+    /// 実行された「瞬間」のバフ状態をチェックします。
+    /// 優先度によって、バフが既に有効かどうかが決まります。
     /// </summary>
     public void TurretHit(GameObject sender, DamageInfo args)
     {
         if (sender == null) return;
 
-        // Check if buff is currently active
+        // 現在バフが有効かどうかを確認
         bool isBuffed = sender.name.Contains("Turret_A") ? _isBuffedA : _isBuffedB;
 
         float finalDamage = args.amount;
@@ -505,33 +504,33 @@ public class TriggerEventReceiver : MonoBehaviour
 
         if (isBuffed)
         {
-            // CRITICAL PATH: Buff was active
-            finalDamage *= 5f; // 500 damage
+            // クリティカルルート: バフが有効だった
+            finalDamage *= 5f; // 500 ダメージ
             isCrit = true;
             vfxToPlay = hitCritVFX;
             
             StartCoroutine(ShakeCameraRoutine(0.2f, 0.4f));
-            Debug.Log($"[Receiver] (B) TURRET HIT: Critical Strike! ({finalDamage} dmg)");
+            Debug.Log($"[Receiver] (B) TURRET HIT: クリティカル！ ({finalDamage} ダメージ)");
         }
         else
         {
-            // NORMAL PATH: Buff wasn't active yet
+            // 通常ルート: バフがまだ有効ではなかった
             vfxToPlay = hitNormalVFX;
-            Debug.Log($"[Receiver] (B) TURRET HIT: Normal Hit. ({finalDamage} dmg)");
+            Debug.Log($"[Receiver] (B) TURRET HIT: 通常ヒット。 ({finalDamage} ダメージ)");
         }
 
-        // Spawn VFX, apply physics, show floating text...
+        // VFX生成、物理適用、数値表示...
         StartCoroutine(ResetRoutine(sender, isBuffed));
     }
 
     /// <summary>
-    /// [Action C] Holo Damage Data
-    /// Bound to Trigger node with TYPE CONVERSION.
+    /// [アクション C] ホロ・ダメージデータ
+    /// 型変換（TYPE CONVERSION）を伴うトリガーノードに紐付け。
     /// 
-    /// Graph configuration:
-    /// - Input: GameEvent<GameObject, DamageInfo>
-    /// - Output: GameEvent<DamageInfo>
-    /// - Result: Sender is dropped, only data is passed
+    /// グラフ設定:
+    /// - 入力: GameEvent<GameObject, DamageInfo>
+    /// - 出力: GameEvent<DamageInfo>
+    /// - 結果: Sender が破棄され、データのみが渡されます
     /// </summary>
     public void HoloDamageData(DamageInfo info)
     {
@@ -540,34 +539,34 @@ public class TriggerEventReceiver : MonoBehaviour
             holoText.text = $"Damage DATA\nType: {info.type}, Target: {info.amount}";
         }
 
-        Debug.Log($"[Receiver] (C) HOLO DATA: Recorded {info.amount} damage packet.");
+        Debug.Log($"[Receiver] (C) HOLO DATA: {info.amount} ダメージパケットを記録しました。");
         StartCoroutine(ClearLogRoutine());
     }
 
     /// <summary>
-    /// [Action D] Global Alarm
-    /// Bound to Trigger node with TYPE CONVERSION to VOID.
+    /// [アクション D] グローバルアラーム
+    /// VOID への型変換を伴うトリガーノードに紐付け。
     /// 
-    /// Graph configuration:
-    /// - Input: GameEvent<GameObject, DamageInfo>
-    /// - Output: GameEvent (void)
-    /// - Result: All arguments dropped
+    /// グラフ設定:
+    /// - 入力: GameEvent<GameObject, DamageInfo>
+    /// - 出力: GameEvent (void)
+    /// - 結果: すべての引数が破棄されます
     /// </summary>
     public void GlobalAlarm()
     {
-        Debug.Log("[Receiver] (D) ALARM: HQ UNDER ATTACK! EMERGENCY PROTOCOL!");
+        Debug.Log("[Receiver] (D) ALARM: 本部が攻撃を受けています！緊急プロトコル発動！");
 
         StopCoroutine(nameof(AlarmRoutine));
         if (alarmScreenGroup) StartCoroutine(AlarmRoutine());
     }
 
     /// <summary>
-    /// [Action E] Secret Log
-    /// Bound to Trigger node with PassArgument = FALSE.
+    /// [アクション E] シークレットログ
+    /// PassArgument = FALSE のトリガーノードに紐付け。
     /// 
-    /// Demonstrates ARGUMENT BLOCKING:
-    /// Even though root event has data, this node receives default/null values.
-    /// Useful for security, debugging, or data isolation.
+    /// 「引数のブロッキング」の実演：
+    /// ルートイベントがデータを持っていても、このノードはデフォルト値/nullを受け取ります。
+    /// セキュリティ、デバッグ、またはデータの隔離に有用です。
     /// </summary>
     public void LogSecretAccess(GameObject sender, DamageInfo data)
     {
@@ -575,10 +574,10 @@ public class TriggerEventReceiver : MonoBehaviour
 
         if (isBlocked)
             Debug.Log("<color=lime>[Receiver] (E) SECURE LOG: " +
-                     "Data transmission blocked by Graph.</color>");
+                     "グラフによってデータ送信がブロックされました。</color>");
         else
             Debug.Log("<color=red>[Receiver] (E) SECURE LOG: " +
-                     "Data LEAKED! ({data.amount})</color>");
+                     "データ漏洩！ ({data.amount})</color>");
     }
 
     private IEnumerator AlarmRoutine()
@@ -590,7 +589,7 @@ public class TriggerEventReceiver : MonoBehaviour
         {
             if (alarmClip) _audioSource.PlayOneShot(alarmClip);
 
-            // Sine wave alpha animation
+            // サイン波によるアルファアニメーション
             float t = 0f;
             while (t < flashDuration)
             {
@@ -607,70 +606,69 @@ public class TriggerEventReceiver : MonoBehaviour
 }
 ```
 
-**Key Points:**
-- 🎯 **5 Independent Methods** - Each handles one action
-- 🔀 **Different Signatures** - void, single arg, dual args
-- 📊 **State Dependency** - `TurretHit` reads `_isBuffedA/B` flags
-- ⏱️ **Priority Critical** - Order determines if buff is active
-- 🎨 **Type Agnostic** - Methods don't know about type conversion
+**ポイント:**
+- 🎯 **5つの独立したメソッド** - 各メソッドが一つのアクションを担当。
+- 🔀 **異なるシグネチャ** - void、単一引数、二重引数に対応。
+- 📊 **状態への依存** - `TurretHit` が `_isBuffedA/B` フラグを読み取ります。
+- ⏱️ **優先度が重要** - 順序によってバフが有効かどうかが決まります。
+- 🎨 **型に依存しない** - メソッド側は型変換が行われていることを知りません。
 
 ---
 
-## 🔑 Key Takeaways
+## 🔑 重要なまとめ
 
-| Concept                   | Implementation                                  |
+| コンセプト                | 実装内容                                        |
 | ------------------------- | ----------------------------------------------- |
-| 🌳 **Flow Graph**          | Visual parallel dispatch replacing bloated code |
-| 🎯 **Trigger Nodes**       | Automatically fired downstream events           |
-| 📋 **Conditional Routing** | Node conditions filter execution                |
-| ⏱️ **Priority Ordering**   | Controls execution sequence within branches     |
-| 🔀 **Type Conversion**     | Automatic argument adaptation per node          |
-| 🔒 **Argument Blocking**   | PassArgument flag controls data transmission    |
-| 📡 **Parallel Execution**  | All branches evaluate simultaneously            |
+| 🌳 **フローグラフ**          | 肥大化したコードを置き換える視覚的な並列配信      |
+| 🎯 **トリガーノード**       | 自動的に下流イベントを発火させる仕組み            |
+| 📋 **条件付きルーティング** | ノード条件によって実行をフィルタリング            |
+| ⏱️ **優先順位付け**         | ブランチ内での実行シーケンスを制御                |
+| 🔀 **型変換**              | ノードごとに引数を自動的に適応                    |
+| 🔒 **引数のブロッキング**    | PassArgument フラグによるデータ送信の制御        |
+| 📡 **並列実行**            | すべてのブランチを同時に評価                      |
 
-:::note 🎓 Design Insight
+:::note 🎓 設計の洞察
 
-Trigger Events are perfect for:
+トリガーイベントは以下のようなケースに最適です：
 
-- **Fan-Out Architecture** - One action triggers many systems
-- **Conditional Routing** - Different logic paths based on sender/data
-- **Priority Management** - Control execution order visually
-- **Type Adaptation** - Connect incompatible event signatures
-- **Decoupling** - Senders unaware of downstream complexity
+- **ファンアウト・アーキテクチャ** - 一つのアクションが多くのシステムをトリガーする
+- **条件付きルーティング** - 送信元やデータに基づいた異なるロジックパス
+- **優先度管理** - 実行順序を視覚的に制御する
+- **型の適応** - 互換性のないイベントシグネチャを接続する
+- **デカップリング** - 発行側が下流の複雑さを意識しなくて済む
 
-**Trigger vs Chain Events:**
-- **Trigger (Parallel):** All nodes evaluate simultaneously, filtered by conditions
-- **Chain (Sequential):** Nodes execute in strict linear order, one after another
+**トリガーイベント vs チェーンイベント:**
+- **トリガー (並列):** 条件によってフィルタリングされつつ、全ノードが同時に評価される
+- **チェーン (直列):** ノードが厳格な線形順序で、一つずつ順番に実行される
 
-Use **Trigger** when you need parallel branching with conditions (e.g., combat system responding to different attackers). Use **Chain** when you need guaranteed sequential order (e.g., tutorial steps, cutscene sequences).
+条件分岐を伴う並列処理（例：異なる攻撃者に反応する戦闘システム）が必要な場合は **トリガー** を使用してください。確実な実行順序の保証（例：チュートリアルのステップ、カットシーン）が必要な場合は **チェーン** を使用してください。
 
 :::
 
-:::warning ⚠️ Priority Gotchas
+:::warning ⚠️ 優先度の注意点
 
-1. **Same Priority:** If multiple nodes have identical priority, execution order is undefined
-2. **Cross-Branch Priority:** Priority only matters within the same conditional branch
-3. **Delay Interaction:** Delayed nodes may execute after non-delayed nodes regardless of priority
-4. **State Mutations:** Be careful with state changes—later nodes see earlier mutations
+1. **同一優先度:** 複数のノードが同じ優先度を持つ場合、実行順序は不定です。
+2. **ブランチを跨ぐ優先度:** 優先度は「同じ条件ブランチ内」でのみ意味を持ちます。
+3. **遅延の影響:** 遅延設定されたノードは、優先度に関わらず非遅延ノードの後に実行される可能性があります。
+4. **状態の変更:** 状態の変更には注意してください。後のノードは、先のノードによる変更結果を参照することになります。
 
 :::
 
 ---
 
-## 🎯 What's Next?
+## 🎯 次のステップは？
 
-You've mastered parallel trigger events. Now let's explore **chain events** for guaranteed sequential execution.
+並列トリガーイベントをマスターしました。次は、確実な連続実行のための**チェーンイベント**を見ていきましょう。
 
-**Next Chapter**: Learn about sequential chains in **[11 Chain Event](./11-chain-event.md)**
+**次の章**: 直列チェーンについて学ぶ **[11 チェーンイベント](./11-chain-event.md)**
 
 ---
 
-## 📚 Related Documentation
+## 📚 関連ドキュメント
 
-- **[Flow Graph Editor](../flow-graph/game-event-node-editor.md)** - Edit Node Flow Graph 
-- **[Node & Connector](../flow-graph/game-event-node-connector.md)** - Understand the visual language of the graph
-- **[Node Behavior](../flow-graph/game-event-node-behavior.md)** - Node configuration and conditions
-- **[Advanced Logic Patterns](../flow-graph/advanced-logic-patterns.md)** - How the system executes Triggers versus Chains
-- **[Programmatic Flow](../scripting/programmatic-flow.md)** - How to Implement Process Control via FlowGraph API
-- **[Best Practices](../scripting/best-practices.md)** - Architectural patterns for complex systems
-
+- **[フローグラフエディタ](../flow-graph/game-event-node-editor.md)** - ノードフローグラフの編集
+- **[ノードとコネクタ](../flow-graph/game-event-node-connector.md)** - グラフの視覚言語を理解する
+- **[ノードの振る舞い](../flow-graph/game-event-node-behavior.md)** - ノードの設定と条件
+- **[高度なロジックパターン](../flow-graph/advanced-logic-patterns.md)** - システムがトリガーとチェーンをどう実行するか
+- **[プログラムによるフロー制御](../scripting/programmatic-flow.md)** - FlowGraph API によるプロセス制御の実装
+- **[ベストプラクティス](../scripting/best-practices.md)** - 複雑なシステムの設計パターン
