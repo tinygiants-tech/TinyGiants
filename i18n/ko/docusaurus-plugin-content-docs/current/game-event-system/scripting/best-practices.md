@@ -6,7 +6,7 @@ sidebar_position: 4
 
 import Tabs from '@theme/Tabs'; import TabItem from '@theme/TabItem';
 
-# 실행 순서 및 베스트 프랙티스 (Execution Order & Best Practices)
+# 실행 순서 및 베스트 프랙티스 
 
 GameEvent가 콜백을 실행하고 이벤트 흐름을 관리하는 방식을 이해하는 것은 안정적이고 성능이 뛰어난 이벤트 기반 시스템을 구축하는 데 필수적입니다. 이 가이드에서는 실행 순서, 일반적인 패턴, 주의 사항 및 최적화 전략을 다룹니다.
 

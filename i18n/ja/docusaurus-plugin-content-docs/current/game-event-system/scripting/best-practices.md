@@ -6,7 +6,7 @@ sidebar_position: 4
 
 import Tabs from '@theme/Tabs'; import TabItem from '@theme/TabItem';
 
-# 実行順序とベストプラクティス (Execution Order & Best Practices)
+# 実行順序とベストプラクティス
 
 GameEventがどのようにコールバックを実行し、イベントフローを管理するかを理解することは、信頼性が高くパフォーマンスの良いイベント駆動型システムを構築するために不可欠です。このガイドでは、実行順序、一般的なパターン、注意点、および最適化戦略について説明します。
 

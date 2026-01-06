@@ -9,7 +9,7 @@ import TabItem from '@theme/TabItem';
 
 
 
-# Game Event Editor
+# ゲームイベントエディター
 
 イベントライブラリの整理、洗練、保守のための主要なワークスペースです。**[Game Event Creator](./game-event-creator.md)**が新しいイベントを生成するためのものである一方、**Editor**はそれらのライフサイクル全体を管理する場所です。
 

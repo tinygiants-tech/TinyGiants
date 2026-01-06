@@ -11,7 +11,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 
 
-# Game Event Creator
+# ゲームイベントクリエイター
 
 高速イベント作成ウィザード。この特殊なツールは、バッチイベント生成、自動コード コンパイル、ScriptableObject作成を、1つの合理化されたワークフローで処理します。
 

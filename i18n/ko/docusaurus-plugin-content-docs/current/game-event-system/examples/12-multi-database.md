@@ -9,7 +9,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 <!-- <VideoGif src="/video/game-event-system/12-multi-database.mp4" /> -->
 
-## 📋 개요 (Overview)
+## 📋 개요
 
 수백 개의 이벤트가 포함된 대규모 프로젝트(RPG, MMO, 복잡한 시뮬레이션 등)에서 모든 이벤트를 하나의 거대한 데이터베이스 에셋에 저장하는 것은 유지보수 측면에서 매우 비효율적입니다. 이는 에디터 성능 저하, Git 병합 충돌, 조직화의 어려움을 초래합니다. **멀티 데이터베이스 시스템(Multi-Database System)**은 이벤트를 여러 개의 모듈형 스크립터블 오브젝트(ScriptableObject) 에셋(예: `Core_DB`, `Combat_DB`, `UI_DB`)으로 분리하여 독립적으로 관리할 수 있게 함으로써 이 문제를 해결합니다.
 
@@ -23,7 +23,8 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 ---
 
-## 🎬 데모 씬 (Demo Scene)
+## 🎬 데모 씬 
+
 ```
 Assets/TinyGiants/GameEventSystem/Demo/12_MultiDatabase/12_MultiDatabase.unity
 ```

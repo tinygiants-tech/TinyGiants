@@ -9,7 +9,7 @@ import TabItem from '@theme/TabItem';
 
 
 
-# ゲームイベントノードの振る舞い (Game Event Node Behavior)
+# ゲームイベントノードの振る舞い 
 
 グラフが接続（繋がり）を示すのに対し、**ノード動作設定ウィンドウ**は、個々のノードの詳細な実行ロジックを制御します。
 

@@ -9,7 +9,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 <!-- <VideoGif src="/video/game-event-system/09-persistent-event.mp4" /> -->
 
-## 📋 개요 (Overview)
+## 📋 개요
 
 Unity에서는 새로운 씬을 로드할 때 이전 씬의 모든 게임 오브젝트(및 해당 이벤트 리스너)가 파괴됩니다. **지속성 이벤트(Persistent Events)**는 씬 전환 시에도 파괴되지 않고 유지되는 글로벌 매니저에 리스너 바인딩을 저장하여 이 문제를 해결합니다. 이는 뮤직 컨트롤러, 인벤토리 매니저, 업적 추적기와 같은 글로벌 시스템을 구축할 때 필수적입니다.
 
@@ -23,7 +23,8 @@ Unity에서는 새로운 씬을 로드할 때 이전 씬의 모든 게임 오브
 
 ---
 
-## 🎬 데모 씬 (Demo Scene)
+## 🎬 데모 씬 
+
 ```
 Assets/TinyGiants/GameEventSystem/Demo/09_PersistentEvent/09_PersistentEvent_1.unity
 ```
@@ -49,7 +50,7 @@ Assets/TinyGiants/GameEventSystem/Demo/09_PersistentEvent/09_PersistentEvent_1.u
   - 실험에 대한 설명 텍스트 표시
   - 지속성 상태 정보 표시
 
-**UI 레이어 (Canvas):**
+**UI 레이어:**
 - 🎮 **세 개의 버튼** - 화면 하단
   - "Fire A" (흰색) → `PersistentEventRaiser.FireTurretA()` 트리거
   - "Fire B" (흰색) → `PersistentEventRaiser.FireTurretB()` 트리거

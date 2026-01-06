@@ -9,7 +9,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 <!-- <VideoGif src="/video/game-event-system/14-runtime-monitor.mp4" /> -->
 
-## 📋 개요 (Overview)
+## 📋 개요
 
 실제 프로덕션 환경에서 이벤트는 초당 수천 번씩 발생할 수 있습니다. `Debug.Log()`는 가비지(Garbage)를 생성하고 콘솔을 어지럽힐 뿐만 아니라, 시스템 건전성에 대한 구조적인 통찰력을 제공하지 못합니다. 따라서 실시간 성능 프로파일링, 리스너 추적, 빈도 분석 및 무결성 경고를 포함한 **엔터프라이즈급 관측성(Observability)**이 필요합니다.
 
@@ -34,7 +34,8 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 ---
 
-## 🎬 데모 씬 (Demo Scene)
+## 🎬 데모 씬
+
 ```
 Assets/TinyGiants/GameEventSystem/Demo/14_RuntimeMonitor/14_RuntimeMonitor.unity
 ```
@@ -202,7 +203,7 @@ public void OnHeavyExecution(GameObject sender, DamageInfo info)
 
 ## 📊 모니터 윈도우 분석
 
-### 탭 1: 🏠 Dashboard (시스템 건전성 개요)
+### 탭 1: 🏠 Dashboard (시스템 건전성 개요
 
 첫 페이지로, 모든 하위 시스템의 지표를 하나의 건전성 보고서로 집계합니다.
 
@@ -246,7 +247,7 @@ public void OnHeavyExecution(GameObject sender, DamageInfo info)
 
 ---
 
-### 탭 2: ⚡ Performance (실행 프로파일링)
+### 탭 2: ⚡ Performance (실행 프로파일링
 
 **중점:** 실행 시간을 통해 성능 병목 지점 감지
 
@@ -287,7 +288,7 @@ public void OnHeavyExecution(GameObject sender, DamageInfo info)
 
 ---
 
-### 탭 3: 📝 Recent Events (실시간 이벤트 로그)
+### 탭 3: 📝 실시간 이벤트 로그
 
 **중점:** 모든 이벤트 발생의 시간순 스트림
 
@@ -326,9 +327,9 @@ Unity 콘솔과 달리 이 로그는 **이벤트에 특화**되어 있습니다.
 
 ---
 
-### 탭 4: 📈 Statistics (빈도 분석)
+### 탭 4: 📈빈도 분석
 
-**중점:** 장기적인 사용 패턴 및 발생 빈도 추적
+**중점:** 장기적인 사용 패턴 및 발생 빈도 추
 
 ![Monitor Statistics](/img/game-event-system/examples/14-runtime-monitor/demo-14-statistics.png)
 
@@ -366,7 +367,7 @@ Unity 콘솔과 달리 이 로그는 **이벤트에 특화**되어 있습니다.
 
 ---
 
-### 탭 5: ⚠️ Warnings (무결성 및 건전성 알림)
+### 탭 5: ⚠️ 무결성 및 건전성 알림
 
 **중점:** 소음을 제거하고 비판적인 문제 노출
 
@@ -410,7 +411,7 @@ Unity 콘솔과 달리 이 로그는 **이벤트에 특화**되어 있습니다.
 
 ---
 
-### 탭 6: 👂 Listeners (구독 정보 인스펙터)
+### 탭 6: 👂 구독 정보 인스펙터
 
 **중점:** 누가 리스닝하고 있는지에 대한 세부 내역
 
@@ -472,7 +473,7 @@ Unity 콘솔과 달리 이 로그는 **이벤트에 특화**되어 있습니다.
 
 ---
 
-### 탭 7: 🔗 Automation (프로그래밍 방식 흐름 시각화)
+### 탭 7: 🔗 프로그래밍 방식 흐름 시각화
 
 **중점:** 코드로 구축된 트리거/체인 그래프 시각화
 
@@ -533,7 +534,7 @@ Unity 콘솔과 달리 이 로그는 **이벤트에 특화**되어 있습니다.
 
 ---
 
-### 탭 8: 🔍 Event Details (심층 분석)
+### 탭 8: 🔍 심층 분석
 
 **중점:** 단일 이벤트 분석 및 히스토리
 
@@ -576,7 +577,7 @@ Unity 콘솔과 달리 이 로그는 **이벤트에 특화**되어 있습니다.
 
 ---
 
-## 🏗️ 씬 아키텍처 (Scene Architecture)
+## 🏗️ 씬 아키텍처 
 
 ### 이벤트 조직화
 
@@ -655,7 +656,7 @@ Unity 콘솔과 달리 이 로그는 **이벤트에 특화**되어 있습니다.
 
 ---
 
-## 💻 코드 분석 (Code Breakdown)
+## 💻 코드 분석
 
 ### 성능 문제 시뮬레이션 (Unit B)
 

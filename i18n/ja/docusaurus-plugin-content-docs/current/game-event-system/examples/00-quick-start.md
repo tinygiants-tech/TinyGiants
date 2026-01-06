@@ -5,7 +5,7 @@ sidebar_position: 1
 
 import VideoGif from '@site/src/components/Video/VideoGif';
 
-# 🚀 クイックスタート (Quick Start)
+# 🚀 クイックスタート
 
 <!-- <VideoGif src="/video/game-event-system/00-quick-start.mp4" /> -->
 

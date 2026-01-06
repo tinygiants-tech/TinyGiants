@@ -9,7 +9,7 @@ import TabItem from '@theme/TabItem';
 
 
 
-# 게임 이벤트 노드 동작 (Game Event Node Behavior)
+# 게임 이벤트 노드 동작
 
 그래프가 노드 간의 연결을 보여준다면, **노드 동작 설정 창(Node Behavior Configuration Window)**은 각 개별 노드의 상세한 실행 로직을 제어합니다.
 

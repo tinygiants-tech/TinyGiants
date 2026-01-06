@@ -4,7 +4,7 @@ sidebar_label: 概要
 sidebar_position: 1
 ---
 
-# Game Event System
+# ゲームイベントシステム
 
 Unityのための本格的なビジュアルイベントアーキテクチャ。混沌としたイベント管理を、保守性と検証性に優れたワークフローへと変革します。
 

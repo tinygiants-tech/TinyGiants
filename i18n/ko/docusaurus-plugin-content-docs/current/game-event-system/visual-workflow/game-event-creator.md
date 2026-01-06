@@ -11,7 +11,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 
 
-# 게임 이벤트 생성기 (Game Event Creator)
+# 게임 이벤트 생성기
 
 고속 이벤트 생성 위자드입니다. 이 전문 도구는 일괄 이벤트 생성, 자동 코드 컴파일, ScriptableObject 제작을 하나의 효율적인 워크플로우로 처리합니다.
 

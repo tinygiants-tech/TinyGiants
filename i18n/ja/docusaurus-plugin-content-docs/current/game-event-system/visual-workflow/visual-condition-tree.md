@@ -6,7 +6,7 @@ sidebar_position: 8
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# Visual Condition Tree
+# ビジュアル条件ツリー
 
 イベントアクションが実行されるべきかどうかを制御するために、複雑なブール論理を**視覚的に**構築します。直感的なインターフェースを通じて洗練された実行時チェックを作成—コーディング不要。
 

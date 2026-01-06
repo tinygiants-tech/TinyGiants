@@ -6,7 +6,7 @@ sidebar_position: 8
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# 비주얼 조건 트리 (Visual Condition Tree)
+# 비주얼 조건 트리
 
 이벤트 액션의 실행 여부를 제어하기 위해 복잡한 불리언 로직을 **시각적**으로 구축합니다. 코딩 없이 직관적인 인터페이스를 통해 정교한 런타임 체크 로직을 생성할 수 있습니다.
 

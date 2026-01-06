@@ -9,7 +9,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 <!-- <VideoGif src="/video/game-event-system/08-repeating-event.mp4" /> -->
 
-## 📋 개요 (Overview)
+## 📋 개요 
 
 일반적으로 레이더 스캔이나 독 데미지와 같이 반복되는 펄스를 생성하려면 C#에서 `InvokeRepeating` 또는 코루틴을 사용하여 타이머 루프를 작성해야 합니다. GameEvent System은 이 로직을 **이벤트 에셋(Event Asset)** 자체로 옮겨 코드 루프가 필요 없게 만듭니다. 에디터에서 한 번만 구성하면, `Raise()`를 호출할 때 시스템이 자동으로 반복을 처리합니다.
 
@@ -23,7 +23,8 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 ---
 
-## 🎬 데모 씬 (Demo Scene)
+## 🎬 데모 씬
+
 ```
 Assets/TinyGiants/GameEventSystem/Demo/08_RepeatingEvent/08_RepeatingEvent.unity
 ```
@@ -45,7 +46,7 @@ Assets/TinyGiants/GameEventSystem/Demo/08_RepeatingEvent/08_RepeatingEvent.unity
   - 최대 스캔 범위(반지름 40 유닛) 표시
   - 펄스 확장 영역의 시각적 가이드
 
-**UI 레이어 (Canvas):**
+**UI 레이어:**
 - 🎮 **세 개의 버튼** - 화면 하단
   - "Activate Beacon" (흰색) → `RepeatingEventRaiser.ActivateBeacon()` 트리거
   - "Toggle Mode (Finite[5])" → `RepeatingEventRaiser.ToggleMode()` 트리거

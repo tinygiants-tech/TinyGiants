@@ -3,7 +3,7 @@ sidebar_label: 'コミュニティ & サポート'
 sidebar_position: 3
 ---
 
-# コミュニティ & サポート (Community & Support)
+# コミュニティ & サポート 
 
 ## 💌 開発者からのメッセージ
 

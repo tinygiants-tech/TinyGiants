@@ -3,7 +3,7 @@ sidebar_label: '게임 이벤트 찾기'
 sidebar_position: 7
 ---
 
-# 게임 이벤트 파인더 (Game Event Finder)
+# 게임 이벤트 파인더
 
 **레퍼런스 파인더(Reference Finder)**는 현재 활성화된 씬 전체를 스캔하여 특정 게임 이벤트를 참조하고 있는 모든 게임 오브젝트, 스크립트 및 컴포넌트를 찾아내는 강력한 진단 도구입니다.
 

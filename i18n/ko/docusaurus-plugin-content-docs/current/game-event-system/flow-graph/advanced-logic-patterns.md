@@ -3,7 +3,7 @@ sidebar_label: '고급 로직 패턴'
 sidebar_position: 4
 ---
 
-# 고급 로직 패턴 (Advanced Logic Patterns)
+# 고급 로직 패턴
 
 단순한 연결을 넘어, 이 장에서는 플로우 시스템의 **런타임 아키텍처(Runtime Architecture)**를 깊이 있게 다룹니다.
 

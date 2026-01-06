@@ -3,7 +3,7 @@ sidebar_label: '高度なロジックパターン'
 sidebar_position: 4
 ---
 
-# 高度なロジックパターン (Advanced Logic Patterns)
+# 高度なロジックパターン
 
 単純な接続の枠を超え、この章ではフローシステムの**実行時のアーキテクチャ（Runtime Architecture）**について深く掘り下げます。
 

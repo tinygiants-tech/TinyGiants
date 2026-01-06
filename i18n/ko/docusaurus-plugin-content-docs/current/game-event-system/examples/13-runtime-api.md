@@ -9,7 +9,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 <!-- <VideoGif src="/video/game-event-system/13-runtime-api.mp4" /> -->
 
-## 📋 개요 (Overview)
+## 📋 개요
 
 이전 데모(01-11)에서는 인스펙터에서 리스너를 바인딩하고, 비헤이비어(Behavior) 윈도우에서 조건을 설정하며, 비주얼 도구로 플로우 그래프를 구축하는 **비주얼 워크플로우(Visual Workflow)**를 살펴보았습니다. 이 방식은 디자이너나 신속한 프로토타이핑에 적합합니다. 그러나 프로그래머는 복잡한 시스템이나 동적인 동작을 구현할 때, 또는 비주얼 도구의 제약을 벗어나고 싶을 때 **코드에서의 완전한 제어**를 선호하는 경우가 많습니다.
 
@@ -28,7 +28,8 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 ---
 
-## 🎬 데모 구조 (Demo Structure)
+## 🎬 데모 구조
+
 ```
 📁 Assets/TinyGiants/GameEventSystem/Demo/13_RuntimeAPI/
 │
