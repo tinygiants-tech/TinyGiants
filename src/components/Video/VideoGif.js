@@ -3,7 +3,13 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 export default function VideoGif({ src, width = '85%', maxWidth = '800px' }) {
   const [showControls, setShowControls] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const videoSrc = useBaseUrl(src);
+
+  const handleMouseEnter = () => {
+    setShowControls(true);
+    setHasInteracted(true);
+  };
 
   return (
     <div
@@ -14,7 +20,7 @@ export default function VideoGif({ src, width = '85%', maxWidth = '800px' }) {
         margin: '2rem auto',
         cursor: 'pointer'
       }}
-      onMouseEnter={() => setShowControls(true)}
+      onMouseEnter={handleMouseEnter}
       onMouseLeave={() => setShowControls(false)}
     >
       <video
@@ -34,7 +40,7 @@ export default function VideoGif({ src, width = '85%', maxWidth = '800px' }) {
         <source src={videoSrc} type="video/mp4" />
       </video>
 
-      {!showControls && (
+      {!hasInteracted && !showControls && (
         <div style={{
           position: 'absolute',
           top: '12px',
