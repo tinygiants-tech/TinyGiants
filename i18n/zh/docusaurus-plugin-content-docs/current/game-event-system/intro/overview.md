@@ -51,52 +51,45 @@ sidebar_position: 1
 
 ---
 
-## 核心理念: 混合工作流
 
-本系统采用程序员和设计师之间的 **分工协作** 模式:
-```mermaid
-graph LR
+## 核心架构：运作原理
 
-    classDef programmer fill:#1e40af,stroke:#0f172a,stroke-width:2px,color:#ffffff,font-weight:bold
-    classDef asset fill:#4338ca,stroke:#1e1b4b,stroke-width:2px,color:#ffffff
-    classDef code fill:#0f766e,stroke:#042f2e,stroke-width:2px,color:#ffffff
-    classDef designer fill:#7c2d12,stroke:#431407,stroke-width:2px,color:#ffffff,font-weight:bold
-    classDef scene fill:#b45309,stroke:#78350f,stroke-width:2px,color:#ffffff
-    classDef visual fill:#9f1239,stroke:#4c0519,stroke-width:2px,color:#ffffff
-    classDef runtime fill:#020617,stroke:#000000,stroke-width:2px,color:#ffffff,font-weight:bold
+**GameEventSystem** 基于“管理-资产-动作”架构构建，旨在集中管理事件逻辑，同时保持执行的去中心化。
 
-    A(👨‍💻 程序员):::programmer
-    B(📦 事件资产):::asset
-    C(🎧 代码逻辑):::code
+<div className="img-full-wrapper">
 
-    D(🎨 设计师):::designer
-    E(🎮 场景行为):::scene
-    F(🕸️ 可视化编排):::visual
+![核心架构图](/img/game-event-system/intro/overview/architecture.png)
 
-    G(▶️ 运行时执行):::runtime
+</div>
 
-    A -->|定义事件| B
-    A -->|编写监听器| C
+### 🏗️ 基础：GameEventManager 与数据库
+系统的核心是 **GameEventManager**，它负责管理和维护**事件数据库**。
+- **事件即资产**：每个事件都是存储在数据库资产中的 `ScriptableObject`。
+- **集中化管理**：**GameEventEditorWindow** 是系统的主控制中心。通过此窗口，您可以访问各类专项工具：
+    - **Creator (创建器)**：快速生成新的事件资产。
+    - **Behavior (行为) 与 Finder (查找器)**：配置事件属性并在场景中定位依赖关系。
+    - **FlowGraph (流图)**：以可视化方式设计复杂的多步骤事件序列。
+    - **Monitor (监控器)**：实时调试和性能跟踪。
 
-    B --> D
-    D -->|在Inspector中绑定| E
-    D -->|构建流程图| F
+### 🔄 混合工作流：可视化与代码
 
-    C --> G
-    E --> G
-    F --> G
-```
+该系统无缝桥接了技术实现与创意设计之间的鸿沟：
 
+1.  **直接代码集成**：程序员只需在脚本中使用简单的 `.Raise()` 调用即可随时触发事件。
+2.  **可视化 Inspector 绑定**：设计师可以使用直观的**下拉菜单**在 Inspector 中直接绑定逻辑，完全消除了对“魔法字符串”或手动组件查找的需求。
+3.  **实时监控**：**Monitor** 窗口提供事件活动的实时视图，帮助您在运行模式下验证数据流和执行时序。
 
+### 💻 完整的 API 支持
+虽然系统为设计师提供了强大的可视化界面，但它本质上是 **API 优先**的。
+**可视化编辑器中的所有功能均可通过 Runtime API 访问。** 无论您喜欢在图表中构建事件链，还是通过 C# 代码动态注册/注销监听器，系统都能提供同等的性能与功能支持。
 
+---
 
-| 角色 | 职责 | 工具 |
-| ----------------- | ------------------------------------------------------------ | -------------------------------------- |
-| **程序员** | 定义 **何时** 触发事件 `Raise()` 以及 **什么** 逻辑响应 | C# API, 监听器 |
-| **设计师** | 将事件连接到 **场景对象** 并配置 **行为** | Inspector绑定, `GameEventBehavior` |
-| **技术设计师** | 编排 **复杂序列**（延迟、链式、条件） | 可视化流程编辑器 |
+### 💡 为什么采用这种架构？
+- **解耦**：发送者和接收者无需彼此了解；它们只需要引用同一个事件资产。
+- **可视化**：标准事件中隐形的“面条代码”被可搜索的可视化数据库所取代。
+- **可靠性**：由于事件是资产，当您重命名方法或移动文件时，引用不会丢失。
 
-**结果**: 清晰的关注点分离，同时完全可视化事件关系。
 
 ---
 

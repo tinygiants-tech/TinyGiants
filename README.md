@@ -35,53 +35,48 @@ In traditional Unity development, events become invisible spaghetti:
 
 ---
 
-## Core Philosophy: Hybrid Workflow
+## Core Architecture: How It Works
 
-This system embraces a **division of labor** between programmers and designers:
+The **GameEventSystem** is built on a "Management-Asset-Action" architecture designed to centralize event logic while maintaining decentralized execution.
 
-```mermaid
-graph LR
-
-    classDef programmer fill:#1e40af,stroke:#0f172a,stroke-width:2px,color:#ffffff,font-weight:bold
-    classDef asset fill:#4338ca,stroke:#1e1b4b,stroke-width:2px,color:#ffffff
-    classDef code fill:#0f766e,stroke:#042f2e,stroke-width:2px,color:#ffffff
-    classDef designer fill:#7c2d12,stroke:#431407,stroke-width:2px,color:#ffffff,font-weight:bold
-    classDef scene fill:#b45309,stroke:#78350f,stroke-width:2px,color:#ffffff
-    classDef visual fill:#9f1239,stroke:#4c0519,stroke-width:2px,color:#ffffff
-    classDef runtime fill:#020617,stroke:#000000,stroke-width:2px,color:#ffffff,font-weight:bold
-
-    A(👨‍💻 Programmer):::programmer
-    B(📦 Event Assets):::asset
-    C(🎧 Code Logic):::code
-
-    D(🎨 Designer):::designer
-    E(🎮 Scene Behaviors):::scene
-    F(🕸️ Visual Orchestration):::visual
-
-    G(▶️ Runtime Execution):::runtime
-
-    A -->|Defines Events| B
-    A -->|Writes Listeners| C
-
-    B --> D
-    D -->|Binds in Inspector| E
-    D -->|Builds Flow Graphs| F
-
-    C --> G
-    E --> G
-    F --> G
-```
+<div className="img-full-wrapper">
 
 
+![Core Architecture Diagram](./static/img/game-event-system/intro/overview/architecture.png)
 
+</div>
 
-| Role              | Responsibility                                               | Tool                                   |
-| ----------------- | ------------------------------------------------------------ | -------------------------------------- |
-| **Programmer**    | Define **when** events fire `Raise()` and **what** logic responds | C# API, Listeners                      |
-| **Designer**      | Wire events to **scene objects** and configure **behaviors** | Inspector Binding, `GameEventBehavior` |
-| **Tech Designer** | Orchestrate **complex sequences** (delays, chains, conditions) | Visual Flow Editor                     |
+### 🏗️ The Foundation: GameEventManager & Databases
 
-**Result**: Clean separation of concerns with full visibility into event relationships.
+At the heart of the system is the **GameEventManager**, which manages and maintains **Event Databases**. 
+
+- **Events as Assets**: Every event is a `ScriptableObject` stored within a database asset.
+- **Centralized Management**: The **GameEventEditorWindow** serves as the primary command center. From here, you access specialized tools:
+  - **Creator**: Rapidly generate new event assets.
+  - **Behavior & Finder**: Configure event properties and locate dependencies across scenes.
+  - **FlowGraph**: Design complex, multi-step event sequences visually.
+  - **Monitor**: Real-time debugging and performance tracking.
+
+### 🔄 The Hybrid Workflow: Visual & Code
+
+The system seamlessly bridges the gap between technical implementation and creative design:
+
+1.  **Direct Code Integration**: Programmers can trigger events anywhere in their scripts using a simple `.Raise()` call.
+2.  **Visual Inspector Binding**: Designers can bind logic to events directly in the Inspector using intuitive **dropdown menus**, completely eliminating the need for "magic strings" or manual component searching.
+3.  **Real-Time Monitoring**: The **Monitor** window provides a live view of event activity, helping you verify the flow of data and execution timing during Play Mode.
+
+### 💻 Full API Parity
+
+While the system provides a robust visual interface for designers, it is **API-first**. 
+**Every feature available in the visual editors is accessible via the Runtime API.** Whether you prefer building event chains in a graph or Registering/Unregistering listeners dynamically through C# code, the system provides the same level of power and performance.
+
+---
+
+### 💡 Why this architecture?
+
+- **Decoupling**: Senders and receivers don't need to know each other; they only need to know the Event Asset.
+- **Visibility**: The "invisible spaghetti" of standard events is replaced by a searchable, visual database.
+- **Reliability**: Because events are assets, references don't break when you rename methods or move files.
 
 ---
 

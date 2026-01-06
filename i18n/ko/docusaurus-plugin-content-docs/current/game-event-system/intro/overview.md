@@ -50,53 +50,43 @@ sidebar_position: 1
 
 ---
 
-## 핵심 철학: 하이브리드 워크플로우
+## 핵심 아키텍처: 작동 원리
 
-이 시스템은 프로그래머와 디자이너 간의 **효율적인 분업**을 지향합니다:
+**GameEventSystem**은 이벤트 로직을 중앙 집중식으로 관리하면서 실행의 분산화를 유지하도록 설계된 "관리-에셋-동작(Management-Asset-Action)" 아키텍처를 기반으로 구축되었습니다.
 
-```mermaid
-graph LR
+<div className="img-full-wrapper">
 
-    classDef programmer fill:#1e40af,stroke:#0f172a,stroke-width:2px,color:#ffffff,font-weight:bold
-    classDef asset fill:#4338ca,stroke:#1e1b4b,stroke-width:2px,color:#ffffff
-    classDef code fill:#0f766e,stroke:#042f2e,stroke-width:2px,color:#ffffff
-    classDef designer fill:#7c2d12,stroke:#431407,stroke-width:2px,color:#ffffff,font-weight:bold
-    classDef scene fill:#b45309,stroke:#78350f,stroke-width:2px,color:#ffffff
-    classDef visual fill:#9f1239,stroke:#4c0519,stroke-width:2px,color:#ffffff
-    classDef runtime fill:#020617,stroke:#000000,stroke-width:2px,color:#ffffff,font-weight:bold
+![핵심 아키텍처 다이어그램](/img/game-event-system/intro/overview/architecture.png)
 
-    A(👨‍💻 프로그래머):::programmer
-    B(📦 이벤트 에셋):::asset
-    C(🎧 코드 로직):::code
+</div>
 
-    D(🎨 디자이너):::designer
-    E(🎮 씬 비헤이비어):::scene
-    F(🕸️ 시각적 오케스트레이션):::visual
+### 🏗️ 토대: GameEventManager 및 데이터베이스
+시스템의 핵심은 **이벤트 데이터베이스**를 관리하고 유지하는 **GameEventManager**입니다.
+- **에셋으로서의 이벤트**: 모든 이벤트는 데이터베이스 에셋 내에 저장된 `ScriptableObject`입니다.
+- **중앙 집중식 관리**: **GameEventEditorWindow**가 기본 커맨드 센터 역할을 합니다. 여기서 다음과 같은 전용 도구에 액세스할 수 있습니다:
+    - **Creator**: 새로운 이벤트 에셋을 신속하게 생성합니다.
+    - **Behavior & Finder**: 이벤트 속성을 설정하고 씬 전체의 의존성을 탐색합니다.
+    - **FlowGraph**: 복잡한 다단계 이벤트 시퀀스를 시각적으로 설계합니다.
+    - **Monitor**: 실시간 디버깅 및 성능 추적을 수행합니다.
 
-    G(▶️ 런타임 실행):::runtime
+### 🔄 하이브리드 워크플로우: 비주얼 및 코드
 
-    A -->|이벤트 정의| B
-    A -->|리스너 작성| C
+이 시스템은 기술적 구현과 크리에이티브 디자인 사이의 간극을 완벽하게 메워줍니다:
 
-    B --> D
-    D -->|인스펙터 바인딩| E
-    D -->|플로우 그래프 구축| F
+1.  **직접적인 코드 통합**: 프로그래머는 스크립트 어디서나 간단한 `.Raise()` 호출을 통해 이벤트를 트리거할 수 있습니다.
+2.  **비주얼 인스펙터 바인딩**: 디자이너는 직관적인 **드롭다운 메뉴**를 사용하여 인스펙터에서 직접 로직을 이벤트에 바인딩할 수 있습니다. "매직 스트링"이나 수동 컴포넌트 검색이 전혀 필요하지 않습니다.
+3.  **실시간 모니터링**: **Monitor** 창은 이벤트 활동의 라이브 뷰를 제공하여, 플레이 모드 중에 데이터 흐름과 실행 타이밍을 즉시 확인할 수 있도록 돕습니다.
 
-    C --> G
-    E --> G
-    F --> G
-```
+### 💻 완전한 API 지원
+디자이너를 위한 강력한 비주얼 인터페이스를 제공하지만, 이 시스템은 기본적으로 **API 우선**입니다.
+**비주얼 에디터에서 사용 가능한 모든 기능은 Runtime API를 통해 접근할 수 있습니다.** 그래프에서 이벤트 체인을 구축하든, C# 코드를 통해 동적으로 리스너를 등록/해제하든 관계없이 동일한 수준의 성능과 기능을 제공합니다.
 
+---
 
-
-
-| 역할              | 책임 범위                                               | 도구                                   |
-| ----------------- | ------------------------------------------------------------ | -------------------------------------- |
-| **프로그래머**    | 이벤트가 언제 발생하는지(`Raise()`)와 어떤 로직이 응답하는지 정의 | C# API, 리스너                      |
-| **디자이너**      | 이벤트를 **씬 오브젝트**에 연결하고 **비헤이비어**를 설정 | 인스펙터 바인딩, `GameEventBehavior` |
-| **테크 디자이너** | **복잡한 시퀀스**(지연, 체인, 조건)를 오케스트레이션 | 시각적 플로우 에디터                     |
-
-**결과**: 이벤트 관계에 대한 완전한 가시성을 확보하면서 관심사를 깔끔하게 분리할 수 있습니다.
+### 💡 왜 이 아키텍처인가요?
+- **디커플링(결합도 감소)**: 송신자와 수신자는 서로를 알 필요가 없으며, 오직 이벤트 에셋만 참조하면 됩니다.
+- **가시성**: 표준 이벤트의 고질적인 문제인 "보이지 않는 스파게티 코드"를 검색 가능한 비주얼 데이터베이스로 대체합니다.
+- **신뢰성**: 이벤트가 에셋 형태이므로, 메서드 이름을 변경하거나 파일을 이동해도 참조가 깨지지 않습니다.
 
 ---
 
