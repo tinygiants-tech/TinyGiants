@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 01 Void 이벤트: 디커플링된 아키텍처
 
-<!-- <VideoGif src="/video/game-event-system/01-void-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/01-void-event.mp4" />
 
 ## 📋 개요
 

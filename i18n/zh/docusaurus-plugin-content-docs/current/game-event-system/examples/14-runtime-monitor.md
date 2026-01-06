@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 14 运行时监视器：生产环境可观察性
 
-<!-- <VideoGif src="/video/game-event-system/14-runtime-monitor.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/14-runtime-monitor.mp4" />
 
 ## 📋 概述
 

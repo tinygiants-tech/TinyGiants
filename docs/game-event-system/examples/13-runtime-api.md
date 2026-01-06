@@ -7,8 +7,6 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 13 Runtime API: Code-First Workflow
 
-<!-- <VideoGif src="/video/game-event-system/13-runtime-api.mp4" /> -->
-
 ## 📋 Overview
 
 Previous demos (01-11) demonstrated the **Visual Workflow**—binding listeners in Inspector, configuring conditions in Behavior windows, and building flow graphs visually. This approach is perfect for designers and rapid prototyping. However, programmers often prefer **full control in code** for complex systems, dynamic behavior, or when visual tools become limiting.

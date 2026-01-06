@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 13 运行时API：代码工作流
 
-<!-- <VideoGif src="/video/game-event-system/13-runtime-api.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/13-runtime-api.mp4" />
 
 ## 📋 概述
 

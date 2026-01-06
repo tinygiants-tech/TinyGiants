@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 03 커스텀 타입 이벤트: 자동 코드 생성
 
-<!-- <VideoGif src="/video/game-event-system/03-custom-type-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/03-custom-type-event.mp4" />
 
 ## 📋 개요
 

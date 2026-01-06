@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 🚀 快速开始
 
-<!-- <VideoGif src="/video/game-event-system/00-quick-start.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/00-quick-start.mp4" />
 
 ## 📋 概述
 

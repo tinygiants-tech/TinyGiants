@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 07 Delayed Event: The Time Bomb Scenario
 
-<!-- <VideoGif src="/video/game-event-system/07-delayed-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/07-delayed-event.mp4" />
 
 ## 📋 Overview
 

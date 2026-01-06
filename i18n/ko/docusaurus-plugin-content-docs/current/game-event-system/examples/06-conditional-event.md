@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 06 조건부 이벤트: 비주얼 로직 빌더
 
-<!-- <VideoGif src="/video/game-event-system/06-conditional-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/06-conditional-event.mp4" />
 
 ## 📋 개요
 

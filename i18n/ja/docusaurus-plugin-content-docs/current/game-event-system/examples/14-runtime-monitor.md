@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 14 ランタイムモニター：プロダクションレベルの可視性
 
-<!-- <VideoGif src="/video/game-event-system/14-runtime-monitor.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/14-runtime-monitor.mp4" />
 
 ## 📋 概要
 

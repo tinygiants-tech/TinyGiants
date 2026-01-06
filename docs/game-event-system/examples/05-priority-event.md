@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 05 Priority Event: Execution Order Matters
 
-<!-- <VideoGif src="/video/game-event-system/05-priority-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/05-priority-event.mp4" />
 
 ## 📋 Overview
 

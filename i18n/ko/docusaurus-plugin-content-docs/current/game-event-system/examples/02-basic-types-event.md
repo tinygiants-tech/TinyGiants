@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 02 기본 타입 이벤트: 이벤트로 데이터 전달하기
 
-<!-- <VideoGif src="/video/game-event-system/02-basic-types-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/02-basic-types-event.mp4" />
 
 ## 📋 개요
 

@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 03 自定义类型事件：自动代码生成
 
-<!-- <VideoGif src="/video/game-event-system/03-custom-type-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/03-custom-type-event.mp4" />
 
 ## 📋 概述
 

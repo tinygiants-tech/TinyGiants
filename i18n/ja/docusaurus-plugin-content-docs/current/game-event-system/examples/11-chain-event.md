@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 11 チェーンイベント：直列実行パイプライン
 
-<!-- <VideoGif src="/video/game-event-system/11-chain-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/11-chain-event.mp4" />
 
 ## 📋 概要
 

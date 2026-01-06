@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 10 트리거 이벤트: 병렬 이벤트 디스패치
 
-<!-- <VideoGif src="/video/game-event-system/10-trigger-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/10-trigger-event.mp4" />
 
 ## 📋 개요
 

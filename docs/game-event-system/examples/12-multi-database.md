@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 12 Multi Database: Modular Event Architecture
 
-<!-- <VideoGif src="/video/game-event-system/12-multi-database.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/12-multi-database.mp4" />
 
 ## 📋 Overview
 

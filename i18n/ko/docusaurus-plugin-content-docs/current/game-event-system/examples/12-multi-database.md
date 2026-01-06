@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 12 멀티 데이터베이스: 모듈형 이벤트 아키텍처
 
-<!-- <VideoGif src="/video/game-event-system/12-multi-database.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/12-multi-database.mp4" />
 
 ## 📋 개요
 

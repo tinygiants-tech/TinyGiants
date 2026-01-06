@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 09 常駐イベント：シーンロードを跨ぐ生存
 
-<!-- <VideoGif src="/video/game-event-system/09-persistent-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/09-persistent-event.mp4" />
 
 ## 📋 概要
 

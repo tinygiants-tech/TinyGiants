@@ -13,7 +13,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 13 ランタイム API：コードファーストのワークフロー
 
-<!-- <VideoGif src="/video/game-event-system/13-runtime-api.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/13-runtime-api.mp4" />
 
 ## 📋 概要
 

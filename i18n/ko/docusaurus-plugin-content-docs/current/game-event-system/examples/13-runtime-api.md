@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 13 런타임 API: 코드 중심의 워크플로우 (Code-First Workflow)
 
-<!-- <VideoGif src="/video/game-event-system/13-runtime-api.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/13-runtime-api.mp4" />
 
 ## 📋 개요
 

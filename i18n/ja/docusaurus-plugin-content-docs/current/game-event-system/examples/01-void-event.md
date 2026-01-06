@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 01 引数なしイベント：デカップリングされたアーキテクチャ
 
-<!-- <VideoGif src="/video/game-event-system/01-void-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/01-void-event.mp4" />
 
 ## 📋 概要
 

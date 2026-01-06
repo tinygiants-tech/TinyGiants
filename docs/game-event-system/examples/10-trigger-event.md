@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 10 Trigger Event: Parallel Event Dispatch
 
-<!-- <VideoGif src="/video/game-event-system/10-trigger-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/10-trigger-event.mp4" />
 
 ## 📋 Overview
 

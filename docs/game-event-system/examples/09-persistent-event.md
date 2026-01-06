@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 09 Persistent Event: Surviving Scene Loads
 
-<!-- <VideoGif src="/video/game-event-system/09-persistent-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/09-persistent-event.mp4" />
 
 ## 📋 Overview
 

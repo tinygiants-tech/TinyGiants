@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 04 自定义Sender事件：上下文感知事件
 
-<!-- <VideoGif src="/video/game-event-system/04-custom-sender-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/04-custom-sender-event.mp4" />
 
 ## 📋 概述
 

@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 04 커스텀 Sender 이벤트: 컨텍스트 인식 이벤트
 
-<!-- <VideoGif src="/video/game-event-system/04-custom-sender-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/04-custom-sender-event.mp4" />
 
 ## 📋 개요
 

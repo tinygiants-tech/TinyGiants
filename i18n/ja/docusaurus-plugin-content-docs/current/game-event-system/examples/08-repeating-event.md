@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 08 リピートイベント：自動ループ
 
-<!-- <VideoGif src="/video/game-event-system/08-repeating-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/08-repeating-event.mp4" />
 
 ## 📋 概要
 

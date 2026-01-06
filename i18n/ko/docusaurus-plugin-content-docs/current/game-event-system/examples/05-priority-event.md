@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 05 우선순위 이벤트: 실행 순서의 중요성
 
-<!-- <VideoGif src="/video/game-event-system/05-priority-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/05-priority-event.mp4" />
 
 ## 📋 개요
 

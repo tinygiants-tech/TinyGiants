@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 06 Conditional Event: Visual Logic Builder
 
-<!-- <VideoGif src="/video/game-event-system/06-conditional-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/06-conditional-event.mp4" />
 
 ## 📋 Overview
 

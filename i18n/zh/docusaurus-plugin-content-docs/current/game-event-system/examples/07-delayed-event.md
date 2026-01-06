@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 07 延迟事件：定时炸弹场景
 
-<!-- <VideoGif src="/video/game-event-system/07-delayed-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/07-delayed-event.mp4" />
 
 ## 📋 概述
 

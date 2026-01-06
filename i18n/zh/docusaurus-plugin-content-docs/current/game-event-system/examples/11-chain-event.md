@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 11 链式事件：顺序执行管道
 
-<!-- <VideoGif src="/video/game-event-system/11-chain-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/11-chain-event.mp4" />
 
 ## 📋 概述
 

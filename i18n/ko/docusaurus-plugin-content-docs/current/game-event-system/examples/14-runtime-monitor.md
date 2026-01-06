@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 14 런타임 모니터: 프로덕션 관측성(Observability)
 
-<!-- <VideoGif src="/video/game-event-system/14-runtime-monitor.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/14-runtime-monitor.mp4" />
 
 ## 📋 개요
 

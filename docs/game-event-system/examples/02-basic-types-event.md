@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 02 Basic Types Event: Passing Data with Events
 
-<!-- <VideoGif src="/video/game-event-system/02-basic-types-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/02-basic-types-event.mp4" />
 
 ## 📋 Overview
 

@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 02 基本类型事件：用事件传递数据
 
-<!-- <VideoGif src="/video/game-event-system/02-basic-types-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/02-basic-types-event.mp4" />
 
 ## 📋 概述
 

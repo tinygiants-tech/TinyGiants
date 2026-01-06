@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 07 지연 이벤트: 시한폭탄 시나리오
 
-<!-- <VideoGif src="/video/game-event-system/07-delayed-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/07-delayed-event.mp4" />
 
 ## 📋 개요
 

@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 04 Custom Sender Event: Context-Aware Events
 
-<!-- <VideoGif src="/video/game-event-system/04-custom-sender-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/04-custom-sender-event.mp4" />
 
 ## 📋 Overview
 

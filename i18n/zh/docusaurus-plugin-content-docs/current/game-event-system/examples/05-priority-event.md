@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 05 优先级事件：执行顺序很重要
 
-<!-- <VideoGif src="/video/game-event-system/05-priority-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/05-priority-event.mp4" />
 
 ## 📋 概述
 

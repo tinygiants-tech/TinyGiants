@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 05 優先度イベント：実行順序の重要性
 
-<!-- <VideoGif src="/video/game-event-system/05-priority-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/05-priority-event.mp4" />
 
 ## 📋 概要
 

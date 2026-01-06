@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 11 체인 이벤트: 순차 실행 파이프라인
 
-<!-- <VideoGif src="/video/game-event-system/11-chain-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/11-chain-event.mp4" />
 
 ## 📋 개요
 

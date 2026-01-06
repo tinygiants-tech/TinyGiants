@@ -7,7 +7,7 @@ import VideoGif from '@site/src/components/Video/VideoGif';
 
 # 09 지속성 이벤트: 씬 로드 시에도 생존하기
 
-<!-- <VideoGif src="/video/game-event-system/09-persistent-event.mp4" /> -->
+<VideoGif src="/video/game-event-system/example/09-persistent-event.mp4" />
 
 ## 📋 개요
 
