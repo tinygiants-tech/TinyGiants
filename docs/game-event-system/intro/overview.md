@@ -8,17 +8,16 @@ sidebar_position: 1
 
 A production-ready, visual event architecture for Unity that transforms chaotic event management into maintainable, testable workflows.
 
-:::tip From the Creator
-"I built this system because I was tired of battling 'invisible spaghetti code' in my own projects. As an indie developer, I needed a tool that balanced visual clarity with raw coding power—without performance trade-offs. **TinyGiants** is my commitment to professional-grade tools that I use in my own games every day."
-—  ***[TinyGiants]** from China*
-:::
-
 <div className="img-full-wrapper">
 
 ![Hero Diagram](/img/game-event-system/intro/overview/hero-main.png)
 
 </div>
 
+:::tip From the Creator
+"I built this system because I was tired of battling 'invisible spaghetti code' in my own projects. As an indie developer, I needed a tool that balanced visual clarity with raw coding power—without performance trade-offs. **TinyGiants** is my commitment to professional-grade tools that I use in my own games every day."
+—  ***[TinyGiants]** from China*
+:::
 
 ---
 
