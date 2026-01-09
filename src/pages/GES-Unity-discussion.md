@@ -376,7 +376,7 @@ Every example is a complete, ready-to-run scene demonstrating real-world usage:
 - **📖 Complete Documentation**: https://tinygiants.tech/docs/game-event-system/intro/overview
 - **💬 Discord Community**: https://discord.tinygiants.tech
 - **📧 Email Support**: support@tinygiants.tech
-- **🎮 Unity Forum Thread**: (this thread!)
+- **🎮 Unity Forum Thread**: (https://forum.tinygiants.tech)
 
 ---
 

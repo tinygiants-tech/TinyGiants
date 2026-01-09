@@ -324,7 +324,7 @@ export default function Home() {
           <LanguageDropdown/>
           <a href="https://discord.tinygiants.tech" target="_blank" rel="noopener noreferrer" className={styles.navIcon}
              aria-label="Discord"><img src={discordIcon} alt="Discord"/></a>
-          <a href="https://forum.unity.com/" target="_blank" rel="noopener noreferrer" className={styles.navIcon}
+          <a href="https://forum.tinygiants.tech" target="_blank" rel="noopener noreferrer" className={styles.navIcon}
              aria-label="Unity Forum"><img src={unityIcon} alt="Unity Forum"/></a>
           <a href="mailto:support@tinygiants.tech" className={styles.navIcon} aria-label="Email"><img src={mailIcon}
                                                                                                       alt="Email"/></a>
@@ -352,7 +352,7 @@ export default function Home() {
                     <span className={styles.btnIcon}>📖</span> <Translate id="homepage.feature.viewDocs">View
                     Documentation</Translate>
                   </Link>
-                  <Link className={styles.featureButtonSecondary} to="https://assetstore.unity.com/">
+                  <Link className={styles.featureButtonSecondary} to="https://assetstore.unity.com/game-event-system">
                     <img src={assetStoreIcon} className={styles.btnIconImg} alt=""/> <Translate
                     id="homepage.feature.assetStore">Asset Store</Translate>
                   </Link>

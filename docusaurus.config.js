@@ -5,7 +5,7 @@ const config = {
   tagline: 'Home',
   favicon: '/img/home-page/tinygiants-logo.png',
 
-  url: 'https://docs.tinygiants.tech',
+  url: 'https://tinygiants.tech',
   baseUrl: '/',
   organizationName: 'TinyGiants',
   projectName: 'GameEventSystem',
@@ -42,7 +42,7 @@ const config = {
       ({
         docs: {
           sidebarPath: './sidebars.js',
-          editUrl: 'https://github.com/LemonSqi/GameEventSystemDocs/tree/main/',
+          editUrl: 'https://github.com/tinygiants-tech/TinyGiants',
         },
         blog: false,
         theme: {
@@ -80,7 +80,7 @@ const config = {
           'aria-label': 'Discord',
         },
         {
-          href: 'https://forum.unity.com/',
+          href: 'https://forum.tinygiants.tech',
           position: 'right',
           className: 'header-unity-forum-link',
           'aria-label': 'Unity Forum',
@@ -125,7 +125,7 @@ const config = {
             },
             {
               label: 'Asset Store Page',
-              href: 'https://assetstore.unity.com/',
+              href: 'https://assetstore.unity.com/game-event-system',
             },
           ],
         },
@@ -138,7 +138,7 @@ const config = {
             },
             {
               label: 'Unity Forum',
-              href: 'https://forum.unity.com/',
+              href: 'https://forum.tinygiants.tech',
             },
           ],
         },

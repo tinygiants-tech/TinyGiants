@@ -65,7 +65,7 @@ sidebar_position: 3
 
 공식 유니티 포럼 스레드에서 대화에 참여하세요.
 
-**[👉 포럼 스레드 방문하기](https://forum.unity.com/your-thread-link)**
+**[👉 포럼 스레드 방문하기](https://forum.tinygiants.tech)**
 
 ------
 
@@ -101,7 +101,7 @@ sidebar_position: 3
 
 1인 개발자로서 **리뷰는 플러그인 성장에 필수적**입니다. 별 5개 평점은 다른 개발자들이 이 도구를 발견하는 데 도움을 주며, 제가 업데이트와 혁신에 더 많은 리소스를 투자할 수 있게 해줍니다.
 
-**[🌟 에셋 스토어에서 평가하기](https://assetstore.unity.com/packages/slug/your-package-id)**
+**[🌟 에셋 스토어에서 평가하기](https://assetstore.unity.com/game-event/system)**
 
 ------
 

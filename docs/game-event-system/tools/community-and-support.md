@@ -65,7 +65,7 @@ For private inquiries, business discussions, or sensitive bug reports.
 
 Join the conversation in my official Unity Forum thread.
 
-**[👉 Visit Forum Thread](https://forum.unity.com/your-thread-link)**
+**[👉 Visit Forum Thread](https://forum.tinygiants.tech)**
 
 ------
 
@@ -101,7 +101,7 @@ If the Game Event System has saved you time, cleaned up your codebase, or made y
 
 As a solo developer, **reviews are essential** to the plugin's growth. A 5-star rating helps other developers discover the tool and allows me to dedicate more resources to updates and innovation.
 
-**[🌟 Rate on Asset Store](https://assetstore.unity.com/packages/slug/your-package-id)**
+**[🌟 Rate on Asset Store](https://assetstore.unity.com/game-event/system)**
 
 ------
 
