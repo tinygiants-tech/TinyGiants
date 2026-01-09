@@ -1,12 +1,20 @@
-# [Released] GameEventSystem - Professional Visual Event Architecture for Unity
+# [Coming Soon] GameEventSystem - Professional Visual Event Architecture for Unity
+
+**Hello Unity Community!** 👋
+
+I'm excited to finally share **GameEventSystem** with you all—a production-ready event architecture that I've been building and refining as an indie developer. This is the flagship product from my studio, **TinyGiants**, and I'm releasing it to help solve a problem that has plagued my own projects for years: invisible, unmaintainable event spaghetti.
+
+**🚀 Current Status: Pre-Release**  
+
+The plugin is feature-complete and battle-tested in my own projects. I'm sharing it here with the community **before the official Asset Store launch** to gather feedback, build connections, and give you an early look at what's coming.
+
+**📢 Want to be notified when it launches?** Join our **[Discord community](https://discord.tinygiants.tech)** or follow this thread!
 
 ![GameEventSystem Hero](https://tinygiants.tech/img/game-event-system/intro/overview/hero-main.png)
 
 ---
 
 ## 💌 A Note from the Creator
-
-Hello, Unity community! I'm the developer behind **TinyGiants**, and I want to share why I built this tool.
 
 As an indie developer, I learned the hard way that the Event System is the **nervous system of any game**—it touches everything. Early in my career, I battled endless "spaghetti code": events scattered across dozens of scripts, mysterious sound triggers, and UI windows that opened for reasons I couldn't trace. I spent more time debugging event chains than actually building gameplay.
 
@@ -361,11 +369,10 @@ Every example is a complete, ready-to-run scene demonstrating real-world usage:
 
 ---
 
-## 🌐 Official Links & Resources
-
-### Essential Links
+## 🌐 Official Links
 
 - **🏠 TinyGiants Homepage**: https://tinygiants.tech
+
 - **📖 Complete Documentation**: https://tinygiants.tech/docs/game-event-system/intro/overview
 - **💬 Discord Community**: https://discord.tinygiants.tech
 - **📧 Email Support**: support@tinygiants.tech
@@ -446,14 +453,6 @@ If you have any questions, feedback, or just want to chat about game development
 *Let's build better games together,*  
 
 **[TinyGiants]**
-
----
-
-**[🌟 Get GameEventSystem on Unity Asset Store](#)**
-
-**[📖 Read Full Documentation](https://tinygiants.tech/docs/game-event-system/intro/overview)**
-
-**[💬 Join Our Community](https://discord.tinygiants.tech)**
 
 ---
 
