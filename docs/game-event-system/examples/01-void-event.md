@@ -150,7 +150,7 @@ using UnityEngine;
 
 public class VoidEventRaiser : MonoBehaviour
 {
-    [Header("GameObject")]
+    [Header("GameEvent")]
     [GameEventDropdown] public GameEvent voidEvent;
 
     [Header("Audio")]
