@@ -39,7 +39,7 @@ Assets/TinyGiants/GameEventSystem/Demo/02_BasicTypesEvent/02_BasicTypesEvent.uni
 
 **게임 로직 레이어 (Demo Scripts):**
 - 📤 **BasicTypesEventRaiser** - raiser 스크립트가 있는 GameObject
-  - 4개의 서로 다른 제네릭 이벤트에 대한 참조 보유: `GameEvent<string>`, `GameEvent<Vector3>`, `GameEvent<GameObject>`, `GameEvent<Material>`
+  - 4개의 서로 다른 제네릭 이벤트에 대한 참조 보유: `StringGameEvent`, `Vector3GameEvent`, `GameObjectGameEvent`, `MaterialGameEvent`
   - 각 버튼은 특정 데이터로 다른 raise 메서드를 트리거
 
 - 📥 **BasicTypesEventReceiver** - receiver 스크립트가 있는 GameObject
@@ -96,10 +96,10 @@ Unity에서 **Play** 버튼을 누릅니다.
 
 | 이벤트 이름    | 타입                    | 목적                                |
 | -------------- | ----------------------- | ----------------------------------- |
-| `OnString`     | `GameEvent<string>`     | 텍스트 디스플레이 업데이트          |
-| `OnVector3`    | `GameEvent<Vector3>`    | 위치/이동 데이터 전송               |
-| `OnGameObject` | `GameEvent<GameObject>` | 생성을 위한 프리팹 참조 전달        |
-| `OnMaterial`   | `GameEvent<Material>`   | 시각적 변경을 위한 머티리얼 에셋 전송 |
+| `OnString`     | `StringGameEvent`     | 텍스트 디스플레이 업데이트          |
+| `OnVector3`    | `Vector3GameEvent`    | 위치/이동 데이터 전송               |
+| `OnGameObject` | `GameObjectGameEvent` | 생성을 위한 프리팹 참조 전달        |
+| `OnMaterial`   | `MaterialGameEvent`   | 시각적 변경을 위한 머티리얼 에셋 전송 |
 
 **Behavior 열 주목:**
 각 이벤트는 Behavior 열에 색상별 타입 표시기(예: **(String)**, **(Vector3)**)를 표시합니다. 이러한 아이콘을 클릭하면 콜백 바인딩을 구성할 수 있는 Behavior Window가 열립니다—이전 데모에서 본 것과 동일한 시각적 바인딩 시스템입니다.
@@ -136,8 +136,8 @@ Hierarchy에서 **BasicTypesEventRaiser** GameObject를 선택하세요:
 
 **타입 안전성 실제 적용:**
 - `[GameEventDropdown]` 속성이 타입별로 이벤트를 자동 필터링
-- "Message Event" 슬롯에는 `GameEvent<string>`만 할당 가능
-- 문자열 슬롯에 `GameEvent<Vector3>`를 할당하려는 시도는 에디터에 의해 차단됨
+- "Message Event" 슬롯에는 `StringGameEvent`만 할당 가능
+- 문자열 슬롯에 `Vector3GameEvent`를 할당하려는 시도는 에디터에 의해 차단됨
 - 이 컴파일 타임 타입 안전성은 런타임 오류를 방지함
 
 ---
@@ -165,7 +165,7 @@ Hierarchy에서 **BasicTypesEventReceiver** GameObject를 선택하여 씬 참�
 
 :::tip 🎯 타입 매칭
 
-Behavior Window의 메서드 드롭다운은 이벤트의 매개변수 타입에 따라 메서드를 자동으로 필터링합니다. `GameEvent<string>`의 경우 `(string)` 매개변수가 있는 메서드만 표시됩니다. 이것은 구성 시점에 타입 안전성을 보장합니다!
+Behavior Window의 메서드 드롭다운은 이벤트의 매개변수 타입에 따라 메서드를 자동으로 필터링합니다. `StringGameEvent`의 경우 `(string)` 매개변수가 있는 메서드만 표시됩니다. 이것은 구성 시점에 타입 안전성을 보장합니다!
 
 :::
 
@@ -182,26 +182,26 @@ using System.Collections.Generic;
 public class BasicTypesEventRaiser : MonoBehaviour
 {
     [Header("1. C# Type (String)")]
-    [GameEventDropdown] public GameEvent<string> messageEvent;
+    [GameEventDropdown] public StringGameEvent messageEvent;
     public string messageToSend = "Hello World";
 
     [Header("2. Math Type (Vector3)")]
-    [GameEventDropdown] public GameEvent<Vector3> movementEvent;
+    [GameEventDropdown] public Vector3GameEvent movementEvent;
     public Vector3 targetPosition = new Vector3(0, 2, 0);
 
     [Header("3. Component Type (GameObject)")]
-    [GameEventDropdown] public GameEvent<GameObject> spawnEvent;
+    [GameEventDropdown] public GameObjectGameEvent spawnEvent;
     public List<GameObject> prefabsToSpawn = new List<GameObject>();
 
     [Header("4. Asset Type (Material)")]
-    [GameEventDropdown] public GameEvent<Material> changeMaterialEvent;
+    [GameEventDropdown] public MaterialGameEvent changeMaterialEvent;
     public List<Material> targetMaterials = new List<Material>();
 
     private int _count;
     private AudioSource _audioSource;
 
     /// <summary>
-    /// 동적 텍스트 콘텐츠로 GameEvent<string>을 발동합니다.
+    /// 동적 텍스트 콘텐츠로 StringGameEvent을 발동합니다.
     /// receiver는 다음 시그니처를 가져야 합니다: void MethodName(string value)
     /// </summary>
     public void RaiseString()
@@ -218,7 +218,7 @@ public class BasicTypesEventRaiser : MonoBehaviour
     }
 
     /// <summary>
-    /// 무작위 위치 데이터로 GameEvent<Vector3>을 발동합니다.
+    /// 무작위 위치 데이터로 Vector3GameEvent을 발동합니다.
     /// 이동, 방향 또는 물리력에 유용합니다.
     /// </summary>
     public void RaiseVector3()
@@ -237,7 +237,7 @@ public class BasicTypesEventRaiser : MonoBehaviour
     }
 
     /// <summary>
-    /// 프리팹 참조로 GameEvent<GameObject>를 발동합니다.
+    /// 프리팹 참조로 GameObjectGameEvent를 발동합니다.
     /// Unity Object 참조를 안전하게 전달하는 것을 보여줍니다.
     /// </summary>
     public void RaiseGameObject()
@@ -255,7 +255,7 @@ public class BasicTypesEventRaiser : MonoBehaviour
     }
 
     /// <summary>
-    /// 머티리얼 에셋 참조로 GameEvent<Material>을 발동합니다.
+    /// 머티리얼 에셋 참조로 MaterialGameEvent을 발동합니다.
     /// 런타임 시각적 커스터마이제이션에 완벽합니다.
     /// </summary>
     public void RaiseMaterial()

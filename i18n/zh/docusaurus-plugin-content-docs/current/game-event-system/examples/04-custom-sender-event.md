@@ -38,8 +38,8 @@ Assets/TinyGiants/GameEventSystem/Demo/04_CustomSenderTypeEvent/04_CustomSenderT
 
 **游戏逻辑层（演示脚本）：**
 - 📤 **CustomSenderTypeEventRaiser** - 带有触发器脚本的GameObject
-  - 使用`GameEvent<GameObject, DamageInfo>`管理两个物理炮塔（红色和蓝色）
-  - 使用`GameEvent<PlayerStats, DamageInfo>`处理系统级攻击
+  - 使用`GameObjectDamageInfoGameEvent`管理两个物理炮塔（红色和蓝色）
+  - 使用`PlayerStatsDamageInfoGameEvent`处理系统级攻击
   - 控制炮塔瞄准、抛射物发射和事件触发
 
 - 📥 **CustomSenderTypeEventReceiver** - 带有接收器脚本的GameObject
@@ -106,7 +106,7 @@ Assets/TinyGiants/GameEventSystem/Demo/04_CustomSenderTypeEvent/04_CustomSenderT
 
 #### 场景A：物理Sender（GameObject）
 ```csharp
-GameEvent<GameObject, DamageInfo>
+GameObjectDamageInfoGameEvent
 ```
 
 **使用场景：** 当发送者在场景中具有物理存在时
@@ -116,7 +116,7 @@ GameEvent<GameObject, DamageInfo>
 
 #### 场景B：逻辑Sender（纯C#类）
 ```csharp
-GameEvent<PlayerStats, DamageInfo>
+PlayerStatsDamageInfoGameEvent
 ```
 
 **使用场景：** 当发送者是没有场景表示的数据对象时
@@ -160,9 +160,9 @@ public class PlayerStats
 
 | 事件名称 | 类型 | 目的 |
 | -------------------------- | ------------------------------------ | ---------------------------- |
-| `OnGameObjectDamageInfo` | `GameEvent<GameObject, DamageInfo>` | 红色炮塔物理攻击 |
-| `OnGameObjectDamageInfo_1` | `GameEvent<GameObject, DamageInfo>` | 蓝色炮塔物理攻击 |
-| `OnPlayerStatsDamageInfo` | `GameEvent<PlayerStats, DamageInfo>` | 系统级逻辑伤害 |
+| `OnGameObjectDamageInfo` | `GameObjectDamageInfoGameEvent` | 红色炮塔物理攻击 |
+| `OnGameObjectDamageInfo_1` | `GameObjectDamageInfoGameEvent` | 蓝色炮塔物理攻击 |
+| `OnPlayerStatsDamageInfo` | `PlayerStatsDamageInfoGameEvent` | 系统级逻辑伤害 |
 
 **注意行为列：**
 - 前两个事件显示**(GameObject,DamageInfo)** - 用于物理发送者
@@ -261,7 +261,7 @@ public class CustomSenderTypeEventRaiser : MonoBehaviour
     private class TurretConfig
     {
         public string name;
-        [GameEventDropdown] public GameEvent<GameObject, DamageInfo> attackEvent;
+        [GameEventDropdown] public GameObjectDamageInfoGameEvent attackEvent;
         public Transform head;
         public Transform muzzlePosition;
         [HideInInspector] public bool isAttacking;
@@ -272,7 +272,7 @@ public class CustomSenderTypeEventRaiser : MonoBehaviour
     [SerializeField] private TurretConfig turret2;
 
     [Header("全局系统事件")]
-    [GameEventDropdown] public GameEvent<PlayerStats, DamageInfo> globalSystemEvent;
+    [GameEventDropdown] public PlayerStatsDamageInfoGameEvent globalSystemEvent;
 
     private PlayerStats _localPlayerStats;
 
@@ -362,7 +362,7 @@ public class CustomSenderTypeEventReceiver : MonoBehaviour
     [SerializeField] private TextMeshPro attackerInfoText;
 
     /// <summary>
-    /// 绑定到：GameEvent<GameObject, DamageInfo>
+    /// 绑定到：GameObjectDamageInfoGameEvent
     /// 处理具有场景存在的物理攻击者。
     /// </summary>
     /// <param name="sender">攻击的GameObject（炮塔）</param>
@@ -388,7 +388,7 @@ public class CustomSenderTypeEventReceiver : MonoBehaviour
     }
 
     /// <summary>
-    /// 绑定到：GameEvent<PlayerStats, DamageInfo>
+    /// 绑定到：PlayerStatsDamageInfoGameEvent
     /// 处理没有场景表示的逻辑攻击者。
     /// </summary>
     /// <param name="sender">带有配置文件数据的PlayerStats对象</param>

@@ -39,7 +39,7 @@ Assets/TinyGiants/GameEventSystem/Demo/05_PriorityEvent/05_PriorityEvent.unity
 - 📤 **PriorityEventRaiser** - 発行側スクリプトを持つGameObject
   - タレットの照準と弾の発射を管理
   - `OnChaoticHit` と `OnOrderedHit` の2つのイベント参照を保持
-  - 両イベントとも同じ `GameEvent<GameObject, DamageInfo>` 型を使用
+  - 両イベントとも同じ `GameObjectDamageInfoGameEvent` 型を使用
 
 - 📥 **PriorityEventReceiver** - 受信側スクリプトを持つGameObject
   - 各イベントに紐付けられた「2つ」のリスナーメソッドを保持：
@@ -149,12 +149,12 @@ Unityの **Play** ボタンを押します。
 
 | イベント名      | 型                                  | リスナーの順序                        |
 | -------------- | ----------------------------------- | ------------------------------------- |
-| `OnChaoticHit` | `GameEvent<GameObject, DamageInfo>` | ❌ ResolveHit → ActivateBuff (誤り)   |
-| `OnOrderedHit` | `GameEvent<GameObject, DamageInfo>` | ✅ ActivateBuff → ResolveHit (正しい) |
+| `OnChaoticHit` | `GameObjectDamageInfoGameEvent` | ❌ ResolveHit → ActivateBuff (誤り)   |
+| `OnOrderedHit` | `GameObjectDamageInfoGameEvent` | ✅ ActivateBuff → ResolveHit (正しい) |
 
 :::note 🔧 同じ型、異なる順序
 
-どちらのイベントも `GameEvent<GameObject, DamageInfo>` です。唯一の違いは、[Behavior Window](../visual-workflow/game-event-behavior.md) で設定された**リスナーの実行順序**です。
+どちらのイベントも `GameObjectDamageInfoGameEvent` です。唯一の違いは、[Behavior Window](../visual-workflow/game-event-behavior.md) で設定された**リスナーの実行順序**です。
 
 :::
 
@@ -247,12 +247,12 @@ public class PriorityEventRaiser : MonoBehaviour
 {
     [Header("Event Channels")]
     [Tooltip("エディタで設定済み: バフ適用 -> その後、発射。")]
-    [GameEventDropdown] public GameEvent<GameObject, DamageInfo> orderedHitEvent;
+    [GameEventDropdown] public GameObjectDamageInfoGameEvent orderedHitEvent;
 
     [Tooltip("エディタで設定済み: 発射 -> その後、バフ適用 (遅すぎる！)。")]
-    [GameEventDropdown] public GameEvent<GameObject, DamageInfo> chaoticHitEvent;
+    [GameEventDropdown] public GameObjectDamageInfoGameEvent chaoticHitEvent;
 
-    private GameEvent<GameObject, DamageInfo> _pendingEvent;
+    private GameObjectDamageInfoGameEvent _pendingEvent;
 
     /// <summary>
     /// ボタン A: "Ordered" イベントをトリガーする攻撃シーケンスを開始。

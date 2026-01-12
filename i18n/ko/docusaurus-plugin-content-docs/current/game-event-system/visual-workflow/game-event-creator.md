@@ -416,7 +416,7 @@ graph LR
 
 // 두 개의 타입 매개변수를 가진 이벤트 클래스
 public class GameObjectDamageInfoGameEvent 
-    : GameEvent<GameObject, DamageInfo> { }
+    : GameObjectDamageInfoGameEvent { }
 
 // 두 개의 매개변수를 가진 바인딩 필드
 public UnityEvent<GameObject, DamageInfo> 

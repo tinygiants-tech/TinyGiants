@@ -184,7 +184,7 @@ Assets/TinyGiants/GameEventSystem/Demo/06_ConditionalEvent/06_ConditionalEvent.u
 
 | 이벤트 이름    | 타입                    | 목적                                    |
 | -------------- | ----------------------- | --------------------------------------- |
-| `OnAccessCard` | `GameEvent<AccessCard>` | 조건 트리를 통해 카드 자격 증명 검증    |
+| `OnAccessCard` | `AccessCardGameEvent` | 조건 트리를 통해 카드 자격 증명 검증    |
 
 **AccessCard 데이터 구조:**
 ```csharp
@@ -320,7 +320,7 @@ using TinyGiants.GameEventSystem.Runtime;
 public class ConditionalEventRaiser : MonoBehaviour
 {
     [Header("Event Channel")]
-    [GameEventDropdown] public GameEvent<AccessCard> requestAccessEvent;
+    [GameEventDropdown] public AccessCardGameEvent requestAccessEvent;
 
     [Header("Scene Reference")]
     [SerializeField] private SecurityGrid securityGrid;

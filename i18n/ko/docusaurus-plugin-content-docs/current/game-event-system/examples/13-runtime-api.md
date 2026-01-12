@@ -148,10 +148,10 @@ public class RuntimeAPI_VoidEventReceiver : MonoBehaviour
 
 **RuntimeAPI_BasicTypesEventRaiser.cs:**
 ```csharp
-[GameEventDropdown] public GameEvent<string> messageEvent;
-[GameEventDropdown] public GameEvent<Vector3> movementEvent;
-[GameEventDropdown] public GameEvent<GameObject> spawnEvent;
-[GameEventDropdown] public GameEvent<Material> changeMaterialEvent;
+[GameEventDropdown] public StringGameEvent messageEvent;
+[GameEventDropdown] public Vector3GameEvent movementEvent;
+[GameEventDropdown] public GameObjectGameEvent spawnEvent;
+[GameEventDropdown] public MaterialGameEvent changeMaterialEvent;
 
 public void RaiseString()
 {
@@ -192,7 +192,7 @@ public void OnMaterialReceived(Material mat) { /* ... */ }
 **주요 포인트:**
 - ✅ **타입 안정성:** 컴파일러가 시그니처 일치 여부를 강제합니다.
 - ✅ **자동 추론:** 수동으로 타입을 지정할 필요가 없습니다.
-- ⚠️ **불일치 오류:** `void(int)`는 `GameEvent<string>`에 바인딩할 수 없습니다.
+- ⚠️ **불일치 오류:** `void(int)`는 `StringGameEvent`에 바인딩할 수 없습니다.
 
 ---
 
@@ -202,9 +202,9 @@ public void OnMaterialReceived(Material mat) { /* ... */ }
 
 **RuntimeAPI_CustomTypeEventRaiser.cs:**
 ```csharp
-[GameEventDropdown] public GameEvent<DamageInfo> physicalDamageEvent;
-[GameEventDropdown] public GameEvent<DamageInfo> fireDamageEvent;
-[GameEventDropdown] public GameEvent<DamageInfo> criticalStrikeEvent;
+[GameEventDropdown] public DamageInfoGameEvent physicalDamageEvent;
+[GameEventDropdown] public DamageInfoGameEvent fireDamageEvent;
+[GameEventDropdown] public DamageInfoGameEvent criticalStrikeEvent;
 
 public void DealPhysicalDamage()
 {
@@ -242,7 +242,7 @@ public void OnDamageReceived(DamageInfo info)
 ```
 
 **주요 포인트:**
-- 📦 **자동 생성:** 플러그인이 `GameEvent<DamageInfo>` 클래스를 자동으로 생성합니다.
+- 📦 **자동 생성:** 플러그인이 `DamageInfoGameEvent` 클래스를 자동으로 생성합니다.
 - 🔗 **다중 바인딩:** 하나의 메서드로 여러 이벤트를 리스닝할 수 있습니다.
 - ⚡ **데이터 접근:** 사용자 정의 클래스의 프로퍼티에 자유롭게 접근 가능합니다.
 
@@ -255,10 +255,10 @@ public void OnDamageReceived(DamageInfo info)
 **RuntimeAPI_CustomSenderTypeEventRaiser.cs:**
 ```csharp
 // 물리적 송신자: GameObject
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> turretEvent;
+[GameEventDropdown] public GameObjectDamageInfoGameEvent turretEvent;
 
 // 논리적 송신자: 사용자 정의 클래스
-[GameEventDropdown] public GameEvent<PlayerStats, DamageInfo> systemEvent;
+[GameEventDropdown] public PlayerStatsDamageInfoGameEvent systemEvent;
 
 public void RaiseTurretDamage()
 {
@@ -319,8 +319,8 @@ public void OnSystemAttackReceived(PlayerStats sender, DamageInfo args)
 
 **RuntimeAPI_PriorityEventReceiver.cs:**
 ```csharp
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> orderedHitEvent;
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> chaoticHitEvent;
+[GameEventDropdown] public GameObjectDamageInfoGameEvent orderedHitEvent;
+[GameEventDropdown] public GameObjectDamageInfoGameEvent chaoticHitEvent;
 
 private void OnEnable()
 {
@@ -370,7 +370,7 @@ public void ResolveHit(GameObject sender, DamageInfo args)
 
 **RuntimeAPI_ConditionalEventReceiver.cs:**
 ```csharp
-[GameEventDropdown] public GameEvent<AccessCard> requestAccessEvent;
+[GameEventDropdown] public AccessCardGameEvent requestAccessEvent;
 
 private void OnEnable()
 {
@@ -576,10 +576,10 @@ public void OnFireCommandB()
 
 **RuntimeAPI_TriggerEventRaiser.cs:**
 ```csharp
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onCommand;      // 루트
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onActiveBuff;   // 분기 A
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onTurretFire;   // 분기 B
-[GameEventDropdown] public GameEvent<DamageInfo> onHoloData;                 // 분기 C (타입 변환)
+[GameEventDropdown] public GameObjectDamageInfoGameEvent onCommand;      // 루트
+[GameEventDropdown] public GameObjectDamageInfoGameEvent onActiveBuff;   // 분기 A
+[GameEventDropdown] public GameObjectDamageInfoGameEvent onTurretFire;   // 분기 B
+[GameEventDropdown] public DamageInfoGameEvent onHoloData;                 // 분기 C (타입 변환)
 [GameEventDropdown] public GameEvent onGlobalAlarm;                          // 분기 D (보이드)
 
 private TriggerHandle _buffAHandle;
@@ -611,7 +611,7 @@ private void OnEnable()
     
     // 분기 C: 홀로 데이터 (타입 변환, 지연)
     _holoHandle = onCommand.AddTriggerEvent(
-        targetEvent: onHoloData,  // ← GameEvent<DamageInfo> (송신자 없음)
+        targetEvent: onHoloData,  // ← DamageInfoGameEvent (송신자 없음)
         delay: 1f,  // ← 1초 지연
         passArgument: true
     );
@@ -668,12 +668,12 @@ private void OnDisable()
 
 **RuntimeAPI_ChainEventRaiser.cs:**
 ```csharp
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnStartSequenceEvent;  // 루트
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnSystemCheckEvent;    // 1단계
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnChargeEvent;         // 2단계
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnFireEvent;           // 3단계
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnCoolDownEvent;       // 4단계
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnArchiveEvent;        // 5단계
+[GameEventDropdown] public GameObjectDamageInfoGameEvent OnStartSequenceEvent;  // 루트
+[GameEventDropdown] public GameObjectDamageInfoGameEvent OnSystemCheckEvent;    // 1단계
+[GameEventDropdown] public GameObjectDamageInfoGameEvent OnChargeEvent;         // 2단계
+[GameEventDropdown] public GameObjectDamageInfoGameEvent OnFireEvent;           // 3단계
+[GameEventDropdown] public GameObjectDamageInfoGameEvent OnCoolDownEvent;       // 4단계
+[GameEventDropdown] public GameObjectDamageInfoGameEvent OnArchiveEvent;        // 5단계
 
 private ChainHandle _checkHandle;
 private ChainHandle _chargeHandle;

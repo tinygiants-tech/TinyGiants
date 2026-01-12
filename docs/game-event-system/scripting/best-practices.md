@@ -322,7 +322,7 @@ The OnEnable/OnDisable pattern is the recommended approach for Unity.
 ```csharp
 public class HealthUI : MonoBehaviour
 {
-    [GameEventDropdown] public GameEvent<float> healthChangedEvent;
+    [GameEventDropdown] public SingleGameEvent healthChangedEvent;
     
     void OnEnable()
     {
@@ -422,7 +422,7 @@ When managing multiple schedules, use a collection.
 ```csharp
 public class BuffManager : MonoBehaviour
 {
-    [GameEventDropdown] public GameEvent<string> buffTickEvent;
+    [GameEventDropdown] public StringGameEvent buffTickEvent;
     
     private Dictionary<string, ScheduleHandle> _activeBuffs = new();
     

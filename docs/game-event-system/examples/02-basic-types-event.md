@@ -39,7 +39,7 @@ Assets/TinyGiants/GameEventSystem/Demo/02_BasicTypesEvent/02_BasicTypesEvent.uni
 
 **Game Logic Layer (Demo Scripts):**
 - 📤 **BasicTypesEventRaiser** - GameObject with the raiser script
-  - Holds references to 4 different generic events: `GameEvent<string>`, `GameEvent<Vector3>`, `GameEvent<GameObject>`, `GameEvent<Material>`
+  - Holds references to 4 different generic events: `StringGameEvent`, `Vector3GameEvent`, `GameObjectGameEvent`, `MaterialGameEvent`
   - Each button triggers a different raise method with specific data
 
 - 📥 **BasicTypesEventReceiver** - GameObject with the receiver script
@@ -96,10 +96,10 @@ Open the **Game Event Editor** window to see the 4 pre-configured events:
 
 | Event Name     | Type                    | Purpose                                 |
 | -------------- | ----------------------- | --------------------------------------- |
-| `OnString`     | `GameEvent<string>`     | Update text displays                    |
-| `OnVector3`    | `GameEvent<Vector3>`    | Send position/movement data             |
-| `OnGameObject` | `GameEvent<GameObject>` | Pass prefab references for spawning     |
-| `OnMaterial`   | `GameEvent<Material>`   | Send material assets for visual changes |
+| `OnString`     | `StringGameEvent`     | Update text displays                    |
+| `OnVector3`    | `Vector3GameEvent`    | Send position/movement data             |
+| `OnGameObject` | `GameObjectGameEvent` | Pass prefab references for spawning     |
+| `OnMaterial`   | `MaterialGameEvent`   | Send material assets for visual changes |
 
 **Notice the Behavior Column:**
 Each event shows a colored type indicator (e.g., **(String)**, **(Vector3)**) in the Behavior column. Clicking these icons opens the Behavior Window where you can configure callback bindings—the same visual binding system you saw in the previous demo.
@@ -136,8 +136,8 @@ Select the **BasicTypesEventRaiser** GameObject in the Hierarchy:
 
 **Type Safety in Action:**
 - The `[GameEventDropdown]` attribute automatically filters events by type
-- You can only assign `GameEvent<string>` to the "Message Event" slot
-- Attempting to assign a `GameEvent<Vector3>` to the string slot is prevented by the Editor
+- You can only assign `StringGameEvent` to the "Message Event" slot
+- Attempting to assign a `Vector3GameEvent` to the string slot is prevented by the Editor
 - This compile-time type safety prevents runtime errors
 
 ---
@@ -165,7 +165,7 @@ Each of the 4 events is bound to a corresponding receiver method through the **B
 
 :::tip 🎯 Type Matching
 
-The Behavior Window's method dropdown automatically filters methods based on the event's parameter type. For `GameEvent<string>`, you'll only see methods with a `(string)` parameter. This ensures type safety at configuration time!
+The Behavior Window's method dropdown automatically filters methods based on the event's parameter type. For `StringGameEvent`, you'll only see methods with a `(string)` parameter. This ensures type safety at configuration time!
 
 :::
 
@@ -182,26 +182,26 @@ using System.Collections.Generic;
 public class BasicTypesEventRaiser : MonoBehaviour
 {
     [Header("1. C# Type (String)")]
-    [GameEventDropdown] public GameEvent<string> messageEvent;
+    [GameEventDropdown] public StringGameEvent messageEvent;
     public string messageToSend = "Hello World";
 
     [Header("2. Math Type (Vector3)")]
-    [GameEventDropdown] public GameEvent<Vector3> movementEvent;
+    [GameEventDropdown] public Vector3GameEvent movementEvent;
     public Vector3 targetPosition = new Vector3(0, 2, 0);
 
     [Header("3. Component Type (GameObject)")]
-    [GameEventDropdown] public GameEvent<GameObject> spawnEvent;
+    [GameEventDropdown] public GameObjectGameEvent spawnEvent;
     public List<GameObject> prefabsToSpawn = new List<GameObject>();
 
     [Header("4. Asset Type (Material)")]
-    [GameEventDropdown] public GameEvent<Material> changeMaterialEvent;
+    [GameEventDropdown] public MaterialGameEvent changeMaterialEvent;
     public List<Material> targetMaterials = new List<Material>();
 
     private int _count;
     private AudioSource _audioSource;
 
     /// <summary>
-    /// Raises a GameEvent<string> with dynamic text content.
+    /// Raises a StringGameEvent with dynamic text content.
     /// The receiver must have signature: void MethodName(string value)
     /// </summary>
     public void RaiseString()
@@ -218,7 +218,7 @@ public class BasicTypesEventRaiser : MonoBehaviour
     }
 
     /// <summary>
-    /// Raises a GameEvent<Vector3> with random position data.
+    /// Raises a Vector3GameEvent with random position data.
     /// Useful for movement, directions, or physics forces.
     /// </summary>
     public void RaiseVector3()
@@ -237,7 +237,7 @@ public class BasicTypesEventRaiser : MonoBehaviour
     }
 
     /// <summary>
-    /// Raises a GameEvent<GameObject> with a prefab reference.
+    /// Raises a GameObjectGameEvent with a prefab reference.
     /// Demonstrates passing Unity Object references safely.
     /// </summary>
     public void RaiseGameObject()
@@ -255,7 +255,7 @@ public class BasicTypesEventRaiser : MonoBehaviour
     }
 
     /// <summary>
-    /// Raises a GameEvent<Material> with a material asset reference.
+    /// Raises a MaterialGameEvent with a material asset reference.
     /// Perfect for runtime visual customization.
     /// </summary>
     public void RaiseMaterial()

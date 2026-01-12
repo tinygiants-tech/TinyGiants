@@ -125,7 +125,7 @@ Filter events by their underlying C# parameter types.
 
 - Type: All ➔ ⚪ Shows **All** signature types
 - Type: void ➔ 🔘 Shows only **Parameterless** events
-- Type: Int32 ➔ 🔢 Shows only `GameEvent<int>`
+- Type: Int32 ➔ 🔢 Shows only `public Int32GameEvent`
 - Type: GameObject ➔ 📦 Shows only **GameObject** reference events
 
 :::tip **Available Types**

@@ -150,7 +150,7 @@ void Start()
 
 ```csharp
 [GameEventDropdown]
-public GameEvent<float> onHealthChanged;
+public SingleGameEvent onHealthChanged;
 
 private float health = 100f;
 
@@ -161,7 +161,7 @@ public void TakeDamage(float damage)
 }
 ```
 
-**타입 안정성**: 드롭다운에 `GameEvent<float>` 타입의 이벤트만 표시되어 타입 불일치를 방지합니다.
+**타입 안정성**: 드롭다운에 `SingleGameEvent` 타입의 이벤트만 표시되어 타입 불일치를 방지합니다.
 
 ---
 
@@ -169,7 +169,7 @@ public void TakeDamage(float damage)
 
 ```csharp
 [GameEventDropdown]
-public GameEvent<GameObject, DamageInfo> onPlayerDamaged;
+public GameObjectDamageInfoGameEvent onPlayerDamaged;
 
 public void ApplyDamage(DamageInfo damageInfo)
 {
@@ -190,10 +190,10 @@ public void ApplyDamage(DamageInfo damageInfo)
 public class ScoreManager : MonoBehaviour
 {
     [GameEventDropdown]
-    public GameEvent<int> onScoreChanged;  // GameEvent<int>만 표시됨
+    public Int32GameEvent onScoreChanged;  // public Int32GameEvent만 표시됨
     
     [GameEventDropdown]
-    public GameEvent<int> onLevelUp;       // GameEvent<int>만 표시됨
+    public Int32GameEvent onLevelUp;       // public Int32GameEvent만 표시됨
     
     private int score = 0;
     
@@ -208,7 +208,7 @@ public class ScoreManager : MonoBehaviour
 **드롭다운 필터링 예시**:
 
 ```
-GameEvent<int>에 사용 가능한 이벤트:
+public Int32GameEvent에 사용 가능한 이벤트:
   ✅ OnScoreChanged (int)
   ✅ OnLevelUp (int)
   ✅ OnComboMultiplier (int)
@@ -472,12 +472,12 @@ Tools > TinyGiants > Game Event System
 **예시**:
 ```csharp
 [GameEventDropdown]
-public GameEvent<string> textEvent;  // GameEvent<string>이 필요함
+public StringGameEvent textEvent;  // StringGameEvent이 필요함
 
 // 하지만 데이터베이스에는 다음만 있는 경우:
 // - GameEvent (void)
-// - GameEvent<int>
-// - GameEvent<float>
+// - public Int32GameEvent
+// - SingleGameEvent
 
 결과: 일치하는 이벤트 없음!
 ```

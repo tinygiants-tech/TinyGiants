@@ -150,11 +150,11 @@ onDamageTaken.AddTriggerEvent(
 
 複雑なオブジェクトイベントをシンプルなプリミティブイベントにマップ。
 
-- **ソース:** `GameEvent<Enemy> (OnEnemyKilled)`
-- **ターゲット:** `GameEvent<int> (OnAddXP)`
+- **ソース:** `EnemyGameEvent (OnEnemyKilled)`
+- **ターゲット:** `public Int32GameEvent (OnAddXP)`
 ```csharp
-[GameEventDropdown] public GameEvent<Enemy> onEnemyKilled;
-[GameEventDropdown] public GameEvent<int> onAddXP;
+[GameEventDropdown] public EnemyGameEvent onEnemyKilled;
+[GameEventDropdown] public Int32GameEvent onAddXP;
 
 void Awake()
 {

@@ -1029,13 +1029,13 @@ TriggerHandle AddTriggerEvent(
 
 ```csharp
 // Pass argument directly
-GameEvent<int> scoreEvent;
-GameEvent<int> updateUIEvent;
+public Int32GameEvent scoreEvent;
+public Int32GameEvent updateUIEvent;
 scoreEvent.AddTriggerEvent(updateUIEvent, passArgument: true);
 
 // Transform argument: int → string
-GameEvent<int> scoreEvent;
-GameEvent<string> notificationEvent;
+public Int32GameEvent scoreEvent;
+StringGameEvent notificationEvent;
 scoreEvent.AddTriggerEvent(
     notificationEvent,
     passArgument: true,
@@ -1043,7 +1043,7 @@ scoreEvent.AddTriggerEvent(
 );
 
 // Conditional with argument check
-GameEvent<float> healthEvent;
+SingleGameEvent healthEvent;
 GameEvent lowHealthWarningEvent;
 healthEvent.AddTriggerEvent(
     lowHealthWarningEvent,
@@ -1082,13 +1082,13 @@ TriggerHandle AddTriggerEvent(
 
 ```csharp
 // Pass sender and args to another sender event
-GameEvent<GameObject, DamageInfo> damageEvent;
-GameEvent<GameObject, DamageInfo> logEvent;
+GameObjectDamageInfoGameEvent damageEvent;
+GameObjectDamageInfoGameEvent logEvent;
 damageEvent.AddTriggerEvent(logEvent, passArgument: true);
 
 // Transform: extract damage value only
-GameEvent<GameObject, DamageInfo> damageEvent;
-GameEvent<int> damageNumberEvent;
+GameObjectDamageInfoGameEvent damageEvent;
+public Int32GameEvent damageNumberEvent;
 damageEvent.AddTriggerEvent(
     damageNumberEvent,
     passArgument: true,
@@ -1096,7 +1096,7 @@ damageEvent.AddTriggerEvent(
 );
 
 // Conditional based on sender and args
-GameEvent<GameObject, DamageInfo> damageEvent;
+GameObjectDamageInfoGameEvent damageEvent;
 GameEvent criticalHitEvent;
 damageEvent.AddTriggerEvent(
     criticalHitEvent,
@@ -1281,16 +1281,16 @@ ChainHandle AddChainEvent(
 
 ```csharp
 // Chain with argument passing
-GameEvent<int> damageEvent;
-GameEvent<int> applyDamageEvent;
-GameEvent<int> updateHealthBarEvent;
+public Int32GameEvent damageEvent;
+public Int32GameEvent applyDamageEvent;
+public Int32GameEvent updateHealthBarEvent;
 
 damageEvent.AddChainEvent(applyDamageEvent, passArgument: true);
 applyDamageEvent.AddChainEvent(updateHealthBarEvent, passArgument: true);
 
 // Chain with transformation
-GameEvent<int> damageEvent;
-GameEvent<float> healthPercentEvent;
+public Int32GameEvent damageEvent;
+SingleGameEvent healthPercentEvent;
 
 damageEvent.AddChainEvent(
     healthPercentEvent,
@@ -1300,7 +1300,7 @@ damageEvent.AddChainEvent(
 );
 
 // Conditional chain with argument check
-GameEvent<int> damageEvent;
+public Int32GameEvent damageEvent;
 GameEvent deathEvent;
 
 damageEvent.AddChainEvent(
@@ -1342,16 +1342,16 @@ ChainHandle AddChainEvent(
 
 ```csharp
 // Attack sequence chain
-GameEvent<GameObject, AttackData> attackStartEvent;
-GameEvent<GameObject, AttackData> playAnimationEvent;
-GameEvent<GameObject, AttackData> dealDamageEvent;
+GameObjectAttackDataGameEvent attackStartEvent;
+GameObjectAttackDataGameEvent playAnimationEvent;
+GameObjectAttackDataGameEvent dealDamageEvent;
 
 attackStartEvent.AddChainEvent(playAnimationEvent, delay: 0f);
 playAnimationEvent.AddChainEvent(dealDamageEvent, delay: 0.5f);
 
 // Extract damage value
-GameEvent<GameObject, AttackData> dealDamageEvent;
-GameEvent<int> showDamageNumberEvent;
+GameObjectAttackDataGameEvent dealDamageEvent;
+public Int32GameEvent showDamageNumberEvent;
 
 dealDamageEvent.AddChainEvent(
     showDamageNumberEvent,
@@ -1360,7 +1360,7 @@ dealDamageEvent.AddChainEvent(
 );
 
 // Victory chain with condition
-GameEvent<GameObject, AttackData> attackEndEvent;
+GameObjectAttackDataGameEvent attackEndEvent;
 GameEvent<GameObject, VictoryData> victoryEvent;
 
 attackEndEvent.AddChainEvent(

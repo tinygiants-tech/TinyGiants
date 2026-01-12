@@ -89,7 +89,7 @@ Unlike string-based or singleton event systems, **events are first-class assets*
 ```csharp
 // Events are assets, not magic strings
 [GameEventDropdown] public GameEvent onPlayerDeath;
-[GameEventDropdown] public GameEvent<int> onScoreChanged;
+[GameEventDropdown] public Int32GameEvent onScoreChanged;
 
 void Die() {
     onPlayerDeath.Raise(); // Type-safe, asset-referenced

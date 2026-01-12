@@ -205,7 +205,7 @@ sidebar_position: 2
 
 - **[时间戳]** - 事件触发时间（HH:MM:SS.mmm）
 - **事件名称** - 触发的事件
-- **事件类型** - 泛型类型（例如，`GameEvent<int>`）
+- **事件类型** - 泛型类型（例如，`public Int32GameEvent`）
 
 **快速操作：**
 
@@ -333,7 +333,7 @@ sidebar_position: 2
 
 每个日志条目显示：
 ```tex
-[14:23:45.123]  F:1250  PlayerTakeDamage  <GameEvent<GameObject, DamageInfo>>  [Details]
+[14:23:45.123]  F:1250  PlayerTakeDamage  <GameObjectDamageInfoGameEvent>  [Details]
   📍 Called by: EnemyController.Attack()
 ```
 
@@ -919,7 +919,7 @@ Basic(Insp): 2  Basic(API): 1  Priority(API): 3  Cond(API): 1  Persist(Insp): 0 
 | 字段 | 描述 |
 | -------------- | --------------------------------------- |
 | **事件名称** | 事件的完整名称 |
-| **事件类型** | 泛型类型（例如，`GameEvent<float>`） |
+| **事件类型** | 泛型类型（例如，`SingleGameEvent`） |
 | **时间** | 精确时间戳（HH:MM:SS.mmm） |
 | **帧** | 执行时的帧号 |
 | **参数** | 传递的参数值 |
@@ -975,10 +975,10 @@ Event: PlayerHealthChanged     Total: 245 triggers
 
 以相反的时间顺序显示此事件的最后50次执行：
 ```tex
-[14:52:33.145]  F:3201  PlayerHealthChanged  <GameEvent<float>>  [Details]
+[14:52:33.145]  F:3201  PlayerHealthChanged  <SingleGameEvent>  [Details]
   📍 Called by: DamageSystem.ApplyDamage()
 
-[14:52:31.089]  F:3180  PlayerHealthChanged  <GameEvent<float>>  [Details]
+[14:52:31.089]  F:3180  PlayerHealthChanged  <SingleGameEvent>  [Details]
   📍 Called by: HealthRegen.Tick()
 
 ...

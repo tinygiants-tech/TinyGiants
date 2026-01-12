@@ -36,7 +36,7 @@ void Update()
 Events that carry a specific data payload (T).
 
 ```csharp
-[GameEventDropdown] public GameEvent<float> onHealthChanged;
+[GameEventDropdown] public SingleGameEvent onHealthChanged;
 
 public void TakeDamage(float damage)
 {
@@ -53,7 +53,7 @@ Events that verify the **Source** of the event (TSender) and carry data (TArgs).
 
 ```csharp
 // Define types: Sender is GameObject, Arg is DamageInfo
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onActorDamaged;
+[GameEventDropdown] public GameObjectDamageInfoGameEvent onActorDamaged;
 
 public void Hit()
 {
@@ -117,7 +117,7 @@ Use this to create loops, timers, or polling mechanisms entirely within the even
 Damage the player every 1 second, for 5 ticks.
 
 ```csharp
-[GameEventDropdown] public GameEvent<int> onTakeDamage;
+[GameEventDropdown] public Int32GameEvent onTakeDamage;
 
 private void ApplyPoison()
 {

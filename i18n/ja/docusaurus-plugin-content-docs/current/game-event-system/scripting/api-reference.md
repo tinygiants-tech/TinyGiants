@@ -951,13 +951,13 @@ TriggerHandle AddTriggerEvent(
 **使用例:**
 ```csharp
 // 引数を直接渡す
-GameEvent<int> scoreEvent;
-GameEvent<int> updateUIEvent;
+public Int32GameEvent scoreEvent;
+public Int32GameEvent updateUIEvent;
 scoreEvent.AddTriggerEvent(updateUIEvent, passArgument: true);
 
 // 引数を変換: int → string
-GameEvent<int> scoreEvent;
-GameEvent<string> notificationEvent;
+public Int32GameEvent scoreEvent;
+StringGameEvent notificationEvent;
 scoreEvent.AddTriggerEvent(
     notificationEvent,
     passArgument: true,
@@ -965,7 +965,7 @@ scoreEvent.AddTriggerEvent(
 );
 
 // 引数チェック付き条件付き
-GameEvent<float> healthEvent;
+SingleGameEvent healthEvent;
 GameEvent lowHealthWarningEvent;
 healthEvent.AddTriggerEvent(
     lowHealthWarningEvent,
@@ -1002,13 +1002,13 @@ TriggerHandle AddTriggerEvent(
 **使用例:**
 ```csharp
 // 送信者と引数を別の送信者イベントに渡す
-GameEvent<GameObject, DamageInfo> damageEvent;
-GameEvent<GameObject, DamageInfo> logEvent;
+GameObjectDamageInfoGameEvent damageEvent;
+GameObjectDamageInfoGameEvent logEvent;
 damageEvent.AddTriggerEvent(logEvent, passArgument: true);
 
 // 変換: ダメージ値のみを抽出
-GameEvent<GameObject, DamageInfo> damageEvent;
-GameEvent<int> damageNumberEvent;
+GameObjectDamageInfoGameEvent damageEvent;
+public Int32GameEvent damageNumberEvent;
 damageEvent.AddTriggerEvent(
     damageNumberEvent,
     passArgument: true,
@@ -1016,7 +1016,7 @@ damageEvent.AddTriggerEvent(
 );
 
 // 送信者と引数に基づく条件付き
-GameEvent<GameObject, DamageInfo> damageEvent;
+GameObjectDamageInfoGameEvent damageEvent;
 GameEvent criticalHitEvent;
 damageEvent.AddTriggerEvent(
     criticalHitEvent,
@@ -1191,16 +1191,16 @@ ChainHandle AddChainEvent(
 **使用例:**
 ```csharp
 // 引数を渡すチェーン
-GameEvent<int> damageEvent;
-GameEvent<int> applyDamageEvent;
-GameEvent<int> updateHealthBarEvent;
+public Int32GameEvent damageEvent;
+public Int32GameEvent applyDamageEvent;
+public Int32GameEvent updateHealthBarEvent;
 
 damageEvent.AddChainEvent(applyDamageEvent, passArgument: true);
 applyDamageEvent.AddChainEvent(updateHealthBarEvent, passArgument: true);
 
 // 変換を伴うチェーン
-GameEvent<int> damageEvent;
-GameEvent<float> healthPercentEvent;
+public Int32GameEvent damageEvent;
+SingleGameEvent healthPercentEvent;
 
 damageEvent.AddChainEvent(
     healthPercentEvent,
@@ -1210,7 +1210,7 @@ damageEvent.AddChainEvent(
 );
 
 // 引数チェック付き条件付きチェーン
-GameEvent<int> damageEvent;
+public Int32GameEvent damageEvent;
 GameEvent deathEvent;
 
 damageEvent.AddChainEvent(
@@ -1250,16 +1250,16 @@ ChainHandle AddChainEvent(
 **使用例:**
 ```csharp
 // 攻撃シーケンスチェーン
-GameEvent<GameObject, AttackData> attackStartEvent;
-GameEvent<GameObject, AttackData> playAnimationEvent;
-GameEvent<GameObject, AttackData> dealDamageEvent;
+GameObjectAttackDataGameEvent attackStartEvent;
+GameObjectAttackDataGameEvent playAnimationEvent;
+GameObjectAttackDataGameEvent dealDamageEvent;
 
 attackStartEvent.AddChainEvent(playAnimationEvent, delay: 0f);
 playAnimationEvent.AddChainEvent(dealDamageEvent, delay: 0.5f);
 
 // ダメージ値を抽出
-GameEvent<GameObject, AttackData> dealDamageEvent;
-GameEvent<int> showDamageNumberEvent;
+GameObjectAttackDataGameEvent dealDamageEvent;
+public Int32GameEvent showDamageNumberEvent;
 
 dealDamageEvent.AddChainEvent(
     showDamageNumberEvent,
@@ -1268,7 +1268,7 @@ dealDamageEvent.AddChainEvent(
 );
 
 // 条件付き勝利チェーン
-GameEvent<GameObject, AttackData> attackEndEvent;
+GameObjectAttackDataGameEvent attackEndEvent;
 GameEvent<GameObject, VictoryData> victoryEvent;
 
 attackEndEvent.AddChainEvent(

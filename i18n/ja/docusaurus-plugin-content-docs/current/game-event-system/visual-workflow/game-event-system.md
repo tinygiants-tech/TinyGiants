@@ -62,7 +62,7 @@ Tools > TinyGiants > Game Event System
 
 | ツール                                                         | 説明                                                  |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [**📜 Generate Game Event Code**](../tools/codegen-and-cleanup.md) | コードジェネレーターを手動でトリガーします。新しいカスタム型(例: `GameEvent<MyCustomData>`)を追加し、具象クラスをすぐに生成する必要がある場合に使用します。 |
+| [**📜 Generate Game Event Code**](../tools/codegen-and-cleanup.md) | コードジェネレーターを手動でトリガーします。新しいカスタム型(例: `MyCustomDataGameEvent`)を追加し、具象クラスをすぐに生成する必要がある場合に使用します。 |
 | [**✂️ Clean Game Event Code**](../tools/codegen-and-cleanup.md) | プロジェクトをスキャンし、すべてのGameEventクラスを見つけ、安全に削除してプロジェクトを整頓します。 |
 | [**🧹 Clean All Game Event Code**](../tools/codegen-and-cleanup.md) | ハードリセット。**すべて**の生成コード(基本型を除く)を削除します。再インストールまたは大幅なリファクタリングを行う場合にのみ使用してください。 |
 

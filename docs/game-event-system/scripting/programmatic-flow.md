@@ -154,12 +154,12 @@ onDamageTaken.AddTriggerEvent(
 
 Map a complex object event to a simple primitive event.
 
-- **Source:** `GameEvent<Enemy> (OnEnemyKilled)`
-- **Target:** `GameEvent<int> (OnAddXP)`
+- **Source:** `EnemyGameEvent (OnEnemyKilled)`
+- **Target:** `Int32GameEvent (OnAddXP)`
 
 ```csharp
-[GameEventDropdown] public GameEvent<Enemy> onEnemyKilled;
-[GameEventDropdown] public GameEvent<int> onAddXP;
+[GameEventDropdown] public EnemyGameEvent onEnemyKilled;
+[GameEventDropdown] public Int32GameEvent onAddXP;
 
 void Awake()
 {

@@ -183,9 +183,9 @@ Inspector提供三个专用面板来监控事件系统的健康状况和组成�
 **您可以做什么**：立即使用这些类型中的任何一种创建事件，无需代码生成。
 ```csharp
 // 内置类型事件示例
-[GameEventDropdown] GameEvent<int> OnScoreChanged;
-[GameEventDropdown] GameEvent<Vector3> OnPositionUpdated;
-[GameEventDropdown] GameEvent<GameObject> OnObjectSpawned;
+[GameEventDropdown] public Int32GameEvent OnScoreChanged;
+[GameEventDropdown] Vector3GameEvent OnPositionUpdated;
+[GameEventDropdown] GameObjectGameEvent OnObjectSpawned;
 ```
 
 ---

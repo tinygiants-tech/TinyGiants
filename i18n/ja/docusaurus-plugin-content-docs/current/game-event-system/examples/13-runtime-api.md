@@ -153,10 +153,10 @@ public class RuntimeAPI_VoidEventReceiver : MonoBehaviour
 
 **RuntimeAPI_BasicTypesEventRaiser.cs:**
 ```csharp
-[GameEventDropdown] public GameEvent<string> messageEvent;
-[GameEventDropdown] public GameEvent<Vector3> movementEvent;
-[GameEventDropdown] public GameEvent<GameObject> spawnEvent;
-[GameEventDropdown] public GameEvent<Material> changeMaterialEvent;
+[GameEventDropdown] public StringGameEvent messageEvent;
+[GameEventDropdown] public Vector3GameEvent movementEvent;
+[GameEventDropdown] public GameObjectGameEvent spawnEvent;
+[GameEventDropdown] public MaterialGameEvent changeMaterialEvent;
 
 public void RaiseString()
 {
@@ -197,7 +197,7 @@ public void OnMaterialReceived(Material mat) { /* ... */ }
 **ポイント：**
 - ✅ **型安全性：** シグネチャが一致することをコンパイラが保証します。
 - ✅ **自動推論：** 型を手動で指定する必要はありません。
-- ⚠️ **不一致エラー：** `void(int)` メソッドを `GameEvent<string>` にバインドすることはできません。
+- ⚠️ **不一致エラー：** `void(int)` メソッドを `StringGameEvent` にバインドすることはできません。
 
 ---
 
@@ -207,9 +207,9 @@ public void OnMaterialReceived(Material mat) { /* ... */ }
 
 **RuntimeAPI_CustomTypeEventRaiser.cs:**
 ```csharp
-[GameEventDropdown] public GameEvent<DamageInfo> physicalDamageEvent;
-[GameEventDropdown] public GameEvent<DamageInfo> fireDamageEvent;
-[GameEventDropdown] public GameEvent<DamageInfo> criticalStrikeEvent;
+[GameEventDropdown] public DamageInfoGameEvent physicalDamageEvent;
+[GameEventDropdown] public DamageInfoGameEvent fireDamageEvent;
+[GameEventDropdown] public DamageInfoGameEvent criticalStrikeEvent;
 
 public void DealPhysicalDamage()
 {
@@ -247,7 +247,7 @@ public void OnDamageReceived(DamageInfo info)
 ```
 
 **ポイント：**
-- 📦 **自動生成：** `GameEvent<DamageInfo>` クラスはプラグインによって自動生成されています。
+- 📦 **自動生成：** `DamageInfoGameEvent` クラスはプラグインによって自動生成されています。
 - 🔗 **複数バインド：** 単一のメソッドで複数のイベントをリッスンできます。
 - ⚡ **データアクセス：** カスタムクラスのプロパティにフルアクセス可能です。
 
@@ -260,10 +260,10 @@ public void OnDamageReceived(DamageInfo info)
 **RuntimeAPI_CustomSenderTypeEventRaiser.cs:**
 ```csharp
 // 物理的送信元: GameObject
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> turretEvent;
+[GameEventDropdown] public GameObjectDamageInfoGameEvent turretEvent;
 
 // 論理的送信元: カスタムクラス
-[GameEventDropdown] public GameEvent<PlayerStats, DamageInfo> systemEvent;
+[GameEventDropdown] public PlayerStatsDamageInfoGameEvent systemEvent;
 
 public void RaiseTurretDamage()
 {
@@ -324,8 +324,8 @@ public void OnSystemAttackReceived(PlayerStats sender, DamageInfo args)
 
 **RuntimeAPI_PriorityEventReceiver.cs:**
 ```csharp
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> orderedHitEvent;
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> chaoticHitEvent;
+[GameEventDropdown] public GameObjectDamageInfoGameEvent orderedHitEvent;
+[GameEventDropdown] public GameObjectDamageInfoGameEvent chaoticHitEvent;
 
 private void OnEnable()
 {
@@ -375,7 +375,7 @@ public void ResolveHit(GameObject sender, DamageInfo args)
 
 **RuntimeAPI_ConditionalEventReceiver.cs:**
 ```csharp
-[GameEventDropdown] public GameEvent<AccessCard> requestAccessEvent;
+[GameEventDropdown] public AccessCardGameEvent requestAccessEvent;
 
 private void OnEnable()
 {
@@ -581,10 +581,10 @@ public void OnFireCommandB()
 
 **RuntimeAPI_TriggerEventRaiser.cs:**
 ```csharp
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onCommand;      // ルート
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onActiveBuff;   // ブランチ A
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onTurretFire;   // ブランチ B
-[GameEventDropdown] public GameEvent<DamageInfo> onHoloData;                 // ブランチ C (型変換あり)
+[GameEventDropdown] public GameObjectDamageInfoGameEvent onCommand;      // ルート
+[GameEventDropdown] public GameObjectDamageInfoGameEvent onActiveBuff;   // ブランチ A
+[GameEventDropdown] public GameObjectDamageInfoGameEvent onTurretFire;   // ブランチ B
+[GameEventDropdown] public DamageInfoGameEvent onHoloData;                 // ブランチ C (型変換あり)
 [GameEventDropdown] public GameEvent onGlobalAlarm;                          // ブランチ D (void)
 
 private TriggerHandle _buffAHandle;
@@ -616,7 +616,7 @@ private void OnEnable()
     
     // ブランチ C: ホロデータ (型変換、遅延あり)
     _holoHandle = onCommand.AddTriggerEvent(
-        targetEvent: onHoloData,  // ← GameEvent<DamageInfo> (送信元なし)
+        targetEvent: onHoloData,  // ← DamageInfoGameEvent (送信元なし)
         delay: 1f,  // ← 1秒の遅延
         passArgument: true
     );
@@ -673,12 +673,12 @@ private void OnDisable()
 
 **RuntimeAPI_ChainEventRaiser.cs:**
 ```csharp
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnStartSequenceEvent;  // ルート
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnSystemCheckEvent;    // Step 1
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnChargeEvent;         // Step 2
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnFireEvent;           // Step 3
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnCoolDownEvent;       // Step 4
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnArchiveEvent;        // Step 5
+[GameEventDropdown] public GameObjectDamageInfoGameEvent OnStartSequenceEvent;  // ルート
+[GameEventDropdown] public GameObjectDamageInfoGameEvent OnSystemCheckEvent;    // Step 1
+[GameEventDropdown] public GameObjectDamageInfoGameEvent OnChargeEvent;         // Step 2
+[GameEventDropdown] public GameObjectDamageInfoGameEvent OnFireEvent;           // Step 3
+[GameEventDropdown] public GameObjectDamageInfoGameEvent OnCoolDownEvent;       // Step 4
+[GameEventDropdown] public GameObjectDamageInfoGameEvent OnArchiveEvent;        // Step 5
 
 private ChainHandle _checkHandle;
 private ChainHandle _chargeHandle;

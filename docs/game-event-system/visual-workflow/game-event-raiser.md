@@ -150,7 +150,7 @@ void Start()
 
 ```csharp
 [GameEventDropdown]
-public GameEvent<float> onHealthChanged;
+public SingleGameEvent onHealthChanged;
 
 private float health = 100f;
 
@@ -161,7 +161,7 @@ public void TakeDamage(float damage)
 }
 ```
 
-**Type Safety**: Dropdown only shows `GameEvent<float>` events, preventing type mismatches.
+**Type Safety**: Dropdown only shows `SingleGameEvent` events, preventing type mismatches.
 
 ---
 
@@ -169,7 +169,7 @@ public void TakeDamage(float damage)
 
 ```csharp
 [GameEventDropdown]
-public GameEvent<GameObject, DamageInfo> onPlayerDamaged;
+public GameObjectDamageInfoGameEvent onPlayerDamaged;
 
 public void ApplyDamage(DamageInfo damageInfo)
 {
@@ -190,10 +190,10 @@ The dropdown **automatically filters** events based on field type:
 public class ScoreManager : MonoBehaviour
 {
     [GameEventDropdown]
-    public GameEvent<int> onScoreChanged;  // Only shows GameEvent<int>
+    public Int32GameEvent onScoreChanged;  // Only shows public Int32GameEvent
     
     [GameEventDropdown]
-    public GameEvent<int> onLevelUp;       // Only shows GameEvent<int>
+    public Int32GameEvent onLevelUp;       // Only shows public Int32GameEvent
     
     private int score = 0;
     
@@ -208,7 +208,7 @@ public class ScoreManager : MonoBehaviour
 **Dropdown Filtering**:
 
 ```
-Available Events for GameEvent<int>:
+Available Events for public Int32GameEvent:
   ✅ OnScoreChanged (int)
   ✅ OnLevelUp (int)
   ✅ OnComboMultiplier (int)
@@ -472,12 +472,12 @@ Click the **"Initialize Event System"** button, creating a **Game Event Manager*
 **Example**:
 ```csharp
 [GameEventDropdown]
-public GameEvent<string> textEvent;  // Needs GameEvent<string>
+public StringGameEvent textEvent;  // Needs StringGameEvent
 
 // But your databases only have:
 // - GameEvent (void)
-// - GameEvent<int>
-// - GameEvent<float>
+// - public Int32GameEvent
+// - SingleGameEvent
 
 Result: No matching events!
 ```

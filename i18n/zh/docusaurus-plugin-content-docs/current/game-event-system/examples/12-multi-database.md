@@ -250,7 +250,7 @@ Assets/TinyGiants/GameEventSystem/Demo/12_MultiDatabase/12_MultiDatabase.unity
 **示例分配：**
 ```csharp
 [GameEventDropdown] 
-public GameEvent<GameObject, DamageInfo> sequenceStartEvent;
+public GameObjectDamageInfoGameEvent sequenceStartEvent;
 ```
 
 下拉菜单显示：
@@ -388,7 +388,7 @@ Demo 12的代码与Demo 11**完全相同**。脚本不知道也不关心事件�
 **MultidatabaseRaiser.cs：**
 ```csharp
 [GameEventDropdown]
-public GameEvent<GameObject, DamageInfo> sequenceStartEvent;
+public GameObjectDamageInfoGameEvent sequenceStartEvent;
 
 public void RequestLaunchA()
 {

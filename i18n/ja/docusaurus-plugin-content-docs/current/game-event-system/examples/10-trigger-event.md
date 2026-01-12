@@ -239,12 +239,12 @@ void OnAttackCommand(GameObject sender, DamageInfo info)
 
 | イベント名      | 型                                  | 役割     | カラー |
 | --------------- | ----------------------------------- | -------- | ----- |
-| `onCommand`     | `GameEvent<GameObject, DamageInfo>` | **ルート** | ゴールド |
-| `onActiveBuff`  | `GameEvent<GameObject, DamageInfo>` | トリガー  | グリーン |
-| `onTurretFire`  | `GameEvent<GameObject, DamageInfo>` | トリガー  | グリーン |
-| `onHoloData`    | `GameEvent<DamageInfo>`             | トリガー  | グリーン |
+| `onCommand`     | `GameObjectDamageInfoGameEvent` | **ルート** | ゴールド |
+| `onActiveBuff`  | `GameObjectDamageInfoGameEvent` | トリガー  | グリーン |
+| `onTurretFire`  | `GameObjectDamageInfoGameEvent` | トリガー  | グリーン |
+| `onHoloData`    | `DamageInfoGameEvent`             | トリガー  | グリーン |
 | `onGlobalAlarm` | `GameEvent` (void)                  | トリガー  | グリーン |
-| `onSecretFire`  | `GameEvent<GameObject, DamageInfo>` | トリガー  | グリーン |
+| `onSecretFire`  | `GameObjectDamageInfoGameEvent` | トリガー  | グリーン |
 
 **重要な洞察:**
 - **ルートイベント**（ゴールド）：コードから直接発行される唯一のイベント
@@ -321,7 +321,7 @@ Game Event Editor の **"Flow Graph"** ボタンをクリックして、ビジ�
 **ゲームイベント:**
 - `Command Event`: `onCommand`
   - ツールチップ: "グラフ全体をトリガーする『唯一』のイベント"
-  - 型: `GameEvent<GameObject, DamageInfo>`
+  - 型: `GameObjectDamageInfoGameEvent`
 
 **Turret A (Smart):**
 - `Turret A`: Turret_A (GameObject)
@@ -377,7 +377,7 @@ public class TriggerEventRaiser : MonoBehaviour
     [Header("Game Event")]
     [Tooltip("グラフ全体をトリガーする唯一のイベント。")]
     [GameEventDropdown]
-    public GameEvent<GameObject, DamageInfo> commandEvent;
+    public GameObjectDamageInfoGameEvent commandEvent;
 
     [Header("Turret A (Smart)")] 
     public GameObject turretA;
@@ -528,8 +528,8 @@ public class TriggerEventReceiver : MonoBehaviour
     /// 型変換（TYPE CONVERSION）を伴うトリガーノードに紐付け。
     /// 
     /// グラフ設定:
-    /// - 入力: GameEvent<GameObject, DamageInfo>
-    /// - 出力: GameEvent<DamageInfo>
+    /// - 入力: GameObjectDamageInfoGameEvent
+    /// - 出力: DamageInfoGameEvent
     /// - 結果: Sender が破棄され、データのみが渡されます
     /// </summary>
     public void HoloDamageData(DamageInfo info)
@@ -548,7 +548,7 @@ public class TriggerEventReceiver : MonoBehaviour
     /// VOID への型変換を伴うトリガーノードに紐付け。
     /// 
     /// グラフ設定:
-    /// - 入力: GameEvent<GameObject, DamageInfo>
+    /// - 入力: GameObjectDamageInfoGameEvent
     /// - 出力: GameEvent (void)
     /// - 結果: すべての引数が破棄されます
     /// </summary>

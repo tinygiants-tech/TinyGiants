@@ -34,7 +34,7 @@ void Update()
 
 携带特定数据有效载荷（T）的事件。
 ```csharp
-[GameEventDropdown] public GameEvent<float> onHealthChanged;
+[GameEventDropdown] public SingleGameEvent onHealthChanged;
 
 public void TakeDamage(float damage)
 {
@@ -50,7 +50,7 @@ public void TakeDamage(float damage)
 验证事件的**源**（TSender）并携带数据（TArgs）的事件。
 ```csharp
 // 定义类型：Sender是GameObject，Arg是DamageInfo
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onActorDamaged;
+[GameEventDropdown] public GameObjectDamageInfoGameEvent onActorDamaged;
 
 public void Hit()
 {
@@ -111,7 +111,7 @@ onItemPickup.RaiseDelayed(this, itemData, 0.5f);
 
 每1秒伤害玩家一次，共5次。
 ```csharp
-[GameEventDropdown] public GameEvent<int> onTakeDamage;
+[GameEventDropdown] public Int32GameEvent onTakeDamage;
 
 private void ApplyPoison()
 {

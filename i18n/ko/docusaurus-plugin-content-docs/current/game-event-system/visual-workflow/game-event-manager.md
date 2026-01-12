@@ -185,9 +185,9 @@ UI를 살펴보기 전에, 이 시스템이 데이터를 저장하는 방식을 
 
 ```csharp
 // 내장 타입을 사용한 이벤트 예시
-[GameEventDropdown] GameEvent<int> OnScoreChanged;
-[GameEventDropdown] GameEvent<Vector3> OnPositionUpdated;
-[GameEventDropdown] GameEvent<GameObject> OnObjectSpawned;
+[GameEventDropdown] public Int32GameEvent OnScoreChanged;
+[GameEventDropdown] Vector3GameEvent OnPositionUpdated;
+[GameEventDropdown] GameObjectGameEvent OnObjectSpawned;
 ```
 
 ---

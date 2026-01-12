@@ -185,9 +185,9 @@ The system comes pre-loaded with native support for **32 standard types**, categ
 
 ```csharp
 // Examples of built-in type events
-[GameEventDropdown] GameEvent<int> OnScoreChanged;
-[GameEventDropdown] GameEvent<Vector3> OnPositionUpdated;
-[GameEventDropdown] GameEvent<GameObject> OnObjectSpawned;
+[GameEventDropdown] public Int32GameEvent OnScoreChanged;
+[GameEventDropdown] Vector3GameEvent OnPositionUpdated;
+[GameEventDropdown] GameObjectGameEvent OnObjectSpawned;
 ```
 
 ---

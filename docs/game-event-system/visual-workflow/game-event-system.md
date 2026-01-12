@@ -63,7 +63,7 @@ Located in the **Tools & Utilities** section, these utilities manage the underly
 
 | Tool                                                         | Description                                                  |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [**📜 Generate Game Event Code**](../tools/codegen-and-cleanup.md) | Manually triggers the code generator. Use this if you have added a new custom type (e.g., `GameEvent<MyCustomData>`) and need the concrete class generated immediately. |
+| [**📜 Generate Game Event Code**](../tools/codegen-and-cleanup.md) | Manually triggers the code generator. Use this if you have added a new custom type (e.g., `MyCustomDataGameEvent`) and need the concrete class generated immediately. |
 | [**✂️ Clean Game Event Code**](../tools/codegen-and-cleanup.md) | Scan your project, find all GameEvent classes, and safely delete them to keep the project tidy. |
 | [**🧹 Clean All Game Event Code**](../tools/codegen-and-cleanup.md) | A hard reset. Removes **ALL** generated code (except basic types). Use this only if you are reinstalling or refactoring significantly. |
 

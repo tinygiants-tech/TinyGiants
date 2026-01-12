@@ -412,7 +412,7 @@ Senderイベント(`GameEvent<TSender, TArgs>`)は同じロジックに従いま
 
 // 2つの型パラメータを持つイベントクラス
 public class GameObjectDamageInfoGameEvent 
-    : GameEvent<GameObject, DamageInfo> { }
+    : GameObjectDamageInfoGameEvent { }
 
 // 2つのパラメータを持つバインディングフィールド
 public UnityEvent<GameObject, DamageInfo> 

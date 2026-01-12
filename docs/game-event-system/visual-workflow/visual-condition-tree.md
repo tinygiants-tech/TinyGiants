@@ -44,8 +44,8 @@ if (damageInfo.amount > 20 &&
 
 **Event Types**:
 
-- `GameEvent<GameObject, DamageInfo>` (GameObject sender)
-- `GameEvent<PlayerStats, DamageInfo>` (Custom sender)
+- `GameObjectDamageInfoGameEvent` (GameObject sender)
+- `PlayerStatsDamageInfoGameEvent` (Custom sender)
 
 **Data Structures**:
 
@@ -214,7 +214,7 @@ Every node follows a standard tripartite structure, making complex logic easy to
 Imagine an event that only triggers if a hit is powerful enough:
 Argument.amount  **>**  20.0
 
-- **🔍 Source:** Argument.amount — The raw damage value passed by the `GameEvent<float>`
+- **🔍 Source:** Argument.amount — The raw damage value passed by the `SingleGameEvent`
 - **📐 Operator:** > — The logical rule (Greater Than)
 - **🎯 Target:** 20.0 — The constant threshold or another variable to compare against
 
@@ -253,7 +253,7 @@ Data access is exclusive to typed events: `GameEvent<T>` or `GameEvent<TSender, 
 
 #### 🔢 Single Parameter Events
 
-**Signature:** `GameEvent<DamageInfo>`
+**Signature:** `DamageInfoGameEvent`
 
 When an event carries a single object, you can access the object itself or any of its public members.
 
@@ -276,7 +276,7 @@ Sender events provide two distinct roots for data access: **Sender** (Who) and *
 
 ##### 🎮 Case A: GameObject Sender
 
-**Signature:** `GameEvent<GameObject, DamageInfo>`
+**Signature:** `GameObjectDamageInfoGameEvent`
 
 | Root         | Path Example              | Data Type |
 | ------------ | ------------------------- | --------- |
@@ -299,7 +299,7 @@ Sender events provide two distinct roots for data access: **Sender** (Who) and *
 
 ##### 🛡️ Case B: Custom C# Sender (Advanced)
 
-**Signature:** `GameEvent<PlayerStats, DamageInfo>`
+**Signature:** `PlayerStatsDamageInfoGameEvent`
 
 > 🚀 **Why it's special:** Unlike traditional systems, you are not tied to GameObjects. Use any **Pure C# Class** as a sender for decoupled, logic-first architecture.
 

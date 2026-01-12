@@ -951,13 +951,13 @@ TriggerHandle AddTriggerEvent(
 **示例：**
 ```csharp
 // 直接传递参数
-GameEvent<int> scoreEvent;
-GameEvent<int> updateUIEvent;
+public Int32GameEvent scoreEvent;
+public Int32GameEvent updateUIEvent;
 scoreEvent.AddTriggerEvent(updateUIEvent, passArgument: true);
 
 // 转换参数：int → string
-GameEvent<int> scoreEvent;
-GameEvent<string> notificationEvent;
+public Int32GameEvent scoreEvent;
+StringGameEvent notificationEvent;
 scoreEvent.AddTriggerEvent(
     notificationEvent,
     passArgument: true,
@@ -965,7 +965,7 @@ scoreEvent.AddTriggerEvent(
 );
 
 // 带参数检查的条件
-GameEvent<float> healthEvent;
+SingleGameEvent healthEvent;
 GameEvent lowHealthWarningEvent;
 healthEvent.AddTriggerEvent(
     lowHealthWarningEvent,
@@ -1002,13 +1002,13 @@ TriggerHandle AddTriggerEvent(
 **示例：**
 ```csharp
 // 将sender和args传递给另一个sender事件
-GameEvent<GameObject, DamageInfo> damageEvent;
-GameEvent<GameObject, DamageInfo> logEvent;
+GameObjectDamageInfoGameEvent damageEvent;
+GameObjectDamageInfoGameEvent logEvent;
 damageEvent.AddTriggerEvent(logEvent, passArgument: true);
 
 // 转换：仅提取伤害值
-GameEvent<GameObject, DamageInfo> damageEvent;
-GameEvent<int> damageNumberEvent;
+GameObjectDamageInfoGameEvent damageEvent;
+public Int32GameEvent damageNumberEvent;
 damageEvent.AddTriggerEvent(
     damageNumberEvent,
     passArgument: true,
@@ -1016,7 +1016,7 @@ damageEvent.AddTriggerEvent(
 );
 
 // 基于sender和args的条件
-GameEvent<GameObject, DamageInfo> damageEvent;
+GameObjectDamageInfoGameEvent damageEvent;
 GameEvent criticalHitEvent;
 damageEvent.AddTriggerEvent(
     criticalHitEvent,
@@ -1191,16 +1191,16 @@ ChainHandle AddChainEvent(
 **示例：**
 ```csharp
 // 带参数传递的链
-GameEvent<int> damageEvent;
-GameEvent<int> applyDamageEvent;
-GameEvent<int> updateHealthBarEvent;
+public Int32GameEvent damageEvent;
+public Int32GameEvent applyDamageEvent;
+public Int32GameEvent updateHealthBarEvent;
 
 damageEvent.AddChainEvent(applyDamageEvent, passArgument: true);
 applyDamageEvent.AddChainEvent(updateHealthBarEvent, passArgument: true);
 
 // 带转换的链
-GameEvent<int> damageEvent;
-GameEvent<float> healthPercentEvent;
+public Int32GameEvent damageEvent;
+SingleGameEvent healthPercentEvent;
 
 damageEvent.AddChainEvent(
     healthPercentEvent,
@@ -1210,7 +1210,7 @@ damageEvent.AddChainEvent(
 );
 
 // 带参数检查的条件链
-GameEvent<int> damageEvent;
+public Int32GameEvent damageEvent;
 GameEvent deathEvent;
 
 damageEvent.AddChainEvent(
@@ -1250,16 +1250,16 @@ ChainHandle AddChainEvent(
 **示例：**
 ```csharp
 // 攻击序列链
-GameEvent<GameObject, AttackData> attackStartEvent;
-GameEvent<GameObject, AttackData> playAnimationEvent;
-GameEvent<GameObject, AttackData> dealDamageEvent;
+GameObjectAttackDataGameEvent attackStartEvent;
+GameObjectAttackDataGameEvent playAnimationEvent;
+GameObjectAttackDataGameEvent dealDamageEvent;
 
 attackStartEvent.AddChainEvent(playAnimationEvent, delay: 0f);
 playAnimationEvent.AddChainEvent(dealDamageEvent, delay: 0.5f);
 
 // 提取伤害值
-GameEvent<GameObject, AttackData> dealDamageEvent;
-GameEvent<int> showDamageNumberEvent;
+GameObjectAttackDataGameEvent dealDamageEvent;
+public Int32GameEvent showDamageNumberEvent;
 
 dealDamageEvent.AddChainEvent(
     showDamageNumberEvent,
@@ -1268,7 +1268,7 @@ dealDamageEvent.AddChainEvent(
 );
 
 // 带条件的胜利链
-GameEvent<GameObject, AttackData> attackEndEvent;
+GameObjectAttackDataGameEvent attackEndEvent;
 GameEvent<GameObject, VictoryData> victoryEvent;
 
 attackEndEvent.AddChainEvent(

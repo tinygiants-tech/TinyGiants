@@ -144,7 +144,7 @@ void Start()
 ### 単一引数イベント
 ```csharp
 [GameEventDropdown]
-public GameEvent<float> onHealthChanged;
+public SingleGameEvent onHealthChanged;
 
 private float health = 100f;
 
@@ -155,14 +155,14 @@ public void TakeDamage(float damage)
 }
 ```
 
-**型安全性**: ドロップダウンは`GameEvent<float>`イベントのみを表示し、型の不一致を防ぎます。
+**型安全性**: ドロップダウンは`SingleGameEvent`イベントのみを表示し、型の不一致を防ぎます。
 
 ---
 
 ### Sender + 引数イベント
 ```csharp
 [GameEventDropdown]
-public GameEvent<GameObject, DamageInfo> onPlayerDamaged;
+public GameObjectDamageInfoGameEvent onPlayerDamaged;
 
 public void ApplyDamage(DamageInfo damageInfo)
 {
@@ -182,10 +182,10 @@ public void ApplyDamage(DamageInfo damageInfo)
 public class ScoreManager : MonoBehaviour
 {
     [GameEventDropdown]
-    public GameEvent<int> onScoreChanged;  // GameEvent<int>のみを表示
+    public Int32GameEvent onScoreChanged;  // public Int32GameEventのみを表示
     
     [GameEventDropdown]
-    public GameEvent<int> onLevelUp;       // GameEvent<int>のみを表示
+    public Int32GameEvent onLevelUp;       // public Int32GameEventのみを表示
     
     private int score = 0;
     
@@ -199,7 +199,7 @@ public class ScoreManager : MonoBehaviour
 
 **ドロップダウンフィルタリング**:
 ```
-GameEvent<int>の利用可能なイベント:
+public Int32GameEventの利用可能なイベント:
   ✅ OnScoreChanged (int)
   ✅ OnLevelUp (int)
   ✅ OnComboMultiplier (int)
@@ -457,12 +457,12 @@ Tools > TinyGiants > Game Event System
 **例**:
 ```csharp
 [GameEventDropdown]
-public GameEvent<string> textEvent;  // GameEvent<string>が必要
+public StringGameEvent textEvent;  // StringGameEventが必要
 
 // しかし、データベースには以下のみがあります:
 // - GameEvent (void)
-// - GameEvent<int>
-// - GameEvent<float>
+// - public Int32GameEvent
+// - SingleGameEvent
 
 結果: 一致するイベントなし!
 ```

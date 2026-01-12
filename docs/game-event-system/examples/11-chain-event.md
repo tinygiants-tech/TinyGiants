@@ -237,12 +237,12 @@ This is fundamentally different from Trigger Events, where failed conditions jus
 
 | Event Name        | Type                                | Role              | Step  |
 | ----------------- | ----------------------------------- | ----------------- | ----- |
-| `0_StartSequence` | `GameEvent<GameObject, DamageInfo>` | **Root** (Gold)   | Entry |
-| `1_SystemCheck`   | `GameEvent<GameObject, DamageInfo>` | **Chain** (Green) | 1     |
-| `2_Charge`        | `GameEvent<GameObject, DamageInfo>` | **Chain** (Green) | 2     |
-| `3_Fire`          | `GameEvent<GameObject, DamageInfo>` | **Chain** (Green) | 3     |
-| `4_CoolDown`      | `GameEvent<GameObject, DamageInfo>` | **Chain** (Green) | 4     |
-| `5_Archive`       | `GameEvent<GameObject, DamageInfo>` | **Chain** (Green) | 5     |
+| `0_StartSequence` | `GameObjectDamageInfoGameEvent` | **Root** (Gold)   | Entry |
+| `1_SystemCheck`   | `GameObjectDamageInfoGameEvent` | **Chain** (Green) | 1     |
+| `2_Charge`        | `GameObjectDamageInfoGameEvent` | **Chain** (Green) | 2     |
+| `3_Fire`          | `GameObjectDamageInfoGameEvent` | **Chain** (Green) | 3     |
+| `4_CoolDown`      | `GameObjectDamageInfoGameEvent` | **Chain** (Green) | 4     |
+| `5_Archive`       | `GameObjectDamageInfoGameEvent` | **Chain** (Green) | 5     |
 
 **Key Insight:**
 - **Root** raises the chain
@@ -261,7 +261,7 @@ Click **"Flow Graph"** button to visualize the sequential pipeline:
 
 **Node 1: 0_StartSequence (Root, Red)**
 - Entry point raised by code
-- Type: `GameEvent<GameObject, DamageInfo>`
+- Type: `GameObjectDamageInfoGameEvent`
 - Connects to first chain node
 
 **Node 2: 1_SystemCheck (Chain, Green)**
@@ -402,7 +402,7 @@ public class ChainEventRaiser : MonoBehaviour
     [Header("Chain Entry Point")]
     [Tooltip("The Start Node of the Chain Graph.")]
     [GameEventDropdown]
-    public GameEvent<GameObject, DamageInfo> sequenceStartEvent;
+    public GameObjectDamageInfoGameEvent sequenceStartEvent;
 
     [Header("Turrets")] 
     public GameObject turretA;

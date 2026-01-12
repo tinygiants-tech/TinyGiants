@@ -413,7 +413,7 @@ Sender事件（`GameEvent<TSender, TArgs>`）遵循相同的逻辑，但生成�
 
 // 具有两个类型参数的事件类
 public class GameObjectDamageInfoGameEvent 
-    : GameEvent<GameObject, DamageInfo> { }
+    : GameObjectDamageInfoGameEvent { }
 
 // 具有两个参数的绑定字段
 public UnityEvent<GameObject, DamageInfo> 

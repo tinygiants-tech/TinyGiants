@@ -39,7 +39,7 @@ Assets/TinyGiants/GameEventSystem/Demo/02_BasicTypesEvent/02_BasicTypesEvent.uni
 
 **游戏逻辑层（演示脚本）：**
 - 📤 **BasicTypesEventRaiser** - 带有触发器脚本的GameObject
-  - 持有对4个不同泛型事件的引用：`GameEvent<string>`、`GameEvent<Vector3>`、`GameEvent<GameObject>`、`GameEvent<Material>`
+  - 持有对4个不同泛型事件的引用：`StringGameEvent`、`Vector3GameEvent`、`GameObjectGameEvent`、`MaterialGameEvent`
   - 每个按钮使用特定数据触发不同的触发方法
 
 - 📥 **BasicTypesEventReceiver** - 带有接收器脚本的GameObject
@@ -96,10 +96,10 @@ Assets/TinyGiants/GameEventSystem/Demo/02_BasicTypesEvent/02_BasicTypesEvent.uni
 
 | 事件名称 | 类型 | 目的 |
 | -------------- | ----------------------- | --------------------------------------- |
-| `OnString` | `GameEvent<string>` | 更新文本显示 |
-| `OnVector3` | `GameEvent<Vector3>` | 发送位置/移动数据 |
-| `OnGameObject` | `GameEvent<GameObject>` | 传递用于生成的预制体引用 |
-| `OnMaterial` | `GameEvent<Material>` | 发送用于视觉变化的材质资产 |
+| `OnString` | `StringGameEvent` | 更新文本显示 |
+| `OnVector3` | `Vector3GameEvent` | 发送位置/移动数据 |
+| `OnGameObject` | `GameObjectGameEvent` | 传递用于生成的预制体引用 |
+| `OnMaterial` | `MaterialGameEvent` | 发送用于视觉变化的材质资产 |
 
 **注意行为列：**
 每个事件在行为列中显示彩色类型指示器（例如，**(String)**、**(Vector3)**）。点击这些图标会打开行为窗口，您可以在其中配置回调绑定——与您在上一个演示中看到的相同的可视化绑定系统。
@@ -136,8 +136,8 @@ Assets/TinyGiants/GameEventSystem/Demo/02_BasicTypesEvent/02_BasicTypesEvent.uni
 
 **类型安全实践：**
 - `[GameEventDropdown]`特性自动按类型过滤事件
-- 您只能将`GameEvent<string>`分配给"Message Event"槽
-- 尝试将`GameEvent<Vector3>`分配给字符串槽会被编辑器阻止
+- 您只能将`StringGameEvent`分配给"Message Event"槽
+- 尝试将`Vector3GameEvent`分配给字符串槽会被编辑器阻止
 - 这种编译时类型安全防止运行时错误
 
 ---
@@ -165,7 +165,7 @@ Assets/TinyGiants/GameEventSystem/Demo/02_BasicTypesEvent/02_BasicTypesEvent.uni
 
 :::tip 🎯 类型匹配
 
-行为窗口的方法下拉菜单根据事件的参数类型自动过滤方法。对于`GameEvent<string>`，您只会看到带有`(string)`参数的方法。这在配置时确保类型安全！
+行为窗口的方法下拉菜单根据事件的参数类型自动过滤方法。对于`StringGameEvent`，您只会看到带有`(string)`参数的方法。这在配置时确保类型安全！
 
 :::
 
@@ -182,26 +182,26 @@ using System.Collections.Generic;
 public class BasicTypesEventRaiser : MonoBehaviour
 {
     [Header("1. C#类型（String）")]
-    [GameEventDropdown] public GameEvent<string> messageEvent;
+    [GameEventDropdown] public StringGameEvent messageEvent;
     public string messageToSend = "Hello World";
 
     [Header("2. 数学类型（Vector3）")]
-    [GameEventDropdown] public GameEvent<Vector3> movementEvent;
+    [GameEventDropdown] public Vector3GameEvent movementEvent;
     public Vector3 targetPosition = new Vector3(0, 2, 0);
 
     [Header("3. 组件类型（GameObject）")]
-    [GameEventDropdown] public GameEvent<GameObject> spawnEvent;
+    [GameEventDropdown] public GameObjectGameEvent spawnEvent;
     public List<GameObject> prefabsToSpawn = new List<GameObject>();
 
     [Header("4. 资产类型（Material）")]
-    [GameEventDropdown] public GameEvent<Material> changeMaterialEvent;
+    [GameEventDropdown] public MaterialGameEvent changeMaterialEvent;
     public List<Material> targetMaterials = new List<Material>();
 
     private int _count;
     private AudioSource _audioSource;
 
     /// <summary>
-    /// 用动态文本内容触发GameEvent<string>。
+    /// 用动态文本内容触发StringGameEvent。
     /// 接收者必须有签名：void MethodName(string value)
     /// </summary>
     public void RaiseString()
@@ -218,7 +218,7 @@ public class BasicTypesEventRaiser : MonoBehaviour
     }
 
     /// <summary>
-    /// 用随机位置数据触发GameEvent<Vector3>。
+    /// 用随机位置数据触发Vector3GameEvent。
     /// 对于移动、方向或物理力很有用。
     /// </summary>
     public void RaiseVector3()
@@ -237,7 +237,7 @@ public class BasicTypesEventRaiser : MonoBehaviour
     }
 
     /// <summary>
-    /// 用预制体引用触发GameEvent<GameObject>。
+    /// 用预制体引用触发GameObjectGameEvent。
     /// 演示安全地传递Unity对象引用。
     /// </summary>
     public void RaiseGameObject()
@@ -255,7 +255,7 @@ public class BasicTypesEventRaiser : MonoBehaviour
     }
 
     /// <summary>
-    /// 用材质资产引用触发GameEvent<Material>。
+    /// 用材质资产引用触发MaterialGameEvent。
     /// 非常适合运行时视觉定制。
     /// </summary>
     public void RaiseMaterial()

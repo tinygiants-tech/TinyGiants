@@ -43,8 +43,8 @@ if (damageInfo.amount > 20 &&
 
 **イベント型**:
 
-- `GameEvent<GameObject, DamageInfo>` (GameObject sender)
-- `GameEvent<PlayerStats, DamageInfo>` (カスタムsender)
+- `GameObjectDamageInfoGameEvent` (GameObject sender)
+- `PlayerStatsDamageInfoGameEvent` (カスタムsender)
 
 **データ構造**:
 ```csharp
@@ -209,7 +209,7 @@ graph LR
 ヒットが十分に強力な場合にのみトリガーするイベントを想像してください:
 Argument.amount  **>**  20.0
 
-- **🔍 ソース:** Argument.amount — `GameEvent<float>`によって渡される生のダメージ値
+- **🔍 ソース:** Argument.amount — `SingleGameEvent`によって渡される生のダメージ値
 - **📐 演算子:** > — 論理ルール(より大きい)
 - **🎯 ターゲット:** 20.0 — 比較する定数閾値または別の変数
 
@@ -248,7 +248,7 @@ Argument.amount  **>**  20.0
 
 #### 🔢 シングルパラメータイベント
 
-**シグネチャ:** `GameEvent<DamageInfo>`
+**シグネチャ:** `DamageInfoGameEvent`
 
 イベントが単一のオブジェクトを運ぶ場合、オブジェクト自体またはそのパブリックメンバーのいずれかにアクセスできます。
 
@@ -270,7 +270,7 @@ Senderイベントは、データアクセスのための2つの異なるルー�
 
 ##### 🎮 ケースA: GameObject Sender
 
-**シグネチャ:** `GameEvent<GameObject, DamageInfo>`
+**シグネチャ:** `GameObjectDamageInfoGameEvent`
 
 | ルート         | パス例              | データ型 |
 | ------------ | ------------------------- | --------- |
@@ -292,7 +292,7 @@ Senderイベントは、データアクセスのための2つの異なるルー�
 
 ##### 🛡️ ケースB: カスタムC# Sender(高度)
 
-**シグネチャ:** `GameEvent<PlayerStats, DamageInfo>`
+**シグネチャ:** `PlayerStatsDamageInfoGameEvent`
 
 > 🚀 **なぜ特別か:** 従来のシステムとは異なり、GameObjectに縛られません。疎結合でロジック優先のアーキテクチャのために、任意の**Pure C#クラス**をSenderとして使用できます。
 

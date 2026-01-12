@@ -98,7 +98,7 @@ sidebar_position: 1
 ```csharp
 // 이벤트는 '매직 스트링'이 아닌 에셋입니다.
 [GameEventDropdown] public GameEvent onPlayerDeath;
-[GameEventDropdown] public GameEvent<int> onScoreChanged;
+[GameEventDropdown] public Int32GameEvent onScoreChanged;
 
 void Die() {
     onPlayerDeath.Raise(); // 타입 안정성 보장, 에셋 참조 방식

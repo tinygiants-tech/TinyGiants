@@ -237,12 +237,12 @@ Unity の **Play** ボタンを押します。
 
 | イベント名        | 型                                  | 役割              | ステップ |
 | ----------------- | ----------------------------------- | ----------------- | ----- |
-| `0_StartSequence` | `GameEvent<GameObject, DamageInfo>` | **Root** (ゴールド) | 入口 |
-| `1_SystemCheck`   | `GameEvent<GameObject, DamageInfo>` | **Chain** (グリーン) | 1     |
-| `2_Charge`        | `GameEvent<GameObject, DamageInfo>` | **Chain** (グリーン) | 2     |
-| `3_Fire`          | `GameEvent<GameObject, DamageInfo>` | **Chain** (グリーン) | 3     |
-| `4_CoolDown`      | `GameEvent<GameObject, DamageInfo>` | **Chain** (グリーン) | 4     |
-| `5_Archive`       | `GameEvent<GameObject, DamageInfo>` | **Chain** (グリーン) | 5     |
+| `0_StartSequence` | `GameObjectDamageInfoGameEvent` | **Root** (ゴールド) | 入口 |
+| `1_SystemCheck`   | `GameObjectDamageInfoGameEvent` | **Chain** (グリーン) | 1     |
+| `2_Charge`        | `GameObjectDamageInfoGameEvent` | **Chain** (グリーン) | 2     |
+| `3_Fire`          | `GameObjectDamageInfoGameEvent` | **Chain** (グリーン) | 3     |
+| `4_CoolDown`      | `GameObjectDamageInfoGameEvent` | **Chain** (グリーン) | 4     |
+| `5_Archive`       | `GameObjectDamageInfoGameEvent` | **Chain** (グリーン) | 5     |
 
 **重要な洞察:**
 - **ルート (Root)** がチェーンを起動します
@@ -261,7 +261,7 @@ Unity の **Play** ボタンを押します。
 
 **Node 1: 0_StartSequence (Root, 赤)**
 - コードから発行されるエントリポイント
-- 型: `GameEvent<GameObject, DamageInfo>`
+- 型: `GameObjectDamageInfoGameEvent`
 - 最初のリレーノードに接続
 
 **Node 2: 1_SystemCheck (Chain, 緑)**
@@ -401,7 +401,7 @@ public class ChainEventRaiser : MonoBehaviour
     [Header("Chain Entry Point")]
     [Tooltip("チェーングラフの開始ノード。")]
     [GameEventDropdown]
-    public GameEvent<GameObject, DamageInfo> sequenceStartEvent;
+    public GameObjectDamageInfoGameEvent sequenceStartEvent;
 
     [Header("Turrets")] 
     public GameObject turretA;

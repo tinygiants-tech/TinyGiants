@@ -38,8 +38,8 @@ Assets/TinyGiants/GameEventSystem/Demo/04_CustomSenderTypeEvent/04_CustomSenderT
 
 **ゲームロジックレイヤー (デモスクリプト):**
 - 📤 **CustomSenderTypeEventRaiser** - 発行側スクリプトを持つGameObject
-  - `GameEvent<GameObject, DamageInfo>` を使用して、2台の物理的なタレット（赤と青）を管理
-  - `GameEvent<PlayerStats, DamageInfo>` を使用して、システムレベルの攻撃を処理
+  - `GameObjectDamageInfoGameEvent` を使用して、2台の物理的なタレット（赤と青）を管理
+  - `PlayerStatsDamageInfoGameEvent` を使用して、システムレベルの攻撃を処理
   - タレットの照準、弾の発射、イベントの発行を制御
 
 - 📥 **CustomSenderTypeEventReceiver** - 受信側スクリプトを持つGameObject
@@ -106,7 +106,7 @@ Unityの **Play** ボタンを押します。
 
 #### シナリオ A: 物理的な送信元 (GameObject)
 ```csharp
-GameEvent<GameObject, DamageInfo>
+GameObjectDamageInfoGameEvent
 ```
 
 **ユースケース:** 送信元がシーン内に物理的に存在する場合
@@ -116,7 +116,7 @@ GameEvent<GameObject, DamageInfo>
 
 #### シナリオ B: 論理的な送信元 (純粋な C# クラス)
 ```csharp
-GameEvent<PlayerStats, DamageInfo>
+PlayerStatsDamageInfoGameEvent
 ```
 
 **ユースケース:** 送信元がシーン表現を持たないデータオブジェクトである場合
@@ -160,9 +160,9 @@ public class PlayerStats
 
 | イベント名                 | 型                                 | 用途                          |
 | -------------------------- | ------------------------------------ | ---------------------------- |
-| `OnGameObjectDamageInfo`   | `GameEvent<GameObject, DamageInfo>`  | 赤いタレットの物理攻撃         |
-| `OnGameObjectDamageInfo_1` | `GameEvent<GameObject, DamageInfo>`  | 青いタレットの物理攻撃         |
-| `OnPlayerStatsDamageInfo`  | `GameEvent<PlayerStats, DamageInfo>` | システムレベルの論理ダメージ   |
+| `OnGameObjectDamageInfo`   | `GameObjectDamageInfoGameEvent`  | 赤いタレットの物理攻撃         |
+| `OnGameObjectDamageInfo_1` | `GameObjectDamageInfoGameEvent`  | 青いタレットの物理攻撃         |
+| `OnPlayerStatsDamageInfo`  | `PlayerStatsDamageInfoGameEvent` | システムレベルの論理ダメージ   |
 
 **Behavior カラムに注目:**
 - 最初の2つのイベントは **(GameObject,DamageInfo)** と表示されています（物理的な送信元用）。
@@ -261,7 +261,7 @@ public class CustomSenderTypeEventRaiser : MonoBehaviour
     private class TurretConfig
     {
         public string name;
-        [GameEventDropdown] public GameEvent<GameObject, DamageInfo> attackEvent;
+        [GameEventDropdown] public GameObjectDamageInfoGameEvent attackEvent;
         public Transform head;
         public Transform muzzlePosition;
         [HideInInspector] public bool isAttacking;
@@ -272,7 +272,7 @@ public class CustomSenderTypeEventRaiser : MonoBehaviour
     [SerializeField] private TurretConfig turret2;
 
     [Header("グローバルシステムイベント")]
-    [GameEventDropdown] public GameEvent<PlayerStats, DamageInfo> globalSystemEvent;
+    [GameEventDropdown] public PlayerStatsDamageInfoGameEvent globalSystemEvent;
 
     private PlayerStats _localPlayerStats;
 
@@ -362,7 +362,7 @@ public class CustomSenderTypeEventReceiver : MonoBehaviour
     [SerializeField] private TextMeshPro attackerInfoText;
 
     /// <summary>
-    /// GameEvent<GameObject, DamageInfo> に紐付け。
+    /// GameObjectDamageInfoGameEvent に紐付け。
     /// シーン内に存在する物理的な攻撃者を処理します。
     /// </summary>
     /// <param name="sender">攻撃した GameObject (タレット)</param>
@@ -388,7 +388,7 @@ public class CustomSenderTypeEventReceiver : MonoBehaviour
     }
 
     /// <summary>
-    /// GameEvent<PlayerStats, DamageInfo> に紐付け。
+    /// PlayerStatsDamageInfoGameEvent に紐付け。
     /// シーン表現を持たない論理的な攻撃者を処理します。
     /// </summary>
     /// <param name="sender">プロフィールデータを持つ PlayerStats オブジェクト</param>

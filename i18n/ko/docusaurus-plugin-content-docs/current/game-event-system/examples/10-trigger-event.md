@@ -239,12 +239,12 @@ void OnAttackCommand(GameObject sender, DamageInfo info)
 
 | 이벤트 이름     | 타입                                | 역할     | 색상  |
 | --------------- | ----------------------------------- | -------- | ----- |
-| `onCommand`     | `GameEvent<GameObject, DamageInfo>` | **루트** | 금색  |
-| `onActiveBuff`  | `GameEvent<GameObject, DamageInfo>` | 트리거   | 녹색  |
-| `onTurretFire`  | `GameEvent<GameObject, DamageInfo>` | 트리거   | 녹색  |
-| `onHoloData`    | `GameEvent<DamageInfo>`             | 트리거   | 녹색  |
+| `onCommand`     | `GameObjectDamageInfoGameEvent` | **루트** | 금색  |
+| `onActiveBuff`  | `GameObjectDamageInfoGameEvent` | 트리거   | 녹색  |
+| `onTurretFire`  | `GameObjectDamageInfoGameEvent` | 트리거   | 녹색  |
+| `onHoloData`    | `DamageInfoGameEvent`             | 트리거   | 녹색  |
 | `onGlobalAlarm` | `GameEvent` (void)                  | 트리거   | 녹색  |
-| `onSecretFire`  | `GameEvent<GameObject, DamageInfo>` | 트리거   | 녹색  |
+| `onSecretFire`  | `GameObjectDamageInfoGameEvent` | 트리거   | 녹색  |
 
 **핵심 인사이트:**
 - **루트 이벤트** (금색): 코드에 의해 직접 발동되는 유일한 것
@@ -321,7 +321,7 @@ Game Event Editor에서 **"Flow Graph"** 버튼을 클릭하여 시각적 그래
 **게임 이벤트:**
 - `Command Event`: `onCommand`
   - 툴팁: "전체 그래프를 트리거하는 하나의 이벤트"
-  - 타입: `GameEvent<GameObject, DamageInfo>`
+  - 타입: `GameObjectDamageInfoGameEvent`
 
 **Turret A (스마트):**
 - `Turret A`: Turret_A (GameObject)
@@ -377,7 +377,7 @@ public class TriggerEventRaiser : MonoBehaviour
     [Header("Game Event")]
     [Tooltip("전체 그래프를 트리거하는 하나의 이벤트.")]
     [GameEventDropdown]
-    public GameEvent<GameObject, DamageInfo> commandEvent;
+    public GameObjectDamageInfoGameEvent commandEvent;
 
     [Header("Turret A (스마트)")] 
     public GameObject turretA;
@@ -528,8 +528,8 @@ public class TriggerEventReceiver : MonoBehaviour
     /// 타입 변환이 있는 트리거 노드에 바인딩됨.
     /// 
     /// 그래프 구성:
-    /// - 입력: GameEvent<GameObject, DamageInfo>
-    /// - 출력: GameEvent<DamageInfo>
+    /// - 입력: GameObjectDamageInfoGameEvent
+    /// - 출력: DamageInfoGameEvent
     /// - 결과: Sender가 제거되고, 데이터만 전달됨
     /// </summary>
     public void HoloDamageData(DamageInfo info)
@@ -548,7 +548,7 @@ public class TriggerEventReceiver : MonoBehaviour
     /// VOID로의 타입 변환이 있는 트리거 노드에 바인딩됨.
     /// 
     /// 그래프 구성:
-    /// - 입력: GameEvent<GameObject, DamageInfo>
+    /// - 입력: GameObjectDamageInfoGameEvent
     /// - 출력: GameEvent (void)
     /// - 결과: 모든 인수 제거됨
     /// </summary>

@@ -588,11 +588,11 @@ Events organized by test unit in Game Event Editor:
 | ---------- | ---------------------- | ----------------------------------- | ---------------------- |
 | **Unit A** | `OnSpammer`            | `GameEvent`                         | High-frequency spam    |
 | **Unit A** | `OnSpammerPersistent`  | `GameEvent`                         | Persistent spam        |
-| **Unit B** | `OnHeavyLoad`          | `GameEvent<GameObject, DamageInfo>` | Performance test       |
-| **Unit B** | `OnHeavyLoadCondition` | `GameEvent<GameObject, DamageInfo>` | Conditional test       |
-| **Unit C** | `OnChainStart`         | `GameEvent<DamageInfo>`             | Root (gold)            |
-| **Unit C** | `OnChainProcess`       | `GameEvent<DamageInfo>`             | Chain step 1           |
-| **Unit C** | `OnChainFinish`        | `GameEvent<DamageInfo>`             | Chain step 2           |
+| **Unit B** | `OnHeavyLoad`          | `GameObjectDamageInfoGameEvent` | Performance test       |
+| **Unit B** | `OnHeavyLoadCondition` | `GameObjectDamageInfoGameEvent` | Conditional test       |
+| **Unit C** | `OnChainStart`         | `DamageInfoGameEvent`             | Root (gold)            |
+| **Unit C** | `OnChainProcess`       | `DamageInfoGameEvent`             | Chain step 1           |
+| **Unit C** | `OnChainFinish`        | `DamageInfoGameEvent`             | Chain step 2           |
 | **Unit C** | `OnTriggerComplete`    | `GameEvent`                         | Chain step 3 (trigger) |
 | **Unit D** | `OnGhost`              | `GameEvent`                         | Integrity test         |
 

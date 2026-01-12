@@ -540,11 +540,11 @@ Game Event Editor 内で、テストユニットごとにイベントを整理�
 | ---------- | ---------------------- | ----------------------------------- | ---------------------- |
 | **Unit A** | `OnSpammer` | `GameEvent` | 高頻度スパム |
 | **Unit A** | `OnSpammerPersistent` | `GameEvent` | 常駐スパム |
-| **Unit B** | `OnHeavyLoad` | `GameEvent<GameObject, DamageInfo>` | パフォーマンステスト |
-| **Unit B** | `OnHeavyLoadCondition` | `GameEvent<GameObject, DamageInfo>` | 条件付きテスト |
-| **Unit C** | `OnChainStart` | `GameEvent<DamageInfo>` | ルート (ゴールド) |
-| **Unit C** | `OnChainProcess` | `GameEvent<DamageInfo>` | チェーン Step 1 |
-| **Unit C** | `OnChainFinish` | `GameEvent<DamageInfo>` | チェーン Step 2 |
+| **Unit B** | `OnHeavyLoad` | `GameObjectDamageInfoGameEvent` | パフォーマンステスト |
+| **Unit B** | `OnHeavyLoadCondition` | `GameObjectDamageInfoGameEvent` | 条件付きテスト |
+| **Unit C** | `OnChainStart` | `DamageInfoGameEvent` | ルート (ゴールド) |
+| **Unit C** | `OnChainProcess` | `DamageInfoGameEvent` | チェーン Step 1 |
+| **Unit C** | `OnChainFinish` | `DamageInfoGameEvent` | チェーン Step 2 |
 | **Unit C** | `OnTriggerComplete` | `GameEvent` | チェーン Step 3 (トリガー) |
 | **Unit D** | `OnGhost` | `GameEvent` | 整合性テスト |
 

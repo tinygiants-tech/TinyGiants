@@ -212,7 +212,7 @@ Game Event System Window → "Game Event Monitor" をクリック
 
 - **[Timestamp]** - イベントが発行された時間 (時:分:秒.ミリ秒)。
 - **Event Name** - トリガーされたイベント名。
-- **Event Type** - ジェネリック型 (例: `GameEvent<int>`)。
+- **Event Type** - ジェネリック型 (例: `public Int32GameEvent`)。
 
 **クイックアクション:**
 
@@ -341,7 +341,7 @@ Game Event System Window → "Game Event Monitor" をクリック
 各ログエントリの表示内容：
 
 ```tex
-[14:23:45.123]  F:1250  PlayerTakeDamage  <GameEvent<GameObject, DamageInfo>>  [Details]
+[14:23:45.123]  F:1250  PlayerTakeDamage  <GameObjectDamageInfoGameEvent>  [Details]
   📍 Called by: EnemyController.Attack()
 ```
 
@@ -888,7 +888,7 @@ Basic(Insp): 2  Basic(API): 1  Priority(API): 3  Cond(API): 1  Persist(Insp): 0 
 | フィールド      | 説明                                     |
 | -------------- | --------------------------------------- |
 | **Event Name** | イベントのフルネーム                     |
-| **Event Type** | ジェネリック型 (例: `GameEvent<float>`)  |
+| **Event Type** | ジェネリック型 (例: `SingleGameEvent`)  |
 | **Time**       | 正確なタイムスタンプ (時:分:秒.ミリ秒)   |
 | **Frame**      | 発行されたフレーム番号                   |
 | **Arguments**  | 渡された引数の値                         |
@@ -944,10 +944,10 @@ Event: PlayerHealthChanged     Total: 245 triggers
 このイベントの最新50件の実行を新しい順に表示します：
 
 ```tex
-[14:52:33.145]  F:3201  PlayerHealthChanged  <GameEvent<float>>  [Details]
+[14:52:33.145]  F:3201  PlayerHealthChanged  <SingleGameEvent>  [Details]
   📍 Called by: DamageSystem.ApplyDamage()
 
-[14:52:31.089]  F:3180  PlayerHealthChanged  <GameEvent<float>>  [Details]
+[14:52:31.089]  F:3180  PlayerHealthChanged  <SingleGameEvent>  [Details]
   📍 Called by: HealthRegen.Tick()
 ```
 

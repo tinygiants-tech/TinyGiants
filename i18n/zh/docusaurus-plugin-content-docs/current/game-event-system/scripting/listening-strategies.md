@@ -33,7 +33,7 @@ sidebar_position: 2
 ```csharp
 public class PlayerHealth : MonoBehaviour
 {
-    [GameEventDropdown] public GameEvent<int> onTakeDamage;
+    [GameEventDropdown] public Int32GameEvent onTakeDamage;
 
     private void OnEnable()
     {

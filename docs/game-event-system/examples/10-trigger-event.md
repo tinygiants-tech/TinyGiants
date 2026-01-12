@@ -239,12 +239,12 @@ void OnAttackCommand(GameObject sender, DamageInfo info)
 
 | Event Name      | Type                                | Role     | Color |
 | --------------- | ----------------------------------- | -------- | ----- |
-| `onCommand`     | `GameEvent<GameObject, DamageInfo>` | **Root** | Gold  |
-| `onActiveBuff`  | `GameEvent<GameObject, DamageInfo>` | Trigger  | Green |
-| `onTurretFire`  | `GameEvent<GameObject, DamageInfo>` | Trigger  | Green |
-| `onHoloData`    | `GameEvent<DamageInfo>`             | Trigger  | Green |
+| `onCommand`     | `GameObjectDamageInfoGameEvent` | **Root** | Gold  |
+| `onActiveBuff`  | `GameObjectDamageInfoGameEvent` | Trigger  | Green |
+| `onTurretFire`  | `GameObjectDamageInfoGameEvent` | Trigger  | Green |
+| `onHoloData`    | `DamageInfoGameEvent`             | Trigger  | Green |
 | `onGlobalAlarm` | `GameEvent` (void)                  | Trigger  | Green |
-| `onSecretFire`  | `GameEvent<GameObject, DamageInfo>` | Trigger  | Green |
+| `onSecretFire`  | `GameObjectDamageInfoGameEvent` | Trigger  | Green |
 
 **Key Insight:**
 - **Root event** (gold): Only one directly raised by code
@@ -322,7 +322,7 @@ Select the **TriggerEventRaiser** GameObject:
 **Game Event:**
 - `Command Event`: `onCommand`
   - Tooltip: "The ONE event that triggers the whole graph"
-  - Type: `GameEvent<GameObject, DamageInfo>`
+  - Type: `GameObjectDamageInfoGameEvent`
 
 **Turret A (Smart):**
 - `Turret A`: Turret_A (GameObject)
@@ -378,7 +378,7 @@ public class TriggerEventRaiser : MonoBehaviour
     [Header("Game Event")]
     [Tooltip("The ONE event that triggers the whole graph.")]
     [GameEventDropdown]
-    public GameEvent<GameObject, DamageInfo> commandEvent;
+    public GameObjectDamageInfoGameEvent commandEvent;
 
     [Header("Turret A (Smart)")] 
     public GameObject turretA;
@@ -529,8 +529,8 @@ public class TriggerEventReceiver : MonoBehaviour
     /// Bound to Trigger node with TYPE CONVERSION.
     /// 
     /// Graph configuration:
-    /// - Input: GameEvent<GameObject, DamageInfo>
-    /// - Output: GameEvent<DamageInfo>
+    /// - Input: GameObjectDamageInfoGameEvent
+    /// - Output: DamageInfoGameEvent
     /// - Result: Sender is dropped, only data is passed
     /// </summary>
     public void HoloDamageData(DamageInfo info)
@@ -549,7 +549,7 @@ public class TriggerEventReceiver : MonoBehaviour
     /// Bound to Trigger node with TYPE CONVERSION to VOID.
     /// 
     /// Graph configuration:
-    /// - Input: GameEvent<GameObject, DamageInfo>
+    /// - Input: GameObjectDamageInfoGameEvent
     /// - Output: GameEvent (void)
     /// - Result: All arguments dropped
     /// </summary>

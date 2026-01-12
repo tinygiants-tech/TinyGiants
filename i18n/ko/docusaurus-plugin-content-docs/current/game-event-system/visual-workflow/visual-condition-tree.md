@@ -44,8 +44,8 @@ if (damageInfo.amount > 20 &&
 
 **이벤트 타입**:
 
-- `GameEvent<GameObject, DamageInfo>` (GameObject 송신자)
-- `GameEvent<PlayerStats, DamageInfo>` (커스텀 송신자)
+- `GameObjectDamageInfoGameEvent` (GameObject 송신자)
+- `PlayerStatsDamageInfoGameEvent` (커스텀 송신자)
 
 **데이터 구조**:
 
@@ -214,7 +214,7 @@ graph LR
 데미지 수치가 일정 수준 이상일 때만 트리거되는 이벤트:
 Argument.amount  **>**  20.0
 
-- **🔍 소스:** Argument.amount — `GameEvent<float>`에 의해 전달된 원본 데미지 값
+- **🔍 소스:** Argument.amount — `SingleGameEvent`에 의해 전달된 원본 데미지 값
 - **📐 연산자:** > — 논리 규칙 (보다 큼)
 - **🎯 타겟:** 20.0 — 비교 대상이 되는 상수 임계값 또는 다른 변수
 
@@ -253,7 +253,7 @@ Argument.amount  **>**  20.0
 
 #### 🔢 단일 매개변수 이벤트
 
-**시그니처:** `GameEvent<DamageInfo>`
+**시그니처:** `DamageInfoGameEvent`
 
 이벤트가 단일 오브젝트를 포함하는 경우, 해당 오브젝트 자체 또는 오브젝트의 퍼블릭 멤버에 액세스할 수 있습니다.
 
@@ -276,7 +276,7 @@ Argument.amount  **>**  20.0
 
 ##### 🎮 사례 A: GameObject 송신자
 
-**시그니처:** `GameEvent<GameObject, DamageInfo>`
+**시그니처:** `GameObjectDamageInfoGameEvent`
 
 | 시작점 | 경로 예시 | 데이터 타입 |
 | ------------ | ------------------------- | --------- |
@@ -299,7 +299,7 @@ Argument.amount  **>**  20.0
 
 ##### 🛡️ 사례 B: 커스텀 C# 송신자 (고급)
 
-**시그니처:** `GameEvent<PlayerStats, DamageInfo>`
+**시그니처:** `PlayerStatsDamageInfoGameEvent`
 
 > 🚀 **특별한 이유:** 기존 시스템과 달리 GameObject에 종속되지 않습니다. 디커플링된 로직 우선 아키텍처를 위해 **순수 C# 클래스**를 송신자로 사용할 수 있습니다.
 

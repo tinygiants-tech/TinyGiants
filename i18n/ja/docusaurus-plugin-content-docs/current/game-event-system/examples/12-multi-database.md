@@ -245,7 +245,7 @@ Assets/TinyGiants/GameEventSystem/Demo/12_MultiDatabase/12_MultiDatabase.unity
 **割り当ての例:**
 ```csharp
 [GameEventDropdown] 
-public GameEvent<GameObject, DamageInfo> sequenceStartEvent;
+public GameObjectDamageInfoGameEvent sequenceStartEvent;
 ```
 
 ドロップダウンの表示:
@@ -377,7 +377,7 @@ void LoadLevel(int levelIndex)
 **MultidatabaseRaiser.cs:**
 ```csharp
 [GameEventDropdown]
-public GameEvent<GameObject, DamageInfo> sequenceStartEvent;
+public GameObjectDamageInfoGameEvent sequenceStartEvent;
 
 public void RequestLaunchA()
 {

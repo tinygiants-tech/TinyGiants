@@ -38,7 +38,7 @@ Assets/TinyGiants/GameEventSystem/Demo/03_CustomTypeEvent/03_CustomTypeEvent.uni
 
 **게임 로직 레이어 (데모 스크립트):**
 - 📤 **CustomTypeEventRaiser** - 발생기(Raiser) 스크립트가 포함된 게임 오브젝트
-  - 물리(Physical), 화염(Fire), 크리티컬(Critical) 공격을 위한 3개의 `GameEvent<DamageInfo>` 참조를 보유합니다.
+  - 물리(Physical), 화염(Fire), 크리티컬(Critical) 공격을 위한 3개의 `DamageInfoGameEvent` 참조를 보유합니다.
   - 서로 다른 속성을 가진 `DamageInfo` 오브젝트를 생성하고 해당 이벤트를 발생시킵니다.
 
 - 📥 **CustomTypeEventReceiver** - 수신기(Receiver) 스크립트가 포함된 게임 오브젝트
@@ -120,18 +120,18 @@ public class DamageInfo
 
 | 이벤트 이름 | 타입 | 용도 |
 | ------------------ | ----------------------- | ------------------------- |
-| `OnPhysicalDamage` | `GameEvent<DamageInfo>` | 표준 물리 공격 |
-| `OnFireDamage` | `GameEvent<DamageInfo>` | 화염 기반 마법 데미지 |
-| `OnCriticalStrike` | `GameEvent<DamageInfo>` | 충격이 큰 크리티컬 히트 |
+| `OnPhysicalDamage` | `DamageInfoGameEvent` | 표준 물리 공격 |
+| `OnFireDamage` | `DamageInfoGameEvent` | 화염 기반 마법 데미지 |
+| `OnCriticalStrike` | `DamageInfoGameEvent` | 충격이 큰 크리티컬 히트 |
 
 **Behavior 열 확인:**
-세 이벤트 모두 타입 인지자로 **(DamageInfo)**를 표시합니다. 이 `GameEvent<DamageInfo>` 클래스들은 이벤트를 생성할 때 플러그인에 의해 **자동으로 생성**되었습니다. 수동 코딩이 전혀 필요하지 않습니다!
+세 이벤트 모두 타입 인지자로 **(DamageInfo)**를 표시합니다. 이 `DamageInfoGameEvent` 클래스들은 이벤트를 생성할 때 플러그인에 의해 **자동으로 생성**되었습니다. 수동 코딩이 전혀 필요하지 않습니다!
 
 :::note 🔧 코드 생성
 
 게임 이벤트 생성기(Creator)에서 커스텀 타입을 가진 이벤트를 생성하면 플러그인이 자동으로 다음을 수행합니다.
 
-1. `GameEvent<YourType>` 클래스 생성
+1. `YourTypeGameEvent` 클래스 생성
 2. 대응하는 리스너 인터페이스 생성
 3. 인스펙터 드롭다운 및 메서드 바인딩에서의 타입 안정성 보장
 
@@ -156,8 +156,8 @@ public class DamageInfo
 - `Hit Target` ➔ Capsule (Transform) - 무작위 히트 지점 계산에 사용됩니다.
 
 **작동 중인 타입 안정성:**
-- 드롭다운에는 오직 `GameEvent<DamageInfo>` 에셋만 표시됩니다.
-- 이 슬롯에 `GameEvent<string>`이나 `GameEvent<Vector3>`를 할당할 수 없습니다.
+- 드롭다운에는 오직 `DamageInfoGameEvent` 에셋만 표시됩니다.
+- 이 슬롯에 `StringGameEvent`이나 `Vector3GameEvent`를 할당할 수 없습니다.
 - 이를 통해 런타임 타입 불일치 에러를 방지합니다.
 
 ---
@@ -199,10 +199,10 @@ using TinyGiants.GameEventSystem.Runtime;
 public class CustomEventRaiser : MonoBehaviour
 {
     [Header("GameEvent")]
-    // 참고: GameEvent<DamageInfo>는 플러그인에 의해 자동으로 생성되었습니다.
-    [GameEventDropdown] public GameEvent<DamageInfo> physicalDamageEvent;
-    [GameEventDropdown] public GameEvent<DamageInfo> fireDamageEvent;
-    [GameEventDropdown] public GameEvent<DamageInfo> criticalStrikeEvent;
+    // 참고: DamageInfoGameEvent는 플러그인에 의해 자동으로 생성되었습니다.
+    [GameEventDropdown] public DamageInfoGameEvent physicalDamageEvent;
+    [GameEventDropdown] public DamageInfoGameEvent fireDamageEvent;
+    [GameEventDropdown] public DamageInfoGameEvent criticalStrikeEvent;
 
     [Header("Settings")]
     public Transform hitTarget;
@@ -239,7 +239,7 @@ public class CustomEventRaiser : MonoBehaviour
     /// <summary>
     /// DamageInfo 패킷을 구성하고 이벤트를 발생시킵니다.
     /// </summary>
-    private void SendDamage(GameEvent<DamageInfo> gameEvent, float baseDamage, 
+    private void SendDamage(DamageInfoGameEvent gameEvent, float baseDamage, 
                            bool isCrit, DamageType type, string attacker)
     {
         if (gameEvent == null) return;
@@ -268,7 +268,7 @@ public class CustomEventRaiser : MonoBehaviour
 ```
 
 **핵심 포인트:**
-- 🎯 **커스텀 타입 지원** - `GameEvent<DamageInfo>`가 복잡한 오브젝트를 처리합니다.
+- 🎯 **커스텀 타입 지원** - `DamageInfoGameEvent`가 복잡한 오브젝트를 처리합니다.
 - 🏗️ **데이터 구성** - 모든 관련 속성을 포함하는 패킷을 빌드합니다.
 - 📦 **단일 호출** - `.Raise(info)`가 전체 데이터 구조를 전달합니다.
 - 🔇 **디커플링** - 어떤 시각 효과가 트리거될지 송신자는 알지 못합니다.
@@ -292,7 +292,7 @@ public class CustomTypeEventReceiver : MonoBehaviour
     private Camera _mainCamera;
 
     /// <summary>
-    /// GameEvent<DamageInfo>를 위한 리스너 메서드입니다.
+    /// DamageInfoGameEvent를 위한 리스너 메서드입니다.
     /// 복잡한 데이터를 파싱하여 여러 피드백 시스템을 트리거합니다.
     /// </summary>
     public void OnDamageReceived(DamageInfo info)
@@ -414,7 +414,7 @@ public class CustomTypeEventReceiver : MonoBehaviour
 
 | 개념 | 구현 방식 |
 | --------------------- | ------------------------------------------------------------ |
-| 🎯 **커스텀 타입** | `GameEvent<YourClass>`는 직렬화 가능한 모든 C# 클래스를 지원함 |
+| 🎯 **커스텀 타입** | `YourClassGameEvent`는 직렬화 가능한 모든 C# 클래스를 지원함 |
 | 🏭 **자동 생성** | 플러그인이 이벤트 클래스를 자동으로 생성함 — 수동 코딩 불필요 |
 | 📦 **데이터 묶기** | 여러 프로퍼티를 가진 복잡한 오브젝트를 한 번의 호출로 전달 |
 | 🔀 **스마트 라우팅** | 단일 수신자 메서드가 데이터를 기반으로 서로 다른 로직 경로를 처리 가능 |

@@ -206,7 +206,7 @@ Game Event Monitor를 처음 열면 **중지 상태**(플레이 모드가 아님
 
 - **[타임스탬프]** - 이벤트가 발동된 시간(HH:MM:SS.mmm)
 - **이벤트 이름** - 트리거된 이벤트
-- **이벤트 타입** - 제네릭 타입(예: `GameEvent<int>`)
+- **이벤트 타입** - 제네릭 타입(예: `public Int32GameEvent`)
 
 **빠른 작업:**
 
@@ -334,7 +334,7 @@ Game Event Monitor를 처음 열면 **중지 상태**(플레이 모드가 아님
 
 각 로그 항목은 다음을 표시합니다:
 ```tex
-[14:23:45.123]  F:1250  PlayerTakeDamage  <GameEvent<GameObject, DamageInfo>>  [Details]
+[14:23:45.123]  F:1250  PlayerTakeDamage  <GameObjectDamageInfoGameEvent>  [Details]
   📍 Called by: EnemyController.Attack()
 ```
 
@@ -916,7 +916,7 @@ Details 탭은 다음 경우에 자동으로 열립니다:
 | 필드           | 설명                                    |
 | -------------- | --------------------------------------- |
 | **Event Name** | 이벤트의 전체 이름                      |
-| **Event Type** | 제네릭 타입(예: `GameEvent<float>`)     |
+| **Event Type** | 제네릭 타입(예: `SingleGameEvent`)     |
 | **Time**       | 정확한 타임스탬프(HH:MM:SS.mmm)         |
 | **Frame**      | 실행된 프레임 번호                      |
 | **Arguments**  | 전달된 인수 값                          |
@@ -972,10 +972,10 @@ Event: PlayerHealthChanged     Total: 245 triggers
 
 이 이벤트의 마지막 50개 실행을 역시간순으로 표시합니다:
 ```tex
-[14:52:33.145]  F:3201  PlayerHealthChanged  <GameEvent<float>>  [Details]
+[14:52:33.145]  F:3201  PlayerHealthChanged  <SingleGameEvent>  [Details]
   📍 Called by: DamageSystem.ApplyDamage()
 
-[14:52:31.089]  F:3180  PlayerHealthChanged  <GameEvent<float>>  [Details]
+[14:52:31.089]  F:3180  PlayerHealthChanged  <SingleGameEvent>  [Details]
   📍 Called by: HealthRegen.Tick()
 
 ...

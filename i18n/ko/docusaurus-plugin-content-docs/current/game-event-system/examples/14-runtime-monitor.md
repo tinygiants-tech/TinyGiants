@@ -589,11 +589,11 @@ Unity 콘솔과 달리 이 로그는 **이벤트에 특화**되어 있습니다.
 | ---------- | ---------------------- | ----------------------------------- | ---------------------- |
 | **Unit A** | `OnSpammer` | `GameEvent` | 고빈도 스팸 |
 | **Unit A** | `OnSpammerPersistent` | `GameEvent` | 지속성 스팸 |
-| **Unit B** | `OnHeavyLoad` | `GameEvent<GameObject, DamageInfo>` | 성능 테스트 |
-| **Unit B** | `OnHeavyLoadCondition` | `GameEvent<GameObject, DamageInfo>` | 조건부 테스트 |
-| **Unit C** | `OnChainStart` | `GameEvent<DamageInfo>` | 루트 (골드) |
-| **Unit C** | `OnChainProcess` | `GameEvent<DamageInfo>` | 체인 1단계 |
-| **Unit C** | `OnChainFinish` | `GameEvent<DamageInfo>` | 체인 2단계 |
+| **Unit B** | `OnHeavyLoad` | `GameObjectDamageInfoGameEvent` | 성능 테스트 |
+| **Unit B** | `OnHeavyLoadCondition` | `GameObjectDamageInfoGameEvent` | 조건부 테스트 |
+| **Unit C** | `OnChainStart` | `DamageInfoGameEvent` | 루트 (골드) |
+| **Unit C** | `OnChainProcess` | `DamageInfoGameEvent` | 체인 1단계 |
+| **Unit C** | `OnChainFinish` | `DamageInfoGameEvent` | 체인 2단계 |
 | **Unit C** | `OnTriggerComplete` | `GameEvent` | 체인 3단계 (트리거) |
 | **Unit D** | `OnGhost` | `GameEvent` | 무결성 테스트 |
 

@@ -38,7 +38,7 @@ Assets/TinyGiants/GameEventSystem/Demo/03_CustomTypeEvent/03_CustomTypeEvent.uni
 
 **游戏逻辑层（演示脚本）：**
 - 📤 **CustomTypeEventRaiser** - 带有触发器脚本的GameObject
-  - 持有对3个事件的引用：物理、火焰和暴击攻击的`GameEvent<DamageInfo>`
+  - 持有对3个事件的引用：物理、火焰和暴击攻击的`DamageInfoGameEvent`
   - 构造具有不同属性的`DamageInfo`对象并触发相应的事件
 
 - 📥 **CustomTypeEventReceiver** - 带有接收器脚本的GameObject
@@ -120,18 +120,18 @@ public class DamageInfo
 
 | 事件名称 | 类型 | 目的 |
 | ------------------ | ----------------------- | ------------------------- |
-| `OnPhysicalDamage` | `GameEvent<DamageInfo>` | 标准物理攻击 |
-| `OnFireDamage` | `GameEvent<DamageInfo>` | 基于火焰的魔法伤害 |
-| `OnCriticalStrike` | `GameEvent<DamageInfo>` | 高冲击力暴击 |
+| `OnPhysicalDamage` | `DamageInfoGameEvent` | 标准物理攻击 |
+| `OnFireDamage` | `DamageInfoGameEvent` | 基于火焰的魔法伤害 |
+| `OnCriticalStrike` | `DamageInfoGameEvent` | 高冲击力暴击 |
 
 **注意行为列：**
-所有三个事件都显示**(DamageInfo)**作为类型指示器。这些`GameEvent<DamageInfo>`类是在您创建事件时由插件**自动生成**的——无需手动编码！
+所有三个事件都显示**(DamageInfo)**作为类型指示器。这些`DamageInfoGameEvent`类是在您创建事件时由插件**自动生成**的——无需手动编码！
 
 :::note 🔧 代码生成
 
 当您在游戏事件创建器中使用自定义类型创建事件时，插件会自动：
 
-1. 生成`GameEvent<YourType>`类
+1. 生成`YourTypeGameEvent`类
 2. 创建相应的监听器接口
 3. 确保Inspector下拉菜单和方法绑定中的类型安全
 
@@ -156,8 +156,8 @@ public class DamageInfo
 - `Hit Target` → 胶囊体（Transform）- 用于计算随机击中点
 
 **类型安全实践：**
-- 下拉菜单仅显示`GameEvent<DamageInfo>`资产
-- 您不能将`GameEvent<string>`或`GameEvent<Vector3>`分配给这些槽
+- 下拉菜单仅显示`DamageInfoGameEvent`资产
+- 您不能将`StringGameEvent`或`Vector3GameEvent`分配给这些槽
 - 这防止运行时类型不匹配错误
 
 ---
@@ -199,10 +199,10 @@ using TinyGiants.GameEventSystem.Runtime;
 public class CustomEventRaiser : MonoBehaviour
 {
     [Header("GameEvent")]
-    // 注意：GameEvent<DamageInfo>由插件自动生成
-    [GameEventDropdown] public GameEvent<DamageInfo> physicalDamageEvent;
-    [GameEventDropdown] public GameEvent<DamageInfo> fireDamageEvent;
-    [GameEventDropdown] public GameEvent<DamageInfo> criticalStrikeEvent;
+    // 注意：DamageInfoGameEvent由插件自动生成
+    [GameEventDropdown] public DamageInfoGameEvent physicalDamageEvent;
+    [GameEventDropdown] public DamageInfoGameEvent fireDamageEvent;
+    [GameEventDropdown] public DamageInfoGameEvent criticalStrikeEvent;
 
     [Header("Settings")]
     public Transform hitTarget;
@@ -239,7 +239,7 @@ public class CustomEventRaiser : MonoBehaviour
     /// <summary>
     /// 构造DamageInfo数据包并触发事件。
     /// </summary>
-    private void SendDamage(GameEvent<DamageInfo> gameEvent, float baseDamage, 
+    private void SendDamage(DamageInfoGameEvent gameEvent, float baseDamage, 
                            bool isCrit, DamageType type, string attacker)
     {
         if (gameEvent == null) return;
@@ -268,7 +268,7 @@ public class CustomEventRaiser : MonoBehaviour
 ```
 
 **关键点：**
-- 🎯 **自定义类型支持** - `GameEvent<DamageInfo>`处理复杂对象
+- 🎯 **自定义类型支持** - `DamageInfoGameEvent`处理复杂对象
 - 🏗️ **数据构造** - 使用所有相关属性构建数据包
 - 📦 **单次调用** - `.Raise(info)`传递整个数据结构
 - 🔇 **解耦** - 不知道将触发什么视觉效果
@@ -292,7 +292,7 @@ public class CustomTypeEventReceiver : MonoBehaviour
     private Camera _mainCamera;
 
     /// <summary>
-    /// GameEvent<DamageInfo>的监听器方法。
+    /// DamageInfoGameEvent的监听器方法。
     /// 解析复杂数据以触发多个反馈系统。
     /// </summary>
     public void OnDamageReceived(DamageInfo info)
@@ -414,7 +414,7 @@ public class CustomTypeEventReceiver : MonoBehaviour
 
 | 概念 | 实现 |
 | --------------------- | ------------------------------------------------------------ |
-| 🎯 **自定义类型** | `GameEvent<YourClass>`支持任何可序列化的C#类 |
+| 🎯 **自定义类型** | `YourClassGameEvent`支持任何可序列化的C#类 |
 | 🏭 **自动生成** | 插件自动生成事件类——无需手动编码 |
 | 📦 **数据打包** | 一次调用传递具有多个属性的复杂对象 |
 | 🔀 **智能路由** | 单个接收器方法可以根据数据处理不同的逻辑路径 |

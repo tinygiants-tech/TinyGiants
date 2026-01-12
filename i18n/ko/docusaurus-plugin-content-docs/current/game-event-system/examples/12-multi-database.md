@@ -251,7 +251,7 @@ Hierarchy에서 **Game Event Manager**를 선택하여 멀티 데이터베이스
 **할당 예시:**
 ```csharp
 [GameEventDropdown] 
-public GameEvent<GameObject, DamageInfo> sequenceStartEvent;
+public GameObjectDamageInfoGameEvent sequenceStartEvent;
 ```
 
 드롭다운 표시:
@@ -389,7 +389,7 @@ void LoadLevel(int levelIndex)
 **MultidatabaseRaiser.cs:**
 ```csharp
 [GameEventDropdown]
-public GameEvent<GameObject, DamageInfo> sequenceStartEvent;
+public GameObjectDamageInfoGameEvent sequenceStartEvent;
 
 public void RequestLaunchA()
 {

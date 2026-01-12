@@ -137,7 +137,7 @@ import TabItem from '@theme/TabItem';
 
   ![Code Generator - Single Parameter](/img/game-event-system/tools/codegen-and-cleanup/tool_codegen_single.png)
 
-  단일 데이터 페이로드를 전달하는 이벤트(예: `GameEvent<float>` 또는 `GameEvent<MyClass>`)에 이 모드를 사용합니다.
+  단일 데이터 페이로드를 전달하는 이벤트(예: `SingleGameEvent` 또는 `MyClassGameEvent`)에 이 모드를 사용합니다.
 
   1.  **빠른 추가(Quick Add)**: 드롭다운을 사용하여 표준 C# 타입(Double, Long, Vector3 등)을 빠르게 추가합니다.
   2.  **커스텀 타입 검색**: 프로젝트 내의 클래스, 구조체 또는 열거형 이름을 입력합니다.

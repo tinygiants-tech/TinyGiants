@@ -182,7 +182,7 @@ Unityの **Play** ボタンを押します。金庫には赤文字で「LOCKED�
 
 | イベント名      | 型                      | 用途                                              |
 | -------------- | ----------------------- | ------------------------------------------------- |
-| `OnAccessCard` | `GameEvent<AccessCard>` | 条件ツリーを通じてカードの認証情報を検証する           |
+| `OnAccessCard` | `AccessCardGameEvent` | 条件ツリーを通じてカードの認証情報を検証する           |
 
 **AccessCard データ構造:**
 ```csharp
@@ -318,7 +318,7 @@ using TinyGiants.GameEventSystem.Runtime;
 public class ConditionalEventRaiser : MonoBehaviour
 {
     [Header("Event Channel")]
-    [GameEventDropdown] public GameEvent<AccessCard> requestAccessEvent;
+    [GameEventDropdown] public AccessCardGameEvent requestAccessEvent;
 
     [Header("Scene Reference")]
     [SerializeField] private SecurityGrid securityGrid;

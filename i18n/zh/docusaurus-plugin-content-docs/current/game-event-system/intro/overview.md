@@ -100,7 +100,7 @@ sidebar_position: 1
 ```csharp
 // 事件是资产，而非魔法字符串
 [GameEventDropdown] public GameEvent onPlayerDeath;
-[GameEventDropdown] public GameEvent<int> onScoreChanged;
+[GameEventDropdown] public Int32GameEvent onScoreChanged;
 
 void Die() {
     onPlayerDeath.Raise(); // 类型安全，资产引用

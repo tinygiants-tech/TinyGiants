@@ -149,11 +149,11 @@ onDamageTaken.AddTriggerEvent(
 
 将复杂对象事件映射到简单基本类型事件。
 
-- **源：** `GameEvent<Enemy> (OnEnemyKilled)`
-- **目标：** `GameEvent<int> (OnAddXP)`
+- **源：** `EnemyGameEvent (OnEnemyKilled)`
+- **目标：** `public Int32GameEvent (OnAddXP)`
 ```csharp
-[GameEventDropdown] public GameEvent<Enemy> onEnemyKilled;
-[GameEventDropdown] public GameEvent<int> onAddXP;
+[GameEventDropdown] public EnemyGameEvent onEnemyKilled;
+[GameEventDropdown] public Int32GameEvent onAddXP;
 
 void Awake()
 {

@@ -250,7 +250,7 @@ Events grouped by database and category:
 **Example Assignment:**
 ```csharp
 [GameEventDropdown] 
-public GameEvent<GameObject, DamageInfo> sequenceStartEvent;
+public GameObjectDamageInfoGameEvent sequenceStartEvent;
 ```
 
 Dropdown shows:
@@ -388,7 +388,7 @@ The code for Demo 12 is **identical** to Demo 11. Scripts don't know or care whi
 **MultidatabaseRaiser.cs:**
 ```csharp
 [GameEventDropdown]
-public GameEvent<GameObject, DamageInfo> sequenceStartEvent;
+public GameObjectDamageInfoGameEvent sequenceStartEvent;
 
 public void RequestLaunchA()
 {

@@ -124,7 +124,7 @@ Game Event System Window → 「Game Event Editor」をクリック
 
 - 型: All ➔ ⚪ **すべて**のシグネチャ型を表示
 - 型: void ➔ 🔘 **パラメータなし**イベントのみを表示
-- 型: Int32 ➔ 🔢 `GameEvent<int>`のみを表示
+- 型: Int32 ➔ 🔢 `public Int32GameEvent`のみを表示
 - 型: GameObject ➔ 📦 **GameObject**参照イベントのみを表示
 
 :::tip **利用可能な型**

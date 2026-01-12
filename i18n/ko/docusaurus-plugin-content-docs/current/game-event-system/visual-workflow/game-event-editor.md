@@ -125,7 +125,7 @@ import TabItem from '@theme/TabItem';
 
 - Type: All ➔ ⚪ **모든** 시그니처 타입 표시
 - Type: void ➔ 🔘 **인자 없는** 이벤트만 표시
-- Type: Int32 ➔ 🔢 `GameEvent<int>` 타입만 표시
+- Type: Int32 ➔ 🔢 `public Int32GameEvent` 타입만 표시
 - Type: GameObject ➔ 📦 **GameObject** 참조 이벤트만 표시
 
 :::tip **사용 가능한 타입**

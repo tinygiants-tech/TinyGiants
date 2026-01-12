@@ -38,7 +38,7 @@ Assets/TinyGiants/GameEventSystem/Demo/03_CustomTypeEvent/03_CustomTypeEvent.uni
 
 **ゲームロジックレイヤー (デモスクリプト):**
 - 📤 **CustomTypeEventRaiser** - 発行側スクリプトを持つGameObject
-  - 物理、火炎、クリティカル攻撃用の3つの `GameEvent<DamageInfo>` 参照を保持
+  - 物理、火炎、クリティカル攻撃用の3つの `DamageInfoGameEvent` 参照を保持
   - プロパティの異なる `DamageInfo` オブジェクトを構築し、対応するイベントを発行
 
 - 📥 **CustomTypeEventReceiver** - 受信側スクリプトを持つGameObject
@@ -120,18 +120,18 @@ public class DamageInfo
 
 | イベント名         | 型                    | 用途                     |
 | ------------------ | ----------------------- | ------------------------ |
-| `OnPhysicalDamage` | `GameEvent<DamageInfo>` | 標準的な物理攻撃         |
-| `OnFireDamage`     | `GameEvent<DamageInfo>` | 火炎魔法ダメージ         |
-| `OnCriticalStrike` | `GameEvent<DamageInfo>` | 衝撃の大きいクリティカル |
+| `OnPhysicalDamage` | `DamageInfoGameEvent` | 標準的な物理攻撃         |
+| `OnFireDamage`     | `DamageInfoGameEvent` | 火炎魔法ダメージ         |
+| `OnCriticalStrike` | `DamageInfoGameEvent` | 衝撃の大きいクリティカル |
 
 **Behavior カラムに注目:**
-3つのイベントすべてに型インジケーターとして **(DamageInfo)** と表示されています。これらの `GameEvent<DamageInfo>` クラスは、イベント作成時にプラグインによって**自動生成**されたものです。手動でコードを書く必要はありません！
+3つのイベントすべてに型インジケーターとして **(DamageInfo)** と表示されています。これらの `DamageInfoGameEvent` クラスは、イベント作成時にプラグインによって**自動生成**されたものです。手動でコードを書く必要はありません！
 
 :::note 🔧 コード生成
 
 カスタム型を使用してイベントを Game Event Creator で作成すると、プラグインは自動的に以下の処理を行います：
 
-1. `GameEvent<YourType>` クラスを生成
+1. `YourTypeGameEvent` クラスを生成
 2. 対応するリスナーインターフェースを作成
 3. インスペクターのドロップダウンやメソッドバインディングでの型安全性を確保
 
@@ -156,8 +156,8 @@ public class DamageInfo
 - `Hit Target` ➔ Capsule (Transform) - ランダムな着弾点を計算するために使用
 
 **型安全性の動作:**
-- ドロップダウンには `GameEvent<DamageInfo>` アセットのみが表示されます。
-- `GameEvent<string>` や `GameEvent<Vector3>` をこれらのスロットに割り当てることはできません。
+- ドロップダウンには `DamageInfoGameEvent` アセットのみが表示されます。
+- `StringGameEvent` や `Vector3GameEvent` をこれらのスロットに割り当てることはできません。
 - これにより、実行時の型不一致エラーが防止されます。
 
 ---
@@ -199,10 +199,10 @@ using TinyGiants.GameEventSystem.Runtime;
 public class CustomEventRaiser : MonoBehaviour
 {
     [Header("GameEvent")]
-    // 注目: GameEvent<DamageInfo> はプラグインによって自動生成されています
-    [GameEventDropdown] public GameEvent<DamageInfo> physicalDamageEvent;
-    [GameEventDropdown] public GameEvent<DamageInfo> fireDamageEvent;
-    [GameEventDropdown] public GameEvent<DamageInfo> criticalStrikeEvent;
+    // 注目: DamageInfoGameEvent はプラグインによって自動生成されています
+    [GameEventDropdown] public DamageInfoGameEvent physicalDamageEvent;
+    [GameEventDropdown] public DamageInfoGameEvent fireDamageEvent;
+    [GameEventDropdown] public DamageInfoGameEvent criticalStrikeEvent;
 
     [Header("Settings")]
     public Transform hitTarget;
@@ -239,7 +239,7 @@ public class CustomEventRaiser : MonoBehaviour
     /// <summary>
     /// DamageInfo パケットを構築し、イベントを発行します。
     /// </summary>
-    private void SendDamage(GameEvent<DamageInfo> gameEvent, float baseDamage, 
+    private void SendDamage(DamageInfoGameEvent gameEvent, float baseDamage, 
                            bool isCrit, DamageType type, string attacker)
     {
         if (gameEvent == null) return;
@@ -268,7 +268,7 @@ public class CustomEventRaiser : MonoBehaviour
 ```
 
 **ポイント:**
-- 🎯 **カスタム型のサポート** - `GameEvent<DamageInfo>` が複雑なオブジェクトを処理します。
+- 🎯 **カスタム型のサポート** - `DamageInfoGameEvent` が複雑なオブジェクトを処理します。
 - 🏗️ **データの構築** - 関連するすべてのプロパティを持つパケットを作成します。
 - 📦 **単一の呼び出し** - `.Raise(info)` でデータ構造全体を渡します。
 - 🔇 **デカップリング** - どのようなビジュアルエフェクトがトリガーされるかを送信側は関知しません。
@@ -292,7 +292,7 @@ public class CustomTypeEventReceiver : MonoBehaviour
     private Camera _mainCamera;
 
     /// <summary>
-    /// GameEvent<DamageInfo> のリスナーメソッド。
+    /// DamageInfoGameEvent のリスナーメソッド。
     /// 複雑なデータを解析して、複数のフィードバックシステムをトリガーします。
     /// </summary>
     public void OnDamageReceived(DamageInfo info)
@@ -414,7 +414,7 @@ public class CustomTypeEventReceiver : MonoBehaviour
 
 | コンセプト            | 実装内容                                                     |
 | ---------------------- | ------------------------------------------------------------ |
-| 🎯 **カスタム型**       | `GameEvent<YourClass>` はシリアライズ可能な任意のC#クラスをサポート |
+| 🎯 **カスタム型**       | `YourClassGameEvent` はシリアライズ可能な任意のC#クラスをサポート |
 | 🏭 **自動生成**         | プラグインがイベントクラスを自動生成するため、手動コーディング不要 |
 | 📦 **データのバンドル** | 複数のプロパティを持つ複雑なオブジェクトを1回の呼び出しで送信可能 |
 | 🔀 **スマートルーティング** | 単一の受信メソッドが、データに基づいて異なるロジックパスを処理可能 |

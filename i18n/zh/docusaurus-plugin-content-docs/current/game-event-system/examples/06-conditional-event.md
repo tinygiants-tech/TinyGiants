@@ -184,7 +184,7 @@ Assets/TinyGiants/GameEventSystem/Demo/06_ConditionalEvent/06_ConditionalEvent.u
 
 | 事件名称 | 类型 | 目的 |
 | -------------- | ----------------------- | ------------------------------------------------- |
-| `OnAccessCard` | `GameEvent<AccessCard>` | 通过条件树验证卡凭证 |
+| `OnAccessCard` | `AccessCardGameEvent` | 通过条件树验证卡凭证 |
 
 **AccessCard数据结构：**
 ```csharp
@@ -320,7 +320,7 @@ using TinyGiants.GameEventSystem.Runtime;
 public class ConditionalEventRaiser : MonoBehaviour
 {
     [Header("事件频道")]
-    [GameEventDropdown] public GameEvent<AccessCard> requestAccessEvent;
+    [GameEventDropdown] public AccessCardGameEvent requestAccessEvent;
 
     [Header("场景引用")]
     [SerializeField] private SecurityGrid securityGrid;

@@ -39,7 +39,7 @@ Assets/TinyGiants/GameEventSystem/Demo/05_PriorityEvent/05_PriorityEvent.unity
 - 📤 **PriorityEventRaiser** - GameObject with the raiser script
   - Manages turret aiming and projectile firing
   - Holds references to two events: `OnChaoticHit` and `OnOrderedHit`
-  - Both events use the same `GameEvent<GameObject, DamageInfo>` type
+  - Both events use the same `GameObjectDamageInfoGameEvent` type
 
 - 📥 **PriorityEventReceiver** - GameObject with the receiver script
   - Has TWO listener methods bound to each event:
@@ -149,12 +149,12 @@ Both events use the same type but have different behavior configurations:
 
 | Event Name     | Type                                | Listener Order                        |
 | -------------- | ----------------------------------- | ------------------------------------- |
-| `OnChaoticHit` | `GameEvent<GameObject, DamageInfo>` | ❌ ResolveHit → ActivateBuff (Wrong)   |
-| `OnOrderedHit` | `GameEvent<GameObject, DamageInfo>` | ✅ ActivateBuff → ResolveHit (Correct) |
+| `OnChaoticHit` | `GameObjectDamageInfoGameEvent` | ❌ ResolveHit → ActivateBuff (Wrong)   |
+| `OnOrderedHit` | `GameObjectDamageInfoGameEvent` | ✅ ActivateBuff → ResolveHit (Correct) |
 
 :::note 🔧 Same Type, Different Order
 
-Both events are `GameEvent<GameObject, DamageInfo>`. The only difference is the **listener execution order** configured in the [Behavior Window](../visual-workflow/game-event-behavior.md).
+Both events are `GameObjectDamageInfoGameEvent`. The only difference is the **listener execution order** configured in the [Behavior Window](../visual-workflow/game-event-behavior.md).
 
 :::
 
@@ -248,12 +248,12 @@ public class PriorityEventRaiser : MonoBehaviour
 {
     [Header("Event Channels")]
     [Tooltip("Configured in Editor: Apply Buff -> Then Fire.")]
-    [GameEventDropdown] public GameEvent<GameObject, DamageInfo> orderedHitEvent;
+    [GameEventDropdown] public GameObjectDamageInfoGameEvent orderedHitEvent;
 
     [Tooltip("Configured in Editor: Fire -> Then Apply Buff (Too late!).")]
-    [GameEventDropdown] public GameEvent<GameObject, DamageInfo> chaoticHitEvent;
+    [GameEventDropdown] public GameObjectDamageInfoGameEvent chaoticHitEvent;
 
-    private GameEvent<GameObject, DamageInfo> _pendingEvent;
+    private GameObjectDamageInfoGameEvent _pendingEvent;
 
     /// <summary>
     /// Button A: Starts attack sequence that triggers the "Ordered" event.

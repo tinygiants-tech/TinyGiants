@@ -34,7 +34,7 @@ Use this for standard, non-critical gameplay logic where execution order doesn't
 ```csharp
 public class PlayerHealth : MonoBehaviour
 {
-    [GameEventDropdown] public GameEvent<int> onTakeDamage;
+    [GameEventDropdown] public Int32GameEvent onTakeDamage;
 
     private void OnEnable()
     {

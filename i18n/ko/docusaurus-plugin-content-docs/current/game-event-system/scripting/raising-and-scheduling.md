@@ -34,7 +34,7 @@ void Update()
 
 특정 데이터 페이로드(T)를 전달하는 이벤트입니다.
 ```csharp
-[GameEventDropdown] public GameEvent<float> onHealthChanged;
+[GameEventDropdown] public SingleGameEvent onHealthChanged;
 
 public void TakeDamage(float damage)
 {
@@ -50,7 +50,7 @@ public void TakeDamage(float damage)
 이벤트의 **출처**(TSender)를 검증하고 데이터(TArgs)를 전달하는 이벤트입니다.
 ```csharp
 // 타입 정의: Sender는 GameObject, Arg는 DamageInfo
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onActorDamaged;
+[GameEventDropdown] public GameObjectDamageInfoGameEvent onActorDamaged;
 
 public void Hit()
 {
@@ -111,7 +111,7 @@ onItemPickup.RaiseDelayed(this, itemData, 0.5f);
 
 1초마다 플레이어에게 5회 동안 데미지를 줍니다.
 ```csharp
-[GameEventDropdown] public GameEvent<int> onTakeDamage;
+[GameEventDropdown] public Int32GameEvent onTakeDamage;
 
 private void ApplyPoison()
 {

@@ -587,11 +587,11 @@ public void OnHeavyExecution(GameObject sender, DamageInfo info)
 | ---------- | ---------------------- | ----------------------------------- | -------------- |
 | **单元A**  | `OnSpammer`            | `GameEvent`                         | 高频垃圾信息   |
 | **单元A**  | `OnSpammerPersistent`  | `GameEvent`                         | 持久化垃圾信息 |
-| **单元B**  | `OnHeavyLoad`          | `GameEvent<GameObject, DamageInfo>` | 性能测试       |
-| **单元B**  | `OnHeavyLoadCondition` | `GameEvent<GameObject, DamageInfo>` | 条件测试       |
-| **单元C**  | `OnChainStart`         | `GameEvent<DamageInfo>`             | 根（金色）     |
-| **单元C**  | `OnChainProcess`       | `GameEvent<DamageInfo>`             | 链步骤1        |
-| **单元C**  | `OnChainFinish`        | `GameEvent<DamageInfo>`             | 链步骤2        |
+| **单元B**  | `OnHeavyLoad`          | `GameObjectDamageInfoGameEvent` | 性能测试       |
+| **单元B**  | `OnHeavyLoadCondition` | `GameObjectDamageInfoGameEvent` | 条件测试       |
+| **单元C**  | `OnChainStart`         | `DamageInfoGameEvent`             | 根（金色）     |
+| **单元C**  | `OnChainProcess`       | `DamageInfoGameEvent`             | 链步骤1        |
+| **单元C**  | `OnChainFinish`        | `DamageInfoGameEvent`             | 链步骤2        |
 | **单元C**  | `OnTriggerComplete`    | `GameEvent`                         | 链步骤3（触发器）|
 | **单元D**  | `OnGhost`              | `GameEvent`                         | 完整性测试     |
 

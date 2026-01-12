@@ -137,7 +137,7 @@ The **Game Event Code Generator** features a tabbed interface allowing you to sw
 
   ![Code Generator - Single Parameter](/img/game-event-system/tools/codegen-and-cleanup/tool_codegen_single.png)
 
-  Use this mode for events that carry a single data payload (e.g., `GameEvent<float>` or `GameEvent<MyClass>`).
+  Use this mode for events that carry a single data payload (e.g., `SingleGameEvent` or `MyClassGameEvent`).
 
   1.  **Quick Add**: Use the dropdown to quickly add standard C# types (Double, Long, Vector3, etc.).
   2.  **Search Custom Types**: Type the name of any class, struct, or enum in your project.

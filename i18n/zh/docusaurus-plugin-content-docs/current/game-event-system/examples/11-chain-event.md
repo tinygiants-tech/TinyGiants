@@ -237,12 +237,12 @@ Assets/TinyGiants/GameEventSystem/Demo/11_ChainEvent/11_ChainEvent.unity
 
 | 事件名称          | 类型                                | 角色           | 步骤 |
 | ----------------- | ----------------------------------- | -------------- | ---- |
-| `0_StartSequence` | `GameEvent<GameObject, DamageInfo>` | **根**（金色） | 入口 |
-| `1_SystemCheck`   | `GameEvent<GameObject, DamageInfo>` | **链**（绿色） | 1    |
-| `2_Charge`        | `GameEvent<GameObject, DamageInfo>` | **链**（绿色） | 2    |
-| `3_Fire`          | `GameEvent<GameObject, DamageInfo>` | **链**（绿色） | 3    |
-| `4_CoolDown`      | `GameEvent<GameObject, DamageInfo>` | **链**（绿色） | 4    |
-| `5_Archive`       | `GameEvent<GameObject, DamageInfo>` | **链**（绿色） | 5    |
+| `0_StartSequence` | `GameObjectDamageInfoGameEvent` | **根**（金色） | 入口 |
+| `1_SystemCheck`   | `GameObjectDamageInfoGameEvent` | **链**（绿色） | 1    |
+| `2_Charge`        | `GameObjectDamageInfoGameEvent` | **链**（绿色） | 2    |
+| `3_Fire`          | `GameObjectDamageInfoGameEvent` | **链**（绿色） | 3    |
+| `4_CoolDown`      | `GameObjectDamageInfoGameEvent` | **链**（绿色） | 4    |
+| `5_Archive`       | `GameObjectDamageInfoGameEvent` | **链**（绿色） | 5    |
 
 **关键洞察：**
 - **根**触发链
@@ -261,7 +261,7 @@ Assets/TinyGiants/GameEventSystem/Demo/11_ChainEvent/11_ChainEvent.unity
 
 **节点1：0_StartSequence（根，红色）**
 - 由代码触发的入口点
-- 类型：`GameEvent<GameObject, DamageInfo>`
+- 类型：`GameObjectDamageInfoGameEvent`
 - 连接到第一个链节点
 
 **节点2：1_SystemCheck（链，绿色）**
@@ -402,7 +402,7 @@ public class ChainEventRaiser : MonoBehaviour
     [Header("Chain Entry Point")]
     [Tooltip("链图的启动节点。")]
     [GameEventDropdown]
-    public GameEvent<GameObject, DamageInfo> sequenceStartEvent;
+    public GameObjectDamageInfoGameEvent sequenceStartEvent;
 
     [Header("Turrets")] 
     public GameObject turretA;

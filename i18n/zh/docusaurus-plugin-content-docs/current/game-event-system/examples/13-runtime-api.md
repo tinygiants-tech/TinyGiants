@@ -147,10 +147,10 @@ public class RuntimeAPI_VoidEventReceiver : MonoBehaviour
 
 **RuntimeAPI_BasicTypesEventRaiser.cs：**
 ```csharp
-[GameEventDropdown] public GameEvent<string> messageEvent;
-[GameEventDropdown] public GameEvent<Vector3> movementEvent;
-[GameEventDropdown] public GameEvent<GameObject> spawnEvent;
-[GameEventDropdown] public GameEvent<Material> changeMaterialEvent;
+[GameEventDropdown] public StringGameEvent messageEvent;
+[GameEventDropdown] public Vector3GameEvent movementEvent;
+[GameEventDropdown] public GameObjectGameEvent spawnEvent;
+[GameEventDropdown] public MaterialGameEvent changeMaterialEvent;
 
 public void RaiseString()
 {
@@ -191,7 +191,7 @@ public void OnMaterialReceived(Material mat) { /* ... */ }
 **要点：**
 - ✅ **类型安全：** 编译器强制签名匹配
 - ✅ **自动推断：** 无需手动类型规范
-- ⚠️ **不匹配错误：** `void(int)` 无法绑定到 `GameEvent<string>`
+- ⚠️ **不匹配错误：** `void(int)` 无法绑定到 `StringGameEvent`
 
 ---
 
@@ -201,9 +201,9 @@ public void OnMaterialReceived(Material mat) { /* ... */ }
 
 **RuntimeAPI_CustomTypeEventRaiser.cs：**
 ```csharp
-[GameEventDropdown] public GameEvent<DamageInfo> physicalDamageEvent;
-[GameEventDropdown] public GameEvent<DamageInfo> fireDamageEvent;
-[GameEventDropdown] public GameEvent<DamageInfo> criticalStrikeEvent;
+[GameEventDropdown] public DamageInfoGameEvent physicalDamageEvent;
+[GameEventDropdown] public DamageInfoGameEvent fireDamageEvent;
+[GameEventDropdown] public DamageInfoGameEvent criticalStrikeEvent;
 
 public void DealPhysicalDamage()
 {
@@ -241,7 +241,7 @@ public void OnDamageReceived(DamageInfo info)
 ```
 
 **要点：**
-- 📦 **自动生成：** 插件创建 `GameEvent<DamageInfo>` 类
+- 📦 **自动生成：** 插件创建 `DamageInfoGameEvent` 类
 - 🔗 **多重绑定：** 同一方法可以监听多个事件
 - ⚡ **数据访问：** 完全访问自定义类属性
 
@@ -254,10 +254,10 @@ public void OnDamageReceived(DamageInfo info)
 **RuntimeAPI_CustomSenderTypeEventRaiser.cs：**
 ```csharp
 // 物理发送者：GameObject
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> turretEvent;
+[GameEventDropdown] public GameObjectDamageInfoGameEvent turretEvent;
 
 // 逻辑发送者：自定义类
-[GameEventDropdown] public GameEvent<PlayerStats, DamageInfo> systemEvent;
+[GameEventDropdown] public PlayerStatsDamageInfoGameEvent systemEvent;
 
 public void RaiseTurretDamage()
 {
@@ -318,8 +318,8 @@ public void OnSystemAttackReceived(PlayerStats sender, DamageInfo args)
 
 **RuntimeAPI_PriorityEventReceiver.cs：**
 ```csharp
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> orderedHitEvent;
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> chaoticHitEvent;
+[GameEventDropdown] public GameObjectDamageInfoGameEvent orderedHitEvent;
+[GameEventDropdown] public GameObjectDamageInfoGameEvent chaoticHitEvent;
 
 private void OnEnable()
 {
@@ -369,7 +369,7 @@ public void ResolveHit(GameObject sender, DamageInfo args)
 
 **RuntimeAPI_ConditionalEventReceiver.cs：**
 ```csharp
-[GameEventDropdown] public GameEvent<AccessCard> requestAccessEvent;
+[GameEventDropdown] public AccessCardGameEvent requestAccessEvent;
 
 private void OnEnable()
 {
@@ -575,10 +575,10 @@ public void OnFireCommandB()
 
 **RuntimeAPI_TriggerEventRaiser.cs：**
 ```csharp
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onCommand;      // 根
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onActiveBuff;   // 分支A
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onTurretFire;   // 分支B
-[GameEventDropdown] public GameEvent<DamageInfo> onHoloData;                 // 分支C（类型转换）
+[GameEventDropdown] public GameObjectDamageInfoGameEvent onCommand;      // 根
+[GameEventDropdown] public GameObjectDamageInfoGameEvent onActiveBuff;   // 分支A
+[GameEventDropdown] public GameObjectDamageInfoGameEvent onTurretFire;   // 分支B
+[GameEventDropdown] public DamageInfoGameEvent onHoloData;                 // 分支C（类型转换）
 [GameEventDropdown] public GameEvent onGlobalAlarm;                          // 分支D（void）
 
 private TriggerHandle _buffAHandle;
@@ -610,7 +610,7 @@ private void OnEnable()
     
     // 分支C：全息数据（类型转换，延迟）
     _holoHandle = onCommand.AddTriggerEvent(
-        targetEvent: onHoloData,  // ← GameEvent<DamageInfo>（无发送者）
+        targetEvent: onHoloData,  // ← DamageInfoGameEvent（无发送者）
         delay: 1f,  // ← 1秒延迟
         passArgument: true
     );
@@ -667,12 +667,12 @@ private void OnDisable()
 
 **RuntimeAPI_ChainEventRaiser.cs：**
 ```csharp
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnStartSequenceEvent;  // 根
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnSystemCheckEvent;    // 步骤1
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnChargeEvent;         // 步骤2
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnFireEvent;           // 步骤3
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnCoolDownEvent;       // 步骤4
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnArchiveEvent;        // 步骤5
+[GameEventDropdown] public GameObjectDamageInfoGameEvent OnStartSequenceEvent;  // 根
+[GameEventDropdown] public GameObjectDamageInfoGameEvent OnSystemCheckEvent;    // 步骤1
+[GameEventDropdown] public GameObjectDamageInfoGameEvent OnChargeEvent;         // 步骤2
+[GameEventDropdown] public GameObjectDamageInfoGameEvent OnFireEvent;           // 步骤3
+[GameEventDropdown] public GameObjectDamageInfoGameEvent OnCoolDownEvent;       // 步骤4
+[GameEventDropdown] public GameObjectDamageInfoGameEvent OnArchiveEvent;        // 步骤5
 
 private ChainHandle _checkHandle;
 private ChainHandle _chargeHandle;

@@ -133,7 +133,7 @@ import TabItem from '@theme/TabItem';
 
   ![Code Generator - Single Parameter](/img/game-event-system/tools/codegen-and-cleanup/tool_codegen_single.png)
 
-  对于携带单个数据有效载荷的事件（例如，`GameEvent<float>`或`GameEvent<MyClass>`），使用此模式。
+  对于携带单个数据有效载荷的事件（例如，`SingleGameEvent`或`MyClassGameEvent`），使用此模式。
 
   1.  **快速添加**：使用下拉菜单快速添加标准C#类型（Double、Long、Vector3等）。
   2.  **搜索自定义类型**：在项目中键入任何类、结构体或枚举的名称。

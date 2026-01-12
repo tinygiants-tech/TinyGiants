@@ -183,9 +183,9 @@ UIに入る前に、このシステムがどのようにデータを保存する
 **できること**: コード生成なしで、これらの型のいずれかをすぐに使用してイベントを作成できます。
 ```csharp
 // 組み込み型イベントの例
-[GameEventDropdown] GameEvent<int> OnScoreChanged;
-[GameEventDropdown] GameEvent<Vector3> OnPositionUpdated;
-[GameEventDropdown] GameEvent<GameObject> OnObjectSpawned;
+[GameEventDropdown] public Int32GameEvent OnScoreChanged;
+[GameEventDropdown] Vector3GameEvent OnPositionUpdated;
+[GameEventDropdown] GameObjectGameEvent OnObjectSpawned;
 ```
 
 ---

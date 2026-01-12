@@ -38,8 +38,8 @@ Assets/TinyGiants/GameEventSystem/Demo/04_CustomSenderTypeEvent/04_CustomSenderT
 
 **게임 로직 레이어 (Demo Scripts):**
 - 📤 **CustomSenderTypeEventRaiser** - raiser 스크립트가 있는 GameObject
-  - `GameEvent<GameObject, DamageInfo>`로 두 개의 물리적 포탑(빨강과 파랑) 관리
-  - `GameEvent<PlayerStats, DamageInfo>`로 시스템 레벨 공격 처리
+  - `GameObjectDamageInfoGameEvent`로 두 개의 물리적 포탑(빨강과 파랑) 관리
+  - `PlayerStatsDamageInfoGameEvent`로 시스템 레벨 공격 처리
   - 포탑 조준, 발사체 발사 및 이벤트 발동 제어
 
 - 📥 **CustomSenderTypeEventReceiver** - receiver 스크립트가 있는 GameObject
@@ -106,7 +106,7 @@ Unity에서 **Play** 버튼을 누릅니다.
 
 #### 시나리오 A: 물리적 Sender (GameObject)
 ```csharp
-GameEvent<GameObject, DamageInfo>
+GameObjectDamageInfoGameEvent
 ```
 
 **사용 사례:** sender가 씬에서 물리적 존재를 가질 때
@@ -116,7 +116,7 @@ GameEvent<GameObject, DamageInfo>
 
 #### 시나리오 B: 논리적 Sender (순수 C# 클래스)
 ```csharp
-GameEvent<PlayerStats, DamageInfo>
+PlayerStatsDamageInfoGameEvent
 ```
 
 **사용 사례:** sender가 씬 표현 없이 데이터 객체일 때
@@ -160,9 +160,9 @@ public class PlayerStats
 
 | 이벤트 이름                | 타입                                 | 목적                         |
 | -------------------------- | ------------------------------------ | ---------------------------- |
-| `OnGameObjectDamageInfo`   | `GameEvent<GameObject, DamageInfo>`  | 빨간 포탑 물리적 공격        |
-| `OnGameObjectDamageInfo_1` | `GameEvent<GameObject, DamageInfo>`  | 파란 포탑 물리적 공격        |
-| `OnPlayerStatsDamageInfo`  | `GameEvent<PlayerStats, DamageInfo>` | 시스템 레벨 논리적 데미지    |
+| `OnGameObjectDamageInfo`   | `GameObjectDamageInfoGameEvent`  | 빨간 포탑 물리적 공격        |
+| `OnGameObjectDamageInfo_1` | `GameObjectDamageInfoGameEvent`  | 파란 포탑 물리적 공격        |
+| `OnPlayerStatsDamageInfo`  | `PlayerStatsDamageInfoGameEvent` | 시스템 레벨 논리적 데미지    |
 
 **Behavior 열 주목:**
 - 처음 두 이벤트는 **(GameObject,DamageInfo)** 표시 - 물리적 sender용
@@ -261,7 +261,7 @@ public class CustomSenderTypeEventRaiser : MonoBehaviour
     private class TurretConfig
     {
         public string name;
-        [GameEventDropdown] public GameEvent<GameObject, DamageInfo> attackEvent;
+        [GameEventDropdown] public GameObjectDamageInfoGameEvent attackEvent;
         public Transform head;
         public Transform muzzlePosition;
         [HideInInspector] public bool isAttacking;
@@ -272,7 +272,7 @@ public class CustomSenderTypeEventRaiser : MonoBehaviour
     [SerializeField] private TurretConfig turret2;
 
     [Header("Global System Event")]
-    [GameEventDropdown] public GameEvent<PlayerStats, DamageInfo> globalSystemEvent;
+    [GameEventDropdown] public PlayerStatsDamageInfoGameEvent globalSystemEvent;
 
     private PlayerStats _localPlayerStats;
 
@@ -362,7 +362,7 @@ public class CustomSenderTypeEventReceiver : MonoBehaviour
     [SerializeField] private TextMeshPro attackerInfoText;
 
     /// <summary>
-    /// 바인딩 대상: GameEvent<GameObject, DamageInfo>
+    /// 바인딩 대상: GameObjectDamageInfoGameEvent
     /// 씬 존재가 있는 물리적 공격자를 처리.
     /// </summary>
     /// <param name="sender">공격한 GameObject (포탑)</param>
@@ -388,7 +388,7 @@ public class CustomSenderTypeEventReceiver : MonoBehaviour
     }
 
     /// <summary>
-    /// 바인딩 대상: GameEvent<PlayerStats, DamageInfo>
+    /// 바인딩 대상: PlayerStatsDamageInfoGameEvent
     /// 씬 표현 없이 논리적 공격자를 처리.
     /// </summary>
     /// <param name="sender">프로필 데이터가 있는 PlayerStats 객체</param>

@@ -98,7 +98,7 @@ Unityのための本格的なビジュアルイベントアーキテクチャ。
 ```csharp
 // イベントはアセットであり、マジックストリングではありません
 [GameEventDropdown] public GameEvent onPlayerDeath;
-[GameEventDropdown] public GameEvent<int> onScoreChanged;
+[GameEventDropdown] public Int32GameEvent onScoreChanged;
 
 void Die() {
     onPlayerDeath.Raise(); // 型安全、アセット参照

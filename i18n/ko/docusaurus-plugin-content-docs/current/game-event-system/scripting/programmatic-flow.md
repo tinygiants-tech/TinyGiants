@@ -149,11 +149,11 @@ onDamageTaken.AddTriggerEvent(
 
 복잡한 객체 이벤트를 단순한 원시 타입 이벤트로 매핑합니다.
 
-- **소스:** `GameEvent<Enemy> (OnEnemyKilled)`
-- **타겟:** `GameEvent<int> (OnAddXP)`
+- **소스:** `EnemyGameEvent (OnEnemyKilled)`
+- **타겟:** `public Int32GameEvent (OnAddXP)`
 ```csharp
-[GameEventDropdown] public GameEvent<Enemy> onEnemyKilled;
-[GameEventDropdown] public GameEvent<int> onAddXP;
+[GameEventDropdown] public EnemyGameEvent onEnemyKilled;
+[GameEventDropdown] public Int32GameEvent onAddXP;
 
 void Awake()
 {

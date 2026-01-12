@@ -184,7 +184,7 @@ The vault's access logic is implemented as a visual tree in the Behavior Window:
 
 | Event Name     | Type                    | Purpose                                           |
 | -------------- | ----------------------- | ------------------------------------------------- |
-| `OnAccessCard` | `GameEvent<AccessCard>` | Validates card credentials through condition tree |
+| `OnAccessCard` | `AccessCardGameEvent` | Validates card credentials through condition tree |
 
 **The AccessCard Data Structure:**
 ```csharp
@@ -320,7 +320,7 @@ using TinyGiants.GameEventSystem.Runtime;
 public class ConditionalEventRaiser : MonoBehaviour
 {
     [Header("Event Channel")]
-    [GameEventDropdown] public GameEvent<AccessCard> requestAccessEvent;
+    [GameEventDropdown] public AccessCardGameEvent requestAccessEvent;
 
     [Header("Scene Reference")]
     [SerializeField] private SecurityGrid securityGrid;

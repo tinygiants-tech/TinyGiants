@@ -137,7 +137,7 @@ import TabItem from '@theme/TabItem';
 
   ![コードジェネレーター - 単一引数](/img/game-event-system/tools/codegen-and-cleanup/tool_codegen_single.png)
 
-  単一のデータペイロードを持つイベント（例：`GameEvent<float>` や `GameEvent<MyClass>`）には、このモードを使用します。
+  単一のデータペイロードを持つイベント（例：`SingleGameEvent` や `MyClassGameEvent`）には、このモードを使用します。
 
   1.  **クイック追加 (Quick Add)**: ドロップダウンを使用して、標準的なC#型（Double, Long, Vector3など）を素早く追加します。
   2.  **カスタム型の検索**: プロジェクト内のクラス、構造体、列挙型の名前を入力して検索します。

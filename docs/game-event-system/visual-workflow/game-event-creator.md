@@ -416,7 +416,7 @@ Sender events (`GameEvent<TSender, TArgs>`) follow the same logic but generate m
 
 // Event class with TWO type parameters
 public class GameObjectDamageInfoGameEvent 
-    : GameEvent<GameObject, DamageInfo> { }
+    : GameObjectDamageInfoGameEvent { }
 
 // Binding field with TWO parameters
 public UnityEvent<GameObject, DamageInfo> 

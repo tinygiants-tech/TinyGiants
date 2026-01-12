@@ -145,10 +145,10 @@ public class RuntimeAPI_VoidEventReceiver : MonoBehaviour
 
 **RuntimeAPI_BasicTypesEventRaiser.cs:**
 ```csharp
-[GameEventDropdown] public GameEvent<string> messageEvent;
-[GameEventDropdown] public GameEvent<Vector3> movementEvent;
-[GameEventDropdown] public GameEvent<GameObject> spawnEvent;
-[GameEventDropdown] public GameEvent<Material> changeMaterialEvent;
+[GameEventDropdown] public StringGameEvent messageEvent;
+[GameEventDropdown] public Vector3GameEvent movementEvent;
+[GameEventDropdown] public GameObjectGameEvent spawnEvent;
+[GameEventDropdown] public MaterialGameEvent changeMaterialEvent;
 
 public void RaiseString()
 {
@@ -189,7 +189,7 @@ public void OnMaterialReceived(Material mat) { /* ... */ }
 **Key Points:**
 - ✅ **Type Safety:** Compiler enforces signature match
 - ✅ **Auto-Inference:** No manual type specification needed
-- ⚠️ **Mismatch Error:** `void(int)` cannot bind to `GameEvent<string>`
+- ⚠️ **Mismatch Error:** `void(int)` cannot bind to `StringGameEvent`
 
 ---
 
@@ -199,9 +199,9 @@ public void OnMaterialReceived(Material mat) { /* ... */ }
 
 **RuntimeAPI_CustomTypeEventRaiser.cs:**
 ```csharp
-[GameEventDropdown] public GameEvent<DamageInfo> physicalDamageEvent;
-[GameEventDropdown] public GameEvent<DamageInfo> fireDamageEvent;
-[GameEventDropdown] public GameEvent<DamageInfo> criticalStrikeEvent;
+[GameEventDropdown] public DamageInfoGameEvent physicalDamageEvent;
+[GameEventDropdown] public DamageInfoGameEvent fireDamageEvent;
+[GameEventDropdown] public DamageInfoGameEvent criticalStrikeEvent;
 
 public void DealPhysicalDamage()
 {
@@ -239,7 +239,7 @@ public void OnDamageReceived(DamageInfo info)
 ```
 
 **Key Points:**
-- 📦 **Auto-Generated:** `GameEvent<DamageInfo>` class created by plugin
+- 📦 **Auto-Generated:** `DamageInfoGameEvent` class created by plugin
 - 🔗 **Multiple Bindings:** Same method can listen to multiple events
 - ⚡ **Data Access:** Full access to custom class properties
 
@@ -252,10 +252,10 @@ public void OnDamageReceived(DamageInfo info)
 **RuntimeAPI_CustomSenderTypeEventRaiser.cs:**
 ```csharp
 // Physical sender: GameObject
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> turretEvent;
+[GameEventDropdown] public GameObjectDamageInfoGameEvent turretEvent;
 
 // Logical sender: Custom class
-[GameEventDropdown] public GameEvent<PlayerStats, DamageInfo> systemEvent;
+[GameEventDropdown] public PlayerStatsDamageInfoGameEvent systemEvent;
 
 public void RaiseTurretDamage()
 {
@@ -316,8 +316,8 @@ public void OnSystemAttackReceived(PlayerStats sender, DamageInfo args)
 
 **RuntimeAPI_PriorityEventReceiver.cs:**
 ```csharp
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> orderedHitEvent;
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> chaoticHitEvent;
+[GameEventDropdown] public GameObjectDamageInfoGameEvent orderedHitEvent;
+[GameEventDropdown] public GameObjectDamageInfoGameEvent chaoticHitEvent;
 
 private void OnEnable()
 {
@@ -367,7 +367,7 @@ public void ResolveHit(GameObject sender, DamageInfo args)
 
 **RuntimeAPI_ConditionalEventReceiver.cs:**
 ```csharp
-[GameEventDropdown] public GameEvent<AccessCard> requestAccessEvent;
+[GameEventDropdown] public AccessCardGameEvent requestAccessEvent;
 
 private void OnEnable()
 {
@@ -573,10 +573,10 @@ public void OnFireCommandB()
 
 **RuntimeAPI_TriggerEventRaiser.cs:**
 ```csharp
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onCommand;      // Root
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onActiveBuff;   // Branch A
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onTurretFire;   // Branch B
-[GameEventDropdown] public GameEvent<DamageInfo> onHoloData;                 // Branch C (type conversion)
+[GameEventDropdown] public GameObjectDamageInfoGameEvent onCommand;      // Root
+[GameEventDropdown] public GameObjectDamageInfoGameEvent onActiveBuff;   // Branch A
+[GameEventDropdown] public GameObjectDamageInfoGameEvent onTurretFire;   // Branch B
+[GameEventDropdown] public DamageInfoGameEvent onHoloData;                 // Branch C (type conversion)
 [GameEventDropdown] public GameEvent onGlobalAlarm;                          // Branch D (void)
 
 private TriggerHandle _buffAHandle;
@@ -608,7 +608,7 @@ private void OnEnable()
     
     // Branch C: Holo Data (Type conversion, Delayed)
     _holoHandle = onCommand.AddTriggerEvent(
-        targetEvent: onHoloData,  // ← GameEvent<DamageInfo> (no sender)
+        targetEvent: onHoloData,  // ← DamageInfoGameEvent (no sender)
         delay: 1f,  // ← 1 second delay
         passArgument: true
     );
@@ -665,12 +665,12 @@ private void OnDisable()
 
 **RuntimeAPI_ChainEventRaiser.cs:**
 ```csharp
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnStartSequenceEvent;  // Root
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnSystemCheckEvent;    // Step 1
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnChargeEvent;         // Step 2
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnFireEvent;           // Step 3
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnCoolDownEvent;       // Step 4
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> OnArchiveEvent;        // Step 5
+[GameEventDropdown] public GameObjectDamageInfoGameEvent OnStartSequenceEvent;  // Root
+[GameEventDropdown] public GameObjectDamageInfoGameEvent OnSystemCheckEvent;    // Step 1
+[GameEventDropdown] public GameObjectDamageInfoGameEvent OnChargeEvent;         // Step 2
+[GameEventDropdown] public GameObjectDamageInfoGameEvent OnFireEvent;           // Step 3
+[GameEventDropdown] public GameObjectDamageInfoGameEvent OnCoolDownEvent;       // Step 4
+[GameEventDropdown] public GameObjectDamageInfoGameEvent OnArchiveEvent;        // Step 5
 
 private ChainHandle _checkHandle;
 private ChainHandle _chargeHandle;

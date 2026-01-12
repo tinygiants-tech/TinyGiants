@@ -212,7 +212,7 @@ Shows the last 15 events that fired:
 
 - **[Timestamp]** - When the event was raised (HH:MM:SS.mmm)
 - **Event Name** - The event that was triggered
-- **Event Type** - Generic type (e.g., `GameEvent<int>`)
+- **Event Type** - Generic type (e.g., `public Int32GameEvent`)
 
 **Quick Actions:**
 
@@ -342,7 +342,7 @@ At the top of the tab:
 Each log entry shows:
 
 ```tex
-[14:23:45.123]  F:1250  PlayerTakeDamage  <GameEvent<GameObject, DamageInfo>>  [Details]
+[14:23:45.123]  F:1250  PlayerTakeDamage  <GameObjectDamageInfoGameEvent>  [Details]
   📍 Called by: EnemyController.Attack()
 ```
 
@@ -941,7 +941,7 @@ When viewing a specific log entry:
 | Field          | Description                             |
 | -------------- | --------------------------------------- |
 | **Event Name** | Full name of the event                  |
-| **Event Type** | Generic type (e.g., `GameEvent<float>`) |
+| **Event Type** | Generic type (e.g., `SingleGameEvent`) |
 | **Time**       | Precise timestamp (HH:MM:SS.mmm)        |
 | **Frame**      | Frame number when executed              |
 | **Arguments**  | Argument values passed                  |
@@ -1000,10 +1000,10 @@ Event: PlayerHealthChanged     Total: 245 triggers
 Shows the last 50 executions of this event in reverse chronological order:
 
 ```tex
-[14:52:33.145]  F:3201  PlayerHealthChanged  <GameEvent<float>>  [Details]
+[14:52:33.145]  F:3201  PlayerHealthChanged  <SingleGameEvent>  [Details]
   📍 Called by: DamageSystem.ApplyDamage()
 
-[14:52:31.089]  F:3180  PlayerHealthChanged  <GameEvent<float>>  [Details]
+[14:52:31.089]  F:3180  PlayerHealthChanged  <SingleGameEvent>  [Details]
   📍 Called by: HealthRegen.Tick()
 
 ...

@@ -237,12 +237,12 @@ Unity에서 **Play** 버튼을 누릅니다.
 
 | 이벤트 이름       | 타입                                | 역할              | 단계  |
 | ----------------- | ----------------------------------- | ----------------- | ----- |
-| `0_StartSequence` | `GameEvent<GameObject, DamageInfo>` | **루트** (금색)   | 진입  |
-| `1_SystemCheck`   | `GameEvent<GameObject, DamageInfo>` | **체인** (녹색)   | 1     |
-| `2_Charge`        | `GameEvent<GameObject, DamageInfo>` | **체인** (녹색)   | 2     |
-| `3_Fire`          | `GameEvent<GameObject, DamageInfo>` | **체인** (녹색)   | 3     |
-| `4_CoolDown`      | `GameEvent<GameObject, DamageInfo>` | **체인** (녹색)   | 4     |
-| `5_Archive`       | `GameEvent<GameObject, DamageInfo>` | **체인** (녹색)   | 5     |
+| `0_StartSequence` | `GameObjectDamageInfoGameEvent` | **루트** (금색)   | 진입  |
+| `1_SystemCheck`   | `GameObjectDamageInfoGameEvent` | **체인** (녹색)   | 1     |
+| `2_Charge`        | `GameObjectDamageInfoGameEvent` | **체인** (녹색)   | 2     |
+| `3_Fire`          | `GameObjectDamageInfoGameEvent` | **체인** (녹색)   | 3     |
+| `4_CoolDown`      | `GameObjectDamageInfoGameEvent` | **체인** (녹색)   | 4     |
+| `5_Archive`       | `GameObjectDamageInfoGameEvent` | **체인** (녹색)   | 5     |
 
 **핵심 인사이트:**
 - **루트**가 체인을 발동
@@ -261,7 +261,7 @@ Unity에서 **Play** 버튼을 누릅니다.
 
 **노드 1: 0_StartSequence (루트, 빨강)**
 - 코드에 의해 발동되는 진입점
-- 타입: `GameEvent<GameObject, DamageInfo>`
+- 타입: `GameObjectDamageInfoGameEvent`
 - 첫 번째 체인 노드에 연결
 
 **노드 2: 1_SystemCheck (체인, 녹색)**
@@ -402,7 +402,7 @@ public class ChainEventRaiser : MonoBehaviour
     [Header("Chain Entry Point")]
     [Tooltip("체인 그래프의 시작 노드.")]
     [GameEventDropdown]
-    public GameEvent<GameObject, DamageInfo> sequenceStartEvent;
+    public GameObjectDamageInfoGameEvent sequenceStartEvent;
 
     [Header("Turrets")] 
     public GameObject turretA;

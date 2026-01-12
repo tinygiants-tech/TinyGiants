@@ -239,12 +239,12 @@ void OnAttackCommand(GameObject sender, DamageInfo info)
 
 | 事件名称        | 类型                                | 角色     | 颜色 |
 | --------------- | ----------------------------------- | -------- | ---- |
-| `onCommand`     | `GameEvent<GameObject, DamageInfo>` | **根**   | 金色 |
-| `onActiveBuff`  | `GameEvent<GameObject, DamageInfo>` | 触发器   | 绿色 |
-| `onTurretFire`  | `GameEvent<GameObject, DamageInfo>` | 触发器   | 绿色 |
-| `onHoloData`    | `GameEvent<DamageInfo>`             | 触发器   | 绿色 |
+| `onCommand`     | `GameObjectDamageInfoGameEvent` | **根**   | 金色 |
+| `onActiveBuff`  | `GameObjectDamageInfoGameEvent` | 触发器   | 绿色 |
+| `onTurretFire`  | `GameObjectDamageInfoGameEvent` | 触发器   | 绿色 |
+| `onHoloData`    | `DamageInfoGameEvent`             | 触发器   | 绿色 |
 | `onGlobalAlarm` | `GameEvent`（void）                 | 触发器   | 绿色 |
-| `onSecretFire`  | `GameEvent<GameObject, DamageInfo>` | 触发器   | 绿色 |
+| `onSecretFire`  | `GameObjectDamageInfoGameEvent` | 触发器   | 绿色 |
 
 **关键洞察：**
 - **根事件**（金色）：唯一由代码直接触发的
@@ -322,7 +322,7 @@ void OnAttackCommand(GameObject sender, DamageInfo info)
 **游戏事件：**
 - `Command Event`：`onCommand`
   - 提示："触发整个图表的唯一事件"
-  - 类型：`GameEvent<GameObject, DamageInfo>`
+  - 类型：`GameObjectDamageInfoGameEvent`
 
 **炮塔A（智能）：**
 - `Turret A`：Turret_A（游戏对象）
@@ -378,7 +378,7 @@ public class TriggerEventRaiser : MonoBehaviour
     [Header("Game Event")]
     [Tooltip("触发整个图表的唯一事件。")]
     [GameEventDropdown]
-    public GameEvent<GameObject, DamageInfo> commandEvent;
+    public GameObjectDamageInfoGameEvent commandEvent;
 
     [Header("Turret A (Smart)")] 
     public GameObject turretA;
@@ -529,8 +529,8 @@ public class TriggerEventReceiver : MonoBehaviour
     /// 绑定到带有类型转换的触发器节点。
     /// 
     /// 图表配置：
-    /// - 输入：GameEvent<GameObject, DamageInfo>
-    /// - 输出：GameEvent<DamageInfo>
+    /// - 输入：GameObjectDamageInfoGameEvent
+    /// - 输出：DamageInfoGameEvent
     /// - 结果：发送者被丢弃，仅传递数据
     /// </summary>
     public void HoloDamageData(DamageInfo info)
@@ -549,7 +549,7 @@ public class TriggerEventReceiver : MonoBehaviour
     /// 绑定到带有类型转换为VOID的触发器节点。
     /// 
     /// 图表配置：
-    /// - 输入：GameEvent<GameObject, DamageInfo>
+    /// - 输入：GameObjectDamageInfoGameEvent
     /// - 输出：GameEvent（void）
     /// - 结果：所有参数被丢弃
     /// </summary>

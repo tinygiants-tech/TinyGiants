@@ -34,7 +34,7 @@ void Update()
 
 特定のデータペイロード(T)を運ぶイベント。
 ```csharp
-[GameEventDropdown] public GameEvent<float> onHealthChanged;
+[GameEventDropdown] public SingleGameEvent onHealthChanged;
 
 public void TakeDamage(float damage)
 {
@@ -50,7 +50,7 @@ public void TakeDamage(float damage)
 イベントの**ソース**(TSender)を検証し、データ(TArgs)を運ぶイベント。
 ```csharp
 // 型を定義: SenderはGameObject、ArgはDamageInfo
-[GameEventDropdown] public GameEvent<GameObject, DamageInfo> onActorDamaged;
+[GameEventDropdown] public GameObjectDamageInfoGameEvent onActorDamaged;
 
 public void Hit()
 {
@@ -111,7 +111,7 @@ onItemPickup.RaiseDelayed(this, itemData, 0.5f);
 
 1秒ごとに5回、プレイヤーにダメージを与える。
 ```csharp
-[GameEventDropdown] public GameEvent<int> onTakeDamage;
+[GameEventDropdown] public Int32GameEvent onTakeDamage;
 
 private void ApplyPoison()
 {

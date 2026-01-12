@@ -952,13 +952,13 @@ TriggerHandle AddTriggerEvent(
 **예시:**
 ```csharp
 // 인수 직접 전달
-GameEvent<int> scoreEvent;
-GameEvent<int> updateUIEvent;
+public Int32GameEvent scoreEvent;
+public Int32GameEvent updateUIEvent;
 scoreEvent.AddTriggerEvent(updateUIEvent, passArgument: true);
 
 // 인수 변환: int → string
-GameEvent<int> scoreEvent;
-GameEvent<string> notificationEvent;
+public Int32GameEvent scoreEvent;
+StringGameEvent notificationEvent;
 scoreEvent.AddTriggerEvent(
     notificationEvent,
     passArgument: true,
@@ -966,7 +966,7 @@ scoreEvent.AddTriggerEvent(
 );
 
 // 인수 확인을 포함한 조건부
-GameEvent<float> healthEvent;
+SingleGameEvent healthEvent;
 GameEvent lowHealthWarningEvent;
 healthEvent.AddTriggerEvent(
     lowHealthWarningEvent,
@@ -1003,13 +1003,13 @@ TriggerHandle AddTriggerEvent(
 **예시:**
 ```csharp
 // sender와 args를 다른 sender 이벤트로 전달
-GameEvent<GameObject, DamageInfo> damageEvent;
-GameEvent<GameObject, DamageInfo> logEvent;
+GameObjectDamageInfoGameEvent damageEvent;
+GameObjectDamageInfoGameEvent logEvent;
 damageEvent.AddTriggerEvent(logEvent, passArgument: true);
 
 // 변환: 데미지 값만 추출
-GameEvent<GameObject, DamageInfo> damageEvent;
-GameEvent<int> damageNumberEvent;
+GameObjectDamageInfoGameEvent damageEvent;
+public Int32GameEvent damageNumberEvent;
 damageEvent.AddTriggerEvent(
     damageNumberEvent,
     passArgument: true,
@@ -1017,7 +1017,7 @@ damageEvent.AddTriggerEvent(
 );
 
 // sender와 args 기반 조건부
-GameEvent<GameObject, DamageInfo> damageEvent;
+GameObjectDamageInfoGameEvent damageEvent;
 GameEvent criticalHitEvent;
 damageEvent.AddTriggerEvent(
     criticalHitEvent,
@@ -1192,16 +1192,16 @@ ChainHandle AddChainEvent(
 **예시:**
 ```csharp
 // 인수 전달이 있는 체인
-GameEvent<int> damageEvent;
-GameEvent<int> applyDamageEvent;
-GameEvent<int> updateHealthBarEvent;
+public Int32GameEvent damageEvent;
+public Int32GameEvent applyDamageEvent;
+public Int32GameEvent updateHealthBarEvent;
 
 damageEvent.AddChainEvent(applyDamageEvent, passArgument: true);
 applyDamageEvent.AddChainEvent(updateHealthBarEvent, passArgument: true);
 
 // 변환이 있는 체인
-GameEvent<int> damageEvent;
-GameEvent<float> healthPercentEvent;
+public Int32GameEvent damageEvent;
+SingleGameEvent healthPercentEvent;
 
 damageEvent.AddChainEvent(
     healthPercentEvent,
@@ -1211,7 +1211,7 @@ damageEvent.AddChainEvent(
 );
 
 // 인수 확인이 있는 조건부 체인
-GameEvent<int> damageEvent;
+public Int32GameEvent damageEvent;
 GameEvent deathEvent;
 
 damageEvent.AddChainEvent(
@@ -1251,16 +1251,16 @@ ChainHandle AddChainEvent(
 **예시:**
 ```csharp
 // 공격 시퀀스 체인
-GameEvent<GameObject, AttackData> attackStartEvent;
-GameEvent<GameObject, AttackData> playAnimationEvent;
-GameEvent<GameObject, AttackData> dealDamageEvent;
+GameObjectAttackDataGameEvent attackStartEvent;
+GameObjectAttackDataGameEvent playAnimationEvent;
+GameObjectAttackDataGameEvent dealDamageEvent;
 
 attackStartEvent.AddChainEvent(playAnimationEvent, delay: 0f);
 playAnimationEvent.AddChainEvent(dealDamageEvent, delay: 0.5f);
 
 // 데미지 값 추출
-GameEvent<GameObject, AttackData> dealDamageEvent;
-GameEvent<int> showDamageNumberEvent;
+GameObjectAttackDataGameEvent dealDamageEvent;
+public Int32GameEvent showDamageNumberEvent;
 
 dealDamageEvent.AddChainEvent(
     showDamageNumberEvent,
@@ -1269,7 +1269,7 @@ dealDamageEvent.AddChainEvent(
 );
 
 // 조건이 있는 승리 체인
-GameEvent<GameObject, AttackData> attackEndEvent;
+GameObjectAttackDataGameEvent attackEndEvent;
 GameEvent<GameObject, VictoryData> victoryEvent;
 
 attackEndEvent.AddChainEvent(

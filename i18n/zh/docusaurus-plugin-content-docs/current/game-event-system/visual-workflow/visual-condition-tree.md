@@ -43,8 +43,8 @@ if (damageInfo.amount > 20 &&
 
 **事件类型**：
 
-- `GameEvent<GameObject, DamageInfo>`（GameObject sender）
-- `GameEvent<PlayerStats, DamageInfo>`（自定义sender）
+- `GameObjectDamageInfoGameEvent`（GameObject sender）
+- `PlayerStatsDamageInfoGameEvent`（自定义sender）
 
 **数据结构**：
 ```csharp
@@ -209,7 +209,7 @@ graph LR
 想象一个只有在命中足够强大时才触发的事件：
 Argument.amount **>** 20.0
 
-- **🔍 源：** Argument.amount — `GameEvent<float>` 传递的原始伤害值
+- **🔍 源：** Argument.amount — `SingleGameEvent` 传递的原始伤害值
 - **📐 运算符：** > — 逻辑规则（大于）
 - **🎯 目标：** 20.0 — 要比较的常量阈值或另一个变量
 
@@ -248,7 +248,7 @@ Argument.amount **>** 20.0
 
 #### 🔢 单参数事件
 
-**签名：** `GameEvent<DamageInfo>`
+**签名：** `DamageInfoGameEvent`
 
 当事件携带单个对象时，您可以访问对象本身或其任何公共成员。
 
@@ -270,7 +270,7 @@ Sender事件为数据访问提供两个不同的根：**Sender**（谁）和**Ar
 
 ##### 🎮 情况A：GameObject Sender
 
-**签名：** `GameEvent<GameObject, DamageInfo>`
+**签名：** `GameObjectDamageInfoGameEvent`
 
 | 根 | 路径示例 | 数据类型 |
 | ------------ | ------------------------- | --------- |
@@ -292,7 +292,7 @@ Sender事件为数据访问提供两个不同的根：**Sender**（谁）和**Ar
 
 ##### 🛡️ 情况B：自定义C# Sender（高级）
 
-**签名：** `GameEvent<PlayerStats, DamageInfo>`
+**签名：** `PlayerStatsDamageInfoGameEvent`
 
 > 🚀 **为什么它特别：** 与传统系统不同，您不受GameObject的限制。使用任何**纯C#类**作为sender，实现解耦的逻辑优先架构。
 

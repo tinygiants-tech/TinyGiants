@@ -38,8 +38,8 @@ Assets/TinyGiants/GameEventSystem/Demo/04_CustomSenderTypeEvent/04_CustomSenderT
 
 **Game Logic Layer (Demo Scripts):**
 - 📤 **CustomSenderTypeEventRaiser** - GameObject with the raiser script
-  - Manages two physical turrets (Red and Blue) with `GameEvent<GameObject, DamageInfo>`
-  - Handles system-level attacks with `GameEvent<PlayerStats, DamageInfo>`
+  - Manages two physical turrets (Red and Blue) with `GameObjectDamageInfoGameEvent`
+  - Handles system-level attacks with `PlayerStatsDamageInfoGameEvent`
   - Controls turret aiming, projectile firing, and event raising
 
 - 📥 **CustomSenderTypeEventReceiver** - GameObject with the receiver script
@@ -106,7 +106,7 @@ This demo showcases the flexibility of the sender system with two distinct scena
 
 #### Scenario A: Physical Sender (GameObject)
 ```csharp
-GameEvent<GameObject, DamageInfo>
+GameObjectDamageInfoGameEvent
 ```
 
 **Use Case:** When the sender has a physical presence in the scene
@@ -116,7 +116,7 @@ GameEvent<GameObject, DamageInfo>
 
 #### Scenario B: Logical Sender (Pure C# Class)
 ```csharp
-GameEvent<PlayerStats, DamageInfo>
+PlayerStatsDamageInfoGameEvent
 ```
 
 **Use Case:** When the sender is a data object without scene representation
@@ -160,9 +160,9 @@ Open the **Game Event Editor** window to see the dual-generic events:
 
 | Event Name                 | Type                                 | Purpose                      |
 | -------------------------- | ------------------------------------ | ---------------------------- |
-| `OnGameObjectDamageInfo`   | `GameEvent<GameObject, DamageInfo>`  | Red turret physical attacks  |
-| `OnGameObjectDamageInfo_1` | `GameEvent<GameObject, DamageInfo>`  | Blue turret physical attacks |
-| `OnPlayerStatsDamageInfo`  | `GameEvent<PlayerStats, DamageInfo>` | System-level logical damage  |
+| `OnGameObjectDamageInfo`   | `GameObjectDamageInfoGameEvent`  | Red turret physical attacks  |
+| `OnGameObjectDamageInfo_1` | `GameObjectDamageInfoGameEvent`  | Blue turret physical attacks |
+| `OnPlayerStatsDamageInfo`  | `PlayerStatsDamageInfoGameEvent` | System-level logical damage  |
 
 **Notice the Behavior Column:**
 - First two events show **(GameObject,DamageInfo)** - for physical senders
@@ -261,7 +261,7 @@ public class CustomSenderTypeEventRaiser : MonoBehaviour
     private class TurretConfig
     {
         public string name;
-        [GameEventDropdown] public GameEvent<GameObject, DamageInfo> attackEvent;
+        [GameEventDropdown] public GameObjectDamageInfoGameEvent attackEvent;
         public Transform head;
         public Transform muzzlePosition;
         [HideInInspector] public bool isAttacking;
@@ -272,7 +272,7 @@ public class CustomSenderTypeEventRaiser : MonoBehaviour
     [SerializeField] private TurretConfig turret2;
 
     [Header("Global System Event")]
-    [GameEventDropdown] public GameEvent<PlayerStats, DamageInfo> globalSystemEvent;
+    [GameEventDropdown] public PlayerStatsDamageInfoGameEvent globalSystemEvent;
 
     private PlayerStats _localPlayerStats;
 
@@ -362,7 +362,7 @@ public class CustomSenderTypeEventReceiver : MonoBehaviour
     [SerializeField] private TextMeshPro attackerInfoText;
 
     /// <summary>
-    /// Bound to: GameEvent<GameObject, DamageInfo>
+    /// Bound to: GameObjectDamageInfoGameEvent
     /// Handles physical attackers with scene presence.
     /// </summary>
     /// <param name="sender">The GameObject that attacked (the Turret)</param>
@@ -388,7 +388,7 @@ public class CustomSenderTypeEventReceiver : MonoBehaviour
     }
 
     /// <summary>
-    /// Bound to: GameEvent<PlayerStats, DamageInfo>
+    /// Bound to: PlayerStatsDamageInfoGameEvent
     /// Handles logical attackers without scene representation.
     /// </summary>
     /// <param name="sender">The PlayerStats object with profile data</param>

@@ -39,7 +39,7 @@ Assets/TinyGiants/GameEventSystem/Demo/05_PriorityEvent/05_PriorityEvent.unity
 - 📤 **PriorityEventRaiser** - 발생기 스크립트가 포함된 게임 오브젝트
   - 터렛 조준 및 발사체 발사를 관리합니다.
   - `OnChaoticHit` 및 `OnOrderedHit` 두 이벤트에 대한 참조를 보유합니다.
-  - 두 이벤트 모두 동일한 `GameEvent<GameObject, DamageInfo>` 타입을 사용합니다.
+  - 두 이벤트 모두 동일한 `GameObjectDamageInfoGameEvent` 타입을 사용합니다.
 
 - 📥 **PriorityEventReceiver** - 수신기 스크립트가 포함된 게임 오브젝트
   - 각 이벤트에 바인딩된 두 개의 리스너 메서드를 가집니다:
@@ -149,12 +149,12 @@ Assets/TinyGiants/GameEventSystem/Demo/05_PriorityEvent/05_PriorityEvent.unity
 
 | 이벤트 이름 | 타입 | 리스너 순서 |
 | -------------- | ----------------------------------- | ------------------------------------- |
-| `OnChaoticHit` | `GameEvent<GameObject, DamageInfo>` | ❌ ResolveHit → ActivateBuff (잘못됨) |
-| `OnOrderedHit` | `GameEvent<GameObject, DamageInfo>` | ✅ ActivateBuff → ResolveHit (올바름) |
+| `OnChaoticHit` | `GameObjectDamageInfoGameEvent` | ❌ ResolveHit → ActivateBuff (잘못됨) |
+| `OnOrderedHit` | `GameObjectDamageInfoGameEvent` | ✅ ActivateBuff → ResolveHit (올바름) |
 
 :::note 🔧 동일한 타입, 다른 순서
 
-두 이벤트 모두 `GameEvent<GameObject, DamageInfo>` 타입입니다. 유일한 차이점은 [비헤이비어 창](../visual-workflow/game-event-behavior.md)에서 설정된 **리스너 실행 순서**입니다.
+두 이벤트 모두 `GameObjectDamageInfoGameEvent` 타입입니다. 유일한 차이점은 [비헤이비어 창](../visual-workflow/game-event-behavior.md)에서 설정된 **리스너 실행 순서**입니다.
 
 :::
 
@@ -248,12 +248,12 @@ public class PriorityEventRaiser : MonoBehaviour
 {
     [Header("이벤트 채널")]
     [Tooltip("에디터 설정: 버프 적용 -> 그 후 발사")]
-    [GameEventDropdown] public GameEvent<GameObject, DamageInfo> orderedHitEvent;
+    [GameEventDropdown] public GameObjectDamageInfoGameEvent orderedHitEvent;
 
     [Tooltip("에디터 설정: 발사 -> 그 후 버프 적용 (너무 늦음!)")]
-    [GameEventDropdown] public GameEvent<GameObject, DamageInfo> chaoticHitEvent;
+    [GameEventDropdown] public GameObjectDamageInfoGameEvent chaoticHitEvent;
 
-    private GameEvent<GameObject, DamageInfo> _pendingEvent;
+    private GameObjectDamageInfoGameEvent _pendingEvent;
 
     /// <summary>
     /// 버튼 A: "Ordered" 이벤트를 트리거하는 공격 시퀀스를 시작합니다.

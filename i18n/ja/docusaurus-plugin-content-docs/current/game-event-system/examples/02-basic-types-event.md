@@ -39,7 +39,7 @@ Assets/TinyGiants/GameEventSystem/Demo/02_BasicTypesEvent/02_BasicTypesEvent.uni
 
 **ゲームロジックレイヤー (デモスクリプト):**
 - 📤 **BasicTypesEventRaiser** - 発行側スクリプトを持つGameObject
-  - 4つの異なるジェネリックイベントへの参照を保持しています： `GameEvent<string>`, `GameEvent<Vector3>`, `GameEvent<GameObject>`, `GameEvent<Material>`
+  - 4つの異なるジェネリックイベントへの参照を保持しています： `StringGameEvent`, `Vector3GameEvent`, `GameObjectGameEvent`, `MaterialGameEvent`
   - 各ボタンが特定のデータを使用して、異なる発行メソッドをトリガーします。
 
 - 📥 **BasicTypesEventReceiver** - 受信側スクリプトを持つGameObject
@@ -96,10 +96,10 @@ Unityの **Play** ボタンを押します。
 
 | イベント名      | 型                      | 用途                                    |
 | -------------- | ----------------------- | --------------------------------------- |
-| `OnString`     | `GameEvent<string>`     | テキスト表示の更新                      |
-| `OnVector3`    | `GameEvent<Vector3>`    | 位置や移動データの送信                  |
-| `OnGameObject` | `GameEvent<GameObject>` | スポーン用のプレハブ参照の受け渡し      |
-| `OnMaterial`   | `GameEvent<Material>`   | ビジュアル変更用のマテリアルアセット送信 |
+| `OnString`     | `StringGameEvent`     | テキスト表示の更新                      |
+| `OnVector3`    | `Vector3GameEvent`    | 位置や移動データの送信                  |
+| `OnGameObject` | `GameObjectGameEvent` | スポーン用のプレハブ参照の受け渡し      |
+| `OnMaterial`   | `MaterialGameEvent`   | ビジュアル変更用のマテリアルアセット送信 |
 
 **Behavior カラムに注目:**
 各イベントには、Behavior カラムに色付きの型インジケーター（例: **(String)**, **(Vector3)**）が表示されています。これらのアイコンをクリックすると Behavior Window が開き、コールバックのバインディングを設定できます。これは前のデモで見たビジュアルバインディングシステムと同じです。
@@ -136,8 +136,8 @@ Unityの **Play** ボタンを押します。
 
 **型安全性の動作:**
 - `[GameEventDropdown]` 属性は、型に合わせてイベントを自動的にフィルタリングします。
-- "Message Event" スロットには `GameEvent<string>` しか割り当てられません。
-- 文字列スロットに `GameEvent<Vector3>` を割り当てようとしても、エディタによって防止されます。
+- "Message Event" スロットには `StringGameEvent` しか割り当てられません。
+- 文字列スロットに `Vector3GameEvent` を割り当てようとしても、エディタによって防止されます。
 - このコンパイル時の型安全性により、実行時のエラーを未然に防ぎます。
 
 ---
@@ -165,7 +165,7 @@ Unityの **Play** ボタンを押します。
 
 :::tip 🎯 型の一致
 
-Behavior Window のメソッドドロップダウンは、イベントのパラメータ型に基づいてメソッドを自動的にフィルタリングします。`GameEvent<string>` の場合、`(string)` パラメータを持つメソッドのみが表示されます。これにより、設定時点での型安全性が保証されます！
+Behavior Window のメソッドドロップダウンは、イベントのパラメータ型に基づいてメソッドを自動的にフィルタリングします。`StringGameEvent` の場合、`(string)` パラメータを持つメソッドのみが表示されます。これにより、設定時点での型安全性が保証されます！
 
 :::
 
@@ -182,26 +182,26 @@ using System.Collections.Generic;
 public class BasicTypesEventRaiser : MonoBehaviour
 {
     [Header("1. C# 型 (String)")]
-    [GameEventDropdown] public GameEvent<string> messageEvent;
+    [GameEventDropdown] public StringGameEvent messageEvent;
     public string messageToSend = "Hello World";
 
     [Header("2. 数学型 (Vector3)")]
-    [GameEventDropdown] public GameEvent<Vector3> movementEvent;
+    [GameEventDropdown] public Vector3GameEvent movementEvent;
     public Vector3 targetPosition = new Vector3(0, 2, 0);
 
     [Header("3. コンポーネント型 (GameObject)")]
-    [GameEventDropdown] public GameEvent<GameObject> spawnEvent;
+    [GameEventDropdown] public GameObjectGameEvent spawnEvent;
     public List<GameObject> prefabsToSpawn = new List<GameObject>();
 
     [Header("4. アセット型 (Material)")]
-    [GameEventDropdown] public GameEvent<Material> changeMaterialEvent;
+    [GameEventDropdown] public MaterialGameEvent changeMaterialEvent;
     public List<Material> targetMaterials = new List<Material>();
 
     private int _count;
     private AudioSource _audioSource;
 
     /// <summary>
-    /// 動的なテキスト内容で GameEvent<string> を発行します。
+    /// 動的なテキスト内容で StringGameEvent を発行します。
     /// 受信側は void MethodName(string value) というシグネチャを持つ必要があります。
     /// </summary>
     public void RaiseString()
@@ -218,7 +218,7 @@ public class BasicTypesEventRaiser : MonoBehaviour
     }
 
     /// <summary>
-    /// ランダムな位置データで GameEvent<Vector3> を発行します。
+    /// ランダムな位置データで Vector3GameEvent を発行します。
     /// 移動、方向、または物理的な力の指定に便利です。
     /// </summary>
     public void RaiseVector3()
@@ -237,7 +237,7 @@ public class BasicTypesEventRaiser : MonoBehaviour
     }
 
     /// <summary>
-    /// プレハブの参照を伴う GameEvent<GameObject> を発行します。
+    /// プレハブの参照を伴う GameObjectGameEvent を発行します。
     /// Unity Object の参照を安全に渡す方法を示しています。
     /// </summary>
     public void RaiseGameObject()
@@ -255,7 +255,7 @@ public class BasicTypesEventRaiser : MonoBehaviour
     }
 
     /// <summary>
-    /// マテリアルアセットの参照を伴う GameEvent<Material> を発行します。
+    /// マテリアルアセットの参照を伴う MaterialGameEvent を発行します。
     /// 実行時のビジュアルカスタマイズに最適です。
     /// </summary>
     public void RaiseMaterial()

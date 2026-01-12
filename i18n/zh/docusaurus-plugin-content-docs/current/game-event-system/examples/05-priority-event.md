@@ -39,7 +39,7 @@ Assets/TinyGiants/GameEventSystem/Demo/05_PriorityEvent/05_PriorityEvent.unity
 - 📤 **PriorityEventRaiser** - 带有触发器脚本的GameObject
   - 管理炮塔瞄准和抛射物发射
   - 持有对两个事件的引用：`OnChaoticHit`和`OnOrderedHit`
-  - 两个事件都使用相同的`GameEvent<GameObject, DamageInfo>`类型
+  - 两个事件都使用相同的`GameObjectDamageInfoGameEvent`类型
 
 - 📥 **PriorityEventReceiver** - 带有接收器脚本的GameObject
   - 有两个监听器方法绑定到每个事件：
@@ -149,12 +149,12 @@ Assets/TinyGiants/GameEventSystem/Demo/05_PriorityEvent/05_PriorityEvent.unity
 
 | 事件名称 | 类型 | 监听器顺序 |
 | -------------- | ----------------------------------- | ------------------------------------- |
-| `OnChaoticHit` | `GameEvent<GameObject, DamageInfo>` | ❌ ResolveHit → ActivateBuff（错误） |
-| `OnOrderedHit` | `GameEvent<GameObject, DamageInfo>` | ✅ ActivateBuff → ResolveHit（正确） |
+| `OnChaoticHit` | `GameObjectDamageInfoGameEvent` | ❌ ResolveHit → ActivateBuff（错误） |
+| `OnOrderedHit` | `GameObjectDamageInfoGameEvent` | ✅ ActivateBuff → ResolveHit（正确） |
 
 :::note 🔧 相同类型，不同顺序
 
-两个事件都是`GameEvent<GameObject, DamageInfo>`。唯一的区别是在[行为窗口](../visual-workflow/game-event-behavior.md)中配置的**监听器执行顺序**。
+两个事件都是`GameObjectDamageInfoGameEvent`。唯一的区别是在[行为窗口](../visual-workflow/game-event-behavior.md)中配置的**监听器执行顺序**。
 
 :::
 
@@ -248,12 +248,12 @@ public class PriorityEventRaiser : MonoBehaviour
 {
     [Header("事件频道")]
     [Tooltip("在编辑器中配置：应用增益 -> 然后发射。")]
-    [GameEventDropdown] public GameEvent<GameObject, DamageInfo> orderedHitEvent;
+    [GameEventDropdown] public GameObjectDamageInfoGameEvent orderedHitEvent;
 
     [Tooltip("在编辑器中配置：发射 -> 然后应用增益（太晚了！）。")]
-    [GameEventDropdown] public GameEvent<GameObject, DamageInfo> chaoticHitEvent;
+    [GameEventDropdown] public GameObjectDamageInfoGameEvent chaoticHitEvent;
 
-    private GameEvent<GameObject, DamageInfo> _pendingEvent;
+    private GameObjectDamageInfoGameEvent _pendingEvent;
 
     /// <summary>
     /// 按钮A：启动触发"有序"事件的攻击序列。

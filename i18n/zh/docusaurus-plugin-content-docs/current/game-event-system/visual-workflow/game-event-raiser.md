@@ -144,7 +144,7 @@ void Start()
 ### 单参数事件
 ```csharp
 [GameEventDropdown]
-public GameEvent<float> onHealthChanged;
+public SingleGameEvent onHealthChanged;
 
 private float health = 100f;
 
@@ -155,14 +155,14 @@ public void TakeDamage(float damage)
 }
 ```
 
-**类型安全**：下拉菜单仅显示 `GameEvent<float>` 事件，防止类型不匹配。
+**类型安全**：下拉菜单仅显示 `SingleGameEvent` 事件，防止类型不匹配。
 
 ---
 
 ### Sender + 参数事件
 ```csharp
 [GameEventDropdown]
-public GameEvent<GameObject, DamageInfo> onPlayerDamaged;
+public GameObjectDamageInfoGameEvent onPlayerDamaged;
 
 public void ApplyDamage(DamageInfo damageInfo)
 {
@@ -182,10 +182,10 @@ public void ApplyDamage(DamageInfo damageInfo)
 public class ScoreManager : MonoBehaviour
 {
     [GameEventDropdown]
-    public GameEvent<int> onScoreChanged;  // 仅显示GameEvent<int>
+    public Int32GameEvent onScoreChanged;  // 仅显示public Int32GameEvent
     
     [GameEventDropdown]
-    public GameEvent<int> onLevelUp;       // 仅显示GameEvent<int>
+    public Int32GameEvent onLevelUp;       // 仅显示public Int32GameEvent
     
     private int score = 0;
     
@@ -199,7 +199,7 @@ public class ScoreManager : MonoBehaviour
 
 **下拉过滤**：
 ```
-GameEvent<int>的可用事件：
+public Int32GameEvent的可用事件：
   ✅ OnScoreChanged (int)
   ✅ OnLevelUp (int)
   ✅ OnComboMultiplier (int)
@@ -457,12 +457,12 @@ Tools > TinyGiants > Game Event System
 **示例**：
 ```csharp
 [GameEventDropdown]
-public GameEvent<string> textEvent;  // 需要GameEvent<string>
+public StringGameEvent textEvent;  // 需要StringGameEvent
 
 // 但您的数据库只有：
 // - GameEvent (void)
-// - GameEvent<int>
-// - GameEvent<float>
+// - public Int32GameEvent
+// - SingleGameEvent
 
 结果：没有匹配的事件！
 ```

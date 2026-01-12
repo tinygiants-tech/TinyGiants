@@ -124,7 +124,7 @@ import TabItem from '@theme/TabItem';
 
 - 类型：All ➔ ⚪ 显示 **所有** 签名类型
 - 类型：void ➔ 🔘 仅显示 **无参数** 事件
-- 类型：Int32 ➔ 🔢 仅显示 `GameEvent<int>`
+- 类型：Int32 ➔ 🔢 仅显示 `public Int32GameEvent`
 - 类型：GameObject ➔ 📦 仅显示 **GameObject** 引用事件
 
 :::tip **可用类型**
