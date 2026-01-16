@@ -348,7 +348,7 @@ export default function Home() {
                 </p>
                 <div className={styles.buttonGroup}>
                   <Link className={styles.featureButton}
-                        to={i18n.currentLocale === 'zh' ? '/zh/docs/game-event-system/intro/overview' : '/docs/game-event-system/intro/overview'}>
+                        to={i18n.currentLocale === 'zh' ? '/zh/docs/ges/intro/overview' : '/docs/ges/intro/overview'}>
                     <span className={styles.btnIcon}>📖</span> <Translate id="homepage.feature.viewDocs">View
                     Documentation</Translate>
                   </Link>
