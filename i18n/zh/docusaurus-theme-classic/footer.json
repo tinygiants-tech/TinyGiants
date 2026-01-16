@@ -13,7 +13,7 @@
   },
   "link.item.label.Game Event System": {
     "message": "游戏事件系统",
-    "description": "The label of footer link with label=Game Event System linking to /docs/game-event-system/intro/overview"
+    "description": "The label of footer link with label=Game Event System linking to /docs/ges/intro/overview"
   },
   "link.item.label.Asset Store Page": {
     "message": "资源商店页面",
