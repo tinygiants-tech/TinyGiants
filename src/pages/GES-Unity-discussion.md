@@ -313,7 +313,7 @@ Real-world metrics from production builds:
 
 We've built an extensive documentation site with **4 language support** (English, Chinese, Japanese, Korean):
 
-**🌐 Documentation Portal**: https://tinygiants.tech/docs/game-event-system/intro/overview
+**🌐 Documentation Portal**: https://tinygiants.tech/docs/ges/intro/overview
 
 The documentation includes:
 
@@ -373,7 +373,7 @@ Every example is a complete, ready-to-run scene demonstrating real-world usage:
 
 - **🏠 TinyGiants Homepage**: https://tinygiants.tech
 
-- **📖 Complete Documentation**: https://tinygiants.tech/docs/game-event-system/intro/overview
+- **📖 Complete Documentation**: https://tinygiants.tech/docs/ges/intro/overview
 - **💬 Discord Community**: https://discord.tinygiants.tech
 - **🎮 Unity Forum Thread**: (https://forum.tinygiants.tech)
 - **📧 Email Support**: support@tinygiants.tech

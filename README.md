@@ -261,7 +261,7 @@ This map provides a complete overview of the system documentation. Use the table
 
 Recommended Learning Paths:
 
-- 🚀 **Quickest Start**: Jump straight to [**Example: Quick Start**](./docs/game-event-system/examples/00-quick-start.md).
+- 🚀 **Quickest Start**: Jump straight to [**Example: Quick Start**](docs/ges/examples/00-quick-start.md).
 - 🎨 **Visual Learner**: Focus on the [**Visual Workflow**](#visual-workflow) and [**Flow Orchestration**](#flow-orchestration) tables.
 - 💻 **Programmer's Deep Dive**: Head directly to [**Runtime API**](#runtime-api).
 
@@ -271,8 +271,8 @@ Foundational setup and core philosophy of the event-as-asset architecture.
 
 | Page                                                         | Description                                                  |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| [**Project Structure**](./docs/game-event-system/intro/project-structure.md) | Understanding directory layout, folder protection, and modular organization. |
-| [**Installation**](./docs/game-event-system/intro/installation.md) | Initializing the plugin and setting up the automated static reset pipeline. |
+| [**Project Structure**](docs/ges/intro/project-structure.md) | Understanding directory layout, folder protection, and modular organization. |
+| [**Installation**](docs/ges/intro/installation.md) | Initializing the plugin and setting up the automated static reset pipeline. |
 
 ### 💎 2. Visual Workflow {#visual-workflow}
 
@@ -280,14 +280,14 @@ Management tools designed to transform invisible code into a tangible visual das
 
 | Page                                                         | Description                                                  |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| [**System Dashboard**](./docs/game-event-system/visual-workflow/game-event-system.md) | Overview of the asset-based workflow and GUID identity system |
-| [**Database & FlowGraph**](./docs/game-event-system/visual-workflow/game-event-manager.md) | Handling multi-database and multi-flowgraph setups and database health maintenance |
-| [**Edit Game Event**](./docs/game-event-system/visual-workflow/game-event-editor.md) | Using the Dashboard for batch editing, search, and categorization |
-| [**Create Game Event**](./docs/game-event-system/visual-workflow/game-event-creator.md) | Rapidly generating event assets using the fuzzy-search batch wizard |
-| [**Configure Game Event**](./docs/game-event-system/visual-workflow/game-event-behavior.md) | Mastering Inspector binding with visual status markers and type safety |
-| [**Raise Game Event**](./docs/game-event-system/visual-workflow/game-event-raiser.md) | Learn how to call events and enhance inspectors using the built-in GameEventDropdown Attribute |
-| [**Find Game Event**](./docs/game-event-system/visual-workflow/game-event-finder.md) | Scanning scenes to locate component-level event dependencies. |
-| [**Visual Condition Tree**](./docs/game-event-system/visual-workflow/visual-condition-tree.md) | Learn how to control the logic execution of event action through condition tree configuration |
+| [**System Dashboard**](docs/ges/visual-workflow/game-event-system.md) | Overview of the asset-based workflow and GUID identity system |
+| [**Database & FlowGraph**](docs/ges/visual-workflow/game-event-manager.md) | Handling multi-database and multi-flowgraph setups and database health maintenance |
+| [**Edit Game Event**](docs/ges/visual-workflow/game-event-editor.md) | Using the Dashboard for batch editing, search, and categorization |
+| [**Create Game Event**](docs/ges/visual-workflow/game-event-creator.md) | Rapidly generating event assets using the fuzzy-search batch wizard |
+| [**Configure Game Event**](docs/ges/visual-workflow/game-event-behavior.md) | Mastering Inspector binding with visual status markers and type safety |
+| [**Raise Game Event**](docs/ges/visual-workflow/game-event-raiser.md) | Learn how to call events and enhance inspectors using the built-in GameEventDropdown Attribute |
+| [**Find Game Event**](docs/ges/visual-workflow/game-event-finder.md) | Scanning scenes to locate component-level event dependencies. |
+| [**Visual Condition Tree**](docs/ges/visual-workflow/visual-condition-tree.md) | Learn how to control the logic execution of event action through condition tree configuration |
 
 ### 🕸️ 3. Flow Orchestration {#flow-orchestration}
 
@@ -295,10 +295,10 @@ Visualizing and building complex multi-step logic sequences using nodes.
 
 | Page                                                         | Description                                                  |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| [**Node Editor**](./docs/game-event-system/flow-graph/game-event-node-editor.md) | Managing the GraphView canvas, groups, and snapshot-based Undo/Redo |
-| [**Node Connector**](./docs/game-event-system/flow-graph/game-event-node-connector.md) | Rules for hybrid execution modes and real-time connection validation |
-| [**Node Behavior**](./docs/game-event-system/flow-graph/game-event-node-behavior.md) | Configuring node-level delays, loops, and argument transformation logic |
-| [**Advanced Logic Patterns**](./docs/game-event-system/flow-graph/advanced-logic-patterns.md) | Building no-code nested logic groups and conditional execution gates |
+| [**Node Editor**](docs/ges/flow-graph/game-event-node-editor.md) | Managing the GraphView canvas, groups, and snapshot-based Undo/Redo |
+| [**Node Connector**](docs/ges/flow-graph/game-event-node-connector.md) | Rules for hybrid execution modes and real-time connection validation |
+| [**Node Behavior**](docs/ges/flow-graph/game-event-node-behavior.md) | Configuring node-level delays, loops, and argument transformation logic |
+| [**Advanced Logic Patterns**](docs/ges/flow-graph/advanced-logic-patterns.md) | Building no-code nested logic groups and conditional execution gates |
 
 ### 💻 4. Scripting & API {#runtime-api}
 
@@ -306,11 +306,11 @@ The developer's guide to high-performance C# integration and lifecycle managemen
 
 | Page                                                         | Description                                                  |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| [**Raising & Scheduling**](./docs/game-event-system/scripting/raising-and-scheduling.md) | Programmatic firing, delayed execution, and Task Handle management |
-| [**Listening Strategies**](./docs/game-event-system/scripting/listening-strategies.md) | implementing prioritized, persistent, and source-aware (Sender) listeners |
-| [**Programmatic Flow**](./docs/game-event-system/scripting/programmatic-flow.md) | Using Expression Tree-based predicates for zero-reflection logic filtering |
-| [**Best Practices**](./docs/game-event-system/scripting/best-practices.md) | Architectural tips for clean decoupling and preventing data pollution |
-| [**API Reference**](./docs/game-event-system/scripting/api-reference.md) | Detailed technical documentation for all core classes and attributes |
+| [**Raising & Scheduling**](docs/ges/scripting/raising-and-scheduling.md) | Programmatic firing, delayed execution, and Task Handle management |
+| [**Listening Strategies**](docs/ges/scripting/listening-strategies.md) | implementing prioritized, persistent, and source-aware (Sender) listeners |
+| [**Programmatic Flow**](docs/ges/scripting/programmatic-flow.md) | Using Expression Tree-based predicates for zero-reflection logic filtering |
+| [**Best Practices**](docs/ges/scripting/best-practices.md) | Architectural tips for clean decoupling and preventing data pollution |
+| [**API Reference**](docs/ges/scripting/api-reference.md) | Detailed technical documentation for all core classes and attributes |
 
 ### 🛠️ 5. Tools & Support {#tools-support}
 
@@ -318,9 +318,9 @@ Automation and monitoring utilities for professional production environments.
 
 | Page                                                         | Description                                                  |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| [**CodeGen & Cleanup**](./docs/game-event-system/tools/codegen-and-cleanup.md) | Using the Tri-Mode Generator and compilation pipeline automation |
-| [**Runtime Monitor**](./docs/game-event-system/tools/runtime-monitor.md) | Real-time performance profiling, deep logging, and warning systems |
-| [**Community & Support**](./docs/game-event-system/tools/community-and-support.md) | Accessing updates, reporting bugs, and getting technical assistance |
+| [**CodeGen & Cleanup**](docs/ges/tools/codegen-and-cleanup.md) | Using the Tri-Mode Generator and compilation pipeline automation |
+| [**Runtime Monitor**](docs/ges/tools/runtime-monitor.md) | Real-time performance profiling, deep logging, and warning systems |
+| [**Community & Support**](docs/ges/tools/community-and-support.md) | Accessing updates, reporting bugs, and getting technical assistance |
 
 ### 📚 6. Examples {#examples}
 
@@ -328,20 +328,20 @@ Practical, ready-to-use scenes covering every scenario from basics to advanced A
 
 | ID   | Example Page                                                 | Key Learning Point                                           |
 | :--- | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| 00   | [**Quick Start**](./docs/game-event-system/examples/00-quick-start.md) | The minimal workflow for creating, raising, and binding an event |
-| 01   | [**Void Event**](./docs/game-event-system/examples/01-void-event.md) | Using parameterless signals for global triggers like "Level Start" |
-| 02   | [**Basic Types Event**](./docs/game-event-system/examples/02-basic-types-event.md) | Passing primitive data (int, float, string) through events   |
-| 03   | [**Custom Type Event**](./docs/game-event-system/examples/03-custom-type-event.md) | Leveraging CodeGen for serialized custom data classes and structs |
-| 04   | [**Custom Sender Event**](./docs/game-event-system/examples/04-custom-sender-event.md) | Using source-aware events to identify which entity raised the signal |
-| 05   | [**Priority Event**](./docs/game-event-system/examples/05-priority-event.md) | Precisely controlling the execution order of multiple listeners |
-| 06   | [**Conditional Event**](./docs/game-event-system/examples/06-conditional-event.md) | Using predicates to execute callbacks only when criteria are met |
-| 07   | [**Delayed Event**](./docs/game-event-system/examples/07-delayed-event.md) | Managing timed logic and using Task Handles for cancellation |
-| 08   | [**Repeating Event**](./docs/game-event-system/examples/08-repeating-event.md) | Creating recurring pulse signals and automated logic loops   |
-| 09   | [**Persistent Event**](./docs/game-event-system/examples/09-persistent-event.md) | Handling events during scene transitions (DontDestroyOnLoad) |
-| 10   | [**Trigger Event**](./docs/game-event-system/examples/10-trigger-event.md) | Bridging Unity's Physics system with Game Event assets       |
-| 11   | [**Chain Event**](./docs/game-event-system/examples/11-chain-event.md) | Building visual sequential logic using the Flow Orchestration graph |
-| 12   | [**Multi Database**](./docs/game-event-system/examples/12-multi-database.md) | Isolating events into different assets for modular project organization |
-| 13   | [**Runtime API**](./docs/game-event-system/examples/13-runtime-api.md) | Registering and unregistering listeners dynamically via C# scripts |
-| 14   | [**Runtime Monitor**](./docs/game-event-system/examples/14-runtime-monitor.md) | Using profiling tools to debug execution timing and GC allocations |
+| 00   | [**Quick Start**](docs/ges/examples/00-quick-start.md) | The minimal workflow for creating, raising, and binding an event |
+| 01   | [**Void Event**](docs/ges/examples/01-void-event.md) | Using parameterless signals for global triggers like "Level Start" |
+| 02   | [**Basic Types Event**](docs/ges/examples/02-basic-types-event.md) | Passing primitive data (int, float, string) through events   |
+| 03   | [**Custom Type Event**](docs/ges/examples/03-custom-type-event.md) | Leveraging CodeGen for serialized custom data classes and structs |
+| 04   | [**Custom Sender Event**](docs/ges/examples/04-custom-sender-event.md) | Using source-aware events to identify which entity raised the signal |
+| 05   | [**Priority Event**](docs/ges/examples/05-priority-event.md) | Precisely controlling the execution order of multiple listeners |
+| 06   | [**Conditional Event**](docs/ges/examples/06-conditional-event.md) | Using predicates to execute callbacks only when criteria are met |
+| 07   | [**Delayed Event**](docs/ges/examples/07-delayed-event.md) | Managing timed logic and using Task Handles for cancellation |
+| 08   | [**Repeating Event**](docs/ges/examples/08-repeating-event.md) | Creating recurring pulse signals and automated logic loops   |
+| 09   | [**Persistent Event**](docs/ges/examples/09-persistent-event.md) | Handling events during scene transitions (DontDestroyOnLoad) |
+| 10   | [**Trigger Event**](docs/ges/examples/10-trigger-event.md) | Bridging Unity's Physics system with Game Event assets       |
+| 11   | [**Chain Event**](docs/ges/examples/11-chain-event.md) | Building visual sequential logic using the Flow Orchestration graph |
+| 12   | [**Multi Database**](docs/ges/examples/12-multi-database.md) | Isolating events into different assets for modular project organization |
+| 13   | [**Runtime API**](docs/ges/examples/13-runtime-api.md) | Registering and unregistering listeners dynamically via C# scripts |
+| 14   | [**Runtime Monitor**](docs/ges/examples/14-runtime-monitor.md) | Using profiling tools to debug execution timing and GC allocations |
 
 For a hands-on start, we recommend following **Example 00 (Quick Start)** first, then exploring the **Visual Workflow** section to see how the editor tools can streamline your development.
