@@ -121,7 +121,7 @@ const config = {
           items: [
             {
               label: 'Game Event System',
-              to: '/docs/game-event-system/intro/overview',
+              to: '/docs/ges/intro/overview',
             },
             {
               label: 'Asset Store Page',
