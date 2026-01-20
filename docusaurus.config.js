@@ -115,6 +115,7 @@ const config = {
       },
     },
     footer: {
+      style: 'dark',
       links: [
         {
           title: 'CORE TOOLS',
@@ -133,12 +134,12 @@ const config = {
           title: 'COMMUNITY',
           items: [
             {
-              label: 'Official Discord',
-              href: 'https://discord.tinygiants.tech',
+              label: 'YouTube Channel',
+              href: 'https://youtube.com/@TinyGiantsTech',
             },
             {
-              label: 'Unity Forum',
-              href: 'https://forum.tinygiants.tech',
+              label: 'Official Discord',
+              href: 'https://discord.tinygiants.tech',
             },
           ],
         },
@@ -146,8 +147,8 @@ const config = {
           title: 'SUPPORT',
           items: [
             {
-              label: 'Official Discord',
-              href: 'https://discord.tinygiants.tech',
+              label: 'Unity Forum',
+              href: 'https://forum.tinygiants.tech',
             },
             {
               label: 'Technical Support',
