@@ -322,9 +322,9 @@ export default function Home() {
         <TechInteractiveBackground/>
         <div className={styles.customNavbarRight}>
           <LanguageDropdown/>
-          <a href="https://discord.tinygiants.tech" target="_blank" rel="noopener noreferrer" className={styles.navIcon}
+          <a href="https://tinygiants.tech/discord" target="_blank" rel="noopener noreferrer" className={styles.navIcon}
              aria-label="Discord"><img src={discordIcon} alt="Discord"/></a>
-          <a href="https://forum.tinygiants.tech" target="_blank" rel="noopener noreferrer" className={styles.navIcon}
+          <a href="https://tinygiants.tech/forum" target="_blank" rel="noopener noreferrer" className={styles.navIcon}
              aria-label="Unity Forum"><img src={unityIcon} alt="Unity Forum"/></a>
           <a href="mailto:support@tinygiants.tech" className={styles.navIcon} aria-label="Email"><img src={mailIcon}
                                                                                                       alt="Email"/></a>
@@ -352,7 +352,7 @@ export default function Home() {
                     <span className={styles.btnIcon}>📖</span> <Translate id="homepage.feature.viewDocs">View
                     Documentation</Translate>
                   </Link>
-                  <Link className={styles.featureButtonSecondary} to="https://assetstore.unity.com/game-event-system">
+                  <Link className={styles.featureButtonSecondary} to="https://tinygiants.tech/ges">
                     <img src={assetStoreIcon} className={styles.btnIconImg} alt=""/> <Translate
                     id="homepage.feature.assetStore">Asset Store</Translate>
                   </Link>

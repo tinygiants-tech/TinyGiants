@@ -8,7 +8,7 @@ I'm excited to finally share **GameEventSystem** with you all—a production-rea
 
 The plugin is feature-complete and battle-tested in my own projects. I'm sharing it here with the community **before the official Asset Store launch** to gather feedback, build connections, and give you an early look at what's coming.
 
-**📢 Want to be notified when it launches?** Join our **[Discord community](https://discord.tinygiants.tech)** or follow this thread!
+**📢 Want to be notified when it launches?** Join our **[Discord community](https://tinygiants.tech/discord)** or follow this thread!
 
 ![GameEventSystem Hero](https://tinygiants.tech/img/game-event-system/intro/overview/hero-main.png)
 
@@ -374,8 +374,8 @@ Every example is a complete, ready-to-run scene demonstrating real-world usage:
 - **🏠 TinyGiants Homepage**: https://tinygiants.tech
 
 - **📖 Complete Documentation**: https://tinygiants.tech/docs/ges/intro/overview
-- **💬 Discord Community**: https://discord.tinygiants.tech
-- **🎮 Unity Forum Thread**: (https://forum.tinygiants.tech)
+- **💬 Discord Community**: https://tinygiants.tech/discord
+- **🎮 Unity Forum Thread**: https://tinygiants.tech/forum
 - **📧 Email Support**: support@tinygiants.tech
 
 ---
@@ -392,7 +392,7 @@ The **fastest way** to get help and connect with other developers.
 - 24/7 community support across global timezones
 - Share screenshots, debug together, and learn best practices
 
-**[👉 Join Discord Server](https://discord.tinygiants.tech)**
+**[👉 Join Discord Server](https://tinygiants.tech/discord)**
 
 ### 📧 Direct Support
 

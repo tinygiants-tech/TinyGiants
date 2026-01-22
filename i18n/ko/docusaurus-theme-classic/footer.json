@@ -17,15 +17,15 @@
   },
   "link.item.label.Asset Store Page": {
     "message": "에셋 스토어 페이지",
-    "description": "The label of footer link with label=Asset Store Page linking to https://assetstore.unity.com/game-event-system"
+    "description": "The label of footer link with label=Asset Store Page linking to https://tinygiants.tech/ges"
   },
   "link.item.label.Official Discord": {
     "message": "공식 디스코드",
-    "description": "The label of footer link with label=Official Discord linking to https://discord.tinygiants.tech"
+    "description": "The label of footer link with label=Official Discord linking to https://tinygiants.tech/discord"
   },
   "link.item.label.Unity Forum": {
     "message": "Unity 포럼",
-    "description": "The label of footer link with label=Unity Forum linking to https://forum.tinygiants.tech"
+    "description": "The label of footer link with label=Unity Forum linking to https://tinygiants.tech/forum"
   },
   "link.item.label.Technical Support": {
     "message": "기술 지원",

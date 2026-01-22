@@ -48,7 +48,7 @@ sidebar_position: 3
 - 跨全球时区的24/7社区支持
 - 分享截图、一起调试并学习最佳实践
 
-**[👉 加入Discord服务器](https://discord.tinygiants.tech)**
+**[👉 加入Discord服务器](https://tinygiants.tech/discord)**
 
 ------
 
@@ -65,7 +65,7 @@ sidebar_position: 3
 
 在我的官方Unity论坛主题中加入对话。
 
-**[👉 访问论坛主题](https://forum.tinygiants.tech)**
+**[👉 访问论坛主题](https://tinygiants.tech/forum)**
 
 ------
 
@@ -101,7 +101,7 @@ sidebar_position: 3
 
 作为独立开发者，**评论对插件的成长至关重要**。5星评级帮助其他开发者发现该工具，并允许我将更多资源投入到更新和创新中。
 
-**[🌟 在Asset Store上评分](https://assetstore.unity.com/game-event/system)**
+**[🌟 在Asset Store上评分](https://tinygiants.tech/ges)**
 
 ------
 

@@ -74,13 +74,13 @@ const config = {
           position: 'right',
         },
         {
-          href: 'https://discord.tinygiants.tech',
+          href: 'https://tinygiants.tech/discord',
           position: 'right',
           className: 'header-discord-link',
           'aria-label': 'Discord',
         },
         {
-          href: 'https://forum.tinygiants.tech',
+          href: 'https://tinygiants.tech/forum',
           position: 'right',
           className: 'header-unity-forum-link',
           'aria-label': 'Unity Forum',
@@ -126,7 +126,7 @@ const config = {
             },
             {
               label: 'Asset Store Page',
-              href: 'https://assetstore.unity.com/game-event-system',
+              href: 'https://tinygiants.tech/ges',
             },
           ],
         },
@@ -135,11 +135,11 @@ const config = {
           items: [
             {
               label: 'YouTube Channel',
-              href: 'https://youtube.com/@TinyGiantsTech',
+              href: 'https://tinygiants.tech/youtube',
             },
             {
               label: 'Official Discord',
-              href: 'https://discord.tinygiants.tech',
+              href: 'https://tinygiants.tech/discord',
             },
           ],
         },
@@ -148,7 +148,7 @@ const config = {
           items: [
             {
               label: 'Unity Forum',
-              href: 'https://forum.tinygiants.tech',
+              href: 'https://tinygiants.tech/forum',
             },
             {
               label: 'Technical Support',
