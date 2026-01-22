@@ -122,11 +122,11 @@ const config = {
           items: [
             {
               label: 'Game Event System',
-              to: '/docs/ges/intro/overview',
+              to: 'https://tinygiants.tech/ges',
             },
             {
               label: 'Asset Store Page',
-              href: 'https://tinygiants.tech/ges',
+              href: 'https://tinygiants.tech/assetstore',
             },
           ],
         },
