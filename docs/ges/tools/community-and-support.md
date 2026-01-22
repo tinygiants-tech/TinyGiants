@@ -101,7 +101,7 @@ If the Game Event System has saved you time, cleaned up your codebase, or made y
 
 As a solo developer, **reviews are essential** to the plugin's growth. A 5-star rating helps other developers discover the tool and allows me to dedicate more resources to updates and innovation.
 
-**[🌟 Rate on Asset Store](https://tinygiants/ges)**
+**[🌟 Rate on Asset Store](https://tinygiants.tech/ges)**
 
 ------
 
