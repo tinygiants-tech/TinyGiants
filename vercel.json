@@ -1,24 +1,52 @@
 {
   "redirects": [
     {
-      "source": "/(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "discord.tinygiants.tech"
-        }
-      ],
+      "source": "/docs",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ges",
+      "destination": "/docs/ges/intro/overview",
+      "permanent": true
+    },
+    {
+      "source": "/ges",
+      "destination": "https://assetstore.unity.com/packages/slug/357054",
+      "permanent": true
+    },
+    {
+      "source": "/assetstore/ges",
+      "destination": "https://assetstore.unity.com/packages/slug/357054",
+      "permanent": true
+    },
+    {
+      "source": "/discord",
       "destination": "https://discord.gg/4Pmg9vR8KF",
       "permanent": true
     },
     {
-      "source": "/(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "forum.tinygiants.tech"
-        }
-      ],
+      "source": "/discord/ges",
+      "destination": "https://discord.gg/4Pmg9vR8KF",
+      "permanent": true
+    },
+    {
+      "source": "/youtube",
+      "destination": "https://youtube.com/@TinyGiantsTech",
+      "permanent": true
+    },
+    {
+      "source": "/youtube/ges",
+      "destination": "https://youtube.com/@TinyGiantsTech",
+      "permanent": true
+    },
+    {
+      "source": "/forum",
+      "destination": "https://discussions.unity.com/t/coming-soon-gameeventsystem-professional-visual-event-architecture-for-unity/1703244",
+      "permanent": true
+    },
+    {
+      "source": "/forum/ges",
       "destination": "https://discussions.unity.com/t/coming-soon-gameeventsystem-professional-visual-event-architecture-for-unity/1703244",
       "permanent": true
     }
