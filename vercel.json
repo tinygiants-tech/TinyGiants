@@ -11,12 +11,17 @@
       "permanent": true
     },
     {
-      "source": "/ges",
-      "destination": "https://assetstore.unity.com/packages/slug/357054",
+      "source": "/assetstore",
+      "destination": "https://assetstore.unity.com/publishers/134662",
       "permanent": true
     },
     {
       "source": "/assetstore/ges",
+      "destination": "https://assetstore.unity.com/packages/slug/357054",
+      "permanent": true
+    },
+    {
+      "source": "/ges",
       "destination": "https://assetstore.unity.com/packages/slug/357054",
       "permanent": true
     },
