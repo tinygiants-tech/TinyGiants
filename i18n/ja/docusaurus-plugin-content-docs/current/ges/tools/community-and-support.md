@@ -48,7 +48,7 @@ sidebar_position: 3
 - 全世界のタイムゾーンをカバーする24時間体制のコミュニティサポート
 - スクリーンショットの共有、共同デバッグ、ベストプラクティスの学習
 
-**[👉 Discord サーバーに参加する](https://discord.tinygiants.tech)**
+**[👉 Discord サーバーに参加する](https://tinygiants.tech/discord)**
 
 ------
 
@@ -65,7 +65,7 @@ sidebar_position: 3
 
 公式の Unity フォーラムのスレッドでも議論に参加できます。
 
-**[👉 フォーラムスレッドを訪ねる](https://forum.tinygiants.tech)**
+**[👉 フォーラムスレッドを訪ねる](https://tinygiants.tech/forum)**
 
 ------
 
@@ -101,7 +101,7 @@ Game Event System があなたの時間を節約し、コードをクリーン�
 
 個人開発者にとって、**レビューはプラグインの成長に不可欠**です。5つ星の評価は、他の開発者がこのツールを見つける助けとなり、私がさらなるアップデートや革新にリソースを割くことを可能にします。
 
-**[🌟 アセットストアで評価する](https://assetstore.unity.com/game-event/system)**
+**[🌟 アセットストアで評価する](https://tinygiants.tech/ges)**
 
 ------
 
