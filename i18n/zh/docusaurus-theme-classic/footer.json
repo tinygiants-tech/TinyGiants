@@ -32,7 +32,7 @@
     "description": "The label of footer link with label=Technical Support linking to mailto:support@tinygiants.tech"
   },
   "copyright": {
-    "message": "版权所有 © 2025 <strong>TinyGiants</strong>。 <br/> <small style=\"opacity: 0.6; font-weight: 400;\">为拥有微小想法的巨人打造专业的 Unity 工具和游戏。</small>",
+    "message": "版权所有 © 2026 <strong>TinyGiants</strong>。 <br/> <small style=\"opacity: 0.6; font-weight: 400;\">为拥有微小想法的巨人打造专业的 Unity 工具和游戏。</small>",
     "description": "The footer copyright"
   }
 }
