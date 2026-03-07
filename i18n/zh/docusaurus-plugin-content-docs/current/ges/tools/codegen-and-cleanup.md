@@ -27,14 +27,14 @@ sidebar_position: 1
 在使用工具之前，理解代码的位置很重要。系统严格分离**核心逻辑**和**用户数据**，以确保您可以在不丢失生成文件的情况下升级插件。
 ```text
 Assets/
-├── 📁 TinyGiants/                  # [核心逻辑] 不可变的插件根目录
-│   └── 📁 GameEventSystem/
-│
-└── 📁 TinyGiantsData/              # [用户数据] 您生成内容的圣地
-    └── 📁 GameEventSystem/
-        └── 📁 CodeGen/             # 💾 自动生成的C#类
-            ├── 📁 Basic/           # 🛡️ 基本类型（必需的系统文件）
-            └── 📁 Custom/          # 💾 您的自定义类型（由工具管理）
+└── 📁 TinyGiants/                  # [项目根目录] 所有插件文件均收纳于此
+    ├── 📁 GameEventSystem/         # [核心逻辑] 不可变的插件根目录
+    │
+    └── 📁 TinyGiantsData/          # [用户数据] 您生成内容的圣地
+        └── 📁 GameEventSystem/
+            └── 📁 CodeGen/         # 💾 自动生成的C#类
+                ├── 📁 Basic/       # 🛡️ 基本类型（必需的系统文件）
+                └── 📁 Custom/      # 💾 您的自定义类型（由工具管理）
 ```
 
 :::info **项目结构**
@@ -44,7 +44,7 @@ Assets/
 :::
 
 :::danger 不要修改'Basic'文件夹
-`TinyGiantsData/GameEventSystem/CodeGen/Basic`文件夹包含基本系统类型（Int、Float、Bool、String等）。
+`TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/Basic`文件夹包含基本系统类型（Int、Float、Bool、String等）。
 
 **永远不要手动删除或修改此文件夹中的文件。**
 
@@ -165,7 +165,7 @@ import TabItem from '@theme/TabItem';
 
 随着项目的发展，您可能会删除旧的结构体或重构代码，留下未使用的GameEvent类。**代码清理器**镜像生成器的界面，允许您安全地过滤和批量删除过时的文件。
 
-它**仅针对Custom文件夹**（`TinyGiantsData/.../Custom`）。它永远不会显示或删除`Basic`文件夹中的文件，从而保护系统完整性。
+它**仅针对Custom文件夹**（`TinyGiants/TinyGiantsData/.../Custom`）。它永远不会显示或删除`Basic`文件夹中的文件，从而保护系统完整性。
 
 <Tabs>
   <TabItem value="single" label="单参数" default>
@@ -199,6 +199,6 @@ import TabItem from '@theme/TabItem';
 
 **Clean All Game Event Code**按钮是"核选项"。
 
-- **操作**：删除`TinyGiantsData/GameEventSystem/CodeGen/Custom`中的**所有**自定义文件。
+- **操作**：删除`TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/Custom`中的**所有**自定义文件。
 - **保留**：它**保留**Basic文件夹。
 - **使用场景**：当您想要对自定义事件执行硬重置时，或者如果您重构了大量类型并且只想重新生成当前需要的内容时，使用此选项。

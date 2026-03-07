@@ -22,23 +22,23 @@ Below is the standard hierarchy. I use distinct icons to indicate the nature of 
 
 ```bash
 Assets/
-├── 📁 TinyGiants/                  # [CORE LOGIC] The immutable plugin root
-│   └── 📁 GameEventSystem/
-│       ├── 📁 API/                 # 🛡️ Interfaces & Public APIs
-│       ├── 📁 Demo/                # 🗑️ Example Scenes & Assets (Safe to delete)
-│       ├── 📁 Editor/              # 🛡️ Custom Inspectors & Window Logic
-│       │   └── 📁 Icons/           # 🗑️ UI Textures (Delete for <1.2MB builds)
-│       ├── 📁 Runtime/             # 🛡️ Core Engine & Event Types
-│       ├── 📄 LICENSE.txt
-│       └── 📄 Readme.txt
-│
-└── 📁 TinyGiantsData/              # [USER DATA] Your generated content sanctuary
-    └── 📁 GameEventSystem/
-        ├── 📁 CodeGen/             # 💾 Auto-Generated C# Classes
-        │   ├── 📁 Basic/           # 🛡️ Primitive Types (Required)
-        │   └── 📁 Custom/          # 💾 Your Custom Types (Auto-regenerated)
-        ├── 📁 Database/            # 💾 Your Event Database Assets (.asset)
-        └── 📁 FlowGraph/           # 💾 Your Visual Flow Graphs (.asset)
+└── 📁 TinyGiants/                  # [PROJECT ROOT] Everything is contained here
+    ├── 📁 GameEventSystem/         # [CORE LOGIC] The immutable plugin root
+    │   ├── 📁 API/                 # 🛡️ Interfaces & Public APIs
+    │   ├── 📁 Demo/                # 🗑️ Example Scenes & Assets (Safe to delete)
+    │   ├── 📁 Editor/              # 🛡️ Custom Inspectors & Window Logic
+    │   │   └── 📁 Icons/           # 🗑️ UI Textures (Delete for <1.2MB builds)
+    │   ├── 📁 Runtime/             # 🛡️ Core Engine & Event Types
+    │   ├── 📄 LICENSE.txt
+    │   └── 📄 Readme.txt
+    │
+    └── 📁 TinyGiantsData/          # [USER DATA] Your generated content sanctuary
+        └── 📁 GameEventSystem/
+            ├── 📁 CodeGen/         # 💾 Auto-Generated C# Classes
+            │   ├── 📁 Basic/       # 🛡️ Primitive Types (Required)
+            │   └── 📁 Custom/      # 💾 Your Custom Types (Auto-regenerated)
+            ├── 📁 Database/        # 💾 Your Event Database Assets (.asset)
+            └── 📁 FlowGraph/       # 💾 Your Visual Flow Graphs (.asset)
 ```
 
 :::info Architecture Note
@@ -74,9 +74,9 @@ For teams working with Source Control, here is the recommended configuration:
 | Folder Path                  | Strategy   | Reasoning                                                    |
 | ---------------------------- | ---------- | ------------------------------------------------------------ |
 | TinyGiants/                  | **Commit** | Contains the core plugin code required for the project to run. |
-| TinyGiantsData/.../Database  | **Commit** | Contains your actual Event Assets. Critical data.            |
-| TinyGiantsData/.../FlowGraph | **Commit** | Contains your visual logic graphs. Critical data.            |
-| TinyGiantsData/.../CodeGen   | **Commit** | **Recommended.** While these *can* be regenerated, committing them ensures the project compiles immediately for other team members without needing to run the Wizard first. |
+| TinyGiants/TinyGiantsData/.../Database  | **Commit** | Contains your actual Event Assets. Critical data.            |
+| TinyGiants/TinyGiantsData/.../FlowGraph | **Commit** | Contains your visual logic graphs. Critical data.            |
+| TinyGiants/TinyGiantsData/.../CodeGen   | **Commit** | **Recommended.** While these *can* be regenerated, committing them ensures the project compiles immediately for other team members without needing to run the Wizard first. |
 
 ------
 

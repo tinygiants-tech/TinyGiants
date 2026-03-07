@@ -24,7 +24,7 @@ Before diving into the UI, it is critical to understand how this system stores d
 2. **Separation of Concerns**:
    - **Databases**: Store Event Definitions (Identity, Name, Type).
    - **Flow Graphs**: Store Logic Nodes (Triggers, Chains, Connections).
-3. **The "Sanctuary"**: By default, all assets are created in `Assets/TinyGiantsData/GameEventSystem/`.
+3. **The "Sanctuary"**: By default, all assets are created in `Assets/TinyGiants/TinyGiantsData/GameEventSystem/`.
 
 :::danger CRITICAL: Do Not Manually Delete Sub-Assets
 
@@ -48,11 +48,11 @@ This section controls which sets of events are active in your scene. The system 
 
 ### Management Actions
 
-| Action                | Description                                                  |
-| :-------------------- | :----------------------------------------------------------- |
-| **Active / Inactive** | Toggles whether this database is loaded. Inactive databases will not resolve event lookups at runtime. |
-| **Remove (×)**        | Removes the database **from this list only**. It **DOES NOT** delete the asset file from your project. |
-| **+ Create New**      | Creates a new `.asset` database file in the `TinyGiantsData/GameEventSystem/Database` folder and adds it here. |
+| Action                | Description                                                                                                                                                                      |
+| :-------------------- |:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Active / Inactive** | Toggles whether this database is loaded. Inactive databases will not resolve event lookups at runtime.                                                                           |
+| **Remove (×)**        | Removes the database **from this list only**. It **DOES NOT** delete the asset file from your project.                                                                           |
+| **+ Create New**      | Creates a new `.asset` database file in the `TinyGiants/TinyGiantsData/GameEventSystem/Database` folder and adds it here.                                                        |
 | **📂 Add Existing**    | Opens a file picker to add a database you created previously (This operation will search for all database assets under Assets directory and display them in the drop-down list). |
 
 ### Understanding Active vs Inactive
@@ -272,7 +272,7 @@ When working with teammates:
 Keep your Data folder (`TinyGiantsData`) **outside** of the `Plugins` folder:
 
 ```
-✅ Correct: Assets/TinyGiantsData/GameEventSystem/
+✅ Correct: Assets/TinyGiants/TinyGiantsData/GameEventSystem/
 ❌ Wrong:   Assets/Plugins/TinyGiantsData/GameEventSystem/
 ```
 

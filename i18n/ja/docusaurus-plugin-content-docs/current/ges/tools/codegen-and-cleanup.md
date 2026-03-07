@@ -29,14 +29,14 @@ Game Event System Window → "Generate/Clean Game Event Code" または "Clean A
 
 ```text
 Assets/
-├── 📁 TinyGiants/                  # [コアロジック] 変更不可のプラグインルート
-│   └── 📁 GameEventSystem/
-│
-└── 📁 TinyGiantsData/              # [ユーザーデータ] 生成されたコンテンツの保存場所
-    └── 📁 GameEventSystem/
-        └── 📁 CodeGen/             # 💾 自動生成されたC#クラス
-            ├── 📁 Basic/           # 🛡️ プリミティブ型（システム必須ファイル）
-            └── 📁 Custom/          # 💾 カスタム型（ツールによって管理）
+└── 📁 TinyGiants/                  # [プロジェクトルート] すべてのファイルがここに集約
+    ├── 📁 GameEventSystem/         # [コアロジック] 変更不可のプラグインルート
+    │
+    └── 📁 TinyGiantsData/          # [ユーザーデータ] 生成されたコンテンツの保存場所
+        └── 📁 GameEventSystem/
+            └── 📁 CodeGen/         # 💾 自動生成されたC#クラス
+                ├── 📁 Basic/       # 🛡️ プリミティブ型（システム必須ファイル）
+                └── 📁 Custom/      # 💾 カスタム型（ツールによって管理）
 ```
 
 :::info **プロジェクト構造**
@@ -46,7 +46,7 @@ Assets/
 :::
 
 :::danger 'Basic' フォルダを修正しないでください
-`TinyGiantsData/GameEventSystem/CodeGen/Basic` フォルダには、必須のシステム型（Int, Float, Bool, Stringなど）が含まれています。
+`TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/Basic` フォルダには、必須のシステム型（Int, Float, Bool, Stringなど）が含まれています。
 
 **このフォルダ内のファイルを手動で削除したり修正したりしないでください。** 
 
@@ -169,7 +169,7 @@ import TabItem from '@theme/TabItem';
 
 プロジェクトが進むにつれて、古い構造体を削除したりコードをリファクタリングしたりすると、未使用の GameEvent クラスが残ることがあります。**Code Cleaner** はジェネレーターのインターフェースをミラーリングしており、不要になったファイルを安全にフィルタリングして一括削除できます。
 
-このツールは **Custom フォルダのみ** (`TinyGiantsData/.../Custom`) を対象とします。システムの整合性を守るため、`Basic` フォルダのファイルを表示したり削除したりすることはありません。
+このツールは **Custom フォルダのみ** (`TinyGiants/TinyGiantsData/.../Custom`) を対象とします。システムの整合性を守るため、`Basic` フォルダのファイルを表示したり削除したりすることはありません。
 
 <Tabs>
   <TabItem value="single" label="単一引数 (Single Parameter)" default>
@@ -203,6 +203,6 @@ import TabItem from '@theme/TabItem';
 
 **Clean All Game Event Code** ボタンは「最終手段（Nuclear Option）」です。
 
-- **アクション**: `TinyGiantsData/GameEventSystem/CodeGen/Custom` 内の**すべての**カスタムファイルを削除します。
+- **アクション**: `TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/Custom` 内の**すべての**カスタムファイルを削除します。
 - **保護**: Basic フォルダは**維持**されます。
 - **ユースケース**: カスタムイベントをハードリセットしたい場合、または大量の型をリファクタリングして現在必要なものだけを再生成したい場合に使用します。

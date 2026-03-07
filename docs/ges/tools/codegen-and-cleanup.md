@@ -29,14 +29,14 @@ Before using the tools, it is important to understand where your code lives. The
 
 ```text
 Assets/
-├── 📁 TinyGiants/                  # [CORE LOGIC] The immutable plugin root
-│   └── 📁 GameEventSystem/
-│
-└── 📁 TinyGiantsData/              # [USER DATA] Your generated content sanctuary
-    └── 📁 GameEventSystem/
-        └── 📁 CodeGen/             # 💾 Auto-Generated C# Classes
-            ├── 📁 Basic/           # 🛡️ Primitive Types (Required System Files)
-            └── 📁 Custom/          # 💾 Your Custom Types (Managed by Tools)
+└── 📁 TinyGiants/                  # [PROJECT ROOT] All files are contained here
+    ├── 📁 GameEventSystem/         # [CORE LOGIC] The immutable plugin root
+    │
+    └── 📁 TinyGiantsData/          # [USER DATA] Your generated content sanctuary
+        └── 📁 GameEventSystem/
+            └── 📁 CodeGen/         # 💾 Auto-Generated C# Classes
+                ├── 📁 Basic/       # 🛡️ Primitive Types (Required System Files)
+                └── 📁 Custom/      # 💾 Your Custom Types (Managed by Tools)
 ```
 
 :::info **Project Structure**
@@ -46,7 +46,7 @@ You can refer to the previous chapter **[Project Structure](../intro/project-str
 :::
 
 :::danger Do Not Modify the 'Basic' Folder
-The `TinyGiantsData/GameEventSystem/CodeGen/Basic` folder contains essential system types (Int, Float, Bool, String, etc.).
+The `TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/Basic` folder contains essential system types (Int, Float, Bool, String, etc.).
 
 **Never manually delete or modify files in this folder.** 
 
@@ -169,7 +169,7 @@ After clicking "Generate", Unity will trigger a script recompilation. The new ev
 
 As your project evolves, you may delete old structs or refactor code, leaving behind unused GameEvent classes. The **Code Cleaner** mirrors the Generator's interface, allowing you to filter and batch-delete obsolete files safely.
 
-It **only targets the Custom folder** (`TinyGiantsData/.../Custom`). It will never display or delete files from the `Basic` folder, protecting system integrity.
+It **only targets the Custom folder** (`TinyGiants/TinyGiantsData/.../Custom`). It will never display or delete files from the `Basic` folder, protecting system integrity.
 
 <Tabs>
   <TabItem value="single" label="Single Parameter" default>
@@ -203,7 +203,7 @@ It **only targets the Custom folder** (`TinyGiantsData/.../Custom`). It will nev
 
 The **Clean All Game Event Code** button is the "Nuclear Option".
 
-- **Action**: Deletes **ALL** custom files in `TinyGiantsData/GameEventSystem/CodeGen/Custom`.
+- **Action**: Deletes **ALL** custom files in `TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/Custom`.
 - **Preservation**: It **preserves** the Basic folder.
 - **Use Case**: Use this when you want to perform a hard reset of your custom events or if you have refactored a large number of types and want to regenerate only what is currently needed.
 

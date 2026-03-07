@@ -491,7 +491,7 @@ public UnityEvent<GameObject, DamageInfo>
 **不要手动编辑生成的文件**
 ```
 ❌ 错误：
-打开：TinyGiantsData/GameEventSystem/CodeGen/Custom/PlayerDataGameEvent.cs
+打开：TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/Custom/PlayerDataGameEvent.cs
 编辑：添加自定义方法、更改命名空间等。
 
 ✅ 正确：
@@ -541,7 +541,7 @@ public UnityEvent<GameObject, DamageInfo>
 
 - 创建了3个新的C#文件
 - 每个文件包含事件类 + 绑定字段
-- 文件位于 `TinyGiantsData/GameEventSystem/CodeGen/Custom/`
+- 文件位于 `TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/Custom/`
 - 编译后将自动创建资产
 
 ---
@@ -570,7 +570,7 @@ public UnityEvent<GameObject, DamageInfo>
 
 **手动资产检查**：
 ```
-1. 导航到：TinyGiantsData/GameEventSystem/Databases/
+1. 导航到：TinyGiants/TinyGiantsData/GameEventSystem/Databases/
 2. 找到您的数据库资产
 3. 在项目窗口中展开它
 4. 查找您的事件子资产
@@ -650,7 +650,7 @@ public class PlayerData  // ← 必须是public
 :::info 代码位置
 生成的文件位于：
 ```
-Assets/TinyGiantsData/GameEventSystem/CodeGen/
+Assets/TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/
 ├─ Basic/    (为int、float等预生成)
 └─ Custom/   (您的自定义类型)
 ```

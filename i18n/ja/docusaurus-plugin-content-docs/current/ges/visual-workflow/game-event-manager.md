@@ -24,7 +24,7 @@ UIに入る前に、このシステムがどのようにデータを保存する
 2. **関心の分離**:
    - **データベース**: イベント定義(識別、名前、型)を保存。
    - **フローグラフ**: ロジックノード(トリガー、チェーン、接続)を保存。
-3. **「聖域」**: デフォルトでは、すべてのアセットは`Assets/TinyGiantsData/GameEventSystem/`に作成されます。
+3. **「聖域」**: デフォルトでは、すべてのアセットは`Assets/TinyGiants/TinyGiantsData/GameEventSystem/`に作成されます。
 
 :::danger 重要: サブアセットを手動で削除しないこと
 
@@ -52,7 +52,7 @@ UIに入る前に、このシステムがどのようにデータを保存する
 | :-------------------- | :----------------------------------------------------------- |
 | **Active / Inactive** | このデータベースがロードされるかどうかを切り替えます。非アクティブなデータベースは、実行時にイベントルックアップを解決しません。 |
 | **Remove (×)**        | **このリストからのみ**データベースを削除します。プロジェクトからアセットファイルを削除**しません**。 |
-| **+ Create New**      | `TinyGiantsData/GameEventSystem/Database`フォルダに新しい`.asset`データベースファイルを作成し、ここに追加します。 |
+| **+ Create New**      | `TinyGiants/TinyGiantsData/GameEventSystem/Database`フォルダに新しい`.asset`データベースファイルを作成し、ここに追加します。 |
 | **📂 Add Existing**    | 以前に作成したデータベースを追加するためにファイルピッカーを開きます(この操作はAssetsディレクトリ下のすべてのデータベースアセットを検索し、ドロップダウンリストに表示します)。 |
 
 ### アクティブ vs 非アクティブの理解
@@ -267,7 +267,7 @@ UIに入る前に、このシステムがどのようにデータを保存する
 
 データフォルダ(`TinyGiantsData`)を`Plugins`フォルダの**外**に保持:
 ```
-✅ 正解: Assets/TinyGiantsData/GameEventSystem/
+✅ 正解: Assets/TinyGiants/TinyGiantsData/GameEventSystem/
 ❌ 誤り: Assets/Plugins/TinyGiantsData/GameEventSystem/
 ```
 

@@ -494,7 +494,7 @@ public UnityEvent<GameObject, DamageInfo>
 **생성된 파일 수동 수정 금지**
 ```
 ❌ 잘못된 예:
-파일 열기: TinyGiantsData/GameEventSystem/CodeGen/Custom/PlayerDataGameEvent.cs
+파일 열기: TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/Custom/PlayerDataGameEvent.cs
 수정: 커스텀 메서드 추가, 네임스페이스 변경 등
 
 ✅ 올바른 예:
@@ -545,7 +545,7 @@ public UnityEvent<GameObject, DamageInfo>
 
 - 3개의 새로운 C# 파일이 생성됨
 - 각 파일에는 이벤트 클래스 + 바인딩 필드가 포함됨
-- 파일 위치: `TinyGiantsData/GameEventSystem/CodeGen/Custom/`
+- 파일 위치: `TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/Custom/`
 - 컴파일 후 에셋이 자동으로 생성됨
 
 ---
@@ -574,7 +574,7 @@ public UnityEvent<GameObject, DamageInfo>
 
 **수동 에셋 확인**:
 ```
-1. 경로 이동: TinyGiantsData/GameEventSystem/Databases/
+1. 경로 이동: TinyGiants/TinyGiantsData/GameEventSystem/Databases/
 2. 데이터베이스 에셋 찾기
 3. 프로젝트 창에서 확장하여 보기
 4. 이벤트 하위 에셋이 있는지 확인
@@ -654,7 +654,7 @@ public class PlayerData  // ← 반드시 public이어야 함
 :::info 코드 위치
 생성된 파일 저장 위치:
 ```
-Assets/TinyGiantsData/GameEventSystem/CodeGen/
+Assets/TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/
 ├─ Basic/    (int, float 등 미리 생성된 타입)
 └─ Custom/   (직접 정의한 커스텀 타입)
 ```

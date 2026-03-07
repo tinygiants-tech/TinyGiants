@@ -500,7 +500,7 @@ graph LR
 
 这会重新生成所有绑定字段：
 ```
-Assets/TinyGiantsData/GameEventSystem/CodeGen/Basic/
+Assets/TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/Basic/
 └─ IntGameEvent.cs（使用绑定字段重新生成）
 ```
 

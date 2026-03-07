@@ -24,7 +24,7 @@ UI를 살펴보기 전에, 이 시스템이 데이터를 저장하는 방식을 
 2. **관심사 분리**:
    - **데이터베이스(Databases)**: 이벤트 정의(식별자, 이름, 타입)를 저장합니다.
    - **플로우 그래프(Flow Graphs)**: 로직 노드(트리거, 체인, 연결 관계)를 저장합니다.
-3. **"보호 구역(Sanctuary)"**: 기본적으로 모든 에셋은 `Assets/TinyGiantsData/GameEventSystem/` 폴더 내에 생성됩니다.
+3. **"보호 구역(Sanctuary)"**: 기본적으로 모든 에셋은 `Assets/TinyGiants/TinyGiantsData/GameEventSystem/` 폴더 내에 생성됩니다.
 
 :::danger 중요: 하위 에셋을 수동으로 삭제하지 마십시오
 
@@ -52,7 +52,7 @@ UI를 살펴보기 전에, 이 시스템이 데이터를 저장하는 방식을 
 | :-------------------- | :----------------------------------------------------------- |
 | **활성화 / 비활성화** | 해당 데이터베이스의 로드 여부를 토글합니다. 비활성화된 데이터베이스는 런타임에 이벤트를 찾을 수 없습니다. |
 | **제거 (×)** | **이 목록에서만** 데이터베이스를 제거합니다. 프로젝트의 실제 에셋 파일은 **삭제되지 않습니다.** |
-| **+ 새 데이터베이스 생성** | `TinyGiantsData/GameEventSystem/Database` 폴더에 새로운 `.asset` 데이터베이스 파일을 생성하고 목록에 추가합니다. |
+| **+ 새 데이터베이스 생성** | `TinyGiants/TinyGiantsData/GameEventSystem/Database` 폴더에 새로운 `.asset` 데이터베이스 파일을 생성하고 목록에 추가합니다. |
 | **📂 기존 에셋 추가** | 이전에 생성한 데이터베이스를 추가하기 위해 파일 선택창을 엽니다. (Assets 디렉토리 아래의 모든 데이터베이스 에셋을 검색하여 드롭다운 목록에 표시합니다.) |
 
 ### 활성화(Active) vs 비활성화(Inactive) 이해하기
@@ -272,7 +272,7 @@ UI를 살펴보기 전에, 이 시스템이 데이터를 저장하는 방식을 
 데이터 폴더(`TinyGiantsData`)를 `Plugins` 폴더 **외부**에 두십시오:
 
 ```
-✅ 올바른 위치: Assets/TinyGiantsData/GameEventSystem/
+✅ 올바른 위치: Assets/TinyGiants/TinyGiantsData/GameEventSystem/
 ❌ 잘못된 위치: Assets/Plugins/TinyGiantsData/GameEventSystem/
 ```
 

@@ -494,7 +494,7 @@ Use categories to group related events:
 **Don't Manually Edit Generated Files**
 ```
 ❌ WRONG:
-Open: TinyGiantsData/GameEventSystem/CodeGen/Custom/PlayerDataGameEvent.cs
+Open: TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/Custom/PlayerDataGameEvent.cs
 Edit: Add custom methods, change namespace, etc.
 
 ✅ RIGHT:
@@ -545,7 +545,7 @@ Extend functionality through separate scripts.
 
 - 3 new C# files created
 - Each file contains event class + binding field
-- Files are in `TinyGiantsData/GameEventSystem/CodeGen/Custom/`
+- Files are in `TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/Custom/`
 - Assets will be created automatically after compilation
 
 ---
@@ -574,7 +574,7 @@ Fix: Add [System.Serializable] to your class
 
 **Manual Asset Check**:
 ```
-1. Navigate to: TinyGiantsData/GameEventSystem/Databases/
+1. Navigate to: TinyGiants/TinyGiantsData/GameEventSystem/Databases/
 2. Find your database asset
 3. Expand it in Project window
 4. Look for your event sub-assets
@@ -654,7 +654,7 @@ Queue:
 :::info Code Location
 Generated files live in:
 ```
-Assets/TinyGiantsData/GameEventSystem/CodeGen/
+Assets/TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/
 ├─ Basic/    (pre-generated for int, float, etc.)
 └─ Custom/   (your custom types)
 ```

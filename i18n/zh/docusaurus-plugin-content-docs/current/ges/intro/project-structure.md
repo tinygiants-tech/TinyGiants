@@ -21,23 +21,23 @@ sidebar_position: 2
 *   🗑️ **可丢弃**: 可以安全删除以进行优化。
 ```bash
 Assets/
-├── 📁 TinyGiants/                  # [核心逻辑] 不可变的插件根目录
-│   └── 📁 GameEventSystem/
-│       ├── 📁 API/                 # 🛡️ 接口与公共API
-│       ├── 📁 Demo/                # 🗑️ 示例场景与资产（可以安全删除）
-│       ├── 📁 Editor/              # 🛡️ 自定义Inspector与窗口逻辑
-│       │   └── 📁 Icons/           # 🗑️ UI纹理（删除可减少<1.2MB的构建体积）
-│       ├── 📁 Runtime/             # 🛡️ 核心引擎与事件类型
-│       ├── 📄 LICENSE.txt
-│       └── 📄 Readme.txt
-│
-└── 📁 TinyGiantsData/              # [用户数据] 您生成的内容保护区
-    └── 📁 GameEventSystem/
-        ├── 📁 CodeGen/             # 💾 自动生成的C#类
-        │   ├── 📁 Basic/           # 🛡️ 基础类型（必需）
-        │   └── 📁 Custom/          # 💾 您的自定义类型（自动重新生成）
-        ├── 📁 Database/            # 💾 您的事件数据库资产（.asset）
-        └── 📁 FlowGraph/           # 💾 您的可视化流程图（.asset）
+└── 📁 TinyGiants/                  # [项目根目录] 所有内容均包含在此目录下
+    ├── 📁 GameEventSystem/         # [核心逻辑] 不可变的插件根目录
+    │   ├── 📁 API/                 # 🛡️ 接口与公共API
+    │   ├── 📁 Demo/                # 🗑️ 示例场景与资产（可以安全删除）
+    │   ├── 📁 Editor/              # 🛡️ 自定义Inspector与窗口逻辑
+    │   │   └── 📁 Icons/           # 🗑️ UI纹理（删除可减少<1.2MB的构建体积）
+    │   ├── 📁 Runtime/             # 🛡️ 核心引擎与事件类型
+    │   ├── 📄 LICENSE.txt
+    │   └── 📄 Readme.txt
+    │
+    └── 📁 TinyGiantsData/          # [用户数据] 您生成的内容保护区
+        └── 📁 GameEventSystem/
+            ├── 📁 CodeGen/         # 💾 自动生成的C#类
+            │   ├── 📁 Basic/       # 🛡️ 基础类型（必需）
+            │   └── 📁 Custom/      # 💾 您的自定义类型（自动重新生成）
+            ├── 📁 Database/        # 💾 您的事件数据库资产（.asset）
+            └── 📁 FlowGraph/       # 💾 您的可视化流程图（.asset）
 ```
 
 :::info 架构说明
@@ -73,9 +73,9 @@ Assets/
 | 文件夹路径 | 策略 | 原因 |
 | ---------------------------- | ---------- | ------------------------------------------------------------ |
 | TinyGiants/ | **提交** | 包含项目运行所需的核心插件代码。 |
-| TinyGiantsData/.../Database | **提交** | 包含您的实际事件资产。关键数据。 |
-| TinyGiantsData/.../FlowGraph | **提交** | 包含您的可视化逻辑图表。关键数据。 |
-| TinyGiantsData/.../CodeGen | **提交** | **推荐。** 虽然这些*可以*重新生成，但提交它们可以确保项目立即为其他团队成员编译，而无需先运行向导。 |
+| TinyGiants/TinyGiantsData/.../Database | **提交** | 包含您的实际事件资产。关键数据。 |
+| TinyGiants/TinyGiantsData/.../FlowGraph | **提交** | 包含您的可视化逻辑图表。关键数据。 |
+| TinyGiants/TinyGiantsData/.../CodeGen | **提交** | **推荐。** 虽然这些*可以*重新生成，但提交它们可以确保项目立即为其他团队成员编译，而无需先运行向导。 |
 
 ------
 

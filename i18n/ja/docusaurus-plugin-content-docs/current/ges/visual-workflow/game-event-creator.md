@@ -490,7 +490,7 @@ public UnityEvent<GameObject, DamageInfo>
 **生成されたファイルを手動で編集しない**
 ```
 ❌ 誤り:
-開く: TinyGiantsData/GameEventSystem/CodeGen/Custom/PlayerDataGameEvent.cs
+開く: TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/Custom/PlayerDataGameEvent.cs
 編集: カスタムメソッドを追加、名前空間を変更など
 
 ✅ 正解:
@@ -540,7 +540,7 @@ public UnityEvent<GameObject, DamageInfo>
 
 - 3つの新しいC#ファイルが作成された
 - 各ファイルにはイベントクラス + バインディングフィールドが含まれる
-- ファイルは`TinyGiantsData/GameEventSystem/CodeGen/Custom/`にある
+- ファイルは`TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/Custom/`にある
 - コンパイル後にアセットが自動的に作成される
 
 ---
@@ -569,7 +569,7 @@ public UnityEvent<GameObject, DamageInfo>
 
 **手動アセット確認**:
 ```
-1. 移動: TinyGiantsData/GameEventSystem/Databases/
+1. 移動: TinyGiants/TinyGiantsData/GameEventSystem/Databases/
 2. データベースアセットを見つける
 3. Projectウィンドウで展開
 4. イベントサブアセットを探す
@@ -649,7 +649,7 @@ public class PlayerData  // ← publicである必要がある
 :::info コードの場所
 生成されたファイルは以下にあります:
 ```
-Assets/TinyGiantsData/GameEventSystem/CodeGen/
+Assets/TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/
 ├─ Basic/    (int、floatなどの事前生成)
 └─ Custom/   (カスタム型)
 ```

@@ -507,7 +507,7 @@ graph LR
 
 그러면 모든 바인딩 필드가 재생성됩니다:
 ```
-Assets/TinyGiantsData/GameEventSystem/CodeGen/Basic/
+Assets/TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/Basic/
 └─ IntGameEvent.cs (바인딩 필드가 포함되어 재생성됨)
 ```
 

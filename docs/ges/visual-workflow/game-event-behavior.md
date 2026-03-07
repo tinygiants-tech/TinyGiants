@@ -507,7 +507,7 @@ Click **"Force Rebuild All (Fix Missing Bindings)"** button.
 
 This regenerates all binding fields:
 ```
-Assets/TinyGiantsData/GameEventSystem/CodeGen/Basic/
+Assets/TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/Basic/
 └─ IntGameEvent.cs (regenerated with binding field)
 ```
 

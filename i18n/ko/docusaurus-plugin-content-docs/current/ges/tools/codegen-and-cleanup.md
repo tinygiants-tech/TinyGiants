@@ -29,14 +29,14 @@ Game Event System Window → "Generate/Clean Game Event Code" 또는 "Clean All 
 
 ```text
 Assets/
-├── 📁 TinyGiants/                  # [코어 로직] 변경 불가능한 플러그인 루트
-│   └── 📁 GameEventSystem/
-│
-└── 📁 TinyGiantsData/              # [사용자 데이터] 여러분이 생성한 콘텐츠의 보호 구역
-    └── 📁 GameEventSystem/
-        └── 📁 CodeGen/             # 💾 자동 생성된 C# 클래스
-            ├── 📁 Basic/           # 🛡️ 기본 타입 (시스템 필수 파일)
-            └── 📁 Custom/          # 💾 커스텀 타입 (도구에 의해 관리됨)
+└── 📁 TinyGiants/                  # [프로젝트 루트] 모든 파일이 이 폴더 내에 집약됨
+    ├── 📁 GameEventSystem/         # [코어 로직] 변경 불가능한 플러그인 루트
+    │
+    └── 📁 TinyGiantsData/          # [사용자 데이터] 여러분이 생성한 콘텐츠의 보호 구역
+        └── 📁 GameEventSystem/
+            └── 📁 CodeGen/         # 💾 자동 생성된 C# 클래스
+                ├── 📁 Basic/       # 🛡️ 기본 타입 (시스템 필수 파일)
+                └── 📁 Custom/      # 💾 커스텀 타입 (도구에 의해 관리됨)
 ```
 
 :::info **프로젝트 구조**
@@ -46,7 +46,7 @@ Assets/
 :::
 
 :::danger 'Basic' 폴더를 수정하지 마십시오
-`TinyGiantsData/GameEventSystem/CodeGen/Basic` 폴더에는 필수 시스템 타입(Int, Float, Bool, String 등)이 포함되어 있습니다.
+`TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/Basic` 폴더에는 필수 시스템 타입(Int, Float, Bool, String 등)이 포함되어 있습니다.
 
 **이 폴더의 파일을 수동으로 삭제하거나 수정하지 마십시오.** 
 
@@ -169,7 +169,7 @@ import TabItem from '@theme/TabItem';
 
 프로젝트가 발전함에 따라 오래된 구조체를 삭제하거나 코드를 리팩토링하여 사용하지 않는 GameEvent 클래스가 남을 수 있습니다. **코드 정리 도구**는 생성기 인터페이스와 대칭을 이루며, 더 이상 사용되지 않는 파일들을 안전하게 필터링하고 일괄 삭제할 수 있게 해줍니다.
 
-이 도구는 **Custom 폴더**(`TinyGiantsData/.../Custom`)**만 대상으로 합니다.** 시스템 무결성을 보호하기 위해 `Basic` 폴더의 파일은 절대로 표시하거나 삭제하지 않습니다.
+이 도구는 **Custom 폴더**(`TinyGiants/TinyGiantsData/.../Custom`)**만 대상으로 합니다.** 시스템 무결성을 보호하기 위해 `Basic` 폴더의 파일은 절대로 표시하거나 삭제하지 않습니다.
 
 <Tabs>
   <TabItem value="single" label="단일 매개변수 (Single Parameter)" default>
@@ -203,6 +203,6 @@ import TabItem from '@theme/TabItem';
 
 **Clean All Game Event Code** 버튼은 "최종 수단" 옵션입니다.
 
-- **동작**: `TinyGiantsData/GameEventSystem/CodeGen/Custom` 폴더 내의 **모든** 커스텀 파일을 삭제합니다.
+- **동작**: `TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/Custom` 폴더 내의 **모든** 커스텀 파일을 삭제합니다.
 - **보존**: Basic 폴더는 **보존**합니다.
 - **사용 사례**: 커스텀 이벤트를 완전히 초기화하고 싶을 때나, 대량의 타입을 리팩토링한 후 현재 필요한 것만 다시 생성하고 싶을 때 사용하십시오.

@@ -500,7 +500,7 @@ graph LR
 
 これによりすべてのバインディングフィールドが再生成されます:
 ```
-Assets/TinyGiantsData/GameEventSystem/CodeGen/Basic/
+Assets/TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/Basic/
 └─ IntGameEvent.cs (バインディングフィールド付きで再生成)
 ```
 
