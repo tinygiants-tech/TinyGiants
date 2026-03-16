@@ -17,12 +17,12 @@
     },
     {
       "source": "/assetstore/ges",
-      "destination": "https://assetstore.unity.com/packages/tools/game-toolkits/game-event-system-ges-357054",
+      "destination": "https://assetstore.unity.com/packages/slug/357054",
       "permanent": true
     },
     {
       "source": "/ges",
-      "destination": "https://assetstore.unity.com/packages/tools/game-toolkits/game-event-system-ges-357054",
+      "destination": "https://assetstore.unity.com/packages/slug/357054",
       "permanent": true
     },
     {
