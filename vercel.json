@@ -26,12 +26,7 @@
       "permanent": true
     },
     {
-      "source": "/assetstore/cn/ges",
-      "destination": "https://assetstore.u3d.cn/packages/slug/20003447",
-      "permanent": true
-    },
-    {
-      "source": "/cn/ges",
+      "source": "/assetstore/ges/cn",
       "destination": "https://assetstore.u3d.cn/packages/slug/20003447",
       "permanent": true
     },
