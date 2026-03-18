@@ -46,6 +46,16 @@
       "permanent": true
     },
     {
+      "source": "/qq",
+      "destination": "https://qm.qq.com/q/7iT0aVxfwY",
+      "permanent": true
+    },
+    {
+      "source": "/qq/ges",
+      "destination": "https://qm.qq.com/q/7iT0aVxfwY",
+      "permanent": true
+    },
+    {
       "source": "/bilibili",
       "destination": "https://www.bilibili.com/video/BV1yowRzSEUi/",
       "permanent": true
