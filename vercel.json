@@ -26,6 +26,21 @@
       "permanent": true
     },
     {
+      "source": "/assetstore/cn/ges",
+      "destination": "https://assetstore.u3d.cn/packages/slug/20003447",
+      "permanent": true
+    },
+    {
+      "source": "/cn/ges",
+      "destination": "https://assetstore.u3d.cn/packages/slug/20003447",
+      "permanent": true
+    },
+    {
+      "source": "/ges/cn",
+      "destination": "https://assetstore.u3d.cn/packages/slug/20003447",
+      "permanent": true
+    },
+    {
       "source": "/discord",
       "destination": "https://discord.gg/4Pmg9vR8KF",
       "permanent": true
@@ -36,13 +51,18 @@
       "permanent": true
     },
     {
+      "source": "/bilibili",
+      "destination": "https://www.bilibili.com/video/BV1yowRzSEUi/",
+      "permanent": true
+    },
+    {
       "source": "/youtube",
       "destination": "https://youtube.com/@TinyGiantsTech",
       "permanent": true
     },
     {
       "source": "/youtube/ges",
-      "destination": "https://www.youtube.com/watch?v=eEmJtJ_4O_4&list=PLh26Aa5scu4cLQ373JPrn5e2kQ-k9sB4L",
+      "destination": "https://youtube.com/@TinyGiantsTech",
       "permanent": true
     },
     {
