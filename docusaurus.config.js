@@ -80,10 +80,10 @@ const config = {
           'aria-label': 'Discord',
         },
         {
-          href: 'https://tinygiants.tech/forum',
+          href: 'https://tinygiants.tech/ges',
           position: 'right',
           className: 'header-unity-forum-link',
-          'aria-label': 'Unity Forum',
+          'aria-label': 'Unity AssetStore',
         },
         {
           href: 'mailto:support@tinygiants.tech',
@@ -126,7 +126,7 @@ const config = {
             },
             {
               label: 'Asset Store Page',
-              href: 'https://tinygiants.tech/assetstore',
+              href: 'https://tinygiants.tech/ges',
             },
           ],
         },
