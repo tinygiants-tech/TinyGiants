@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /d/file/repository/Github/TinyGiants -maxdepth 2 -type f -name *.json -o -name *.yml -o -name *.yaml -o -name .cursorrules -o -name *.md)",
+      "Bash(wc:*)",
+      "Bash(find:*)",
+      "Bash(ls -d D:/file/repository/Github/TinyGiants/blog/2025-*/)",
+      "Bash(npm run:*)"
+    ]
+  }
+}

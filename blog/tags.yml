@@ -1,19 +1,84 @@
-facebook:
-  label: Facebook
-  permalink: /facebook
-  description: Facebook tag description
+ges:
+  label: Game Event System
+  permalink: /ges
+  description: Game Event System related articles
 
-hello:
-  label: Hello
-  permalink: /hello
-  description: Hello tag description
+unity:
+  label: Unity
+  permalink: /unity
+  description: Unity game development
 
-docusaurus:
-  label: Docusaurus
-  permalink: /docusaurus
-  description: Docusaurus tag description
+architecture:
+  label: Architecture
+  permalink: /architecture
+  description: Game architecture and design patterns
 
-hola:
-  label: Hola
-  permalink: /hola
-  description: Hola tag description
+visual-workflow:
+  label: Visual Workflow
+  permalink: /visual-workflow
+  description: Visual event configuration and management
+
+scripting:
+  label: Scripting API
+  permalink: /scripting
+  description: C# runtime API
+
+performance:
+  label: Performance
+  permalink: /performance
+  description: Performance analysis and optimization
+
+flow-graph:
+  label: Flow Graph
+  permalink: /flow-graph
+  description: Event flow graph orchestration
+
+tools:
+  label: Tools
+  permalink: /tools
+  description: Development tools and utilities
+
+best-practices:
+  label: Best Practices
+  permalink: /best-practices
+  description: Development best practices and tips
+
+tutorial:
+  label: Tutorial
+  permalink: /tutorial
+  description: Step-by-step tutorials
+
+beginner:
+  label: Beginner
+  permalink: /beginner
+  description: Beginner-friendly guides
+
+advanced:
+  label: Advanced
+  permalink: /advanced
+  description: Advanced techniques and patterns
+
+debugging:
+  label: Debugging
+  permalink: /debugging
+  description: Debugging and troubleshooting
+
+codegen:
+  label: Code Generation
+  permalink: /codegen
+  description: Code generation tools
+
+condition-tree:
+  label: Condition Tree
+  permalink: /condition-tree
+  description: Visual condition tree logic
+
+cross-scene:
+  label: Cross-Scene
+  permalink: /cross-scene
+  description: Cross-scene event persistence
+
+decoupling:
+  label: Decoupling
+  permalink: /decoupling
+  description: Module decoupling design

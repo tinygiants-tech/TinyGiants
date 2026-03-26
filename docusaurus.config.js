@@ -44,7 +44,14 @@ const config = {
           sidebarPath: './sidebars.js',
           editUrl: 'https://github.com/tinygiants-tech/TinyGiants',
         },
-        blog: false,
+        blog: {
+          showReadingTime: true,
+          blogSidebarTitle: 'All Posts',
+          blogSidebarCount: 'ALL',
+          postsPerPage: 10,
+          blogTitle: 'GES Blog',
+          blogDescription: 'Game Event System Blog - Unity Event Architecture Best Practices',
+        },
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -69,6 +76,11 @@ const config = {
         src: '/img/home-page/tinygiants-logo.png',
       },
       items: [
+        {
+          to: '/blog',
+          label: 'Blog',
+          position: 'left',
+        },
         {
           type: 'localeDropdown',
           position: 'right',
