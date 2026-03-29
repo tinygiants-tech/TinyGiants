@@ -17,7 +17,7 @@ This isn't a skill issue. It's an architectural one. And it's way more common th
 
 ## The Three Deadly Problems Nobody Talks About
 
-After years of building Unity projects — from small jam games to production titles — I've identified three recurring problems that plague virtually every event-driven Unity project. They're not bugs in the traditional sense. They're structural failures that compound over time.
+After years of building Unity projects —  I've identified three recurring problems that plague virtually every event-driven Unity project. They're not bugs in the traditional sense. They're structural failures that compound over time.
 
 ### Problem 1: Invisible Dependencies (Who Is Actually Listening?)
 
