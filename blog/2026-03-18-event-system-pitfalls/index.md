@@ -228,8 +228,6 @@ This separation is deliberate. Design-time data should persist between sessions 
 
 If you're storing custom state on event subclasses (your own properties or fields), you need to handle that reset yourself. The auto-reset covers GES's internal state, not your extensions. Use `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]` for your own statics.
 
-![Monitor Dashboard](/img/game-event-system/tools/runtime-monitor/monitor-dashboard.png)
-
 ### The Recursive Guard Pattern
 
 GES doesn't automatically break recursive cycles because sometimes re-entrant raises are intentional (rarely, but it happens). Instead, use a guard flag:
@@ -432,8 +430,6 @@ onPositionUpdate.AddConditionalListener(
 ```
 
 One physics query per FixedUpdate versus one per event firing. For events that fire multiple times per frame, this is the difference between smooth gameplay and a stuttering mess.
-
-![Monitor Listeners](/img/game-event-system/tools/runtime-monitor/monitor-listeners.png)
 
 ## The Architecture Pattern: Service Event Interfaces
 

@@ -160,8 +160,6 @@ These three layers compose: Category "Combat" AND Type "SingleGameEvent" AND Sea
 
 Each event row in the editor shows a color-coded status indicator for its Behavior configuration:
 
-![Event Row](/img/game-event-system/visual-workflow/game-event-editor/editor-event-row.png)
-
 - **Green:** Event has active Behaviors configured — listeners are set up and ready
 - **Blue:** Event exists but has no Behaviors yet — it's defined but not wired up
 - **Orange:** Event has Behaviors but some have warnings or incomplete configuration

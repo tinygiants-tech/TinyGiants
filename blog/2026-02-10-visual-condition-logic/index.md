@@ -401,8 +401,6 @@ Condition trees are specifically designed for event-level gating — "should thi
 
 In practice, roughly 70-80% of event conditions in a typical game are the "visual tree" kind — threshold checks, type comparisons, state flags, probability rolls. The remaining 20-30% are genuinely complex logic that belongs in code. The condition tree handles the common cases so your programmers can focus on the interesting ones.
 
-The demo scene `06-Conditional-Event` has a complete working example. Your designers will thank you. Your future self maintaining the project will thank you even more.
-
 ---
 
 🚀 Global Developer Service Matrix

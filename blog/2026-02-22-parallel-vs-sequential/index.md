@@ -428,8 +428,6 @@ After using trigger and chain patterns across multiple projects, here's the heur
 
 The visual Flow Graph makes all of this explicit. Orange for parallel. Green for sequential. Transformers on connections. Conditions on nodes. The entire architecture of a complex game flow — the boss fight, the cutscene, the death sequence — visible in one window instead of scattered across dozens of files.
 
-The demo scenes `10-Trigger-Event` and `11-Chain-Event` have complete working examples of each pattern. Start there, then combine them. That's where the real power is.
-
 ---
 
 🚀 Global Developer Service Matrix

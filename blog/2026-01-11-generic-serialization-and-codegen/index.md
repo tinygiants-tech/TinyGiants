@@ -9,7 +9,7 @@ image: /img/home-page/game-event-system-preview.png
 
 You build `GameEvent<T>`. Clean, type-safe, elegant. You create a `GameEvent<float>` field for health updates and slap `[SerializeField]` on it. You switch to the Inspector. The field isn't there. It's just... gone. Unity is staring at you with a blank panel like you asked it to divide by zero.
 
-Welcome to Unity's oldest architectural headache. The serialization system doesn't understand generics. It never has. And every developer who's ever tried to build a type-safe, data-driven event system has walked face-first into this wall.
+It's Unity's oldest architectural headache. The serialization system doesn't understand generics. It never has. And every developer who's ever tried to build a type-safe, data-driven event system has walked face-first into this wall.
 
 This isn't a minor inconvenience. It's the kind of limitation that poisons your entire architecture. You either give up type safety, drown in boilerplate, or accept that your beautiful generic design will never touch the Inspector. For years, the community answer has been "just write the concrete classes by hand." But here's the thing — if the boilerplate is 100% predictable, why is a human writing it?
 
@@ -39,7 +39,7 @@ This means that if you want type-safe events that actually work in the Inspector
 public class FloatGameEvent : GameEvent<float> { }
 
 [CreateAssetMenu]
-public class IntGameEvent : GameEvent<int> { }
+public class Int32GameEvent : GameEvent<int> { }
 
 [CreateAssetMenu]
 public class StringGameEvent : GameEvent<string> { }

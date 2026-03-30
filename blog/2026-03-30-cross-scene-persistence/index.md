@@ -273,8 +273,6 @@ GES's approach — ScriptableObject events with explicit persistence control —
 
 Your `AudioManager` subscribes once with a persistent listener and hears events from every scene for the entire session. Your `EnemySpawner` subscribes through the Behavior Window, automatically disconnects when the scene unloads, and automatically reconnects in the next scene. Both patterns coexist on the same event. No special configuration. No bootstrap scenes. No race conditions.
 
-Scene transitions are hard enough without your event system fighting you. Stop fighting.
-
 ---
 
 🚀 Global Developer Service Matrix

@@ -116,8 +116,6 @@ Native C# events give you raw speed — direct delegate invocation, no allocatio
 
 UnityEvents give you Inspector integration, visual binding, scene-level event wiring. But they use reflection under the hood. They're slower. They allocate. They don't support complex condition logic natively.
 
-![Zero Reflection](/img/game-event-system/feature/zero-reflect.png)
-
 The conventional wisdom is that you pick one: raw speed or visual convenience. You can't have both. But that's only true if you accept reflection as the mechanism for bridging visual configuration to runtime behavior.
 
 What if you could compile the visual configuration into native code?
