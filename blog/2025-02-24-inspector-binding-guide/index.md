@@ -7,111 +7,164 @@ description: "Configure event responses, conditions, delays, and loops entirely 
 image: /img/home-page/game-event-system-preview.png
 ---
 
-"Hey, can you change the damage threshold from 50 to 30?" The designer leans over. Simple request. Should take five seconds, right? But the programmer sighs, closes the Scene view, opens the IDE, waits for it to load, searches for the damage handler, finds the hardcoded value buried in a method chain, changes it, saves, waits for Unity to recompile, tests it... ten minutes later, the designer says "actually, can we try 40?"
+It's 3 PM on a Tuesday. Your designer leans over and says, "Hey, can we make the screen shake a little stronger when the player gets hit for more than 50 damage? And add a half-second delay before the hit sound plays? Oh, and the poison effect should tick every 1.5 seconds instead of 2."
 
-This is the friction that kills iteration speed. Not the big architectural decisions — the small, constant, grinding friction of needing a code change for every tweak.
+Three changes. Maybe fifteen seconds of actual decision-making from the designer's perspective. But here's what actually happens: you close the Scene view. Open your IDE. Wait for it to load. Search for the damage handler. Find the screen shake intensity value buried in a method. Change it. Then find the audio delay -- that's in a different class. Change it. Then find the poison coroutine -- that's in yet another class, and the tick rate is part of a WaitForSeconds call. Change it. Save all three files. Switch back to Unity. Wait for recompilation. Test.
+
+Eight minutes later, the designer says "actually, the shake was better before, and can we try the poison at 1.8 seconds?"
 
 <!-- truncate -->
 
-The Game Event Behavior window exists to eliminate exactly this problem. It lets you configure event responses, conditions, delays, and repeat loops entirely through the Unity Inspector. No IDE. No recompilation. No waiting. A designer can change a damage threshold, add a delay before a visual effect, or set up a repeating audio cue — all by clicking and typing in fields.
+This is the loop that kills iteration speed in game development. Not the big architectural decisions -- the constant, grinding friction of needing a programmer to touch code for every parameter tweak. It's not just slow. It's a collaboration bottleneck that fundamentally limits how fast your team can iterate on game feel.
 
-This isn't about replacing programmers. It's about putting the right controls in the right hands. Programmers define the architecture and build the systems. Designers tune the parameters and iterate on the feel. The Behavior window is the bridge between those two roles.
+And the worst part? The programmer isn't doing programming during this loop. They're doing data entry. Changing a `0.5f` to a `0.3f` and waiting for the compiler. That's not a good use of anyone's time.
 
-Let's walk through every section of the Behavior window, understand what each setting does, and build a practical example from scratch.
+## The Designer-Programmer Handoff Problem
+
+Let's be honest about how most Unity teams work. There are two types of people who need to touch event responses: the people who build the systems (programmers) and the people who tune the parameters (designers). These are fundamentally different activities that require fundamentally different tools.
+
+Programmers need IDEs, debuggers, version control, and the full power of C#. Designers need sliders, dropdowns, checkboxes, and immediate feedback. When you force both groups through the same code-compile-test pipeline, you're optimizing for neither.
+
+### The Classic Dependency Loop
+
+Here's the pattern that plays out on every team I've worked with:
+
+1. Designer has an idea: "What if we added a 0.2 second delay before the hit reaction?"
+2. Designer can't make the change -- it's in code
+3. Designer asks programmer
+4. Programmer is in the middle of something else -- context switch penalty
+5. Programmer opens the file, makes the change, waits for compile
+6. Designer tests it: "Hmm, try 0.15"
+7. Repeat steps 4-6 until it feels right
+8. Total elapsed time: 20 minutes for what's conceptually a 5-second tweak
+
+Multiply this by every parameter in every event response across your entire project. Multiply again by every day of production. The cumulative cost is staggering, and most teams just accept it as normal because they've never experienced anything else.
+
+### What Designers Actually Want to Control
+
+When you break it down, what designers need to adjust about event responses falls into a few clear categories:
+
+**What happens.** When an event fires, which methods get called? Play a sound, spawn a particle effect, update a UI element, trigger an animation.
+
+**Under what conditions.** Should this response fire every time, or only when the damage exceeds a threshold? Only when the player is below 30% health? Only when a specific flag is true?
+
+**With what timing.** Should the response be immediate, or delayed by 0.2 seconds? Should it repeat? How often? How many times?
+
+None of these are "programming" questions. They're design questions. A designer should be able to answer them without writing a line of code.
+
+### The Traditional Solutions (And Why They're Insufficient)
+
+Unity developers have tried various approaches to give designers more control. Each has significant limitations.
+
+**Expose [SerializeField] fields on MonoBehaviours.** This works for simple values, but it gets messy fast. Every tuneable parameter needs its own serialized field. The Inspector becomes a wall of unlabeled floats. There's no grouping, no conditions, no timing control. And the programmer still has to anticipate every parameter the designer might want to tweak -- miss one and it's back to the code-compile loop.
+
+```csharp
+// The "expose everything" approach
+public class DamageResponse : MonoBehaviour
+{
+    [SerializeField] private float screenShakeIntensity = 0.5f;
+    [SerializeField] private float screenShakeDuration = 0.3f;
+    [SerializeField] private float soundDelay = 0.1f;
+    [SerializeField] private float damageThreshold = 50f;
+    [SerializeField] private bool enableScreenShake = true;
+    [SerializeField] private bool enableSound = true;
+    [SerializeField] private float poisonTickRate = 2.0f;
+    [SerializeField] private int poisonTickCount = 5;
+    // ... this grows forever
+    // And it's all tangled with the implementation code
+}
+```
+
+**Custom Editor scripts.** You can build beautiful custom Inspectors for each system. But that's a significant engineering investment per system. And every time the underlying system changes, the custom editor needs to change too. Most teams can't afford this for every event response in the game.
+
+**UnityEvent.** Unity's built-in UnityEvent system is the closest thing to a real solution. Drag a target object, pick a method from a dropdown, done. Designers can wire up responses without code. But UnityEvent has real limitations:
+
+- No condition system -- you can't say "only fire if value > 50"
+- No scheduling -- no delays, no repeats, no timing control
+- String-based method binding -- fragile under refactoring
+- Limited generic type support -- doesn't handle typed event parameters cleanly
+- No status visibility -- you can't tell at a glance which events have responses configured
+
+UnityEvent gets you maybe 40% of the way there. The remaining 60% -- conditions, scheduling, type safety, status visibility -- is the hard part.
+
+### The Real Question
+
+Can you give designers complete control over event responses -- including conditions, timing, and repetition -- without building a custom editor for every single event in your project?
+
+That's the question the GES Behavior Window answers.
+
+## The Behavior Window: Full Response Control, Zero Code
+
+The Behavior Window is a single editor interface that lets anyone -- designer, audio engineer, gameplay programmer -- configure complete event responses through visual controls. No IDE. No compilation. No waiting.
 
 ![Behavior Window Full](/img/game-event-system/visual-workflow/game-event-behavior/behavior-window-full.png)
 
-## The Four Sections
+It's divided into four sections that flow in a logical order: "What event is this?" > "Should it respond?" > "What does it do?" > "When and how often?"
 
-The Behavior window is divided into four main sections, each handling a different aspect of event response configuration:
+Receivers are configured directly in this window. There's no separate "listener" component to add to GameObjects. You select an event, open the Behavior Window, and configure everything in one place.
 
-1. **Event Information** — identity and metadata
-2. **Action Condition** — when should this response fire
-3. **Event Action** — what should happen when it fires
-4. **Schedule Configuration** — timing, repetition, and lifecycle
-
-These sections flow from top to bottom in a logical order: "What event is this?" → "Should it respond?" → "What does it do?" → "When and how often?"
-
-## Event Information Section
+### Event Info: Your "You Are Here" Marker
 
 ![Behavior Info](/img/game-event-system/visual-workflow/game-event-behavior/behavior-info.png)
 
-The Event Information section sits at the top and is read-only. It displays the identity of the event you're configuring:
+The top section is read-only -- it displays the identity of the event you're configuring: name, type (parameterless, single parameter with type, or sender), GUID, category, and database.
 
-- **Event Name** — the human-readable name of the event
-- **Event Type** — parameterless, single parameter (with type), or sender
-- **GUID** — the unique identifier that GES uses internally
-- **Category** — which organizational group this event belongs to
-- **Database** — which event database contains this event
+This seems trivial until you've been configuring behaviors for twelve events in a row and you lose track of which one you're looking at. The info section is your confirmation. And the GUID is genuinely useful for debugging -- when you see an event ID in a console log at runtime, you can match it here instantly.
 
-This section is purely informational, but it serves an important purpose: confirmation. When you're configuring behaviors for multiple events in a row, it's easy to lose track of which one you're looking at. The info section is your "you are here" marker.
-
-The GUID is particularly useful for debugging. If something goes wrong at runtime and you see an event ID in the console log, you can match it to this GUID to identify exactly which event was involved. It's a small thing that saves real time when troubleshooting.
-
-## Action Condition Section
+### Action Condition: The "If" Before the "Then"
 
 ![Behavior Condition](/img/game-event-system/visual-workflow/game-event-behavior/behavior-condition.png)
 
-The Action Condition section acts as a gateway — it determines whether the event response should actually execute when the event fires. This is where you define the "if" part of "if this event fires, do that."
+This is where the Behavior Window goes beyond what UnityEvent can do. The Action Condition section is a visual gate that determines whether the response should actually fire when the event is raised.
 
-The condition system is a visual tree that you build in the Inspector. You can create conditions based on:
+You build condition trees in the Inspector:
 
-- **Value comparisons** — is the incoming parameter greater than, less than, or equal to a threshold?
-- **Boolean states** — is a flag true or false?
-- **Reference checks** — is a specific object null or not null?
-- **Compound conditions** — AND/OR combinations of the above
+- **Value comparisons** -- is the incoming parameter greater than, less than, or equal to a threshold?
+- **Boolean states** -- is a flag true or false?
+- **Reference checks** -- is a specific object null or not null?
+- **Compound conditions** -- AND/OR combinations of the above
 
-Here's where the designer-programmer collaboration really shines. The programmer sets up an event that carries a damage amount. The designer configures a condition that says "only respond if the damage amount is greater than 30." No code change needed. The designer can tweak that threshold from 30 to 50 to 10 and see the results immediately in Play mode.
+Here's where the designer-programmer collaboration truly clicks. The programmer creates a `Float32GameEvent` called `OnDamageReceived` and writes the code that raises it:
 
 ```csharp
-// The programmer creates the event and the systems that raise it:
-// GameEvent<float> OnDamageReceived
+[GameEventDropdown, SerializeField] private Float32GameEvent onDamageReceived;
 
-// The event gets raised normally in code:
-onDamageReceived.Raise(damageAmount);
-
-// But the RESPONSE is configured in the Inspector:
-// Condition: value > 30.0
-// Action: Play heavy hit animation
-//
-// No code needed for the condition or the response.
-// The designer controls both through the Behavior window.
+// Somewhere in the damage calculation:
+onDamageReceived.Raise(calculatedDamage);
 ```
 
-Conditions are optional. If you don't configure any condition, the event response fires every time the event is raised. This is the default behavior and is correct for many use cases — not every response needs a gate.
+The programmer's job is done. Now the designer opens the Behavior Window and configures a condition: "only respond if the damage value is greater than 50." The designer can change that threshold to 30, to 80, to 1000, and test each one immediately in Play mode. No code changes. No recompilation. No waiting for the programmer to be free.
 
-## Event Action Section
+Conditions are optional. If you don't configure any, the response fires every time the event is raised. For many use cases, that's exactly right -- not every response needs a gate.
+
+The condition tree system also handles the more complex scenarios that would traditionally require custom code. "Respond only if damage is greater than 30 AND the player is in combat mode" becomes two nodes in a condition tree. No `if` statements to write, no booleans to expose.
+
+### Event Action: What Actually Happens
 
 ![Behavior Action](/img/game-event-system/visual-workflow/game-event-behavior/behavior-action.png)
 
-The Event Action section is where you define what actually happens when the event fires (and conditions pass). This uses Unity's built-in UnityEvent system, extended to support GES's type system.
+The Event Action section defines what happens when the event fires and conditions pass. If you've used a Button's `onClick` in Unity's Inspector, you know the basic pattern: drag in a target object, select a method from the dropdown. The Behavior Window uses the same pattern, extended to support GES's type system.
 
-If you've ever used a Button's `onClick` event in the Inspector, you already know the basic pattern. You drag in a target object, select a method from the dropdown, and that method gets called when the event fires. The Behavior window uses the same pattern, but with three variants depending on the event type.
-
-### Void Actions (Parameterless Events)
-
-For parameterless events, the action section shows a standard UnityEvent. You can bind any method that takes no parameters (or a method with parameters that you set statically in the Inspector).
+**For parameterless events**, you get a standard action binding. Drag a target, pick a method that takes no parameters:
 
 ```csharp
-// These methods can all be bound from the Inspector:
+// These methods can be bound from the Behavior Window:
 public void PlayExplosionEffect() { /* ... */ }
 public void ShakeCamera() { /* ... */ }
 public void IncrementKillCounter() { /* ... */ }
 ```
 
-### Typed Actions (Single Parameter Events)
-
-For typed events, you get a `UnityEvent<T>` where T matches the event's parameter type. This means the incoming event data is automatically passed to the bound method.
+**For typed events**, the incoming event data is automatically passed to the bound method. The Behavior Window understands your event's parameter type and only shows compatible methods:
 
 ```csharp
-// For a GameEvent<float> (OnDamageReceived):
+// For a Float32GameEvent (OnDamageReceived):
 public void ApplyDamage(float amount)
 {
     currentHealth -= amount;
     UpdateHealthBar();
 }
 
-// For a GameEvent<string> (OnDialogueTriggered):
+// For a StringGameEvent (OnDialogueTriggered):
 public void ShowDialogue(string text)
 {
     dialogueBox.SetText(text);
@@ -119,12 +172,10 @@ public void ShowDialogue(string text)
 }
 ```
 
-### Sender Actions (Sender Events)
-
-For sender events, you get the data plus the source GameObject reference:
+**For sender events**, you get both the data and the source GameObject:
 
 ```csharp
-// For a sender GameEvent<float> (OnDamageDealt):
+// For a sender Float32GameEvent (OnDamageDealt):
 public void HandleDamage(float amount, GameObject source)
 {
     currentHealth -= amount;
@@ -135,183 +186,162 @@ public void HandleDamage(float amount, GameObject source)
 
 ![Behavior Action Add](/img/game-event-system/visual-workflow/game-event-behavior/behavior-action-add.png)
 
-You can bind multiple actions to a single event behavior. When the event fires and conditions pass, all bound actions execute in order. This is useful for triggering multiple responses from a single event — play a sound, show a particle effect, update the UI, all from one event firing.
+The action binding supports **Dynamic** and **Static** parameter modes. Dynamic mode passes the event's runtime value to the method -- the actual damage amount that was raised. Static mode lets the designer set a fixed value in the Inspector, ignoring the event data. Both modes are useful: dynamic for "apply the actual damage," static for "always play the loud explosion sound regardless of damage amount."
 
-The action binding supports:
+You can bind multiple actions to a single behavior. When the event fires and conditions pass, all bound actions execute in order. This is the pattern I use constantly: bind one event to methods on three different objects. The event fires once, but the audio manager plays a sound, the VFX manager spawns particles, and the UI manager shows a notification. Three systems respond independently, completely decoupled from each other.
 
-- **Instance methods** on any component attached to any GameObject in the scene
-- **Static methods** (with some Unity serialization limitations)
-- **Properties** through setter methods
-- **Multiple targets** on different GameObjects
-
-One practical pattern I use constantly: bind the same event to methods on three different objects. The event fires once, but the audio manager plays a sound, the VFX manager spawns particles, and the UI manager shows a notification. Three systems respond independently without knowing about each other.
-
-## Schedule Configuration
+### Schedule: Timing Without Coroutines
 
 ![Behavior Schedule](/img/game-event-system/visual-workflow/game-event-behavior/behavior-schedule.png)
 
-The Schedule Configuration section is where the Behavior window goes from "useful" to "genuinely powerful." This is timing and lifecycle control, all from the Inspector.
+The Schedule section is where the Behavior Window goes from "useful" to "I can't believe this doesn't require code." This is full timing and lifecycle control, all from visual fields.
 
-### Action Delay
+**Action Delay** -- time in seconds between when the event fires and when the action executes. Zero for immediate. 0.5 for half a second. 3.0 for three seconds.
 
-The Action Delay field specifies a time offset (in seconds) between when the event fires and when the action executes. Set it to 0 for immediate response. Set it to 0.5 to wait half a second. Set it to 3.0 to wait three seconds.
-
-This is incredibly useful for sequencing. Imagine an explosion event: the screen shake happens immediately, the sound plays after 0.05 seconds (to simulate distance), and the damage number appears after 0.3 seconds (for dramatic effect). Three behaviors on the same event, each with a different delay, all configured in the Inspector.
+This alone is worth the price of admission. Consider an explosion event:
 
 ```
 Event: OnExplosion
-├── Behavior 1: ShakeCamera()      — Delay: 0.0s
-├── Behavior 2: PlayExplosionSFX() — Delay: 0.05s
-├── Behavior 3: ShowDamageNumber() — Delay: 0.3s
-└── Behavior 4: FadeSmoke()        — Delay: 1.5s
+  Behavior 1: ShakeCamera()      -- Delay: 0.0s
+  Behavior 2: PlayExplosionSFX() -- Delay: 0.05s
+  Behavior 3: ShowDamageNumber() -- Delay: 0.3s
+  Behavior 4: FadeSmoke()        -- Delay: 1.5s
 ```
 
-No coroutines. No Invoke calls. No timer management code. Just Inspector fields.
+No coroutines. No `Invoke` calls. No timer management code. The designer sets four delay values and gets a perfectly sequenced explosion response. Change the sound delay from 0.05 to 0.1 to simulate farther distance? One field. Test immediately.
 
-### Repeat Interval
+**Repeat Interval** -- time between repeated executions. Set it to 1.0 and the action repeats every second.
 
-The Repeat Interval sets the time between repeated executions. If you set the interval to 1.0, the action will repeat every second. This turns a one-shot event into a recurring behavior.
+**Repeat Count** -- how many times the action repeats:
+- **0** -- execute once, no repeating (the default)
+- **N** -- execute N additional times after the first
+- **-1** -- repeat infinitely until cancelled or the object is destroyed
 
-### Repeat Count
-
-Repeat Count controls how many times the action repeats:
-
-- **0** — execute once (no repeating), this is the default
-- **N (positive)** — execute N additional times after the first
-- **-1** — repeat infinitely until the event is cancelled or the object is destroyed
-
-Combining repeat interval and repeat count gives you looping behaviors without writing any code:
+Combine these and you get looping behaviors without a single line of code:
 
 ```
 Event: OnPoisoned
 Action: ApplyPoisonTick(5.0f)
-├── Delay: 0.0s
-├── Repeat Interval: 2.0s
-├── Repeat Count: 5
-└── Result: Deals 5 damage immediately, then every 2 seconds, 5 more times
-    Total: 6 ticks × 5 damage = 30 poison damage over 10 seconds
+  Delay: 0.0s
+  Repeat Interval: 2.0s
+  Repeat Count: 5
+  Result: 5 damage immediately, then every 2 seconds, 5 more times
+  Total: 6 ticks x 5 damage = 30 poison damage over 10 seconds
 ```
 
-Want to change the poison to deal 3 damage every 1.5 seconds for 8 ticks? Just change the numbers in the Inspector. Test immediately. No recompile.
+Want to change the poison to 3 damage every 1.5 seconds for 8 ticks? Change three numbers. Test immediately. The designer just tuned a damage-over-time system without the programmer even knowing about it.
 
-### Persistent Event
+**Persistent Event** -- makes the behavior survive scene loads when the object uses `DontDestroyOnLoad`. Essential for global systems like audio managers, analytics trackers, and achievement systems that need to respond to events regardless of which scene is active.
 
-The Persistent Event toggle makes the behavior survive scene loads when the object uses `DontDestroyOnLoad`. When enabled, the event response persists across scene transitions. This is essential for global systems like audio managers, analytics trackers, and achievement systems that need to respond to events regardless of which scene is active.
+### Color-Coded Status: See Your Architecture at a Glance
+
+One of my favorite details in the GES ecosystem is the color-coded behavior status visible throughout the toolchain:
+
+- **Green** -- this event has behaviors configured in the Behavior Window. Responses are set up and ready.
+- **Blue** -- this event has listeners registered at runtime through code. Behaviors exist, but they were wired programmatically.
+- **Orange** -- this event has no configured behaviors. Either it's unused, or someone forgot to set up responses.
+
+A sea of orange in your Event Editor means you have events that nobody is listening to. Either they're dead code that should be cleaned up, or they're missing responses that should be configured. Either way, you know about it at a glance instead of discovering it when a player reports a bug.
+
+## The Workflow Transformation
+
+Let's bring this back to the scenario from the beginning. Your designer wants three changes: stronger screen shake for big hits, a half-second delay on the hit sound, and a different poison tick rate.
+
+**Old workflow:** Designer asks programmer. Programmer context-switches. Three files, three changes, one compilation, one test, one "actually, try different values," another compilation. Twenty minutes.
+
+**New workflow:** Designer opens the Behavior Window. Changes the screen shake condition threshold. Changes the sound delay field. Changes the poison repeat interval. Tests in Play mode. Adjusts. Tests again. Done. Three minutes. The programmer never left their own task.
+
+The programmers define the architecture and build the systems that expose public methods. Then they write the `Raise()` call:
 
 ```csharp
-// Without Persistent: behavior is destroyed on scene load
-// With Persistent: behavior survives scene transitions
+[GameEventDropdown, SerializeField] private Float32GameEvent onDamageReceived;
 
-// Example: A global AudioManager that plays sounds in response to events
-// It sits on a DontDestroyOnLoad object
-// Its behaviors need to be Persistent to keep working across scenes
+public void TakeDamage(float amount)
+{
+    // Programmer's responsibility: raise the event with data
+    onDamageReceived.Raise(amount);
+
+    // Everything that RESPONDS to this event is configured
+    // in the Behavior Window by the designer.
+    // The programmer doesn't need to know or care what those responses are.
+}
 ```
 
-## Color-Coded Behavior Status
+That's the clean separation. Programmers own the "what events exist and when they fire." Designers own the "what happens in response and with what timing." Neither blocks the other.
 
-One of my favorite details in the Behavior window is the color-coded status system. When you're looking at events in the Event Editor, each event's behavior button is color-coded:
+## Practical Example: A Complete Damage Response System
 
-- **Green** — this event has behaviors configured in the Inspector. Someone has set up responses through the Behavior window.
-- **Blue** — this event has listeners registered at runtime through code. The behavior exists, but it was set up programmatically.
-- **Orange** — this event has no configured behaviors. It's either unused or only being raised without anything listening.
+Let's put it all together. We want the following responses when a player takes damage:
 
-This color coding is visible throughout the GES toolchain, not just in the Behavior window. It gives you an instant visual read on the state of your event architecture. A sea of orange means you have events that nobody is listening to — either they're unused (and should be cleaned up) or someone forgot to wire up the responses.
-
-## Practical Example: Setting Up a Damage Response Without Code
-
-Let's put it all together. We'll configure a complete damage response system using only the Behavior window — no custom scripts for the response logic.
-
-**Scenario:** When a player takes damage, we want to:
 1. Flash the screen red immediately
 2. Play a hurt sound after a tiny delay
-3. Show a damage number that floats up
-4. If the damage is over 50, also trigger a camera shake
-5. Apply a damage-over-time bleed effect that ticks 3 times
-
-**Setup:**
-
-Start with a `GameEvent<float>` called `OnPlayerDamaged`.
+3. Show a floating damage number
+4. Camera shake, but only for big hits (over 50 damage)
+5. A bleed effect that ticks 3 times over 6 seconds
 
 **Behavior 1: Screen Flash**
 - Condition: none (always fire)
 - Action: `ScreenEffects.FlashRed()`
-- Delay: 0.0s
-- Repeat: 0
+- Delay: 0.0s, Repeat: 0
 
 **Behavior 2: Hurt Sound**
 - Condition: none
 - Action: `AudioManager.PlayHurtSound()`
-- Delay: 0.03s
-- Repeat: 0
+- Delay: 0.03s, Repeat: 0
 
 **Behavior 3: Damage Number**
 - Condition: none
-- Action: `DamageUI.ShowNumber(float)` — receives the damage value automatically
-- Delay: 0.1s
-- Repeat: 0
+- Action: `DamageUI.ShowNumber(float)` -- receives the damage value dynamically
+- Delay: 0.1s, Repeat: 0
 
 **Behavior 4: Camera Shake**
 - Condition: value > 50.0
 - Action: `CameraController.HeavyShake()`
-- Delay: 0.0s
-- Repeat: 0
+- Delay: 0.0s, Repeat: 0
 
 **Behavior 5: Bleed Effect**
 - Condition: none
-- Action: `PlayerHealth.ApplyBleedTick(float)` — receives damage × 0.1 or a fixed value
-- Delay: 1.0s
-- Repeat Interval: 2.0s
-- Repeat Count: 3
+- Action: `PlayerHealth.ApplyBleedTick(float)`
+- Delay: 1.0s, Repeat Interval: 2.0s, Repeat Count: 3
 
-All of this is configured in the Inspector. The designer can:
+All configured in the Behavior Window. The designer can:
 - Change the camera shake threshold from 50 to 30 by editing one field
-- Adjust the bleed timing from 2s intervals to 1.5s
-- Disable the screen flash by removing that behavior
-- Add a new response (like controller vibration) by adding another behavior
+- Adjust the bleed timing from 2-second intervals to 1.5
+- Disable the screen flash entirely by removing that behavior
+- Add a new response (controller vibration) by adding another behavior
+- Reorder the delays to change the "feel" of getting hit
 
-None of these changes require touching code. None of them require recompilation. The programmer who built the underlying systems (ScreenEffects, AudioManager, CameraController, etc.) only needed to expose public methods. The Behavior window handles all the wiring.
+None of these changes require touching code. None require recompilation. The programmer who built `ScreenEffects`, `AudioManager`, `CameraController`, and `PlayerHealth` only needed to expose public methods. The Behavior Window handles all the wiring, conditions, and scheduling.
 
-## Best Practices for Behavior Configuration
+## When to Use the Behavior Window vs. Code
 
-After setting up hundreds of event behaviors across multiple projects, here are patterns that work well:
+The Behavior Window isn't a replacement for code-based event handling. It's a complement. Here's the split that works in practice:
 
-**Keep actions focused.** Each bound method should do one thing. Don't bind a method that plays sound AND shows particles AND updates UI. Bind three separate methods. This way, the designer can adjust or remove individual responses independently.
-
-**Use delays for juice.** Small timing offsets (0.02-0.1 seconds) between related responses create a sense of weight and impact that simultaneous execution doesn't have. This is classic game feel polish, and the Behavior window makes it trivially easy to experiment with.
-
-**Condition on the listener, not the raiser.** The event should carry raw data. Let the Behavior's condition system decide whether to respond. This keeps events reusable — different listeners can have different thresholds for the same event.
-
-**Document with categories.** When you have many behaviors on a single event, use the event's category and naming to make it clear what system each behavior serves. "Combat/OnDamageReceived" is easier to navigate than a generic "OnDamageReceived" with 15 behaviors.
-
-**Use -1 repeat count sparingly.** Infinite repeating behaviors are powerful but dangerous. Always make sure there's a clear cancellation path — either through event cancellation, object destruction, or a scene load. An infinite repeating behavior with no exit condition is a memory and performance issue waiting to happen.
-
-## When to Use Behaviors vs. Code Listeners
-
-The Behavior window isn't a replacement for code-based event listening. It's a complement. Here's my rule of thumb:
-
-**Use the Behavior window when:**
-- The response is simple (call a method, set a value)
-- Designers need to tweak the parameters
-- You want to iterate on timing quickly
-- The response doesn't require complex logic
+**Use the Behavior Window when:**
+- The response is straightforward (call methods, set values)
+- Designers need to iterate on parameters
+- You want to experiment with timing quickly
+- The response doesn't need complex branching logic
 
 **Use code listeners when:**
-- The response involves conditional branching beyond simple comparisons
-- You need to process the event data before responding
-- The response involves async operations or complex state machines
-- Performance is critical (code listeners have slightly less overhead)
+- The response involves complex state machine logic
+- You need to process event data before responding
+- The response involves async operations or complex coroutine chains
+- Performance is critical in a tight loop
 
-In practice, most projects end up with about 60-70% of their event responses configured through the Behavior window and 30-40% through code. The sweet spot depends on your team composition — more designers means more Behavior window usage, more programmers means more code listeners.
+Most projects end up with 60-70% of responses configured through the Behavior Window and 30-40% through code. Teams with more designers skew higher on the Behavior Window side. The important thing is that the designer-driven responses never block on programmer availability.
 
-## Wrapping Up
+## The Bigger Picture
 
-The Game Event Behavior window transforms event configuration from a programmer-only task into a collaborative workflow. Designers get direct control over responses, conditions, timing, and repetition. Programmers get clean, decoupled systems that don't need code changes for every tweak.
+The Behavior Window isn't really about saving time, though it does that. It's about changing who can do what on your team.
 
-The color-coded status system keeps everyone informed about the state of the event architecture, and the four-section layout (Info, Condition, Action, Schedule) provides a logical flow for configuration.
+In the traditional model, event responses are programmer territory. Every tweak, every experiment, every "what if we tried this" goes through the code-compile pipeline. This creates a bottleneck where the designer's creativity is gated by the programmer's availability.
 
-If your team is struggling with iteration speed — if every small gameplay change requires a code commit and a recompilation cycle — the Behavior window might be the single most impactful tool in the GES ecosystem. Give it a serious try for a week and see how it changes your workflow.
+In the Behavior Window model, programmers build systems and raise events. Designers configure responses and iterate on feel. The handoff is clean, the iteration is fast, and neither role blocks the other. That's not a tooling improvement -- it's a workflow transformation.
 
-Next post, I'll look at the `[GameEventDropdown]` attribute — a single-line addition to your code that gives you a searchable, type-safe, categorized event picker right in the Inspector.
+If your team is struggling with iteration speed -- if every small gameplay change requires a code commit and a recompilation cycle -- the Behavior Window might be the single most impactful change you can make. Give it a serious try for one week. Let your designers loose on it. Watch what happens to your iteration speed.
+
+In the next post, we'll look at the `[GameEventDropdown]` attribute -- a single-line addition to your code that gives you a searchable, type-safe, categorized event picker right in the Inspector.
 
 ---
 

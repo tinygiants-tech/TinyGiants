@@ -7,193 +7,154 @@ description: "The GES System Dashboard gives you a bird's-eye view of your entir
 image: /img/home-page/game-event-system-preview.png
 ---
 
-Quick question: can you tell me how many events your project has right now? Not roughly. Exactly. How many are parameterless? How many use sender patterns? Which ones have Inspector-configured behaviors, and which ones are just floating around unconfigured?
+Pop quiz. How many events does your Unity project have right now? Not ballpark. Exactly. How many are parameterless? How many carry data? Which ones have receivers configured in the Behavior Window, and which ones are floating around with nothing listening? Which events are being raised but have zero responses? Which were created six months ago by someone who left the team and nobody knows if they're still used?
 
-If you're like most Unity developers I've worked with, the honest answer is "I have no idea." And that's not a personal failing — it's a tooling problem. Unity gives you a Project window and a search bar. That's it. When your event architecture grows past a couple dozen events, you're basically flying blind.
+If you're being honest, the answer to most of those questions is "I have absolutely no idea." And here's the thing -- that's not your fault. It's a tooling gap that basically every Unity project falls into once it grows past a certain size.
 
 <!-- truncate -->
 
-That's exactly why the Game Event System ships with a System Dashboard — a single window that acts as mission control for your entire event architecture. Think of it like the cockpit of an airplane. You don't need to check every instrument every second, but when you need information, it's right there at a glance.
+I want to talk about a problem that doesn't get enough attention in Unity development: observability. Specifically, the complete lack of observability over your event architecture. We build these sophisticated event-driven systems, layer our entire game logic on top of them, and then have essentially zero visibility into what we've built. It's like constructing a building and then bricking over all the windows.
 
-In this post, I'm going to walk through every panel and shortcut in the System Dashboard, explain why each piece of information matters, and share how I use it in my daily workflow.
+## Flying Blind: The Observability Problem in Unity
 
-## Opening the Dashboard
+Let's set the scene. You're six months into a project. The codebase has grown organically, as codebases do. Different programmers have added events as they needed them. The combat team created their events. The UI team created theirs. The audio programmer set up a bunch of events for sound triggers. The AI team has their own set.
 
-You can access the System Dashboard through the Unity menu: `Tools > TinyGiants > Game Event System`, or use the keyboard shortcut if you've configured one. The window is dockable, so you can pin it next to your Scene or Game view — wherever makes sense for your layout.
+Now someone asks a simple question: "Can we get a list of all the events in the project?"
+
+And the room goes quiet.
+
+In Unity, what tools do you actually have for answering this question? You have the Project window. You can search for ScriptableObject assets if your events are asset-based. You can use Ctrl+F across your codebase to find event declarations. You can grep through files. And that's... basically it. There's no architectural overview. No bird's-eye view. No dashboard that says "here's everything, here's what's connected, here's what's orphaned."
+
+This might sound manageable when you have 15 events. It becomes a nightmare at 150. And plenty of production games have 500+.
+
+### The Hidden Costs of Not Seeing
+
+The lack of event visibility creates problems that compound over time, and most teams don't even realize they're paying these costs because they've never had anything better.
+
+**Duplicate events.** Without a central registry you can actually browse, different developers create events that do the same thing. You end up with `OnPlayerDied`, `OnPlayerDeath`, `PlayerDeathEvent`, and `OnPlayerKilled` -- four events for the same concept. Each has its own listeners, its own raise points, its own slightly different behavior. Merging them later is a refactoring nightmare.
+
+**Orphaned events.** Features get cut, systems get refactored, but the events stick around. Nobody deletes them because nobody knows if something else depends on them. Over time, your project accumulates dead events that clutter searches, confuse new team members, and occasionally cause bugs when someone accidentally wires into an event that's no longer being raised.
+
+**The "who's listening?" mystery.** An event fires. Something unexpected happens. You need to figure out what's responding to that event. In a traditional setup, this means searching the entire codebase for references -- and hoping that all listeners are registered in ways that are actually searchable. Dynamic listeners, reflection-based subscriptions, and Inspector-configured callbacks can all hide from a simple code search.
+
+**Onboarding friction.** A new developer joins the team. "How does the damage system work?" Well, there's an event that fires when damage is dealt, and then various systems listen to it. Which event? Where is it? What listens to it? Good luck figuring that out from the Project window.
+
+**Version control conflicts.** When multiple developers create events without knowing what already exists, you get merge conflicts, naming collisions, and duplicated work. A central overview would prevent most of these before they happen.
+
+### The Traditional "Solutions" (That Don't Actually Work)
+
+Teams try to solve this with process. Spreadsheets that track events. Wiki pages with event inventories. Naming conventions enforced through code review. README files in the events folder.
+
+These all share the same fatal flaw: they go stale. The moment someone creates an event and forgets to update the spreadsheet -- which will be approximately the second time someone creates an event -- you have a single source of truth that's no longer true. Now you have something worse than no documentation: you have misleading documentation.
+
+Code comments rot. Wikis get abandoned. Spreadsheets drift. The only documentation that stays accurate is documentation that's generated from the actual state of the system.
+
+### What Other Domains Have Figured Out
+
+Here's what frustrates me. This problem has been solved in virtually every other software domain.
+
+Web developers have React DevTools, Vue DevTools, browser network panels. They can inspect their component tree, see what state lives where, watch events flow through the system in real-time.
+
+DevOps engineers have Grafana, Datadog, New Relic. They build dashboards that show system health at a glance. If a service goes down or a metric spikes, they know within seconds.
+
+Database administrators have admin panels that show table structures, query performance, index usage. They can see their entire data architecture from one screen.
+
+Backend developers have message queue dashboards -- RabbitMQ Management, Kafka UI -- that show every topic, every consumer, every message in flight.
+
+And game developers working with event systems have... the Project window and Ctrl+F.
+
+We're building some of the most complex interactive software in existence, and our observability tooling for event architecture is basically nonexistent. That gap is what the GES System Dashboard exists to fill.
+
+## The System Dashboard: A Central Command Center
+
+The GES System Dashboard is a single editor window that acts as mission control for your entire event architecture. It's not where you create events or configure behaviors -- it's where you get oriented, assess project health, and jump to the right tool for whatever you need to do.
 
 ![System Dashboard Full](/img/game-event-system/visual-workflow/game-event-system/system-dashboard-full.png)
 
-The first time you open it, you'll see everything laid out in a vertical scroll view. The dashboard is read-mostly — it's not where you create or edit events. It's where you get your bearings and jump to the right tool for the job.
+Think of it like the cockpit of an airplane. You don't stare at every instrument every second, but when you need information, it's right there at a glance. And when something's wrong, the instruments tell you before the passengers start screaming.
 
-## System Info Panel: Know Your Environment
+You access it through `Tools > TinyGiants > Game Event System`. I recommend docking it somewhere visible -- next to your Scene view or in a secondary tab. The more you see it, the more value it provides.
 
-The top section of the dashboard displays your project's technical environment. This might seem trivial, but it's actually incredibly useful, especially when you're working across multiple projects or helping teammates debug issues.
-
-The System Info panel auto-detects and displays:
-
-- **Unity Version** — the exact version you're running (e.g., 2022.3.20f1)
-- **Render Pipeline** — whether you're on Built-in, URP, or HDRP
-- **Scripting Backend** — Mono or IL2CPP
-- **Target Platform** — your current build target
+### Environment Info: Context That Actually Matters
 
 ![System Environment Dashboard](/img/game-event-system/intro/installation/install-step-2-sysinfo.png)
 
-Why does this matter for an event system? Because GES adapts its code generation and serialization strategies based on these settings. IL2CPP has stricter AOT compilation requirements, which affects how generic event types get generated. The render pipeline detection matters for the built-in integration examples. And knowing your target platform helps when you're debugging platform-specific event timing issues.
+The top section displays your project's technical environment: Unity version, render pipeline, scripting backend, and target platform.
 
-I can't tell you how many times someone has filed a bug report and the first question is "what's your scripting backend?" Now you don't even have to check — it's right there on the dashboard.
+This might seem trivial, but it's not. GES adapts its code generation and serialization strategies based on these settings. IL2CPP has stricter AOT compilation requirements that affect how generic event types get generated. Your target platform matters when debugging event timing issues. And when someone files a bug report, the first three questions are always about environment -- now you don't have to go check.
 
-## Quick Access Shortcuts: One Click to Anywhere
+If you work across multiple projects (and who doesn't these days), this panel saves you from the "wait, is this the IL2CPP project or the Mono project?" confusion that costs surprisingly real time.
+
+### Quick Access: One Click to Anywhere
 
 ![Quick Access](/img/game-event-system/visual-workflow/game-event-system/quick-access.png)
 
-Below the system info, you'll find the Quick Access panel. These are folder shortcuts that jump you directly to key directories in your GES project. One click opens the folder in Unity's Project window — no digging through nested folders to find what you need.
+Below the environment info, you'll find Quick Access shortcuts that jump you directly to key directories in your GES project structure. One click opens the folder in Unity's Project window:
 
-The shortcuts are:
+- **Documentation** -- opens the GES documentation folder
+- **API Scripts** -- jumps to the core GES API scripts
+- **Databases** -- your event database assets
+- **Flow Graph** -- flow graph container assets
+- **CodeGen** -- generated code folder (Basic/ and Custom/ subfolders)
+- **Demo Scenes** -- example scenes
 
-- **Documentation** — opens the GES documentation folder
-- **API Scripts** — jumps to the core GES API scripts
-- **Databases** — takes you to the folder containing your event database assets
-- **Flow Graph** — opens the flow graph container assets folder
-- **CodeGen** — jumps to the generated code folder (Basic/ and Custom/ subfolders)
-- **Demo Scenes** — opens the example scenes folder
+GES stores its data across a specific directory structure (`Assets/TinyGiants/TinyGiantsData/GameEventSystem/`), and navigating nested Unity folders gets old fast. But the real value is for new team members. "Where are the event databases?" Click Databases. "Where's the generated code?" Click CodeGen. No guessing, no Slack messages asking for paths.
 
-These are simple folder shortcuts, but they save real time. GES stores its data across a specific directory structure (`Assets/TinyGiants/TinyGiantsData/GameEventSystem/`), and remembering the exact path gets old fast. The Quick Access panel means you never have to navigate manually.
-
-For new team members, this panel is a lifesaver. "Where are the event databases?" — just click Databases in the Quick Access panel. "Where's the generated code?" — click CodeGen. No guessing, no folder hunting.
-
-## Core Tools Section
+### Core Tools Hub: Your Daily Drivers
 
 ![Core Tools](/img/game-event-system/visual-workflow/game-event-system/hub-core-tools.png)
 
-The Core Tools section is where the dashboard really earns its keep. This panel gives you a visual overview of the four primary GES tools, each with a brief description and a launch button.
+The Core Tools section provides a visual overview of the four primary GES tools, each with a brief description and a launch button.
 
-### Event Editor
+**Event Editor** -- your main workspace for browsing, searching, filtering, and organizing every event in the project. This is the "spreadsheet view" of your event architecture. When you need to find a specific event, verify what exists, or get an overview of your event landscape, this is where you go.
 
-The Event Editor is your main workspace for managing existing events. From here you can browse, search, filter, and organize every event in your project. The dashboard shows you a quick summary — how many events exist, how many databases you're using — and lets you jump straight in.
+**Event Creator** -- where new events are born. The dashboard link takes you to the batch creation interface, which lets you queue up multiple events of different types and create them all at once. (We'll cover this in depth in the next post.)
 
-I think of the Event Editor as the "spreadsheet view" of your event architecture. It's where you go when you need to find something specific or get an overview of what exists.
+**Behavior Window** -- the Inspector-side configuration tool where designers and gameplay programmers set up event responses without writing code. Binding actions, configuring delays, setting up repeat loops -- all visual.
 
-### Event Creator
+**Flow Graph** -- the visual representation of your event architecture as a node-based graph. Which events connect to which behaviors, where chains form, what the big picture looks like. Incredibly useful for understanding complex systems where events trigger cascades of other events.
 
-The Event Creator is where new events are born. The dashboard link takes you directly to the batch creation wizard, which lets you queue up multiple events of different types and create them all at once. If you've ever had to create 20+ events for a new feature, you know why this exists.
-
-### Behavior Window
-
-The Behavior Window is the Inspector-side configuration tool. This is where designers and gameplay programmers set up event responses without writing code — binding actions, configuring delays, setting up repeat loops, all from a visual interface. The dashboard provides quick access so you don't have to select a specific event asset first.
-
-### Flow Graph
-
-The Flow Graph is the visual representation of your event architecture — a node-based graph showing which events connect to which behaviors. It's incredibly useful for understanding the big picture, especially in complex systems where events trigger chains of other events.
-
-## Code Tools Section
+### Code Tools Hub: Keeping the Machine Clean
 
 ![Code Tools](/img/game-event-system/visual-workflow/game-event-system/hub-code-tools.png)
 
-Below the Core Tools, you'll find the Code Tools section. These are the automated code generation and maintenance utilities that keep your codebase clean.
+Below the Core Tools, you'll find the Code Tools section -- the automated code generation and maintenance utilities.
 
-### Code Generator
+**Code Generator** -- a maintenance tool for managing the C# boilerplate that GES generates for custom event types. When you create events through the Creator (Editor > "+ New Event"), the Creator auto-generates all necessary code. The Code Generator is for maintenance: regenerating after version control merges, cleaning up after refactors, or resolving issues with generated files. After pulling from a repo, if generated files got out of sync, this is where you fix it.
 
-The Code Generator is a maintenance tool for managing the C# boilerplate that GES generates for your custom event types. When you create events through the Creator (Event Editor > "+ New Event"), the Creator auto-generates all necessary code for custom types. The Code Generator is for maintenance tasks: regenerating code after version control merges, cleaning up after refactors, or resolving issues with generated files.
+**Code Cleaner** -- the Code Generator's counterpart. It identifies and removes generated code for types that are no longer in use. Orphaned generated code causes compilation warnings, clutters IntelliSense, and can bloat IL2CPP builds. The Cleaner keeps things tidy.
 
-From the dashboard, you can launch the generator and see at a glance whether there are any pending types that need regeneration. This is particularly useful after pulling from version control — if generated files got out of sync, you'll know immediately.
-
-When the Creator generates code for a custom type, it produces:
-
-```csharp
-// You define a custom type:
-[System.Serializable]
-public struct DamageInfo
-{
-    public float amount;
-    public DamageType type;
-    public Vector3 hitPoint;
-}
-
-// The Creator auto-generates when you create an event with this type:
-// - GameEvent<DamageInfo> support
-// - Serialization support
-// - Editor drawer and property support
-```
-
-You don't write any of that boilerplate. The Creator handles it during event creation, and the Code Generator is there for maintenance if you ever need to regenerate or clean up.
-
-### Code Cleaner
-
-The Code Cleaner is the Code Generator's counterpart — it removes generated code for types that are no longer in use. When you delete an event type or refactor your data structures, the Cleaner identifies orphaned generated files and removes them.
-
-This might not sound exciting, but orphaned generated code is a real problem in long-running projects. It causes compilation warnings, clutters IntelliSense suggestions, and can even cause build errors if the original types change. The Cleaner keeps things tidy.
-
-## Release Notes Panel
-
-The dashboard includes a release notes section that shows what's new in your current version of GES. This is more useful than you might think — when you update the plugin, you can immediately see what changed without having to visit an external website or dig through changelogs.
-
-Release notes typically cover:
-
-- New features and tools
-- Bug fixes
-- Performance improvements
-- Breaking changes (if any) with migration notes
-- Known issues
-
-I recommend glancing at this section after every update. It takes 30 seconds and can save you from stumbling into a known issue or missing a new feature that solves a problem you've been working around.
-
-## Support and Community Access
+### Support and Community
 
 ![Support Community](/img/game-event-system/visual-workflow/game-event-system/support-community.png)
 
-The bottom section of the dashboard provides direct links to support and community resources. This includes:
+The bottom section provides direct links to documentation, Discord, YouTube tutorials, the Asset Store page, email support, and GitHub. Having these links in-editor removes friction. When you're stuck on something at 11 PM, you don't have to find a bookmark -- you just click from the dashboard.
 
-- **Documentation** — opens the online docs in your browser
-- **Discord Community** — join the developer community for questions and discussion
-- **YouTube Tutorials** — video walkthroughs and deep dives
-- **Asset Store Page** — for reviews, ratings, and updates
-- **Email Support** — direct line to the TinyGiants team
-- **GitHub** — source access and issue tracking
+## The Daily Workflow This Enables
 
-Having these links in the editor might seem trivial, but it removes friction. When you're stuck on something, you don't have to go find a bookmark or remember a URL. You just click the link from the dashboard. That small reduction in friction makes it more likely you'll actually reach out for help instead of banging your head against a problem for an hour.
+Here's what changes when you actually have a dashboard for your event architecture.
 
-## Daily Workflow Recommendations
+**Start of session.** Open the dashboard. Glance at the environment info, especially after pulling from the repo. Check if code generation needs attention -- this is common after merges where generated files get out of sync.
 
-After using the dashboard extensively across several projects, here's the workflow pattern I've settled into:
+**Before starting a new feature.** Check the event count and existing categories. You'd be surprised how often the event you need already exists under a slightly different name. The dashboard's overview prevents duplicate creation.
 
-### Start of Day
+**During development.** Keep the dashboard docked but minimized. Use the Quick Access buttons and Core Tools launchers to jump between tools. The most common flow is: Dashboard > Event Creator (make events) > Event Editor (verify) > Behavior Window (configure responses).
 
-Open the dashboard first thing. Glance at the system info to make sure nothing changed overnight (especially if CI/CD updated your project). Check if code generation is needed — this happens a lot after pulling from the repo.
+**Before code review.** Open the dashboard and verify: no pending code generation, no orphaned generated code (run Cleaner), event count makes sense for the feature you're submitting.
 
-### Before Starting a New Feature
+**Before builds.** The environment panel confirms your build target and scripting backend. Run the Code Cleaner to remove dead code -- especially important for IL2CPP builds where unused generic instantiations bloat binary size.
 
-Check the event count and existing categories. Many times, an event you need already exists under a slightly different name. The dashboard's summary helps you avoid duplicating events.
+## It's Not Glamorous. It's Essential.
 
-### During Development
+The System Dashboard isn't flashy. It doesn't have a cool node graph or slick animations. It's a panel with information and buttons.
 
-Keep the dashboard docked but minimized. Use the Quick Access buttons to jump between tools as needed. The most common flow is: Dashboard > Event Creator (make events) > Event Editor (verify) > Behavior Window (configure responses).
+But it solves a problem that every Unity project with more than a handful of events eventually hits: the inability to see your own architecture. It's the difference between knowing your project's event system and hoping you know it. Between catching issues at 9 AM ("hey, the event count jumped by 40 overnight -- who added those?") and discovering them at 5 PM ("why are there 40 mystery events in the build?").
 
-### Before Code Review / PR
+If you're working on a team, I'd recommend making the dashboard the first thing everyone opens when they start Unity. A quick daily glance catches integration issues early and keeps everyone oriented.
 
-Open the dashboard and verify:
-1. No pending code generation
-2. No orphaned generated code (run Cleaner)
-3. Event count makes sense for the feature you're submitting
+The dashboard gives you something Unity has never provided: observability over your event architecture. And once you've had it, going back to flying blind feels genuinely uncomfortable.
 
-### Before Builds
-
-The system info panel confirms your build target and scripting backend. Run the Code Cleaner to remove any dead code. This is especially important for IL2CPP builds where unused generic instantiations can bloat binary size.
-
-## Making the Dashboard Work for Your Team
-
-Here's a practical tip: if you're working on a team, establish a convention that the System Dashboard is the first thing everyone opens when they start Unity. Make it part of your team's "morning checklist."
-
-You'd be surprised how many integration issues get caught early just by having everyone glance at the dashboard. "Hey, the event count jumped by 40 overnight — who added those?" is a much better conversation to have at 9 AM than "why are there 40 mystery events in the build?" at 5 PM.
-
-The dashboard isn't glamorous. It's not the flashiest tool in the GES toolbox. But it's the one that keeps you oriented. It's the difference between knowing your project's event architecture and hoping you know it.
-
-## Wrapping Up
-
-The System Dashboard is designed to be your first stop and your constant companion when working with GES. It gives you environment awareness, tool access, and project health information in a single, always-available window.
-
-If you've been using GES without spending much time on the dashboard, I'd encourage you to dock it somewhere visible for a week. You'll be surprised how often you glance at it — and how much faster you navigate the toolchain when everything is one click away.
-
-In the next post, we'll dive into the Event Creator's batch wizard and show you how to create dozens of events in under a minute. If you've been creating events one at a time, that post is going to change your life.
+In the next post, we'll dive into the Event Creator and show you how to go from a design doc with 50 events to a fully configured event set in under a minute.
 
 ---
 

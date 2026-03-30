@@ -1,104 +1,111 @@
 ---
 slug: performance-benchmark-and-optimization
-title: "Performance Tested: GES Under 500+ Events and 10,000+ Listeners — Benchmarks and Optimization"
+title: "Show Me the Numbers: What 'High Performance' Actually Means for a Unity Event System"
 authors: [tinygiants]
-tags: [ges, unity, performance, advanced, best-practices]
-description: "Hard numbers, not marketing claims. See real benchmark data for GES event raises, condition evaluations, and flow execution — plus optimization strategies for scale."
+tags: [ges, unity, performance, benchmarks, optimization]
+description: "Every event system plugin claims 'high performance.' Here are the actual benchmark numbers, comparison data, and the optimization strategies that keep them low at scale."
 image: /img/home-page/game-event-system-preview.png
 ---
 
-Every event system on the Asset Store says "high performance." It's right there in the marketing bullet points, nestled between "easy to use" and "well documented." But what does that actually mean? High compared to what? Under what conditions? With how many listeners? Does "high performance" mean 0.001ms per raise or 1ms? Those are three orders of magnitude apart, and the difference matters when you're targeting 60fps on mobile with 200 events firing per frame.
+Go to the Unity Asset Store. Search for "event system." Read the feature lists. Every single one says some variation of "high performance" or "lightweight" or "zero overhead." It's right there between "easy to use" and "well documented," like a holy trinity of marketing adjectives that mean nothing without numbers.
 
-This post is the benchmark data I wanted to see before choosing an event system. Real numbers, tested in controlled conditions, with methodology you can reproduce. Plus the optimization strategies that keep those numbers low at scale.
+What does "high performance" mean? 1ms per event raise? 0.1ms? 0.001ms? Those are three orders of magnitude apart. On a desktop machine running at 60fps, you have 16.6ms per frame. A 1ms event raise eats 6% of your budget. A 0.001ms event raise eats 0.006%. One of those matters. The other doesn't. But the marketing copy doesn't distinguish between them.
 
-No marketing spin. If GES is slow at something, I'll tell you where and why.
+I've been guilty of this too. "GES is fast." Great. How fast? Under what conditions? With how many listeners? On what hardware? Let's fix that. Here are the actual numbers.
 
 <!-- truncate -->
 
-## Test Environment and Methodology
+## Why Most Developers Don't Measure Event Overhead
+
+Here's a dirty secret about event system performance: most developers never benchmark it. They assume event dispatch is "basically free" because it's "just calling some callbacks." And for small projects with 10 events and 5 listeners each, they're right — the overhead IS negligible.
+
+The problem is that games grow. That prototype with 10 events becomes a production game with 200 events. Those 5 listeners become 50. That event you thought would fire "occasionally" turns out to fire every frame because the designer wired it to the player's position update.
+
+By the time you notice the performance issue, it's death by a thousand cuts. No single event is slow. But 200 events firing at various frequencies with 10-50 listeners each add up to a meaningful chunk of your frame budget. And you can't optimize what you haven't measured.
+
+## Where Event Overhead Actually Matters
+
+Not every project needs to worry about event system performance. Here's where it genuinely matters:
+
+**Mobile games.** ARM processors have smaller caches, weaker branch prediction, and less aggressive speculative execution than desktop CPUs. A dispatch loop that costs 0.02ms on an i7 might cost 0.06ms on a Snapdragon. Your frame budget at 60fps is the same 16.6ms, but the CPU is 3x slower at executing event-related code. Every millisecond counts.
+
+**VR.** The headset needs a new frame every 11.1ms (90fps) or 8.3ms (120fps). A GC pause that takes 5ms on desktop creates visible judder in VR — the rendered frame is late, the headset displays a stale frame, and the user experiences it as physical discomfort. Nausea. Headache. In VR, zero-allocation code paths aren't a performance optimization. They're a medical requirement.
+
+**Games with many entities.** An RTS with 500 units, each subscribing to 3-4 events, creates 1,500-2,000 listener subscriptions. A tower defense with 100 towers, each listening to enemy movement events, can create event raises with triple-digit listener counts. Linear scaling is mandatory here — if dispatch cost grows faster than O(n) with listener count, you're in trouble.
+
+## The Hidden Costs Nobody Talks About
+
+Event system overhead isn't just "calling the callbacks." There are hidden costs that most developers don't think about:
+
+**Reflection.** UnityEvent uses reflection internally for persistent (Inspector-configured) listeners. `MethodInfo.Invoke()` is slow — it validates parameters, boxes value types, and dispatches through the reflection layer. Every. Single. Raise.
+
+**Boxing.** Event systems that use `object`-typed parameters (like many string-keyed systems: `EventManager.Trigger("OnDamage", 42)`) box value types. Boxing an `int` allocates 24 bytes on the heap. Do that 60 times per second across 20 events and you're generating 28KB of garbage per second. Not huge, but it accumulates.
+
+**GC allocation.** Any event system that allocates memory on the raise path creates GC pressure. On desktop, the garbage collector runs incrementally and you barely notice. On mobile, a GC pause at the wrong moment — right before VSync — drops a frame. A 5ms GC pause at 60fps means the player sees a visible stutter.
+
+**Condition evaluation.** Event systems with filtering (only call the listener if a condition is true) need to evaluate predicates. If the predicate is a `Func&lt;T, bool&gt;`, that's a delegate invocation. Cheap, but not free — and it happens for every conditional listener on every raise.
+
+**String operations.** String-keyed event systems pay for dictionary lookups and string hashing on every raise. String comparison isn't expensive in isolation, but it involves pointer chasing and potential cache misses that add up at scale.
+
+## What "Zero Overhead" Should Mean
+
+A well-designed event system should add no more overhead than a direct method call plus the actual listener execution. The dispatch itself — finding the listeners, iterating, invoking — should be negligible compared to the work the listeners do.
+
+Here's the bar: if you replaced every event raise with direct method calls to the same listeners, the performance should be nearly identical. The event system's job is abstraction and decoupling, not computation. If the abstraction layer itself is the bottleneck, the abstraction is broken.
+
+Native C# events (`event Action&lt;T&gt;`) meet this bar. They're essentially a multicast delegate — the dispatch is a pointer-chase through a linked list of function pointers. Blazing fast. Zero allocation. But they give you nothing else: no Inspector support, no priority ordering, no conditional filtering, no cross-scene persistence, no visual wiring, no monitoring.
+
+Can you have the performance of C# events WITH the features of a full event system? That's the question. Let's look at the data.
+
+## Test Methodology
 
 All benchmarks were run on:
 
 - **CPU:** Intel i7-12700K (desktop) and Snapdragon 865 (mobile baseline)
 - **Unity:** 2022.3 LTS, IL2CPP backend, Release configuration
-- **GES Version:** Latest stable release
 - **Measurement:** Unity Profiler deep profile + GES Runtime Monitor + custom `Stopwatch` instrumentation
-- **Warmup:** 1000 iterations before measurement to eliminate JIT and cache effects
-- **Samples:** 10,000 iterations per measurement, reported as median (not mean, to exclude outlier spikes)
+- **Warmup:** 1,000 iterations before measurement to eliminate JIT and cache effects
+- **Samples:** 10,000 iterations per measurement, reported as median (not mean — to exclude outlier GC/OS spikes)
 - **GC Tracking:** `GC.GetTotalMemory()` before and after each raise batch
 
-Why median instead of mean? Because event execution time has occasional spikes (GC collection, OS scheduling, cache misses) that inflate the mean but don't represent typical behavior. The median gives you the "normal" case. Max values are reported separately for spike analysis.
+Why median instead of mean? Because event execution has occasional spikes from GC collection, OS scheduling, and cache misses. These inflate the mean but don't represent typical behavior. I report max values separately for spike analysis.
 
-## Core Benchmark Data
+## Core Benchmark: Event Raise
 
-### Event Raise — No Listeners
+The fundamental operation — raising an event with N listeners, where each listener is an empty handler (isolating dispatch cost from handler cost).
 
-The absolute baseline: raising an event with zero subscribers.
+| Listeners | Desktop (median) | Mobile (median) | Desktop (max) | Mobile (max) | GC Alloc |
+|-----------|-------------------|------------------|----------------|---------------|----------|
+| 0 | ~0.001ms | ~0.003ms | ~0.01ms | ~0.02ms | 0 bytes |
+| 1 | ~0.002ms | ~0.006ms | ~0.015ms | ~0.03ms | 0 bytes |
+| 10 | ~0.02ms | ~0.05ms | ~0.08ms | ~0.15ms | 0 bytes |
+| 100 | ~0.15ms | ~0.4ms | ~0.5ms | ~1.2ms | 0 bytes |
+| 1,000 | ~1.5ms | ~4ms | ~3ms | ~8ms | 0 bytes |
 
-| Metric | Desktop | Mobile |
-|--------|---------|--------|
-| Median | ~0.001ms | ~0.003ms |
-| Max | ~0.01ms | ~0.02ms |
-| GC Alloc | 0 bytes | 0 bytes |
+Three things jump out:
 
-This is the overhead of the event system itself — checking the listener list, finding it empty, and returning. It's effectively unmeasurable. Even at 10,000 raises per frame, this adds 10ms on desktop and 30ms on mobile — and you wouldn't have 10,000 raises per frame.
+**Linear scaling.** 10 listeners costs ~10x one listener. 100 listeners costs ~100x. No hidden overhead accumulates. This is critical — it means you can predict performance at any listener count by extrapolating from a single measurement.
 
-### Event Raise — 1 Listener (Empty Handler)
+**Zero GC allocation across the board.** Not "low allocation." Zero. No boxing, no string operations, no delegate creation, no LINQ enumerators. The raise path is completely allocation-free.
 
-One subscriber with a no-op handler, isolating dispatch overhead from handler execution.
+**The 0-listener case is essentially unmeasurable.** Raising an event with no subscribers costs ~0.001ms on desktop. Even at 10,000 raises per frame (absurd), that's 10ms. Events without listeners are nearly free.
 
-| Metric | Desktop | Mobile |
-|--------|---------|--------|
-| Median | ~0.002ms | ~0.006ms |
-| Max | ~0.015ms | ~0.03ms |
-| GC Alloc | 0 bytes | 0 bytes |
+## Core Benchmark: Condition Evaluation
 
-The listener dispatch overhead is roughly 0.001ms per listener on desktop. This is the cost of the delegate invocation, not the handler's own work.
-
-### Event Raise — 10 Listeners
-
-| Metric | Desktop | Mobile |
-|--------|---------|--------|
-| Median | ~0.02ms | ~0.05ms |
-| Max | ~0.08ms | ~0.15ms |
-| GC Alloc | 0 bytes | 0 bytes |
-
-Linear scaling from the 1-listener case. 10 listeners = ~10x the cost. This is healthy — it means no hidden overhead accumulates with listener count.
-
-### Event Raise — 100 Listeners
-
-| Metric | Desktop | Mobile |
-|--------|---------|--------|
-| Median | ~0.15ms | ~0.4ms |
-| Max | ~0.5ms | ~1.2ms |
-| GC Alloc | 0 bytes | 0 bytes |
-
-Still linear. 100 listeners on mobile costs about 0.4ms. At 60fps, your frame budget is 16.6ms. A single event with 100 listeners consuming 0.4ms is 2.4% of your frame budget — significant but manageable if it's not happening every frame.
-
-### Event Raise — 1,000 Listeners
-
-| Metric | Desktop | Mobile |
-|--------|---------|--------|
-| Median | ~1.5ms | ~4ms |
-| Max | ~3ms | ~8ms |
-| GC Alloc | 0 bytes | 0 bytes |
-
-At 1,000 listeners, you're starting to see real costs. 4ms on mobile for a single event raise is 24% of your frame budget. If this event fires every frame, you have a problem. If it fires once when a boss phase changes, it's perfectly fine.
-
-The takeaway: listener count matters more than event count. 100 events with 10 listeners each cost 2ms total. 1 event with 1,000 listeners costs 4ms total on mobile. Distribute your listeners.
-
-### Condition Evaluation
+For conditional listeners, the condition predicate is evaluated before the listener executes. How expensive is that?
 
 | Condition Type | Desktop | Mobile |
 |----------------|---------|--------|
 | Simple field check (`() => isAlive`) | ~0.003ms | ~0.008ms |
 | Comparison (`(int x) => x > 50`) | ~0.004ms | ~0.01ms |
-| Compound (`() => isAlive && hp < 50`) | ~0.005ms | ~0.012ms |
-| Complex nested | ~0.01ms | ~0.025ms |
+| Compound (`() => isAlive && hp &lt; 50`) | ~0.005ms | ~0.012ms |
+| Complex nested (3-4 boolean ops) | ~0.01ms | ~0.025ms |
 
-Conditions are cheap. Even "complex nested" conditions (3-4 boolean operations with field reads) cost ~0.025ms on mobile. For most use cases, the cost of evaluating a condition is far less than the cost of executing the listener it gates. That's the whole point — a cheap check preventing expensive work.
+Conditions are cheap. Even the most complex condition costs ~0.025ms on mobile. If the listener it gates costs 0.1ms and the condition is false 80% of the time, you save 0.08ms per raise at a cost of 0.025ms — a 3x net win. The cheaper the condition relative to the listener, the bigger the savings.
 
-### Flow Node Execution
+## Core Benchmark: Flow Node Execution
+
+Trigger and chain events — event-to-event propagation:
 
 | Flow Type | Desktop | Mobile |
 |-----------|---------|--------|
@@ -107,167 +114,206 @@ Conditions are cheap. Even "complex nested" conditions (3-4 boolean operations w
 | Chain (immediate) | ~0.01ms | ~0.03ms |
 | Chain (delayed, with duration) | ~0.05ms | ~0.12ms |
 
-Flow nodes include coroutine setup overhead for delayed execution, which is why they're more expensive than raw listener dispatch. The ~0.05ms for a chain with delay/duration includes creating and starting the coroutine — this is a one-time cost per chain step, not a per-frame cost.
+Delayed flows include coroutine setup overhead — a one-time cost when the flow starts, not a per-frame cost during the delay. After setup, the coroutine waits on Unity's internal timer with no per-frame overhead.
 
-### Monitor Window Overhead
-
-| Scenario | Overhead |
-|----------|----------|
-| Monitor closed | 0ms (no code path) |
-| Monitor open, 10 events | ~0.1ms per frame |
-| Monitor open, 100 events | ~0.3ms per frame |
-| Monitor open, 500 events | ~0.8ms per frame |
-
-The monitor is editor-only. It's completely stripped from builds. In the editor, its overhead is proportional to the number of events being tracked, but it's all editor UI rendering cost — it doesn't affect event execution time in builds.
-
-![Monitor Performance](/img/game-event-system/tools/runtime-monitor/monitor-performance.png)
-
-## Comparison with Native Approaches
-
-How does GES compare to the event mechanisms Unity developers commonly use?
-
-### C# Event/Delegate
+## Comparison: GES vs. Native C# Events
 
 ```csharp
+// Native C# event
 public event Action<int> OnDamage;
 OnDamage?.Invoke(42);
 ```
 
-| Metric | C# event | GES |
-|--------|----------|-----|
-| 10 listeners, raise time | ~0.015ms | ~0.02ms |
-| GC Alloc | 0 bytes | 0 bytes |
-| Type safety | Compile-time | Compile-time |
-| Inspector support | None | Full |
-| Priority ordering | None | Built-in |
-| Cross-scene | Manual | Built-in |
+| Metric | C# event | GES | Difference |
+|--------|----------|-----|------------|
+| 10 listeners, raise time | ~0.015ms | ~0.02ms | GES ~30% slower |
+| GC Alloc | 0 bytes | 0 bytes | Identical |
+| Type safety | Compile-time | Compile-time | Identical |
+| Inspector support | None | Full | -- |
+| Priority ordering | None | Built-in | -- |
+| Conditional filtering | None | Built-in | -- |
+| Cross-scene persistence | Manual | Built-in | -- |
+| Runtime monitoring | None | Built-in | -- |
 
-GES is ~30% slower than raw C# events for the dispatch itself. That's the cost of the priority pipeline, condition evaluation, and flow propagation checks. In absolute terms, it's ~0.005ms difference with 10 listeners. You will never notice this in any real game.
+GES is ~30% slower than raw C# events for dispatch. In absolute terms, that's ~0.005ms difference with 10 listeners. You will never, ever notice this in any real game. What you WILL notice is the difference between having Inspector support and not having it, between having priority ordering and manually managing execution order, between having a Runtime Monitor and adding `Debug.Log` to every handler.
 
-What you GET for that 0.005ms: Inspector support, priority ordering, conditional filtering, cross-scene persistence, flow graph propagation, runtime monitoring. That's a lot of value for essentially free.
+The 0.005ms buys you an entire event management infrastructure. That's the best trade in Unity development.
 
-### UnityEvent
+## Comparison: GES vs. UnityEvent
 
 ```csharp
+// UnityEvent
 [SerializeField] private UnityEvent<int> onDamage;
 onDamage.Invoke(42);
 ```
 
-| Metric | UnityEvent | GES |
-|--------|------------|-----|
-| 10 listeners, raise time | ~0.05ms | ~0.02ms |
-| GC Alloc | 24+ bytes | 0 bytes |
-| Type safety | Runtime only | Compile-time |
-| Inspector support | Basic | Full |
-| Priority ordering | None | Built-in |
+| Metric | UnityEvent | GES | Difference |
+|--------|------------|-----|------------|
+| 10 listeners, raise time | ~0.05ms | ~0.02ms | GES ~2.5x faster |
+| GC Alloc | 24+ bytes | 0 bytes | GES zero alloc |
+| Type safety | Runtime only | Compile-time | -- |
+| Inspector support | Basic | Full (searchable dropdown) | -- |
 
-GES is actually faster than UnityEvent. `UnityEvent.Invoke()` uses reflection internally for persistent (Inspector-configured) calls, which is slower and allocates memory. GES uses Expression Trees compiled to delegates — zero reflection at runtime.
+Wait — GES is FASTER than UnityEvent? Yes. Here's why.
 
 ![Zero Reflection](/img/game-event-system/feature/zero-reflect.png)
 
-This is one of the key architectural decisions in GES. Expression Trees are compiled once (at edit time or first access) into cached delegates. Subsequent invocations are as fast as calling a regular method — because that's literally what's happening.
+UnityEvent uses `MethodInfo.Invoke()` for persistent (Inspector-configured) listeners. That's reflection. Every invocation validates parameters, boxes value types, and dispatches through the reflection layer. It allocates memory every time.
 
-### ScriptableObject Event (Vanilla)
+GES uses **Expression Tree compilation**. When an event is first accessed (or when the editor recompiles), GES compiles the listener binding into a cached delegate using Expression Trees. That delegate is a direct method call — no reflection, no validation, no boxing, no allocation. The compilation costs ~1-5ms per event (invisible during asset loading). After that, every invocation is as fast as calling a regular method, because that's literally what's happening.
 
-The basic "ScriptableObject event" pattern (like the one in Ryan Hipple's GDC talk) without GES:
+The 2.5x speed advantage comes entirely from eliminating reflection. And the zero GC allocation comes from eliminating boxing. Expression Trees give you both.
 
-| Metric | SO Event (basic) | GES |
-|--------|-------------------|-----|
-| 10 listeners, raise time | ~0.02ms | ~0.02ms |
-| GC Alloc | 0 bytes | 0 bytes |
-| Features | Raise + Listen | Full pipeline |
-
-Performance is identical because the basic pattern is essentially what GES does at its core. GES adds the priority/conditional/persistent layers, flow graph, and monitoring on top. Those features have ~zero cost when not used (no conditional listeners = no condition evaluation, no triggers = no trigger check).
-
-### String-Based Event Systems
+## Comparison: GES vs. String-Based Event Systems
 
 ```csharp
+// String-based (common pattern)
 EventManager.Trigger("OnDamage", 42);
 ```
 
-| Metric | String-based | GES |
-|--------|--------------|-----|
-| 10 listeners, raise time | ~0.08ms | ~0.02ms |
-| GC Alloc | 48+ bytes | 0 bytes |
-| Type safety | None | Compile-time |
-| Rename safety | None | Full |
+| Metric | String-based | GES | Difference |
+|--------|--------------|-----|------------|
+| 10 listeners, raise time | ~0.08ms | ~0.02ms | GES ~4x faster |
+| GC Alloc | 48+ bytes | 0 bytes | GES zero alloc |
+| Type safety | None | Compile-time | -- |
+| Rename safety | None | Full | -- |
 
-String-based systems are the slowest option. Dictionary lookups, string hashing, boxing of value types, and lack of compile-time checking. GES is 4x faster with zero allocation and full type safety.
+String-based systems are the worst of all worlds: dictionary lookups, string hashing, boxing of value types, and zero compile-time checking. Rename an event and your code silently breaks at runtime instead of failing at compile time. GES is 4x faster with zero allocation and full type safety.
 
-## Why Zero GC Allocation Matters
+## Why Zero GC Matters More Than You Think
 
-On desktop, garbage collection is a minor inconvenience — a few milliseconds of pause every few seconds. On mobile and VR, it's a frame rate killer.
+Let me put the GC allocation issue in concrete terms.
 
-**Mobile:** ARM processors have smaller caches and less aggressive prefetching. A GC pause that takes 2ms on desktop can take 8-15ms on mobile. At 60fps, a 15ms GC pause means a dropped frame. At 30fps, it means the frame takes 50% longer than it should.
+On desktop (Mono/.NET), a garbage collection cycle for Gen 0 takes ~1-2ms. Annoying but survivable. The incremental GC in newer Unity versions spreads this across frames.
 
-**VR:** GC pauses cause visible judder — the rendered frame is late, and the headset can't maintain its target refresh rate. Users experience this as physical discomfort (nausea, headache). In VR development, zero-allocation code paths aren't a nice-to-have; they're a medical requirement.
+On mobile (IL2CPP on ARM), a GC cycle can take **8-15ms**. At 60fps, your frame budget is 16.6ms. A 15ms GC pause means the frame takes 31.6ms — nearly two frames. The player sees a stutter. In a fast-paced game, that stutter can feel like lag or broken controls.
 
-GES achieves zero GC allocation on the raise path through:
+On VR (Quest, PSVR2), a missed frame triggers the headset's reprojection system. Instead of rendering a new frame, it warps the previous frame to approximate head movement. Players perceive this as a "swimming" or "smearing" effect. Multiple missed frames cause nausea.
 
-1. **No boxing:** Typed events use generic methods that don't box value types
-2. **No string operations:** No string keys, no ToString() calls, no string concatenation
-3. **Delegate caching:** Expression Tree compiled delegates are cached, not recreated
-4. **List reuse:** Internal listener lists are pre-allocated and reused, not recreated
-5. **No LINQ:** Internal iteration uses for-loops, not LINQ (which allocates enumerators)
+An event system that allocates 24 bytes per raise doesn't seem like much. But if you have 50 events firing at various frequencies, that's thousands of small allocations per second. Each one is a drop in the GC bucket. When the bucket overflows, the GC runs, and the frame stutters.
 
-The only path that *can* allocate is scheduling (`RaiseDelayed`/`RaiseRepeating`), which creates a coroutine. But that's a one-time allocation at schedule time, not a per-frame cost, and the handle management is allocation-free after creation.
+GES achieves zero allocation on the raise path through five techniques:
 
-## Expression Tree Compilation Benefit
+1. **No boxing** — typed generics, no `object` parameters
+2. **No string operations** — no string keys, no ToString(), no concatenation
+3. **Delegate caching** — Expression Tree compiled delegates are compiled once and cached
+4. **List reuse** — internal listener lists are pre-allocated and reused, not recreated
+5. **No LINQ** — internal iteration uses for-loops (LINQ allocates enumerators)
 
-Let's quantify the reflection vs. Expression Tree difference because it's one of GES's key technical differentiators.
+The only allocation paths are `RaiseDelayed`/`RaiseRepeating` (coroutine creation, one-time per schedule, ~80 bytes) and Runtime Monitor data collection (editor-only, stripped from builds). Neither is a per-frame cost.
 
-UnityEvent uses `MethodInfo.Invoke()` for persistent (Inspector-configured) calls:
+## Production Validation: Real Project, Real Numbers
 
-```
-MethodInfo.Invoke():
-  - Parameter validation: ~0.002ms
-  - Boxing arguments: ~0.001ms (+ GC alloc)
-  - Reflection dispatch: ~0.01ms
-  - Total: ~0.013ms per call, + 24 bytes GC
-```
+Benchmarks with empty handlers are useful for understanding dispatch overhead, but what about a real game?
 
-GES uses compiled Expression Trees:
+**Project profile:**
+- 3D action RPG targeting mobile (Android/iOS)
+- 280 event assets across 8 databases
+- Average 45 listeners per active event during combat
+- 30fps target on mid-range devices
 
-```
-Compiled delegate call:
-  - Direct method call: ~0.001ms
-  - No boxing, no validation
-  - Total: ~0.001ms per call, 0 bytes GC
-```
+**Production metrics (10-minute combat session, measured via Runtime Monitor):**
 
-That's a 13x speed improvement with zero allocation. At 10 Inspector-configured listeners, it's the difference between 0.13ms and 0.01ms per raise. At 100 listeners, it's 1.3ms vs 0.1ms. The benefit scales linearly with listener count.
+| Metric | Value |
+|--------|-------|
+| Total events raised | ~42,000 |
+| Events per second (average) | ~70 |
+| Events per second (peak, boss fight) | ~220 |
+| Average raise time (all events) | 0.03ms |
+| Max raise time (worst event) | 0.8ms |
+| Total event system time per frame (average) | 0.4ms |
+| Total event system time per frame (peak) | 2.1ms |
+| GC allocation from events | 0 bytes |
+| Frame budget used by events (average) | 1.2% |
+| Frame budget used by events (peak) | 6.3% |
 
-The compilation itself happens once — when the event is first accessed or when the editor recompiles. It takes ~1-5ms per event, which is invisible during asset loading. After compilation, the cached delegate is used for every subsequent invocation.
+![Stress Test Performance](/img/game-event-system/examples/14-runtime-monitor/demo-14-performance.png)
 
-## Scaling Strategies for Large Projects
+The event system uses 1.2% of the frame budget on average. During the most intense moment — a boss fight phase transition with 220 events per second — it peaks at 6.3%. The other 93.7% goes to rendering, physics, animation, and game logic.
 
-When your project has hundreds of events and thousands of listeners, there are specific strategies to keep performance optimal.
+For context:
+- Rendering: 40-60% of frame budget
+- Physics: 10-20%
+- Animation: 5-15%
+- Game logic: 10-25%
+- **Event system: 1-2%**
+
+Optimizing the event system from 1.2% to 0.8% saves 0.4% of your frame budget. Optimizing one expensive shader saves 5%. Optimizing one physics query saves 2%. The event system is almost never your bottleneck.
+
+![Demo Monitor](/img/game-event-system/examples/14-runtime-monitor/demo-14-monitor.png)
+
+### GC Validation
+
+The zero-allocation claim was validated by running the combat session with deep profiling and `GC.GetTotalMemory()` monitoring. Event raises contributed zero bytes to GC pressure. The only event-related allocations were initial delegate compilation at scene load (one-time) and Runtime Monitor data collection (editor-only, stripped from builds).
+
+![Monitor Dashboard](/img/game-event-system/tools/runtime-monitor/monitor-dashboard.png)
+
+## Scaling Strategies for When It Does Matter
+
+The event system is rarely your bottleneck. But "rarely" isn't "never." VR games, massive multiplayer, per-frame events — some scenarios push the limits. Here are the strategies.
 
 ### Strategy 1: Database Partitioning
 
-GES organizes events into databases (folders). If you have 500 events, split them into logical databases:
+Organize events into domain-specific databases:
 
 ```
 Events/
-├── Core/          (20 events: lifecycle, scene management)
-├── Combat/        (80 events: damage, abilities, effects)
-├── UI/            (60 events: menu, HUD, popups)
-├── Audio/         (40 events: music, SFX, ambient)
-├── AI/            (50 events: behavior, pathfinding, perception)
-└── Progression/   (30 events: XP, achievements, unlocks)
++-- Core/          (lifecycle, scene management)
++-- Combat/        (damage, abilities, effects)
++-- UI/            (menu, HUD, popups)
++-- Audio/         (music, SFX, ambient)
++-- AI/            (behavior, pathfinding)
 ```
 
-Database partitioning doesn't affect runtime performance (events are events regardless of folder), but it dramatically affects development scalability. Finding events, auditing listeners, and reviewing flow graphs are all faster when events are organized by domain.
+This doesn't affect runtime performance (an event is an event regardless of folder), but it dramatically improves development scalability — finding events, auditing listeners, and reviewing flow graphs all get faster with clear organization.
 
-### Strategy 2: Listener Count Management
+### Strategy 2: Conditional Listeners for Short-Circuiting
 
-The single most impactful optimization is controlling listener count per event.
+If 80% of `OnDamageDealt` raises are irrelevant to a particular listener (it only cares about critical hits), use a conditional listener:
 
-**Audit regularly:** Use the Runtime Monitor's Listeners tab to check for events with unexpectedly high listener counts. If `OnUpdate` has 200 listeners, something is wrong.
+```csharp
+// Without conditional: listener runs every time, wastes CPU on non-crits
+onDamageDealt.AddListener(HandleCriticalHit);
 
-**Use granular events:** Instead of one `OnEnemyStateChanged` with 50 listeners, use `OnEnemyDied`, `OnEnemySpawned`, `OnEnemyDamaged`, etc. Each has fewer listeners, and listeners that don't care about spawning don't waste time checking if the state change is a spawn.
+// With conditional: listener only runs when condition is true
+onDamageDealt.AddConditionalListener(
+    HandleCriticalHit,
+    (int damage) => damage > criticalThreshold,
+    priority: 50
+);
+```
 
-**Unsubscribe when inactive:** If a listener's parent object is off-screen, consider unsubscribing. The `OnBecameVisible`/`OnBecameInvisible` callbacks are a natural place for this:
+The condition costs ~0.005ms. If `HandleCriticalHit` costs 0.1ms and 80% of raises are non-critical, you save 0.08ms per non-critical raise at a cost of 0.005ms. That's a 16x return on investment.
+
+OR short-circuit evaluation means compound conditions bail out early — if the first clause is false, the rest aren't evaluated.
+
+### Strategy 3: SetInspectorListenersActive for Batch Operations
+
+When processing events in bulk — spawning 100 enemies, loading inventory, initializing a level — the visual feedback (particle effects, sound effects, UI animations) attached to Inspector listeners is unnecessary overhead:
+
+```csharp
+// Mute visual feedback during batch spawn
+onEnemySpawned.SetInspectorListenersActive(false);
+
+for (int i = 0; i < 100; i++)
+{
+    SpawnEnemy(enemyData[i]);
+    onEnemySpawned.Raise(enemyData[i]);
+}
+
+// Restore visual feedback
+onEnemySpawned.SetInspectorListenersActive(true);
+```
+
+Code listeners still execute normally — only the Inspector-bound visual responses are muted. You get the data propagation without 100 spawn particle effects firing simultaneously.
+
+### Strategy 4: Listener Count Management
+
+The single most impactful optimization: keep listener counts under control.
+
+**Use granular events.** Instead of one `OnEnemyStateChanged` with 50 listeners each checking what state changed, use `OnEnemyDied`, `OnEnemySpawned`, `OnEnemyDamaged`. Fewer listeners per event, no wasted checks.
+
+**Unsubscribe when inactive.** Off-screen objects don't need position updates:
 
 ```csharp
 private void OnBecameVisible()
@@ -281,145 +327,53 @@ private void OnBecameInvisible()
 }
 ```
 
-### Strategy 3: Conditional Listener Short-Circuiting
-
-If 80% of `OnDamageDealt` raises are irrelevant to a particular listener (e.g., it only cares about critical hits), use a conditional listener:
-
-```csharp
-// Without conditional: listener runs 100% of the time
-onDamageDealt.AddListener(HandleCriticalHit); // wastes time on non-crits
-
-// With conditional: listener runs ~20% of the time
-onDamageDealt.AddConditionalListener(
-    HandleCriticalHit,
-    (int damage) => damage > criticalThreshold,
-    priority: 50
-);
-```
-
-The condition evaluation costs ~0.005ms. If `HandleCriticalHit` costs 0.1ms, and 80% of raises are non-critical, the conditional saves 0.08ms per non-critical raise at a cost of 0.005ms — a 16x return on investment.
-
-### Strategy 4: SetInspectorListenersActive for Batch Operations
-
-When processing events in bulk (initializing 100 enemies, loading inventory, etc.), Inspector-bound visual effects are unnecessary overhead:
-
-```csharp
-// Mute visual feedback during batch
-onEnemySpawned.SetInspectorListenersActive(false);
-
-for (int i = 0; i < 100; i++)
-{
-    SpawnEnemy(enemyData[i]);
-    onEnemySpawned.Raise(enemyData[i]);
-}
-
-onEnemySpawned.SetInspectorListenersActive(true);
-```
-
-This skips particle effects, sound effects, and UI animations that would fire 100 times during the batch. Code listeners still execute normally — only the Inspector-bound responses are muted.
-
-### Strategy 5: High-Frequency Event Optimization
-
-Events that fire every frame (position updates, input polling, physics results) deserve special attention:
-
-1. **Minimize listeners:** Only systems that truly need per-frame data should subscribe
-2. **Use conditional listeners:** Filter at the event level, not inside each handler
-3. **Consider direct references for critical paths:** If two systems need per-frame communication and nothing else listens, a direct reference might be more appropriate than an event. Events shine for decoupled, multi-subscriber patterns — not for dedicated point-to-point communication at 60Hz.
+**Audit with the Runtime Monitor.** The Listeners tab shows you exactly how many listeners each event has. If `OnUpdate` has 200 listeners, something is architecturally wrong.
 
 ![Monitor Statistics](/img/game-event-system/tools/runtime-monitor/monitor-statistics.png)
 
-## Production Validation
+### Strategy 5: Know When NOT to Use Events
 
-Numbers from a real project help ground these benchmarks in practical context.
+Events are for decoupled, multi-subscriber communication. They're not for everything.
 
-**Project profile:**
-- 3D action RPG, mobile target (Android/iOS)
-- 280 event assets across 8 databases
-- Average 45 listeners per active event during combat
-- 30fps target on mid-range devices
+If two systems need per-frame, point-to-point communication and nothing else ever listens, a direct reference is simpler and faster. Events add value through decoupling and multi-subscription. If you have neither — one sender, one receiver, every frame — a direct method call or a shared reference is the right tool.
 
-**Production metrics (measured via Runtime Monitor during a 10-minute combat session):**
+Events shine when: multiple systems react to the same occurrence, systems are in different scenes or assemblies, you want to add/remove behavior without modifying the sender, or you need visual wiring in the Inspector.
 
-| Metric | Value |
-|--------|-------|
-| Total events raised | ~42,000 |
-| Events per second (average) | ~70 |
-| Events per second (peak, during boss fight) | ~220 |
-| Average raise time (all events) | 0.03ms |
-| Max raise time (worst event) | 0.8ms |
-| Total event system time per frame (average) | 0.4ms |
-| Total event system time per frame (peak) | 2.1ms |
-| GC allocation from events | 0 bytes |
-| Frame budget used by events (average) | 1.2% |
-| Frame budget used by events (peak) | 6.3% |
+Events are overkill when: it's a tight, known, 1-to-1 communication at high frequency.
 
-The event system consumes 1.2% of the frame budget on average. Even during the most intense moment (boss fight phase transition with 220 events per second), it stays under 7%. The rest of the frame budget goes to rendering, physics, animation, and game logic.
+## Reproducing These Benchmarks
 
-![Stress Test](/img/game-event-system/examples/14-runtime-monitor/demo-14-performance.png)
-
-![Demo Monitor](/img/game-event-system/examples/14-runtime-monitor/demo-14-monitor.png)
-
-### GC Allocation Validation
-
-The zero-allocation claim was validated by running the combat session with deep profiling and monitoring `GC.GetTotalMemory()`. Event raises contributed zero bytes to GC pressure. The only event-related allocations were:
-
-- Initial delegate compilation (one-time, at scene load)
-- `RaiseDelayed`/`RaiseRepeating` coroutine creation (one-time per schedule, ~80 bytes each)
-- Runtime Monitor data collection (editor-only, stripped from build)
-
-In the production build (IL2CPP, stripped), none of these exist as per-frame costs.
-
-![Monitor Dashboard](/img/game-event-system/tools/runtime-monitor/monitor-dashboard.png)
-
-## The Real Performance Question
-
-The question isn't "is GES fast enough?" — it demonstrably is, for any reasonable workload. The real question is "where should I spend my optimization budget?"
-
-Event system overhead: 1-2% of frame budget.
-Rendering: 40-60% of frame budget.
-Physics: 10-20% of frame budget.
-Animation: 5-15% of frame budget.
-Game logic: 10-25% of frame budget.
-
-Optimizing the event system from 1.2% to 0.8% saves 0.4% of your frame budget. Optimizing one expensive shader saves 5%. Optimizing one physics query saves 2%. The event system is almost never your bottleneck.
-
-That said, there are edge cases where event system performance matters:
-
-- **VR:** Every millisecond counts. The 6.3% peak might matter here.
-- **Massive multiplayer:** 1000+ entities each raising events creates scale pressure.
-- **Per-frame events:** Events that fire every frame bypass the "infrequent" assumption.
-
-For these cases, the optimization strategies above (listener management, conditional filtering, batch muting) are your tools. And the Runtime Monitor tells you exactly which events to target.
-
-## Benchmark Reproduction
-
-Want to run these benchmarks yourself? Use the GES stress test example (Example 14):
+GES includes a stress test example (Example 14) designed specifically for performance validation:
 
 1. Open the example scene
 2. Configure listener count, event count, and raise frequency
 3. Open the Runtime Monitor to the Performance tab
 4. Enter Play Mode
 5. Run for 60 seconds to get stable averages
-6. Compare with the numbers in this post
 
-Your results will vary based on hardware, but the *relationships* should be consistent — linear scaling with listener count, zero GC allocation, condition evaluation being cheaper than listener execution.
+![Monitor Performance](/img/game-event-system/tools/runtime-monitor/monitor-performance.png)
+
+Your numbers will vary by hardware, but the relationships should hold: linear scaling with listener count, zero GC allocation, conditions cheaper than listener execution.
 
 If your numbers are significantly worse than expected, check:
-- Are you in Debug or Development build? IL2CPP Release is 3-5x faster for delegate dispatch.
-- Is the Profiler deep profiling enabled? Deep profiling adds substantial overhead to every method call.
-- Are your listeners doing actual work? The benchmarks above use empty handlers to isolate dispatch cost.
+- **Build configuration:** IL2CPP Release is 3-5x faster than Mono Debug for delegate dispatch
+- **Deep profiling:** Adds substantial overhead to every method call — disable for benchmarks
+- **Listener work:** Empty handlers isolate dispatch cost. Real handlers add their own cost.
 
-## Summary
+## The Bottom Line
 
 Hard numbers:
-- Event raise with 10 listeners: ~0.02ms, zero GC
-- Condition evaluation: ~0.003ms per condition
-- 280 events in production: 1.2% of frame budget average
-- GES vs. C# events: ~30% slower dispatch, vastly more features
-- GES vs. UnityEvent: ~2.5x faster, zero GC (vs. UnityEvent's reflection-based allocation)
-- GES vs. string-based: ~4x faster, zero GC, compile-time type safety
 
-The event system is almost never your performance bottleneck. But when you need to optimize, the Runtime Monitor shows you exactly where, and the strategies in this post show you how. Measure first, optimize second, and spend your budget where it matters.
+- **Event raise with 10 listeners:** ~0.02ms, zero GC
+- **Condition evaluation:** ~0.003-0.01ms per condition
+- **280 events in production:** 1.2% of frame budget average, 6.3% peak
+- **vs. C# events:** ~30% slower dispatch, vastly more features
+- **vs. UnityEvent:** ~2.5x faster, zero GC (UnityEvent uses reflection)
+- **vs. string-based:** ~4x faster, zero GC, compile-time type safety
+
+"High performance" means the event system takes 1-2% of your frame budget in a real production game with 280 events. It means zero GC allocation on the raise path. It means linear scaling with listener count. It means you can measure all of this yourself with the built-in Runtime Monitor and stress test tools.
+
+The next time an event system tells you it's "high performance," ask for the numbers. And when you test GES, check the numbers yourself. The Runtime Monitor is right there — it'll show you exactly what's happening, how long it takes, and where to optimize if you need to. Measure first, optimize second, and spend your performance budget where it actually matters.
 
 ---
 

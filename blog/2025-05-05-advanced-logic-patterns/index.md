@@ -1,347 +1,317 @@
 ---
 slug: advanced-logic-patterns
-title: "Advanced Flow Patterns: Nested Groups, Condition Gates, and Complex Event Orchestration"
+title: "Beyond Linear: Why Real Game Logic Needs Conditional Branching, Nested Groups, and Async Coordination"
 authors: [tinygiants]
 tags: [ges, unity, flow-graph, advanced, best-practices]
-description: "Real game logic is never linear. Learn how to build complex event flows with nested groups, per-node conditions, delays, async waits, and loops."
+description: "Tutorial logic is linear. Production logic has conditional branches, async waits, nested parallel groups inside sequential chains, and loops. Here's how to handle the mess without losing your mind."
 image: /img/home-page/game-event-system-preview.png
 ---
 
-Let me paint a picture. You're building a boss fight. Phase 1: the boss has a shield, and when the shield breaks, trigger effects fire simultaneously — shield shatter particles, camera shake, music intensifies. Phase 2 kicks in when HP drops below 50%: the boss enters a rage state, plays a rage animation, then spawns adds, then buffs itself — that's a strict sequence. Phase 3 at 10% HP: a desperation attack that chains through a wind-up, screen flash, area damage, and recovery. Each phase has conditions, each step has timing, and the whole thing needs to be readable by your combat designer who doesn't write code.
+Tutorial-level game logic is beautifully simple. "When the player presses Space, play the jump animation." One event, one response. You can hold the entire flow in your head. You write it in ten minutes and it works forever.
 
-This is what real game event flows look like. They're not linear pipelines or simple fan-outs. They're phased, conditional, time-sensitive, and branching. And the GES flow graph has features specifically designed for this level of complexity.
+Then you start building a real game.
 
-In the previous posts, we covered trigger/chain modes and argument transformers. Those are the foundation. This post is about the advanced features that handle the messy reality of production game logic.
+"Boss enters Phase 2 when HP drops below 50%. A roar animation plays while the music changes AND the arena turns red — those three are parallel. When the roar animation finishes — that's an async wait because the animation length varies — start the new attack pattern. But ONLY if the player hasn't triggered the mercy mechanic by dealing zero damage for 10 seconds. If they have, skip Phase 2 entirely and go straight to the dialogue sequence."
+
+That's one paragraph of a design document. The gap between that paragraph and working code is where projects go to die.
 
 <!-- truncate -->
 
-## Nested Groups for Organizing Large Flows
+## The Complexity Scaling Problem
 
-When your flow graph has 30, 50, or 100+ nodes, flat organization doesn't work. You need hierarchy. The GES Node Editor supports nested groups — groups inside groups — to create logical organization at multiple levels.
+Let me be specific about what makes production game logic hard. It's not any single feature — it's the COMBINATION of features that interact.
 
-### Why Nest Groups?
+### Coroutine Spaghetti
 
-Consider a complete boss fight flow. At the top level, you have three phases. Each phase has its own set of events, conditions, and connections. Without nesting, you'd have one massive flat graph with color-coded groups, which works until it doesn't — when phases share events or when you need to visually separate the "Audio" events within Phase 2 from the "Gameplay" events within Phase 2.
+The boss phase transition from the opening sounds manageable. Let's write it as a coroutine:
 
-With nested groups:
+```csharp
+IEnumerator BossPhaseTransition()
+{
+    if (bossHealth.currentHPPercent > 0.5f)
+        yield break; // Not time for Phase 2 yet
+
+    if (mercyMechanic.isTriggered)
+    {
+        // Skip to dialogue
+        yield return StartCoroutine(PlayDialogueSequence());
+        yield break;
+    }
+
+    // Parallel: roar + music + arena color
+    StartCoroutine(PlayRoarAnimation());
+    StartCoroutine(TransitionMusic());
+    StartCoroutine(ChangeArenaColor());
+
+    // Wait for roar to finish (but how?)
+    while (!_roarAnimationComplete)
+        yield return null;
+
+    // Start new attack pattern
+    bossAI.SetAttackPattern(Phase2Pattern);
+}
+```
+
+Already there are problems. The three parallel coroutines (`PlayRoarAnimation`, `TransitionMusic`, `ChangeArenaColor`) are fire-and-forget — we started them but only wait for one of them. If `ChangeArenaColor` throws an exception, we don't know. We're polling a boolean (`_roarAnimationComplete`) to synchronize with the animation, which means the animation handler needs to set that bool, which means we have shared mutable state between the coroutine and the animation system.
+
+Now add Phase 3. The boss enters desperation at 10% HP: charge-up animation (3 seconds), screen flash (twice with 0.2s gap), area damage, then exhaustion state for 5 seconds. But only if the boss isn't in the middle of a Phase 2 attack. And if the desperation attack kills the player, play a special cinematic.
+
+```csharp
+IEnumerator DesperationAttack()
+{
+    if (bossHealth.currentHPPercent > 0.1f)
+        yield break;
+
+    if (_isPerformingPhase2Attack)
+    {
+        // Queue it? Ignore it? Retry later?
+        yield break;
+    }
+
+    _isPerformingDesperation = true;
+
+    // Charge up
+    yield return StartCoroutine(PlayChargeAnimation());
+    yield return new WaitForSeconds(3.0f);
+
+    // Screen flash x2
+    for (int i = 0; i < 2; i++)
+    {
+        TriggerScreenFlash();
+        yield return new WaitForSeconds(0.2f);
+    }
+
+    // Area damage
+    DealAreaDamage();
+
+    if (player.isDead)
+    {
+        yield return StartCoroutine(PlaySpecialDeathCinematic());
+        _isPerformingDesperation = false;
+        yield break;
+    }
+
+    // Exhaustion
+    bossAI.SetState(BossState.Exhausted);
+    yield return new WaitForSeconds(5.0f);
+    bossAI.SetState(BossState.Active);
+
+    _isPerformingDesperation = false;
+}
+```
+
+Forty lines. Boolean flags for state tracking. Conditional branches inside the coroutine. A loop for the screen flash. Early exits. Shared mutable state. And this is ONE attack of ONE boss. A full boss fight with three phases, multiple attacks per phase, and transition sequences between phases can easily hit 200-300 lines of coroutine code.
+
+Six months later, a designer says "make the charge-up 4 seconds instead of 3." A programmer opens this file, reads through 300 lines, finds the right `WaitForSeconds`, changes the number, hopes they didn't break the flow by misreading which coroutine they're in. This is write-only code.
+
+### State Machine Explosion
+
+"Just use a state machine." Fair point. State machines are the proper tool for managing sequential states with conditions. Let's try it.
+
+The boss has three phases. Each phase has an entry transition, active behavior, and exit transition. Some phases have conditional skips. The transitions have parallel effects and sequential steps.
+
+States: `Idle`, `Phase1Active`, `Phase1ToPhase2Transition`, `Phase2Entry`, `Phase2Active`, `Phase2Attack`, `Phase2ToPhase3Transition`, `Phase3Entry`, `Phase3Active`, `DesperationCharge`, `DesperationAttack`, `DesperationExhaust`, `MercyDialogue`, `BossDeath`, `SpecialDeathCinematic`.
+
+Fifteen states. Each one is a class or a method. Each one has entry logic, update logic, exit logic, and transition conditions. The transition table connects them. Understanding the flow means reading all fifteen states and their transitions, then mentally reconstructing the graph.
+
+And you STILL need coroutines for the timed sequences within states. The `DesperationCharge` state starts a 3-second timer. The `DesperationAttack` state loops a screen flash twice. You've combined two complexity models (state machine + coroutines) and neither one shows you the complete picture.
+
+The fundamental issue: state machines are great for expressing "what state am I in and what transitions are available." They're terrible at expressing "in what order do these six things happen, with timing, conditions, and parallel branches." Those are two different concerns, and production game logic needs both.
+
+### The Async Problem
+
+"Wait for this animation to finish before proceeding."
+
+Sounds simple. In practice, it's one of the most annoying coordination problems in game development.
+
+Coroutine approach: yield return the animation coroutine. But what if the animation is driven by Animator, not a coroutine? Then you need an AnimationEvent callback, or you poll `animator.GetCurrentAnimatorStateInfo(0).normalizedTime`, or you use a StateMachineBehaviour that sets a flag.
+
+Task approach: wrap the animation in a Task using `TaskCompletionSource`. Clean, but now you're mixing async/await with Unity's coroutine-based lifecycle. Some team members use coroutines, others use Tasks. Both work, neither is visible.
+
+Event approach: the animation fires an event when it completes. The next step subscribes to that event. But now your sequential flow is split across two event subscriptions in two different places. The sequence "animate → wait → proceed" exists nowhere as a readable unit.
+
+All three approaches share one problem: the relationship between "wait for X" and "then do Y" is invisible. It exists in callbacks, in yield returns, in task continuations. It's code-level plumbing that hides the actual intent.
+
+### The Condition-Within-Sequence Problem
+
+Here's a subtle one that catches teams off guard.
+
+You have a five-step chain: A → B → C → D → E. Step C should only execute if a runtime condition is met (player has enough gold, boss is in the right phase, a cooldown has expired). But steps D and E should still run regardless.
+
+In a coroutine:
+
+```csharp
+yield return DoStepA();
+yield return DoStepB();
+if (someCondition)
+    yield return DoStepC();
+yield return DoStepD();
+yield return DoStepE();
+```
+
+Simple enough for one condition. But what about: step C only runs if condition X, step D only runs if condition Y, and the entire chain aborts if condition Z fails at any point?
+
+```csharp
+yield return DoStepA();
+if (!conditionZ()) yield break;
+yield return DoStepB();
+if (!conditionZ()) yield break;
+if (conditionX()) yield return DoStepC();
+if (!conditionZ()) yield break;
+if (conditionY()) yield return DoStepD();
+if (!conditionZ()) yield break;
+yield return DoStepE();
+```
+
+Now the actual flow logic is drowning in condition checks. And you need to understand which conditions are "skip this step" (continue the sequence) vs "abort the sequence" (stop everything). In a coroutine, both look like `if` statements. There's no semantic distinction.
+
+### The Documentation Problem
+
+A 50-line coroutine that orchestrates a boss fight is, by definition, write-only code. I don't care how clean your coding style is. A sequence of `yield return`, `StartCoroutine`, `WaitForSeconds`, conditional branches, loops, and shared boolean flags cannot be understood at a glance. It requires careful, line-by-line reading.
+
+A designer asks "can we add a 0.5-second pause between the screen flash and the area damage?" The programmer opens the file, reads through the coroutine, locates the right spot, adds a `WaitForSeconds(0.5f)`, tests it. Total time: 15-30 minutes. Not because the change is hard, but because FINDING where to make the change requires reading and understanding the entire sequence.
+
+In a visual flow graph, that same change takes 5 seconds. Click the connection between the flash node and the damage node. Set delay to 0.5. Done.
+
+## GES's Advanced Flow Patterns
+
+Everything in the previous section describes problems that arise from expressing complex game logic in code-only formats. GES's flow graph addresses each one with specific features designed for the patterns that actually appear in production games.
+
+### Nested Groups: Organization at Scale
+
+When your flow graph has 30+ nodes, flat organization fails. Nested groups provide hierarchy.
+
+A boss fight flow at the top level has three groups: "Phase 1," "Phase 2," "Phase 3." Each phase group contains sub-groups: "Effects" (audio/visual) and "Gameplay" (state changes, spawns). Each sub-group contains the actual event nodes.
 
 ```
-[Boss Fight] (outer group)
-├── [Phase 1: Shield] (inner group)
-│   ├── [Shield Effects] (nested inner group)
-│   │   ├── OnShieldShatter
-│   │   ├── OnSpawnShieldParticles
-│   │   └── OnPlayShieldBreakSound
-│   └── [Shield Gameplay] (nested inner group)
-│       ├── OnDisableShield
-│       └── OnEnableVulnerability
+[Valthar Boss Fight]
+├── [Phase 1: Shield]
+│   ├── [Shield Effects] → shield break particles, sound, camera shake
+│   └── [Shield Gameplay] → disable shield, enable vulnerability
 ├── [Phase 2: Rage]
-│   ├── [Rage Effects]
-│   └── [Rage Gameplay]
+│   ├── [Rage Effects] → rage roar, music change, arena tint
+│   └── [Rage Gameplay] → spawn adds, buff stats, new attack pattern
 └── [Phase 3: Desperation]
-    ├── [Desperation Effects]
-    └── [Desperation Gameplay]
+    ├── [Desperation Effects] → charge VFX, screen flash, area VFX
+    └── [Desperation Gameplay] → area damage, exhaustion, special death
 ```
 
-Each level of nesting adds visual clarity. You can collapse inner groups you're not working on, expand the ones you are, and maintain a mental model of the flow at different zoom levels.
+You can collapse groups you're not working on. Expand the one you are. Navigate the flow at different zoom levels — high-altitude overview shows the three phases as colored blocks, mid-level shows the sub-groups, close-up shows individual nodes and connections.
 
-### Practical Tips for Group Organization
+Color conventions help enormously. Blue for system events, green for gameplay, orange for UI, purple for audio — consistent across all nesting levels. Zoom out and the graph is a color-coded map. Zoom in and the details appear.
 
-**Top-level groups = game features or sequences.** "Player Death Flow," "Boss Fight," "Tutorial Sequence," "Shop System."
+### Per-Node Conditions: The Two-Layer System
 
-**Second-level groups = phases or domains.** "Phase 1," "Phase 2" for phased encounters. Or "Audio," "Visual," "Gameplay" for domain separation within a feature.
+This is the feature that directly addresses the "skip vs abort" problem from the coroutine section. GES has two distinct types of conditions, and understanding the difference is critical.
 
-**Third-level groups = implementation details.** Rarely needed, but useful for very complex sub-systems. Don't force a third level if two levels provide enough clarity.
+![Node Condition Config](/img/game-event-system/flow-graph/game-event-node-behavior/node-config-condition.png)
 
-**Color conventions across levels:** Use consistent colors. If blue always means "system events" in your project, use blue at every nesting level for system events. This creates instant recognition regardless of where you are in the graph.
+**Node conditions** (configured in the NodeBehavior Window) control the FLOW:
+- If a node condition evaluates to `false` on a chain connection, the ENTIRE remaining branch stops. Subsequent steps don't execute.
+- This is your "abort the sequence" mechanism. If the mercy mechanic is active, abort the phase transition entirely.
 
-## Per-Node Condition Gates
+**Event conditions** (configured in the Behavior Window) control the SIDE EFFECTS:
+- If an event condition evaluates to `false`, the event's actions (gameplay responses) don't execute. But the FLOW continues to the next step.
+- This is your "skip this step" mechanism. If the player doesn't have enough gold, skip the purchase animation but continue to the next step in the shop sequence.
 
-We covered condition trees in earlier posts as a way to gate event listeners. In the flow graph, you can also attach condition trees to individual nodes (connections). This means a specific step in your flow can be conditionally skipped based on runtime state.
+In the five-step chain example: steps C and D get event conditions (skip if their condition is false, but the chain continues). The chain itself gets a node condition for the abort case (if condition Z fails, stop everything).
 
-![Node Config Condition](/img/game-event-system/flow-graph/game-event-node-behavior/node-config-condition.png)
+In the Node Editor, both condition types are visible. During runtime debugging, you can see which layer blocked which node. A red flash on a node condition means the branch was aborted. A dimmed side-effect indicator means the step was skipped but the flow continued. No more guessing which `if` statement in a coroutine caused the behavior.
 
-### How Per-Node Conditions Work
+### Delay and Duration: Visible Timing
 
-When a connection has a condition, the execution flow checks the condition before dispatching to the target node:
+Every chain step can have a delay (wait before starting) and a duration (how long this step "takes" before the chain proceeds).
 
-**For trigger connections:** If the condition is `false`, the target doesn't fire, but other trigger connections from the same source are unaffected. It's like a per-branch gate.
-
-**For chain connections:** There are two layers of conditions. **Node conditions** (configured in the NodeBehavior Window) stop the ENTIRE flow branch if `false` — subsequent steps don't execute. **Event conditions** (configured in the Behavior Window) only gate the side effects (Event Actions) for that step; the flow itself CONTINUES to the next step regardless. This distinction is critical: node conditions control flow, event conditions control side effects.
-
-### Boss Phase Example
+![Chain Config](/img/game-event-system/flow-graph/game-event-node-behavior/node-config-chain.png)
 
 ```csharp
-// Phase 2 condition: only trigger when HP < 50%
-onBossDamaged.AddChainEvent(onStartRagePhase,
-    condition: () => bossHealth.currentHPPercent < 0.5f);
+// Wait 0.5s before starting the charge-up animation
+onStartDesperation.AddChainEvent(onChargeUp, delay: 0.5f);
 
-// Phase 3 condition: only trigger when HP < 10%
-onBossDamaged.AddChainEvent(onStartDesperationPhase,
-    condition: () => bossHealth.currentHPPercent < 0.1f);
+// The charge-up takes 3.0 seconds before the chain continues
+onChargeUp.AddChainEvent(onScreenFlash, duration: 3.0f);
 ```
 
-In the Node Editor, you configure this by clicking on the connection and adding a condition tree in the connection inspector. The condition tree supports the full AND/OR group structure, comparison operators, and all four data source types — the same system you'd use on a standalone event listener.
+These timing values appear directly on the connection in the Node Editor. A designer reads the graph left to right and sees: "0.5s pause, then charge-up for 3s, then flash." The timing is VISIBLE. No digging through coroutine code to find the `WaitForSeconds` calls.
 
-The visual representation is powerful: the connection line shows a small condition icon, and during runtime debugging, you can see connections flash green (condition passed) or red (condition failed). This makes it immediately obvious why a particular node didn't fire.
+Combining delay and duration: "wait 0.5s, then this step runs for 2.0s, then the next step starts." Total time from previous step: 2.5 seconds. The math is right there on the graph.
 
-### Condition vs Code Guard
+### waitForCompletion: Async Without the Mess
 
-A common question: when should I use a per-node condition vs a code check at the start of the handler?
-
-**Use per-node conditions when:**
-- The condition is about game state that a designer might want to tweak
-- The condition fits naturally into the visual tree model (simple comparisons)
-- You want visibility in the flow graph about which connections are gated
-
-**Use code guards when:**
-- The check is deeply technical (thread safety, resource availability)
-- The logic is too complex for the visual tree
-- The condition affects the handler's behavior, not whether it runs
-
-## Delay and Duration Between Steps
-
-Chain mode steps can have two timing parameters: delay and duration. Together, they give you precise control over the pacing of sequential flows.
-
-![Node Config Chain](/img/game-event-system/flow-graph/game-event-node-behavior/node-config-chain.png)
-
-### Delay: Wait Before Starting
-
-The delay is a pause (in seconds) before the step begins. After the previous step completes, the chain waits for the delay period, then fires this step.
+For chain steps that involve genuinely asynchronous operations — scene loads, network calls, animation completions — you can't predict the duration in advance. `waitForCompletion` tells the chain to pause until the handler signals it's done.
 
 ```csharp
-onStartCutscene.AddChainEvent(onShowDialogue, delay: 1.5f);
+onFadeComplete.AddChainEvent(onLoadScene, waitForCompletion: true);
 ```
 
-"Wait 1.5 seconds after the cutscene starts, then show dialogue."
-
-**Use delay for:**
-- Pacing between steps ("let the explosion settle before showing the result")
-- Staggered effects ("spawn enemy 1, wait 0.3s, spawn enemy 2, wait 0.3s...")
-- Dramatic timing ("hold on the empty screen for 2 seconds before the title appears")
-
-### Duration: How Long This Step Takes
-
-The duration tells the chain how long to consider this step "in progress" before moving to the next one. This is independent of the actual execution — the event fires immediately, but the chain waits for the duration before proceeding.
+The handler returns an `IEnumerator` (coroutine), and the chain waits for that coroutine to finish:
 
 ```csharp
-onFadeToBlack.AddChainEvent(onLoadNextLevel, duration: 1.0f);
-```
-
-"Fire the fade event, then wait 1.0 seconds (the fade duration) before starting the level load."
-
-**Use duration for:**
-- Animation timings ("this animation takes 2 seconds to complete")
-- Transition effects ("the fade takes 1 second")
-- Cooldown periods ("wait 5 seconds before the next phase")
-
-### Combining Delay and Duration
-
-```csharp
-// Wait 0.5s, then start the explosion (which takes 2.0s to finish)
-onTriggerExplosion.AddChainEvent(onPlayExplosion, delay: 0.5f, duration: 2.0f);
-
-// After the explosion finishes, immediately show results
-onPlayExplosion.AddChainEvent(onShowResults);
-```
-
-Total time from trigger to results: 0.5s (delay) + 2.0s (duration) = 2.5 seconds. The visual flow in the Node Editor shows these timing values on the connection, making the overall sequence timing visible at a glance.
-
-## waitForCompletion: Async Integration
-
-For chain steps that involve asynchronous operations — coroutine-based animations, async scene loads, network calls — the timing isn't fixed. You don't know in advance how long a scene load will take. That's where `waitForCompletion` comes in.
-
-```csharp
-onFadeComplete.AddChainEvent(onLoadNextScene, waitForCompletion: true);
-```
-
-When `waitForCompletion` is `true`, the chain pauses after firing this step and waits for the handler to signal completion. The handler signals completion by finishing its coroutine:
-
-```csharp
-// Handler for onLoadNextScene
-public IEnumerator HandleLoadNextScene(string sceneName)
+public IEnumerator HandleLoadScene(string sceneName)
 {
     AsyncOperation loadOp = SceneManager.LoadSceneAsync(sceneName);
     while (!loadOp.isDone)
     {
-        // Update loading progress UI
         loadingBar.value = loadOp.progress;
         yield return null;
     }
-    // Coroutine completes → chain continues to next step
+    // Coroutine completes → chain automatically continues
 }
 ```
 
-The chain won't move to the next step until the coroutine finishes. This is how you integrate Unity's async patterns (coroutines, AsyncOperations) into the sequential event flow.
+No boolean flags. No polling. No event-based callbacks to reconnect the sequence. The chain pauses, the async operation runs, the chain resumes when it's done. And in the flow graph, you can see the `waitForCompletion` indicator on the connection, so you know this step has variable timing.
 
-### Mixing waitForCompletion with Duration
+If both `waitForCompletion` and a `duration` are set on the same step, the chain waits for whichever takes LONGER. A 2.0s minimum duration with an async operation that takes 5.0s? Chain waits 5.0s. An async operation that completes in 0.3s with a 2.0s minimum? Chain waits 2.0s. Safety net built in.
 
-If a step has both `waitForCompletion: true` and a `duration`, the chain waits for whichever takes LONGER. This is a safety mechanism — if your async operation completes in 0.5s but you set a 2.0s duration (for visual pacing), the chain waits the full 2.0s. If the async operation takes 5.0s but you set a 2.0s duration, the chain waits the full 5.0s.
+### Loop Execution: Repetition Without Code Loops
 
-## Loop Execution on Nodes
+Some steps need to repeat. Spawn 5 enemies one at a time. Flash the screen 3 times. Pulse a warning indicator. Instead of creating 5 separate spawn nodes or writing a for-loop in a coroutine, you configure a loop on a single node.
 
-Some flow patterns require repetition. The GES flow graph supports loop configuration on individual nodes, allowing a step to execute multiple times before the flow continues.
-
-![Node Config General](/img/game-event-system/flow-graph/game-event-node-behavior/node-config-general.png)
-
-### Fixed Loop Count
+![Node General Config](/img/game-event-system/flow-graph/game-event-node-behavior/node-config-general.png)
 
 ```csharp
-// Pulse the screen flash 3 times
-onStartWarning.AddChainEvent(onScreenFlash, loopCount: 3, loopDelay: 0.3f);
+// Flash screen 3 times with 0.2s between flashes
+onStartWarning.AddChainEvent(onScreenFlash, loopCount: 3, loopDelay: 0.2f);
+
+// Spawn 5 enemies, one every 0.8 seconds
+onWaveStart.AddChainEvent(onSpawnEnemy, loopCount: 5, loopDelay: 0.8f);
 ```
 
-The `onScreenFlash` event fires 3 times, with 0.3 seconds between each firing. After all 3 iterations complete, the chain continues to the next step.
+The event fires `loopCount` times with `loopDelay` seconds between each firing. After all iterations complete, the chain continues to the next step. In the graph, the node shows its loop count, so you can see at a glance "this step repeats 3 times."
 
-**Use fixed loops for:**
-- Repeated visual effects (pulse, blink, shake)
-- Multi-shot patterns ("fire 5 projectiles in sequence")
-- Retry logic ("attempt connection 3 times")
+This replaces for-loops inside coroutines with visible, configurable repetition on individual nodes. Change the count from 3 to 5? Click the node, change the number. No code editing.
 
-### Loop with Delay
+## Pattern Gallery: Three Reusable Architectures
 
-Each loop iteration can have a delay between repetitions. This creates rhythmic patterns:
-
-```csharp
-// Spawn 5 enemies, one every 0.5 seconds
-onStartWave.AddChainEvent(onSpawnEnemy, loopCount: 5, loopDelay: 0.5f);
-```
-
-The visual result: 5 enemies spawn over 2.5 seconds (5 * 0.5s), then the chain continues.
-
-## Complete Case Study: Boss Fight Event Orchestration
-
-Let's put everything together into a real boss fight flow. This is the kind of complex event orchestration that would be a nightmare to build and maintain in scattered code, but becomes manageable and visible in the flow graph.
-
-### The Boss: Valthar the Undying
-
-**Phase 1 (100%-50% HP): Shield Phase**
-- Boss has an energy shield
-- When shield breaks: parallel effects (shatter particles + sound + camera shake)
-- Transition: play phase transition cinematic
-
-**Phase 2 (50%-10% HP): Rage Phase**
-- Boss enters rage mode
-- Sequential: rage animation → spawn 3 adds (looped) → buff boss stats → change music
-- Periodic rage slam attack (triggered by timer event, gated by phase condition)
-
-**Phase 3 (&lt;10% HP): Desperation**
-- Sequential desperation attack: charge up → screen flash → area damage → exhaustion
-- If desperation attack kills player: play special death cinematic (condition gated)
-- If boss reaches 0 HP during desperation: special death sequence
-
-### The Flow Graph Structure
-
-```
-[Valthar Boss Fight] (top-level group, dark red)
-│
-├── [Phase 1: Shield] (group, blue)
-│   ├── OnShieldDamaged ──trigger──► OnShieldHitEffect
-│   ├── OnShieldBroken ──trigger──► OnShieldShatterParticles
-│   │                   ──trigger──► OnPlayShieldBreakSound
-│   │                   ──trigger──► OnCameraShake
-│   │                   ──chain───► OnPlayPhaseTransitionCinematic
-│   │                                └──chain──► OnStartPhase2 (condition: HP < 50%)
-│   │
-│   └── [Shield Effects] (nested group, purple)
-│       └── (visual/audio nodes)
-│
-├── [Phase 2: Rage] (group, orange)
-│   ├── OnStartPhase2 ──chain──► OnPlayRageAnimation (duration: 2.0s)
-│   │                  ──chain──► OnSpawnAdd (loop: 3, loopDelay: 0.5s)
-│   │                  ──chain──► OnBuffBossStats
-│   │                  ──chain──► OnChangeMusic
-│   │
-│   ├── OnRageSlamTimer ──trigger──► OnRageSlam (condition: currentPhase == 2)
-│   │                    ──trigger──► OnRageSlamEffect
-│   │
-│   └── OnBossDamaged ──chain──► OnStartPhase3 (condition: HP < 10%)
-│
-├── [Phase 3: Desperation] (group, red)
-│   ├── OnStartPhase3 ──chain──► OnDesperationChargeUp (duration: 3.0s)
-│   │                  ──chain──► OnScreenFlash (loop: 2, loopDelay: 0.2s)
-│   │                  ──chain──► OnAreaDamage
-│   │                  ──chain──► OnBossExhaustion (duration: 5.0s)
-│   │
-│   ├── OnPlayerKilled ──chain──► OnSpecialDeathCinematic
-│   │                              (condition: currentPhase == 3)
-│   │
-│   └── OnBossDefeated ──chain──► OnPlayBossDeathAnimation (duration: 3.0s)
-│                       ──chain──► OnDropLoot (waitForCompletion: true)
-│                       ──chain──► OnPlayVictoryMusic
-│                       ──chain──► OnShowVictoryScreen
-```
-
-### What Makes This Work
-
-**Nested groups** keep the three phases visually separated. A designer can collapse Phase 1 and Phase 3 while working on Phase 2.
-
-**Per-node conditions** gate the phase transitions. `OnStartPhase2` only fires when HP drops below 50%. The condition is visible on the connection in the editor.
-
-**Mixed trigger/chain** handles the parallel effects (shield break sounds + particles happen simultaneously) alongside sequential logic (rage animation must finish before adds spawn).
-
-**Loop execution** on `OnSpawnAdd` spawns three adds with timing, without needing three separate spawn events.
-
-**Duration** on animations ensures the chain waits for visual elements to complete before proceeding.
-
-**waitForCompletion** on `OnDropLoot` ensures loot is fully spawned before the victory screen appears.
-
-### The Code Setup
-
-Here's what the code version looks like for Phase 2:
-
-```csharp
-void SetupPhase2Flow()
-{
-    // Phase 2 entry: sequential rage sequence
-    onStartPhase2.AddChainEvent(onPlayRageAnimation, duration: 2.0f);
-    onPlayRageAnimation.AddChainEvent(onSpawnAdd, loopCount: 3, loopDelay: 0.5f);
-    onSpawnAdd.AddChainEvent(onBuffBossStats);
-    onBuffBossStats.AddChainEvent(onChangeMusic);
-
-    // Rage slam: triggered by timer, gated by phase
-    onRageSlamTimer.AddTriggerEvent(onRageSlam,
-        condition: () => currentPhase == BossPhase.Rage);
-    onRageSlamTimer.AddTriggerEvent(onRageSlamEffect,
-        condition: () => currentPhase == BossPhase.Rage);
-
-    // Phase 3 transition
-    onBossDamaged.AddChainEvent(onStartPhase3,
-        condition: () => bossHealth.currentHPPercent < 0.1f);
-}
-```
-
-Functional, but the visual graph version is immediately more readable. A combat designer can open the Node Editor, see the entire Phase 2 flow, understand the conditions and timing, and suggest changes ("can we make the rage animation 3 seconds instead of 2?") without reading a single line of code.
-
-## Pattern Gallery
-
-Beyond boss fights, here are three reusable patterns for common scenarios:
+Let me show you three patterns that cover the vast majority of complex event flows in games. Think of them as templates you can adapt.
 
 ### The Broadcaster Pattern
 
-One event triggers many independent systems. Pure fan-out, all triggers, no chains.
+Pure parallel fan-out. One event, many independent consumers.
 
-![Pattern Broadcaster](/img/game-event-system/flow-graph/advanced-logic-patterns/pattern-broadcaster.png)
+![Broadcaster Pattern](/img/game-event-system/flow-graph/advanced-logic-patterns/pattern-broadcaster.png)
 
 ```
-OnPlayerLevelUp ──trigger──► UpdateUI
-                ──trigger──► PlaySound
-                ──trigger──► SpawnParticles
+OnPlayerLevelUp ──trigger──► UpdateLevelUI
+                ──trigger──► PlayLevelUpSound
+                ──trigger──► SpawnParticleEffect
                 ──trigger──► CheckAchievements
                 ──trigger──► LogAnalytics
                 ──trigger──► SaveProgress
-                ──trigger──► NotifyServer
+                ──trigger──► SyncToServer
 ```
 
-**When to use:** System-wide notifications where every consumer is independent. Analytics events, state change broadcasts, global notifications.
+Seven consumers, all independent. If the analytics server is down, the player still sees their level-up effects. If the achievement check throws an exception, saving still happens.
 
-**Key characteristic:** If any target fails, the others are unaffected. This is your most resilient pattern.
+When to use: system-wide notifications, state change broadcasts, any scenario where consumers are independent and failure should be isolated.
+
+The key characteristic is resilience. Trigger mode's fault tolerance means one broken consumer can't cascade-fail to the others. In a traditional delegate chain, one unhandled exception stops the entire invocation list. In a broadcaster pattern with trigger connections, each consumer is isolated.
 
 ### The Cinematic Pattern
 
-A strict sequence of events with precise timing. Pure chain, no triggers.
+Pure sequential chain with precise timing. Every step waits for the previous one.
 
-![Pattern Cinematic](/img/game-event-system/flow-graph/advanced-logic-patterns/pattern-cinematic.png)
+![Cinematic Pattern](/img/game-event-system/flow-graph/advanced-logic-patterns/pattern-cinematic.png)
 
 ```
 OnStartCutscene ──chain(delay: 0.5s)──► DisablePlayerInput
@@ -354,70 +324,48 @@ OnStartCutscene ──chain(delay: 0.5s)──► DisablePlayerInput
                 ──chain──► EnablePlayerInput
 ```
 
-**When to use:** Cutscenes, tutorials, scripted sequences, onboarding flows. Anything where precise timing and strict ordering are essential.
+Eight steps, strictly ordered. Delays provide pacing. Durations handle fixed-time operations. `waitForCompletion` handles variable-time operations. The entire sequence is deterministic and reproducible.
 
-**Key characteristic:** Every step waits for the previous one. The sequence is deterministic and reproducible.
+When to use: cutscenes, tutorials, onboarding flows, scripted sequences, any scenario where precise timing and strict ordering matter.
+
+The key characteristic is readability. A designer can read this graph left to right and understand the complete cutscene timing without reading a single line of code. "0.5s pause, disable input, camera moves (wait for it), 1s pause, dialogue (wait for it), 3s animation, 0.5s pause, 1s fade out, load scene (wait for it), 1s fade in, enable input." That's the cutscene, right there in the graph.
 
 ### The Hybrid Pattern
 
-The most common real-world pattern. Parallel effects combined with sequential state changes.
+The most common real-world pattern. Parallel effects combined with sequential state changes, plus conditions and async waits.
 
-![Pattern Hybrid](/img/game-event-system/flow-graph/advanced-logic-patterns/pattern-hybrid.png)
+![Hybrid Pattern](/img/game-event-system/flow-graph/advanced-logic-patterns/pattern-hybrid.png)
 
 ```
-OnDoorOpen ──trigger──► PlayDoorSound
-           ──trigger──► PlayDoorAnimation
-           ──trigger──► SpawnDustParticles
-           ──chain───► UpdateNavMesh (waitForCompletion)
-           ──chain───► EnableTriggerZone
-           ──chain───► NotifyAI
+OnBossPhaseChange ──trigger──► PlayRoarSound
+                  ──trigger──► ShakeCamera
+                  ──trigger──► FlashArenaLights
+                  ──chain───► PlayRoarAnimation (waitForCompletion)
+                              └──chain──► SpawnAdd (loop: 3, delay: 0.5s)
+                                         └──chain──► BuffBossStats
+                                                     └──chain──► ChangeMusic
+                                                                 └──chain──► EnableNewAttacks
 ```
 
-**When to use:** Most gameplay events. The immediate feedback (sound, visual) happens in parallel, while the gameplay consequences (navmesh update, AI notification) happen sequentially because they depend on each other.
+The instant sensory feedback (sound, camera, lights) triggers in parallel — players feel the response immediately. The gameplay state changes (animation wait, staggered spawns, stat buffs, music transition, attack pattern switch) chain sequentially — each step depends on the previous one completing.
 
-**Key characteristic:** Instant sensory feedback + ordered state mutation. Players feel the response immediately while the game state updates safely in sequence.
+When to use: most gameplay events. Any scenario where you want immediate audiovisual feedback combined with carefully ordered state mutations.
 
-## Debugging Complex Flows
+The key characteristic is the parallel/sequential split. Sensory feedback is parallel because it's independent and should feel instant. State changes are sequential because ordering matters and failures should halt the chain.
 
-When a complex flow isn't behaving as expected, the Node Editor's runtime debug view is your best friend. Here's a debugging workflow:
+## The Real Pitch
 
-1. **Open the Node Editor** with your flow graph and enable debug mode.
-2. **Enter Play Mode** and trigger the flow.
-3. **Watch the execution.** Active nodes pulse, connections animate, and you can see exactly which path the execution takes.
-4. **Look for red flashes** on connections — these indicate conditions that evaluated to `false`, causing steps to be skipped.
-5. **Check timing** on chain connections. The displayed execution time tells you if a step is taking longer than expected.
-6. **Look for dead nodes** — nodes that never light up. These indicate broken connections or conditions that never pass.
+Here's what all of this comes down to.
 
-For the boss fight example, debugging Phase 2 would look like: trigger the boss to 50% HP, watch `OnStartPhase2` light up, see the chain progress through rage animation → spawn (3 pulses with delays) → buff → music change. If the spawn loop only pulses twice, you know the loop count is wrong. If the music change never lights up, you know the chain is breaking at the buff step. Visual debugging that would take 30 minutes of log reading takes 30 seconds of watching.
+A 50-line coroutine and a 15-state state machine can both implement a boss fight correctly. The code works. It ships. Players experience it.
 
-## Performance Considerations for Complex Flows
+But six months later, when a designer asks "can we change the Phase 2 transition timing?" — the coroutine takes 30 minutes to safely modify. The state machine takes 45 minutes because you need to trace transitions across multiple states.
 
-Complex flows with many nodes, conditions, and transformers have a few performance characteristics worth knowing:
+The flow graph takes 10 seconds. Click the connection, change the number. You can SEE the flow. You can SEE the conditions. You can SEE the timing. You can WATCH it execute in real time during play testing.
 
-**Initialization cost:** Each condition tree compiles an Expression Tree on first use. A flow with 50 conditioned connections has 50 one-time compilation costs, totaling maybe 50-100ms at scene start. This happens once and is negligible.
+That's not a minor quality-of-life improvement. That's the difference between a team that can iterate on game feel quickly and a team that's afraid to touch the boss fight code because "it works and we don't fully understand it."
 
-**Per-event evaluation:** Each condition tree evaluates in roughly 0.001ms. Each argument transformer is a compiled delegate call. Even a complex flow with 20 trigger connections, each with conditions and transformers, adds about 0.02ms per event dispatch. You won't see this in a profiler.
-
-**Chain overhead:** Chains use Unity's coroutine system for timing (delays, durations, waitForCompletion). Coroutines have minimal overhead, but if you have hundreds of active chains simultaneously, the coroutine scheduling can become noticeable. In practice, you rarely have more than a handful of active chains at any given time.
-
-**Memory:** Each flow graph connection allocates a small amount of memory for its compiled expressions and transformer delegates. A flow with 100 connections might use 50-100KB. Trivial for modern hardware.
-
-The bottom line: the performance characteristics of the flow graph system are designed so you never have to think about them during normal game development. Only in extreme cases (thousands of connections, per-frame events with hundreds of conditioned targets) would you need to optimize.
-
-## Wrapping Up
-
-This post covered the advanced features that turn the GES flow graph from a simple visual event connector into a complete event orchestration system:
-
-- **Nested groups** for organizing large, complex flows
-- **Per-node conditions** for gating individual connections
-- **Delay and duration** for precise timing control
-- **waitForCompletion** for async integration
-- **Loop execution** for repeated steps
-- **Real-world patterns** — Broadcaster, Cinematic, Hybrid
-
-The boss fight case study demonstrated how all these features work together to handle genuinely complex game logic. The key insight is that you're not replacing code — you're making the event flow visible, configurable, and debuggable. The actual game logic (what happens when the boss takes damage, how adds are spawned, what the desperation attack does) still lives in C# scripts. The flow graph orchestrates when and in what order those scripts execute.
-
-If you're building any game with event-driven architecture — which is most games — this level of event orchestration will save you significant development and debugging time. Start with simple flows, learn the patterns, and gradually adopt the advanced features as your needs grow.
+Complex game logic is inevitable. The question is whether that complexity is visible or invisible, editable or fragile, debuggable or opaque. The flow graph doesn't eliminate the complexity. It makes it manageable.
 
 ---
 

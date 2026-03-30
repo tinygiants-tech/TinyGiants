@@ -1,400 +1,253 @@
 ---
 slug: argument-transformers
-title: "Argument Transformers: The Type Conversion Magic in Event Flows"
+title: "When Event Types Don't Match: The Data Transformation Problem in Event-Driven Architectures"
 authors: [tinygiants]
-tags: [ges, unity, flow-graph, advanced, tutorial]
-description: "When your upstream event sends DamageInfo but your downstream event expects an int, Argument Transformers bridge the gap with zero friction."
+tags: [ges, unity, flow-graph, advanced, data-flow]
+description: "Your damage event carries DamageInfo. Your health bar needs a float. Your kill feed needs a string. Your VFX system needs a Vector3. One event, four consumers, four different types. Now what?"
 image: /img/home-page/game-event-system-preview.png
 ---
 
-You've built a clean event flow. Your `OnDamageDealt` event sends a `DamageInfo` object with damage amount, damage type, attacker reference, and crit flag. Now you want to connect it to `OnUpdateHealthBar`, which expects a plain `int` — the new health value. Type mismatch. The Node Editor won't let you connect them directly because the data shapes don't match.
+You have a `DamageInfoGameEvent`. It carries a `DamageInfo` struct — damage amount, damage type, attacker reference, hit position, crit flag. It's a well-designed event payload that gives consumers everything they might need.
 
-You could create a middle-man event that listens to `OnDamageDealt`, extracts the damage value, calculates the new health, and raises `OnUpdateHealthBar`. But now you have an extra event that exists purely for plumbing. Multiply that by every type mismatch in your flow, and you've got a graph full of adapter events that add visual noise without adding value.
+Now you want to connect it to four different systems. The health bar just needs the `float` damage number. The kill feed needs a formatted `string` like "Player dealt 47 Fire damage." The VFX system needs the `Vector3` hit position to spawn particles. The screen shake system just needs to know damage happened — it doesn't need any data at all.
 
-Argument Transformers solve this. They sit on a connection between two events and transform the source data into whatever the target expects. No intermediate events. No adapter scripts. Just a lambda or visual configuration that says "take this `DamageInfo` and turn it into this `int`."
+One event. Four consumers. Four different expected types. In every event system I've used before GES, this is where things start to get ugly.
 
 <!-- truncate -->
 
-## What Is an Argument Transformer?
+## The Type Mismatch Problem
 
-An argument transformer is a function attached to an event flow connection (trigger or chain) that converts the source event's argument type into the target event's expected type. It runs after the source fires and before the target receives the data.
+This isn't a theoretical concern. Type mismatches between event producers and consumers show up in every non-trivial event-driven architecture. And the "solutions" most teams reach for all have significant downsides.
 
-Think of it as a pipe fitting. The source pipe carries `DamageInfo`. The target pipe expects `int`. The transformer is the adapter that fits between them, extracting or computing the right value.
+### Solution 1: Pass the Full Object Everywhere
 
-The transformer has access to:
-- The source event's argument (the payload data)
-- The source event's sender (the object that raised the event)
-
-And it returns whatever type the target event expects.
-
-## The Three Transformation Patterns
-
-In practice, argument transformers fall into three categories. Understanding these patterns covers about 95% of use cases.
-
-### Pattern 1: Complex to Void (Filter Gate)
-
-Sometimes you want to connect a typed event to a void event — one that doesn't take any argument. The target event just needs to know "something happened," not the details.
+The simplest approach: every consumer receives the full `DamageInfo` and extracts what it needs.
 
 ```csharp
-// Source: DamageInfoGameEvent — carries full damage data
-// Target: GameEvent (void) — just a signal, no data needed
+// HealthBar.cs
+void OnDamageReceived(DamageInfo info)
+{
+    currentHealth -= info.damage;
+    UpdateBar(currentHealth / maxHealth);
+}
 
-onDamageDealt.AddTriggerEvent(onPlayHitSound, passArgument: false);
+// KillFeed.cs
+void OnDamageReceived(DamageInfo info)
+{
+    feedText.text = $"{info.attacker.name} dealt {info.damage} {info.damageType} damage";
+}
+
+// VFXManager.cs
+void OnDamageReceived(DamageInfo info)
+{
+    SpawnHitParticles(info.hitPosition);
+}
 ```
 
-The `passArgument: false` flag tells the connection to not pass any data to the target. The target fires as a void event. This is the simplest form of transformation — you're not converting the data, you're discarding it.
+This works. But now every consumer is coupled to `DamageInfo`. Your health bar — a generic UI component that should work with any number — depends on your combat system's data structure. Change `DamageInfo` (rename a field, reorganize the struct, split it into two structs), and every consumer needs to update. The promise of event-driven decoupling just evaporated.
 
-**When to use this:**
-- Trigger sound effects or particle systems that don't need to know what caused them
-- Increment counters that just need "something happened"
-- Toggle states that react to any event occurrence
+This coupling is particularly painful during prototyping. Early in development, data structures change constantly. If your health bar, kill feed, VFX system, and screen shake all depend on `DamageInfo`, every change to your combat data model ripples through four unrelated systems.
 
-In the Node Editor, this is configured on the connection properties. You'll see a "Pass Argument" toggle that you can uncheck:
+### Solution 2: Create Intermediate Events
 
-![Node Pass Arg](/img/game-event-system/flow-graph/game-event-node-connector/node-pass-arg.png)
-
-### Pattern 2: Simple Type Transformation (Field Extraction)
-
-This is the most common pattern. You have a complex source type and need to extract a single field or compute a simple value from it.
+The "clean architecture" approach: create specialized events for each consumer type.
 
 ```csharp
-// Source: DamageInfoGameEvent — carries damage, type, attacker, crit flag
-// Target: Int32GameEvent — expects the damage amount
+// DamageInfoGameEvent — the source
+// FloatGameEvent (OnDamageAmount) — carries just the number
+// StringGameEvent (OnDamageNotification) — carries the formatted message
+// Vector3GameEvent (OnDamagePosition) — carries the hit point
+// GameEvent (OnDamageOccurred) — void, just a signal
 
-onDamageDealt.AddTriggerEvent(onApplyDamage,
+// Some "converter" MonoBehaviour that bridges them:
+void OnDamageDealt(DamageInfo info)
+{
+    onDamageAmount.Raise(info.damage);
+    onDamageNotification.Raise($"{info.damage} {info.damageType} damage!");
+    onDamagePosition.Raise(info.hitPosition);
+    onDamageOccurred.Raise();
+}
+```
+
+Now your health bar subscribes to `OnDamageAmount` (a clean `float` event), your VFX subscribes to `OnDamagePosition` (a clean `Vector3` event), and nobody depends on `DamageInfo` except the converter.
+
+But you've just doubled your event count. For EVERY typed event that has multiple consumer types, you need a family of derived events plus a converter script. A project with 20 complex events might need 60-80 total events, most of which exist purely as plumbing. Your event inventory becomes cluttered with adapter events that add no semantic value.
+
+In a visual flow graph, this is even worse. Your graph fills up with "middleman" nodes that exist solely to convert types. The actual event flow — the logic you care about — gets lost in a sea of conversion nodes.
+
+### Solution 3: Transform in Every Listener
+
+The pragmatic approach: each listener does its own transformation in its subscription handler.
+
+```csharp
+// HealthBar subscribes to the raw DamageInfo event but only uses one field
+onDamageDealt.AddListener(info => UpdateBar(info.damage));
+
+// KillFeed subscribes and formats
+onDamageDealt.AddListener(info => ShowMessage($"{info.damage} damage!"));
+
+// VFX subscribes and extracts position
+onDamageDealt.AddListener(info => SpawnParticles(info.hitPosition));
+```
+
+This keeps the event count low and avoids intermediate events. But now the transformation logic is scattered across every consumer. If you decide to change how damage is displayed (add crit indicators, change the format), you're hunting through every listener that touches `DamageInfo`.
+
+More importantly, this approach is invisible. There's no single place that documents "here's how DamageInfo flows to each consumer and what each one extracts." The transformations exist only inside anonymous lambdas sprinkled across the codebase.
+
+### What Data Engineering Already Figured Out
+
+If you've worked with data pipelines, you know this problem has a name: **ETL (Extract, Transform, Load)**. Data comes in one shape, needs to go out in a different shape, and there's a transformation step in between.
+
+Data engineering solved this decades ago. ETL tools, map/reduce frameworks, stream processing pipelines — they all have explicit transformation stages between data producers and consumers. The transformation is a first-class concept, visible in the pipeline definition, configurable without touching the producer or consumer.
+
+Event-driven game architectures need the same concept. Not "pass everything and let consumers figure it out." Not "create intermediate events for every type combination." A transformation layer that sits on the CONNECTION between events, visible and configurable.
+
+## GES's Argument Transformer System
+
+GES's argument transformers sit on individual connections between event nodes. They intercept the source event's data, transform it, and pass the result to the target event. No intermediate events. No consumer-side extraction. The transformation lives where it logically belongs: on the connection between the two events.
+
+### Pattern 1: Complex-to-Void (Discard the Data)
+
+The simplest transformation: the target doesn't need any data at all. The screen shake system just needs to know "damage happened" — it shakes the same amount regardless of damage details.
+
+```csharp
+onDamageDealt.AddTriggerEvent(onScreenShake, passArgument: false);
+```
+
+The `passArgument: false` flag tells the connection to discard the source data entirely. The target fires as a void event.
+
+In the Node Editor, this is a toggle on the connection properties:
+
+![Pass Argument Toggle](/img/game-event-system/flow-graph/game-event-node-connector/node-pass-arg.png)
+
+When to use this:
+- Triggering sound effects or particles that don't vary based on the source data
+- Incrementing counters that just need "something happened"
+- Toggling states that respond to any occurrence of an event
+
+This pattern eliminates the need for parallel void events like `OnDamageOccurred` that exist solely as type-stripped versions of `OnDamageDealt`. One event, one connection with `passArgument: false`, done.
+
+### Pattern 2: Field Extraction (The Common Case)
+
+The most frequent pattern. Your source event carries a complex type, and your target needs one specific field from it.
+
+```csharp
+// DamageInfo → float (damage amount)
+onDamageDealt.AddTriggerEvent(onUpdateHealthBar,
     argumentTransformer: (DamageInfo info) => info.damage);
+
+// DamageInfo → Vector3 (hit position for VFX)
+onDamageDealt.AddTriggerEvent(onSpawnHitParticles,
+    argumentTransformer: (DamageInfo info) => info.hitPosition);
+
+// EnemyDeathInfo → int (XP value)
+onEnemyKilled.AddTriggerEvent(onAwardXP,
+    argumentTransformer: (EnemyDeathInfo info) => info.enemy.xpValue);
 ```
 
-The transformer is a lambda that takes the source argument and returns the target type. Here, it extracts `info.damage` (an int) from the `DamageInfo` object.
-
-You can do more than field extraction. Any computation is valid:
+The transformer is a lambda that takes the source type and returns the target type. It can be a simple field access (`info.damage`), a nested property access (`info.enemy.xpValue`), or a computation:
 
 ```csharp
-// Extract and modify
+// Compute effective damage after armor
 onDamageDealt.AddTriggerEvent(onApplyDamage,
     argumentTransformer: (DamageInfo info) => info.isCritical ? info.damage * 2 : info.damage);
 
-// Extract nested properties
-onEnemyKilled.AddTriggerEvent(onAwardXP,
-    argumentTransformer: (EnemyInfo enemy) => enemy.xpValue);
-
-// Construct a new type
+// Convert to display string
 onDamageDealt.AddTriggerEvent(onShowDamageNumber,
-    argumentTransformer: (DamageInfo info) => new DamageDisplay
-    {
-        amount = info.damage,
-        position = info.hitPoint,
-        isCrit = info.isCritical
-    });
+    argumentTransformer: (DamageInfo info) =>
+        $"{(info.isCritical ? "CRIT " : "")}{info.damage} {info.damageType}");
 ```
 
-**When to use this:**
-- Extracting a single field from a complex payload
-- Converting between related types (DamageInfo → int, EnemyInfo → string)
-- Computing derived values (raw damage → effective damage after armor)
+The key insight: the health bar now depends on `float`, not `DamageInfo`. The VFX system depends on `Vector3`, not `DamageInfo`. The coupling between your combat data structure and your UI/VFX systems is broken. The transformer handles the bridge, and it lives on the connection — visible in the flow graph, editable without touching either the producer or the consumer.
 
 ### Pattern 3: Sender + Args Transformation
 
-Sometimes you need data from both the event's argument AND its sender to construct the target value. The transformer can receive both:
+Sometimes the target needs data from both the event's payload AND the object that raised the event. The transformer can receive both:
 
 ```csharp
-// Source: ItemInfoGameEvent with sender being the player who picked it up
-// Target: StringGameEvent — expects a notification message
+// Build a kill feed message from the killer (sender) and the death info (argument)
+onEnemyKilled.AddTriggerEvent(onShowKillFeedMessage,
+    argumentTransformer: (GameObject killer, EnemyDeathInfo info) =>
+        $"{killer.name} eliminated {info.enemy.displayName}!");
 
-onItemPickup.AddTriggerEvent(onShowNotification,
-    argumentTransformer: (GameObject sender, ItemInfo item) =>
-        $"{sender.name} picked up {item.itemName}!");
-```
-
-The two-parameter transformer form gives you access to the sender object (the `GameObject` or component that raised the event) alongside the argument. This is powerful for creating context-rich transformations without requiring the source event to pack everything into its argument type.
-
-```csharp
-// Combine sender and argument data for a complex transformation
+// Compute damage with attacker stats
 onPlayerAttack.AddTriggerEvent(onCalculateDamage,
     argumentTransformer: (GameObject attacker, AttackInfo attack) => new DamageInfo
     {
         damage = attack.baseDamage + attacker.GetComponent<Stats>().bonusDamage,
         attacker = attacker,
-        damageType = attack.damageType,
-        isCritical = Random.value < attacker.GetComponent<Stats>().critChance
+        damageType = attack.element
     });
 ```
 
-**When to use this:**
-- The target needs information about WHO raised the event, not just WHAT happened
-- Building notification messages that include the actor's name
-- Computing values that depend on both the event data and the sender's state
+The two-parameter form gives you the sender (typically the `GameObject` or component that raised the event) alongside the argument. This is powerful for building context-rich transformations without requiring the source event to pack everything into its payload.
+
+Without this, you'd need to either: include the sender reference inside the event payload (bloating your data structures) or have the consumer look up context at receive time (adding coupling and latency).
 
 ## Visual Configuration in the Node Editor
 
-While the code API uses lambdas, the Node Editor provides a visual interface for configuring argument transformers. When you select a connection between two nodes, the connection inspector shows the transformation options.
+The code API uses lambdas, which is great for programmers. But the Node Editor provides visual configuration for argument transformers that designers and non-programmers can use.
 
 ![Node Config Window](/img/game-event-system/flow-graph/game-event-node-behavior/node-config-window.png)
 
-The visual transformer configuration supports:
+When you select a connection between two events with mismatched types, the connection inspector shows transformation options.
 
-**Field Selection:** A dropdown that mirrors the deep property access system from condition trees. You can navigate into the source type's properties to select which field to extract. This covers the "simple extraction" pattern without writing code.
+**Field Selection** is the visual equivalent of field extraction. A dropdown mirrors the source type's property hierarchy. Click into `DamageInfo`, see its fields (`damage`, `damageType`, `hitPosition`, `isCritical`, `attacker`), select one. If the field type matches the target event's type, the transformer is configured. One click. No code.
 
-**Pass Argument Toggle:** A checkbox that enables/disables argument passing entirely (Pattern 1).
+This works with nested properties too. If `DamageInfo` has an `attacker` field of type `CharacterStats`, and `CharacterStats` has a `level` field of type `int`, and your target event expects `int`, you can navigate `DamageInfo → attacker → level` through the dropdown chain.
 
 ![Node Trigger Config](/img/game-event-system/flow-graph/game-event-node-behavior/node-config-trigger.png)
 
-**Custom Transformer:** For transformations that can't be expressed as simple field extraction (computations, type construction, sender access), you can reference a MonoBehaviour method that performs the transformation. This method is called at runtime with the source data and returns the target type.
+**Pass Argument Toggle** handles the void passthrough case. Uncheck the box, and the connection discards the source data.
+
+**Custom Transformer Reference** covers computations that can't be expressed as simple field extraction. You reference a MonoBehaviour method that performs the transformation:
 
 ```csharp
-// Referenced by the visual transformer configuration
 public class DamageTransformers : MonoBehaviour
 {
-    public int ExtractDamage(DamageInfo info)
+    public int EffectiveDamage(DamageInfo info)
     {
         return info.isCritical ? info.damage * 2 : info.damage;
     }
 
-    public string BuildNotification(DamageInfo info)
+    public string KillFeedMessage(EnemyDeathInfo info)
     {
-        return $"{info.damage} {info.damageType} damage!";
+        return $"{info.enemy.displayName} defeated! +{info.enemy.xpValue} XP";
     }
 }
 ```
 
-The Node Editor lets you drag this component into the transformer field and select the method from a dropdown. The system validates that the method's parameter type matches the source event and its return type matches the target event.
+Drag this component into the transformer field, select the method from a dropdown. The system validates parameter and return types at configuration time — if the method signature doesn't match the source/target event types, the editor tells you immediately.
 
-![Argument Transform](/img/game-event-system/flow-graph/game-event-node-behavior/node-transform.png)
+![Argument Transform Visual](/img/game-event-system/flow-graph/game-event-node-behavior/node-transform.png)
 
-## Common Transformation Patterns
+## Why This Matters for Architecture
 
-Here's a collection of transformer patterns I've found useful across multiple projects. Think of these as recipes.
+Argument transformers aren't just a convenience feature. They fundamentally change how you design event payloads.
 
-### The Extractor
+**Without transformers:** Every event payload must be the lowest common denominator. You either make events carry massive "god objects" that every consumer understands, or you create dozens of specialized events for each consumer type. Both approaches compromise your architecture.
 
-Pull one field out of a complex type.
+**With transformers:** Event payloads can be semantically rich and specific to their domain. `DamageInfo` carries everything relevant to damage — because it should. The combat system owns that data structure. Other systems don't need to know about it. The transformer on each connection extracts exactly what each consumer needs.
 
-```csharp
-// DamageInfo → int (damage amount)
-argumentTransformer: (DamageInfo info) => info.damage
+This is true decoupling. The producer defines its data in terms of its own domain. The consumer defines its interface in terms of its own domain. The transformer bridges the two, and it's visible on the connection in the flow graph. Change `DamageInfo`? Update the transformers on its outgoing connections. The consumers never know.
 
-// PlayerState → float (health percentage)
-argumentTransformer: (PlayerState state) => state.currentHP / state.maxHP
+Compare this to the data pipeline world. A database stores data in its normalized schema. A dashboard displays data in a denormalized format. An ETL process transforms between the two. Nobody thinks the database should store data in dashboard format, or that the dashboard should understand database schemas. The transformation layer is a natural, expected part of the architecture.
 
-// CollisionInfo → Vector3 (contact point)
-argumentTransformer: (CollisionInfo col) => col.contactPoint
-```
+Event-driven game systems should work the same way. And now they can.
 
-### The Formatter
+## Design Guidelines
 
-Convert data to a display-ready string.
+After using transformers across several projects, these guidelines have served me well:
 
-```csharp
-// int → string (score display)
-argumentTransformer: (int score) => $"Score: {score:N0}"
+**Keep transformers simple.** If your transformer lambda exceeds 3-4 lines, the logic probably belongs in a dedicated handler, not on a connection. A transformer should be extraction, formatting, or simple computation — not game logic.
 
-// DamageInfo → string (floating damage text)
-argumentTransformer: (DamageInfo info) => info.isCritical ? $"CRIT {info.damage}!" : info.damage.ToString()
+**Avoid chains of transformers.** Event A transforms to B, B transforms to C, C transforms to D. If you're doing this, your event types are probably wrong. Redesign the intermediate events to carry the right data.
 
-// ItemInfo → string (pickup notification)
-argumentTransformer: (ItemInfo item) => $"Acquired: {item.displayName} x{item.quantity}"
-```
+**Use the visual editor for simple extractions.** Field selection is one click and requires no code. Use it for straightforward field access. Use code transformers for computations.
 
-### The Calculator
+**Document non-obvious transformers.** If a code-based transformer does something non-trivial (applies a multiplier, combines fields, does a lookup), add a comment. The visual editor is self-documenting (you can see the field path), but code lambdas aren't.
 
-Compute a derived value.
-
-```csharp
-// DamageInfo → int (effective damage after armor)
-argumentTransformer: (DamageInfo info) =>
-    Mathf.Max(0, info.damage - targetArmor.value)
-
-// SpawnRequest → Vector3 (randomized spawn position)
-argumentTransformer: (SpawnRequest req) =>
-    req.basePosition + Random.insideUnitSphere * req.spawnRadius
-
-// WaveInfo → int (enemy count scaled by difficulty)
-argumentTransformer: (WaveInfo wave) =>
-    Mathf.RoundToInt(wave.baseEnemyCount * difficultyMultiplier)
-```
-
-### The Constructor
-
-Build a new object from parts of the source.
-
-```csharp
-// DamageInfo → FloatingTextData
-argumentTransformer: (DamageInfo info) => new FloatingTextData
-{
-    text = info.damage.ToString(),
-    position = info.hitPoint + Vector3.up * 0.5f,
-    color = info.isCritical ? Color.yellow : Color.white,
-    scale = info.isCritical ? 1.5f : 1.0f
-}
-
-// QuestEvent → NotificationData
-argumentTransformer: (QuestEvent evt) => new NotificationData
-{
-    title = evt.questName,
-    description = evt.isComplete ? "Quest Complete!" : "New Objective",
-    icon = evt.questIcon,
-    duration = 3.0f
-}
-```
-
-### The Gate (Void Passthrough)
-
-Ignore the argument entirely. Sometimes you just need to know an event happened.
-
-```csharp
-// Any typed event → void event
-onDamageDealt.AddTriggerEvent(onRefreshUI, passArgument: false);
-onEnemyKilled.AddTriggerEvent(onPlayVictoryStinger, passArgument: false);
-onLevelComplete.AddTriggerEvent(onSaveProgress, passArgument: false);
-```
-
-## Type Safety and Validation
-
-Argument transformers are type-checked at configuration time in the Node Editor and at compile time in code. If you define a transformer that takes `DamageInfo` but the source event sends `string`, you'll get a compile error (in code) or a visual warning (in the editor).
-
-The Node Editor is particularly helpful here. When you create a connection between two events with mismatched types, the editor:
-
-1. Flags the connection with a warning icon
-2. Opens the transformer configuration panel
-3. Suggests field extractions based on the source type's properties that match the target type
-
-For example, connecting a `GameEvent<DamageInfo>` to a `GameEvent<int>`, the editor sees that `DamageInfo` has an `int damage` field and suggests it as a transformer. One click and you're configured.
-
-## Performance Considerations
-
-Argument transformers run once per event dispatch per connection. The performance characteristics:
-
-- **Lambda transformers** (code API): Essentially zero overhead. A compiled delegate call is as fast as a regular method call.
-- **Field extraction** (visual config): Also essentially zero. The extraction path is compiled into an Expression Tree at initialization, same as condition trees.
-- **MonoBehaviour method references** (visual custom transformer): One virtual method call overhead. Negligible for game-frequency events, but worth considering for per-frame events with many connections.
-
-In practice, I've never seen transformer overhead show up in a profiler. The transformation is typically a few field accesses or a simple computation — microseconds at most.
-
-## Putting It Together: A Real Flow
-
-Let's build a complete flow that uses argument transformers to connect events with different types:
-
-**Scenario:** Enemy death triggers multiple systems with different data needs.
-
-```csharp
-// Events with different argument types
-[GameEventDropdown, SerializeField]
-EnemyDeathInfoGameEvent onEnemyDeath;          // Full death data
-[GameEventDropdown, SerializeField]
-Int32GameEvent onAwardXP;                      // XP amount
-[GameEventDropdown, SerializeField]
-LootTableGameEvent onDropLoot;                 // Loot table reference
-[GameEventDropdown, SerializeField]
-StringGameEvent onShowKillNotification;        // Display text
-[GameEventDropdown, SerializeField]
-GameEvent onIncrementKillCount;                // Void — just count it
-[GameEventDropdown, SerializeField]
-Vector3GameEvent onSpawnDeathEffect;           // Effect position
-
-void SetupEnemyDeathFlow()
-{
-    // Extract XP value from death info
-    onEnemyDeath.AddTriggerEvent(onAwardXP,
-        argumentTransformer: (EnemyDeathInfo info) => info.enemy.xpValue);
-
-    // Extract loot table reference
-    onEnemyDeath.AddTriggerEvent(onDropLoot,
-        argumentTransformer: (EnemyDeathInfo info) => info.enemy.lootTable);
-
-    // Build notification string using sender + args
-    onEnemyDeath.AddTriggerEvent(onShowKillNotification,
-        argumentTransformer: (GameObject killer, EnemyDeathInfo info) =>
-            $"{killer.name} killed {info.enemy.displayName}!");
-
-    // Void — just increment, don't need the data
-    onEnemyDeath.AddTriggerEvent(onIncrementKillCount, passArgument: false);
-
-    // Extract death position for particle effect
-    onEnemyDeath.AddTriggerEvent(onSpawnDeathEffect,
-        argumentTransformer: (EnemyDeathInfo info) => info.deathPosition);
-}
-```
-
-One source event, five target events, five different types. Each connection has a transformer that extracts or constructs exactly what the target needs. In the Node Editor, this is a single source node with five outgoing connections, each with a configured transformer. Clean, visible, and maintainable.
-
-Without argument transformers, you'd need either:
-- A single monolithic handler that calls five different systems directly (tight coupling)
-- Five intermediate events that convert the data (graph clutter)
-- Five separate listener scripts that each subscribe to the death event and extract what they need (scattered logic)
-
-Argument transformers give you the best of all worlds: decoupled events with different types, connected seamlessly through explicit, visible transformations.
-
-## Design Guidelines: When to Transform vs When to Restructure
-
-Argument transformers are powerful, but they're not always the right answer. Here are guidelines I've developed after using them extensively.
-
-### Transform When the Data Exists but the Shape Is Wrong
-
-This is the sweet spot. The source event has all the information the target needs — it's just packaged differently. Extracting `damage` from `DamageInfo`, building a notification string from structured data, pulling a position vector from a complex event payload. The transformation is simple, obvious, and stable.
-
-### Restructure When the Transformation Is Complex
-
-If your transformer lambda grows beyond 3-4 lines, that's a code smell. A transformer that computes effective damage after armor, resistance, buffs, debuffs, and environmental modifiers isn't a "transformation" — it's game logic masquerading as a data adapter. That logic belongs in a proper method or service, not in a lambda on an event connection.
-
-```csharp
-// Too complex for a transformer — this is game logic
-argumentTransformer: (DamageInfo info) =>
-{
-    var armor = target.GetComponent<Defense>().armor;
-    var resistance = target.GetComponent<Defense>().GetResistance(info.damageType);
-    var buffMultiplier = BuffManager.GetDamageMultiplier(info.attacker);
-    var envModifier = EnvironmentManager.GetDamageModifier(info.hitPoint);
-    return Mathf.Max(1, (int)((info.damage - armor) * resistance * buffMultiplier * envModifier));
-}
-
-// Better: use a dedicated event with its own handler
-onDamageDealt.AddTriggerEvent(onCalculateEffectiveDamage);
-// The handler for onCalculateEffectiveDamage does the complex calculation
-```
-
-### Avoid Chains of Transformers
-
-If Event A transforms to Event B, which transforms to Event C, which transforms to Event D — you have a data pipeline, not an event flow. Each transformation adds a layer of indirection. Two hops is fine. Three is suspicious. Four means you should probably redesign your event types.
-
-### Document Non-Obvious Transformations
-
-In the code API, a comment above a transformer lambda goes a long way:
-
-```csharp
-// Convert player's equipped weapon to its base damage for the damage calculation system
-onPlayerAttack.AddTriggerEvent(onCalculateBaseDamage,
-    argumentTransformer: (WeaponInfo weapon) => weapon.stats.baseDamage + weapon.enchantmentBonus);
-```
-
-In the visual editor, the field extraction path serves as implicit documentation — seeing `weapon → stats → baseDamage` in the dropdown chain makes the transformation self-evident.
-
-## Transformer Lifecycle and Cleanup
-
-Transformers follow the same lifecycle as their parent connection. When you remove a trigger or chain event, the associated transformer is cleaned up automatically:
-
-```csharp
-// Adding with transformer
-onDamageDealt.AddTriggerEvent(onApplyDamage,
-    argumentTransformer: (DamageInfo info) => info.damage);
-
-// Removing — transformer is cleaned up automatically
-onDamageDealt.RemoveTriggerEvent(onApplyDamage);
-```
-
-If you're using the visual editor, deleting a connection removes its transformer configuration. No dangling references, no leaked delegates.
-
-One subtlety worth knowing: transformer delegates can capture references from their enclosing scope (closures). If your transformer lambda captures a reference to a MonoBehaviour that gets destroyed, the transformer will throw a null reference when it executes. This is the same issue you'd have with any C# delegate that captures references — it's not specific to GES, but it's worth being aware of.
-
-The fix is the same as always: clean up your event connections in `OnDisable` or `OnDestroy` so transformers don't outlive their captured references.
-
-## What's Next
-
-Argument transformers complete the core toolkit for the flow graph system. You now know how to:
-- Build parallel and sequential flows (Trigger and Chain)
-- Gate connections with visual conditions
-- Bridge type mismatches between events
-
-The next post covers advanced logic patterns — nested groups, delays, async waits, loops, and complex orchestration — which pull all of these features together into production-ready event flows.
+**Prefer transformers over intermediate events.** If you find yourself creating an event that exists solely to convert another event's data type, replace it with a transformer on the original connection. Fewer events = cleaner graph = less cognitive overhead.
 
 ---
 

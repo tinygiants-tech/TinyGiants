@@ -1,63 +1,150 @@
 ---
 slug: programmatic-flow-api
-title: "Building Event Flows in Pure Code: The Programmatic Flow API"
+title: "When Visual Editors Aren't Enough: Building Event Flows at Runtime for Procedural and Dynamic Systems"
 authors: [tinygiants]
 tags: [ges, unity, scripting, flow-graph, advanced]
-description: "When visual editors aren't flexible enough — like procedural levels or AI behavior trees — build your entire event flow graph programmatically with full API parity."
+description: "Procedural dungeons, dynamic AI, mod support — some event flows can't be designed at edit time. Here's how to build, mix, and tear down event graphs entirely from code."
 image: /img/home-page/game-event-system-preview.png
 ---
 
-Your AI director needs to compose different event chains based on difficulty. Easy mode: enemies telegraph attacks for 2 seconds, then strike. Hard mode: 0.5-second telegraphs, attacks chain into combos, and environmental hazards trigger on each combo hit. The exact flow graph depends on runtime state — player count, difficulty setting, current level, enemy type. You can't pre-build this in a visual editor because the topology itself is dynamic.
+Your procedural dungeon generator just created a room with three pressure plates and a spike trap. The next room has a lever puzzle connected to a locked door. The room after that is a boss arena where environmental hazards activate based on the boss's health phase. None of these event relationships existed at edit time. The dungeon layout was determined by a seed that the player entered 30 seconds ago.
 
-This is where the Programmatic Flow API comes in. Every single feature you can configure in the GES visual editor — triggers, chains, conditions, delays, argument transformers — has a corresponding code API. Full parity, zero exceptions. You can build, modify, and tear down event flow graphs entirely at runtime.
+How do you wire up the events?
 
-And here's the real power move: you can mix programmatic and visual flows. Design your static, known flows in the editor. Layer dynamic, runtime-determined flows on top via code. They all execute through the same pipeline.
+With a traditional approach, you write an enormous switch statement. For each room type, manually subscribe and unsubscribe event handlers. For each AI difficulty, manually chain different attack patterns. For each mod-created content piece, manually parse a config file and translate it into event connections. The "manual" part is the problem — you're reimplementing event wiring logic every time the topology changes at runtime.
+
+Visual node editors are fantastic for flows you know at design time. But they fundamentally can't handle flows that don't exist until the game is running. And increasingly, the most interesting game systems are exactly the ones where the event graph is dynamic.
 
 <!-- truncate -->
 
-## Full API Parity: What It Means
+## The Procedural Content Problem
 
-When we say "full API parity," we mean it literally. The visual Node Editor is a GUI wrapper around the same API you have access to in code. Every trigger connection you draw in the editor calls `AddTriggerEvent()` under the hood. Every chain connection calls `AddChainEvent()`. The inspector fields for delay, condition, and argument passing are direct parameters to these methods.
+Let's make this concrete. You're building a roguelike. Each run generates 15-25 rooms from a pool of room templates. Each template defines what interactive objects are in the room — pressure plates, levers, doors, traps, treasure chests, enemy spawners. But the *connections* between these objects depend on the specific layout the generator produces.
 
-This means anything you learn in the visual editor translates 1:1 to code, and vice versa. There are no editor-only features and no code-only features. The only difference is the interface — drag-and-drop vs. method calls.
+Room Template A has a pressure plate and a spike trap. In one run, the pressure plate triggers the spikes with a 1-second delay. In another run (different difficulty), the same template triggers spikes immediately with no delay but adds a warning sound 0.5 seconds before. The template is the same; the event wiring is different.
 
-## Building Triggers Programmatically
+How do teams typically handle this?
 
-A trigger event is a parallel fan-out: when Event A fires, Events B, C, and D also fire simultaneously. Here's the full API signature:
+### The If-Else Approach
+
+```csharp
+public void WireRoom(Room room, DifficultySettings difficulty)
+{
+    if (room.HasPressurePlate && room.HasSpikeTrap)
+    {
+        if (difficulty.level == Difficulty.Easy)
+        {
+            room.pressurePlate.onActivated += () =>
+            {
+                PlayWarningSound();
+                StartCoroutine(DelayedSpikes(room.spikeTrap, 1.5f));
+            };
+        }
+        else if (difficulty.level == Difficulty.Hard)
+        {
+            room.pressurePlate.onActivated += () =>
+            {
+                room.spikeTrap.Activate();
+            };
+        }
+    }
+
+    if (room.HasLever && room.HasDoor)
+    {
+        room.lever.onPulled += () => room.door.Open();
+
+        if (difficulty.level == Difficulty.Hard)
+        {
+            room.lever.onPulled += () =>
+            {
+                StartCoroutine(ResetLever(room.lever, 5f));
+            };
+        }
+    }
+
+    // ... 200 more lines for other combinations
+}
+```
+
+This works for small games. For a roguelike with 30 room templates and 4 difficulty levels, you're looking at hundreds of lines of conditional wiring code. Every new room template means updating this method. Every new interactive object type means updating it again. And the lambda subscriptions? You can never cleanly unsubscribe them when the room is destroyed. Memory leaks are baked in.
+
+### The Data-Driven Approach (Better, Still Painful)
+
+Some teams move to a data-driven model — JSON or ScriptableObject configs that define connections:
+
+```json
+{
+    "room_type": "trap_room",
+    "connections": [
+        {
+            "source": "pressure_plate",
+            "target": "spike_trap",
+            "delay": 1.0,
+            "condition": "player_in_range"
+        }
+    ]
+}
+```
+
+This is architecturally cleaner, but now you need a custom parser, a custom connection manager, custom condition evaluation, and custom lifecycle management. You're building a mini event system on top of your event system. And it still doesn't integrate with whatever visual editor you're using for the static parts of your game.
+
+### The Ideal
+
+What you actually want is the same power as your visual event editor — triggers, chains, conditions, delays, argument passing — but accessible from code. Build flows programmatically, mix them with visual flows, tear them down when done. Same pipeline, same execution guarantees, different interface.
+
+## The AI Behavior Problem
+
+Procedural levels aren't the only use case. AI behavior is fundamentally dynamic.
+
+Easy mode enemies: telegraph attack for 2 seconds, strike, wait 3 seconds, repeat. The event chain is simple and predictable.
+
+Hard mode enemies: 0.5-second telegraphs, attacks chain into combos, combo finishers trigger environmental hazards, and the exact combo sequence depends on the player's position and remaining health. The event chain is complex and varies per encounter.
+
+Boss fights are even worse. Phase 1: simple attack patterns. Phase 2: new attacks unlock, old patterns get faster. Phase 3: desperation moves that chain into area-of-effect hazards. Each phase transition rewires the entire attack event graph.
+
+You could hard-code each phase in separate methods, but the connections between events — "when attack lands, trigger screen shake after 0.2s, then trigger area damage after 1s if health is below 30%" — are exactly the kind of thing an event flow system should handle. The problem is that the flow topology changes at runtime.
+
+## The Mod Support Problem
+
+This one is increasingly relevant. If your game supports mods, players need to define event relationships for their custom content. A modder creates a new trap type. They need to wire it to existing game events — maybe "when player enters trigger zone, play custom animation, then deal damage after animation completes."
+
+They can't use your visual editor (it's a development tool, not a player tool). They need a code or config interface that gives them the same capabilities. If your event system's features are locked behind a GUI, modders are locked out.
+
+## GES's Programmatic Flow API
+
+Every single feature available in the GES visual Node Editor has a corresponding code API. Full parity. The visual editor is a GUI wrapper around the same methods you can call directly. This means anything you learn in the visual editor translates 1:1 to code, and vice versa.
+
+### Building Triggers: Parallel Fan-Out
+
+A trigger event is: when Event A fires, Event B also fires (simultaneously). Here's the full API:
+
+```csharp
+[GameEventDropdown, SerializeField] private SingleGameEvent onDoorOpened;
+[GameEventDropdown, SerializeField] private SingleGameEvent onLightsOn;
+[GameEventDropdown, SerializeField] private SingleGameEvent onAlarmDisabled;
+
+private void SetupRoom()
+{
+    // When door opens, lights and alarm react simultaneously
+    TriggerHandle h1 = onDoorOpened.AddTriggerEvent(targetEvent: onLightsOn);
+    TriggerHandle h2 = onDoorOpened.AddTriggerEvent(targetEvent: onAlarmDisabled);
+}
+```
+
+The full signature gives you every option the visual editor has:
 
 ```csharp
 TriggerHandle handle = sourceEvent.AddTriggerEvent(
     targetEvent: targetEvent,
-    delay: 0f,
-    condition: () => isNightTime,
-    passArgument: true,
-    argumentTransformer: null,
-    priority: 0
+    delay: 0f,                          // seconds before target fires
+    condition: () => isNightTime,       // predicate gate
+    passArgument: true,                 // forward source args to target
+    argumentTransformer: null,          // transform args between types
+    priority: 0                         // ordering among triggers
 );
 ```
 
-Let's break down each parameter:
-
-### targetEvent
-
-The event to trigger when the source fires. Can be any GES event type — void, typed, or sender.
-
-```csharp
-[GameEventDropdown, SerializeField] private GameEvent onDoorOpened;
-[GameEventDropdown, SerializeField] private GameEvent onLightsOn;
-[GameEventDropdown, SerializeField] private GameEvent onAlarmDisabled;
-
-private void SetupRoom()
-{
-    // When door opens, turn on lights and disable alarm simultaneously
-    onDoorOpened.AddTriggerEvent(targetEvent: onLightsOn);
-    onDoorOpened.AddTriggerEvent(targetEvent: onAlarmDisabled);
-}
-```
-
-### delay
-
-How long to wait (in seconds) before firing the target event. Zero means immediate (same frame as the source).
+**delay** — Time to wait after the source fires before the target fires. Zero means same frame.
 
 ```csharp
 // Door opens, lights flicker on 0.5s later
@@ -67,36 +154,27 @@ onDoorOpened.AddTriggerEvent(
 );
 ```
 
-### condition
-
-A predicate that must return `true` for the trigger to fire. Evaluated at the moment the source event raises, not at setup time.
+**condition** — Predicate evaluated at raise time, not setup time. Pass null for unconditional.
 
 ```csharp
 // Only trigger lights if it's nighttime
 onDoorOpened.AddTriggerEvent(
     targetEvent: onLightsOn,
-    delay: 0f,
     condition: () => TimeOfDayManager.IsNight
 );
 ```
 
-Pass `null` for unconditional triggers.
-
-### passArgument
-
-Whether to forward the source event's argument to the target event. This is where type compatibility matters — if the source is `GameEvent<int>` and the target is also `GameEvent<int>`, setting `passArgument: true` forwards the integer value.
+**passArgument** — Forward the source event's data to the target. Type compatibility matters.
 
 ```csharp
-// Source raises with damage amount, target receives the same amount
+// Source raises with damage amount, target receives the same
 onPlayerHit.AddTriggerEvent(
     targetEvent: onDamageNumberSpawn,
     passArgument: true
 );
 ```
 
-### argumentTransformer
-
-When the source and target have different types, or you need to modify the value, provide a transformer delegate. We covered these in the argument transformers post, and they work identically in the programmatic API.
+**argumentTransformer** — When source and target have different types, or you need to modify the value.
 
 ```csharp
 // Source sends int damage, target expects float for UI scaling
@@ -107,57 +185,44 @@ onPlayerHit.AddTriggerEvent(
 );
 ```
 
-### priority
-
-When multiple triggers exist on the same source event, priority determines execution order (higher first). Usually 0 is fine unless you have ordering requirements among triggers.
-
-### The TriggerHandle
-
-The returned `TriggerHandle` is your reference for later management:
+The returned `TriggerHandle` is your reference for later cleanup:
 
 ```csharp
+// Store the handle
 TriggerHandle handle = sourceEvent.AddTriggerEvent(targetEvent: targetEvent);
 
-// Later: remove this specific trigger
+// Later: remove this specific connection
 sourceEvent.RemoveTriggerEvent(handle);
 ```
 
-Always store the handle if there's any chance you'll need to remove the trigger later. This is especially important for dynamic flows that change during gameplay.
+![Trigger Flow Graph](/img/game-event-system/examples/10-trigger-event/demo-10-graph.png)
 
-![Runtime API Demo](/img/game-event-system/examples/10-trigger-event/demo-10-graph.png)
+### Building Chains: Sequential Blocking Execution
 
-## Building Chains Programmatically
-
-A chain event is a sequential blocking connection: Event A fires, then after a delay, Event B fires, and optionally the system waits for B's listeners to complete before proceeding.
+A chain event is: Event A fires, then after a delay, Event B fires, then after Event B's listeners complete, Event C fires. Sequential, ordered, with timing control.
 
 ```csharp
 ChainHandle handle = sourceEvent.AddChainEvent(
     targetEvent: targetEvent,
-    delay: 1f,
-    duration: 2f,
-    condition: null,
-    passArgument: true,
-    argumentTransformer: null,
-    waitForCompletion: false
+    delay: 1f,                    // gap before this step fires
+    duration: 2f,                 // how long this step is "active"
+    condition: null,              // predicate gate
+    passArgument: true,           // forward args
+    argumentTransformer: null,    // transform args
+    waitForCompletion: false      // block until listeners finish?
 );
 ```
 
-Most parameters work the same as triggers. The chain-specific ones are:
+The chain-specific parameters:
 
-### delay
+**delay** — The gap between the source firing and this chain step executing.
 
-Time to wait after the source fires before the chain target fires. This is the "gap" between steps.
+**duration** — How long this step is considered "active." Affects overall flow timing when multiple chains are connected in sequence.
 
-### duration
-
-How long this chain step is considered "active." This affects the overall flow timing when multiple chains are connected in sequence.
-
-### waitForCompletion
-
-When `true`, the chain system waits for all listeners on the target event to finish (including any async operations they kick off) before the chain can proceed to subsequent steps. This is the "blocking" in "sequential blocking."
+**waitForCompletion** — When true, the chain system waits for all listeners on the target event to finish before proceeding to subsequent steps. This is the "blocking" part.
 
 ```csharp
-// Animation must finish before proceeding
+// Boss sequence: play animation (wait for it), then spawn enemies
 onBossPhaseStart.AddChainEvent(
     targetEvent: onPlayBossAnimation,
     delay: 0f,
@@ -165,7 +230,6 @@ onBossPhaseStart.AddChainEvent(
     waitForCompletion: true
 );
 
-// After animation, spawn adds
 onPlayBossAnimation.AddChainEvent(
     targetEvent: onSpawnAdds,
     delay: 0.5f,
@@ -174,120 +238,71 @@ onPlayBossAnimation.AddChainEvent(
 );
 ```
 
-![Chain Demo](/img/game-event-system/examples/11-chain-event/demo-11-graph.png)
+![Chain Flow Graph](/img/game-event-system/examples/11-chain-event/demo-11-graph.png)
 
-### ChainHandle Management
+### Mixing Visual and Programmatic Flows
 
-```csharp
-ChainHandle handle = sourceEvent.AddChainEvent(targetEvent: targetEvent);
-
-// Remove later
-sourceEvent.RemoveChainEvent(handle);
-```
-
-## Mixing Programmatic and Visual Flows
-
-This is where things get really powerful. You can design your base flow graph visually in the editor — the static, known-at-design-time connections — and then layer dynamic connections on top at runtime.
+This is where the architecture really pays off. You design your base flow graph visually — the static, known-at-design-time connections. Then you layer dynamic connections on top at runtime. They all execute through the same pipeline.
 
 ```csharp
 public class DifficultyFlowManager : MonoBehaviour
 {
     [Header("Base Events (connected visually in editor)")]
-    [GameEventDropdown, SerializeField] private GameEvent onEnemySpawned;
-    [GameEventDropdown, SerializeField] private GameEvent onEnemyAttackWindup;
-    [GameEventDropdown, SerializeField] private GameEvent onEnemyAttackStrike;
+    [GameEventDropdown, SerializeField] private SingleGameEvent onEnemySpawned;
+    [GameEventDropdown, SerializeField] private SingleGameEvent onEnemyAttackWindup;
+    [GameEventDropdown, SerializeField] private SingleGameEvent onEnemyAttackStrike;
 
     [Header("Hard Mode Events")]
-    [GameEventDropdown, SerializeField] private GameEvent onComboFollowUp;
-    [GameEventDropdown, SerializeField] private GameEvent onEnvironmentHazard;
+    [GameEventDropdown, SerializeField] private SingleGameEvent onComboFollowUp;
+    [GameEventDropdown, SerializeField] private SingleGameEvent onEnvironmentHazard;
 
     private List<TriggerHandle> _hardModeHandles = new List<TriggerHandle>();
 
     public void EnableHardMode()
     {
-        // Add combo follow-ups (doesn't exist in visual graph)
-        var comboHandle = onEnemyAttackStrike.AddTriggerEvent(
+        _hardModeHandles.Add(onEnemyAttackStrike.AddTriggerEvent(
             targetEvent: onComboFollowUp,
             delay: 0.3f,
-            condition: () => Random.value > 0.5f // 50% chance
-        );
-        _hardModeHandles.Add(comboHandle);
+            condition: () => Random.value > 0.5f
+        ));
 
-        // Environmental hazards on combos
-        var hazardHandle = onComboFollowUp.AddTriggerEvent(
+        _hardModeHandles.Add(onComboFollowUp.AddTriggerEvent(
             targetEvent: onEnvironmentHazard,
             delay: 0.1f
-        );
-        _hardModeHandles.Add(hazardHandle);
+        ));
     }
 
     public void DisableHardMode()
     {
         foreach (var handle in _hardModeHandles)
-        {
-            // Remove each dynamic connection
-            // The visual connections remain untouched
             handle.Source.RemoveTriggerEvent(handle);
-        }
         _hardModeHandles.Clear();
     }
 }
 ```
 
-The visual editor connections are always there — they're part of the asset data. The programmatic connections layer on top and can be added/removed without affecting the visual graph. This is a clean separation between "designed behavior" and "dynamic behavior."
-
-## Expression Tree Predicates for Conditions
-
-When building conditions programmatically, you have full access to C# lambda expressions. But GES goes a step further with Expression Tree compilation for conditions used in the visual editor. In code, you can leverage the same optimization:
-
-```csharp
-// Simple lambda — works fine
-onDamage.AddTriggerEvent(
-    targetEvent: onCriticalDamage,
-    condition: () => currentHealth < maxHealth * 0.25f
-);
-
-// Captured variables — also works, GES handles the closure correctly
-float threshold = difficultySettings.criticalHealthPercent;
-onDamage.AddTriggerEvent(
-    targetEvent: onCriticalDamage,
-    condition: () => currentHealth < maxHealth * threshold
-);
-```
-
-For conditions that are evaluated very frequently (high-frequency events with many conditional triggers), the performance characteristics of your predicate matter. Simple field comparisons are effectively free. Complex LINQ queries or methods with allocation inside the predicate are not — keep predicates lean.
-
-```csharp
-// GOOD: simple field comparison, near-zero cost
-condition: () => isAlive && currentPhase == BossPhase.Rage
-
-// BAD: allocation inside predicate, runs every time event fires
-condition: () => GetAllEnemies().Where(e => e.IsAlive).Count() > 5
-
-// BETTER: cache the result and check the cached value
-condition: () => aliveEnemyCount > 5
-```
+The visual editor connections are always there — they're baked into the asset. The programmatic connections layer on top and can be added or removed without affecting the visual graph. "Designed behavior" and "dynamic behavior" stay cleanly separated.
 
 ## Handle-Based Cleanup Patterns
 
-When you build complex dynamic flows, you accumulate handles. Managing them cleanly is essential to avoid leaked connections. Here are the patterns I use:
+When you build complex dynamic flows, you accumulate handles. Managing them cleanly is essential to avoid leaked connections. Here are the patterns that work in production.
 
 ### Pattern 1: List Collection
 
-For a known set of dynamic connections that are added and removed as a unit:
+For a set of connections that are added and removed as a unit:
 
 ```csharp
 private List<TriggerHandle> _triggerHandles = new List<TriggerHandle>();
 private List<ChainHandle> _chainHandles = new List<ChainHandle>();
 
-private void BuildDynamicFlow()
+private void BuildFlow()
 {
     _triggerHandles.Add(eventA.AddTriggerEvent(targetEvent: eventB));
     _triggerHandles.Add(eventA.AddTriggerEvent(targetEvent: eventC));
     _chainHandles.Add(eventB.AddChainEvent(targetEvent: eventD, delay: 1f));
 }
 
-private void TearDownDynamicFlow()
+private void TearDownFlow()
 {
     foreach (var h in _triggerHandles)
         h.Source.RemoveTriggerEvent(h);
@@ -301,7 +316,7 @@ private void TearDownDynamicFlow()
 
 ### Pattern 2: Flow Context Object
 
-For more complex flows, wrap all handles in a context object:
+For complex flows that need structured lifecycle management:
 
 ```csharp
 public class EventFlowContext : System.IDisposable
@@ -325,32 +340,32 @@ public class EventFlowContext : System.IDisposable
 ```
 
 ```csharp
-private EventFlowContext _currentFlow;
+private EventFlowContext _currentPhaseFlow;
 
 private void SetupBossPhase(int phase)
 {
-    // Tear down previous phase's dynamic flow
-    _currentFlow?.Dispose();
-    _currentFlow = new EventFlowContext();
+    _currentPhaseFlow?.Dispose();
+    _currentPhaseFlow = new EventFlowContext();
 
     switch (phase)
     {
         case 1:
-            _currentFlow.AddTrigger(onBossAttack.AddTriggerEvent(
+            _currentPhaseFlow.AddTrigger(onBossAttack.AddTriggerEvent(
                 targetEvent: onShieldPulse, delay: 0.5f));
             break;
         case 2:
-            _currentFlow.AddTrigger(onBossAttack.AddTriggerEvent(
-                targetEvent: onRageSwipe, condition: () => bossHealth < 0.5f));
-            _currentFlow.AddChain(onRageSwipe.AddChainEvent(
+            _currentPhaseFlow.AddTrigger(onBossAttack.AddTriggerEvent(
+                targetEvent: onRageSwipe,
+                condition: () => bossHealth < 0.5f));
+            _currentPhaseFlow.AddChain(onRageSwipe.AddChainEvent(
                 targetEvent: onSummonAdds, delay: 2f));
             break;
         case 3:
-            _currentFlow.AddTrigger(onBossAttack.AddTriggerEvent(
+            _currentPhaseFlow.AddTrigger(onBossAttack.AddTriggerEvent(
                 targetEvent: onDesperationBlast));
-            _currentFlow.AddTrigger(onDesperationBlast.AddTriggerEvent(
+            _currentPhaseFlow.AddTrigger(onDesperationBlast.AddTriggerEvent(
                 targetEvent: onScreenFlash));
-            _currentFlow.AddChain(onDesperationBlast.AddChainEvent(
+            _currentPhaseFlow.AddChain(onDesperationBlast.AddChainEvent(
                 targetEvent: onAreaDamage, delay: 1f, waitForCompletion: true));
             break;
     }
@@ -358,56 +373,41 @@ private void SetupBossPhase(int phase)
 
 private void OnDestroy()
 {
-    _currentFlow?.Dispose();
+    _currentPhaseFlow?.Dispose();
 }
 ```
 
-### Pattern 3: Scoped with Using
-
-If the flow context implements `IDisposable`, you can scope it in methods that build temporary flows:
-
-```csharp
-// Not typical for game flows, but useful for test setups
-using (var flow = new EventFlowContext())
-{
-    flow.AddTrigger(eventA.AddTriggerEvent(targetEvent: eventB));
-
-    // Test...
-    eventA.Raise();
-
-    // flow.Dispose() called automatically, connections removed
-}
-```
+Each boss phase transition disposes the previous flow and builds a new one. No leaked connections. No stale event wiring from Phase 1 hanging around during Phase 3.
 
 ## Complete Example: Procedural Dungeon Event Wiring
 
-Let's build something real. A procedural dungeon generator creates rooms, and each room type needs different event wiring. Trap rooms, treasure rooms, boss rooms — each has a unique flow graph that's determined at runtime.
+Let's build the roguelike dungeon system from the introduction. Each room type gets its own event wiring, determined entirely at runtime.
 
 ```csharp
 public class DungeonRoom
 {
     public RoomType Type;
-    public GameEvent OnPlayerEntered;
-    public GameEvent OnPlayerExited;
-    public GameEvent OnRoomCleared;
-    public GameEventInt OnDamageInRoom;
-    public List<GameEvent> RoomSpecificEvents;
+    public SingleGameEvent OnPlayerEntered;
+    public SingleGameEvent OnPlayerExited;
+    public SingleGameEvent OnRoomCleared;
+    public Int32GameEvent OnDamageInRoom;
+    public List<SingleGameEvent> RoomSpecificEvents;
 }
 
 public class DungeonEventWiring : MonoBehaviour
 {
     [Header("Shared Events")]
-    [GameEventDropdown, SerializeField] private GameEvent onDungeonStarted;
-    [GameEventDropdown, SerializeField] private GameEvent onPlayerDied;
-    [GameEventDropdown, SerializeField] private GameEventInt onPlayerDamaged;
-    [GameEventDropdown, SerializeField] private GameEvent onBossDefeated;
+    [GameEventDropdown, SerializeField] private SingleGameEvent onDungeonStarted;
+    [GameEventDropdown, SerializeField] private SingleGameEvent onPlayerDied;
+    [GameEventDropdown, SerializeField] private Int32GameEvent onPlayerDamaged;
+    [GameEventDropdown, SerializeField] private SingleGameEvent onBossDefeated;
 
     [Header("Effect Events")]
-    [GameEventDropdown, SerializeField] private GameEvent onPlayTrapSound;
-    [GameEventDropdown, SerializeField] private GameEvent onSpawnTreasureParticles;
-    [GameEventDropdown, SerializeField] private GameEvent onStartBossMusic;
-    [GameEventDropdown, SerializeField] private GameEvent onStopBossMusic;
-    [GameEventDropdown, SerializeField] private GameEvent onScreenShake;
+    [GameEventDropdown, SerializeField] private SingleGameEvent onPlayTrapSound;
+    [GameEventDropdown, SerializeField] private SingleGameEvent onSpawnTreasureParticles;
+    [GameEventDropdown, SerializeField] private SingleGameEvent onStartBossMusic;
+    [GameEventDropdown, SerializeField] private SingleGameEvent onStopBossMusic;
+    [GameEventDropdown, SerializeField] private SingleGameEvent onScreenShake;
 
     private Dictionary<DungeonRoom, EventFlowContext> _roomFlows
         = new Dictionary<DungeonRoom, EventFlowContext>();
@@ -428,7 +428,6 @@ public class DungeonEventWiring : MonoBehaviour
                 WireBossRoom(room, flow);
                 break;
             case RoomType.Safe:
-                // Safe rooms have no special wiring
                 break;
         }
 
@@ -437,14 +436,14 @@ public class DungeonEventWiring : MonoBehaviour
 
     private void WireTrapRoom(DungeonRoom room, EventFlowContext flow)
     {
-        // Player enters -> trigger traps after 1 second
+        // Player enters -> traps fire after 1 second (if room not cleared)
         flow.AddTrigger(room.OnPlayerEntered.AddTriggerEvent(
             targetEvent: room.OnDamageInRoom,
             delay: 1f,
             condition: () => !room.OnRoomCleared.HasFired()
         ));
 
-        // Damage in room -> screen shake + trap sound
+        // Room damage -> screen shake + trap sound
         flow.AddTrigger(room.OnDamageInRoom.AddTriggerEvent(
             targetEvent: onScreenShake
         ));
@@ -462,12 +461,12 @@ public class DungeonEventWiring : MonoBehaviour
 
     private void WireTreasureRoom(DungeonRoom room, EventFlowContext flow)
     {
-        // Player enters -> spawn particles immediately
+        // Player enters -> sparkle particles
         flow.AddTrigger(room.OnPlayerEntered.AddTriggerEvent(
             targetEvent: onSpawnTreasureParticles
         ));
 
-        // Room cleared -> chain: wait 2s, then mark cleared
+        // Chain: enter -> wait 2s -> room cleared
         flow.AddChain(room.OnPlayerEntered.AddChainEvent(
             targetEvent: room.OnRoomCleared,
             delay: 2f
@@ -476,13 +475,12 @@ public class DungeonEventWiring : MonoBehaviour
 
     private void WireBossRoom(DungeonRoom room, EventFlowContext flow)
     {
-        // Player enters -> start boss music
+        // Enter -> boss music
         flow.AddTrigger(room.OnPlayerEntered.AddTriggerEvent(
             targetEvent: onStartBossMusic
         ));
 
-        // Boss defeated -> chain: stop music, then screen shake,
-        // then mark room cleared
+        // Boss defeated -> chain: stop music -> shake -> room cleared
         flow.AddChain(onBossDefeated.AddChainEvent(
             targetEvent: onStopBossMusic,
             delay: 0.5f,
@@ -497,7 +495,7 @@ public class DungeonEventWiring : MonoBehaviour
             delay: 1f
         ));
 
-        // Player exits boss room -> stop music (safety net)
+        // Safety net: exiting boss room stops music
         flow.AddTrigger(room.OnPlayerExited.AddTriggerEvent(
             targetEvent: onStopBossMusic
         ));
@@ -526,31 +524,52 @@ public class DungeonEventWiring : MonoBehaviour
 }
 ```
 
-![Monitor Automation](/img/game-event-system/tools/runtime-monitor/monitor-automation-tree.png)
+![Monitor Automation Tree](/img/game-event-system/tools/runtime-monitor/monitor-automation-tree.png)
 
-This is the kind of thing you simply can't do with a static visual editor. The room types, counts, and connections are all determined at runtime by the procedural generator. But the underlying event infrastructure — the scheduling, the listener pipeline, the condition evaluation — is the same battle-tested GES core that powers the visual workflows.
+Look at what this gives you. The procedural generator creates rooms and calls `WireRoom()`. Each room gets exactly the event connections it needs. When a room is unloaded or the run ends, `UnwireRoom()` or `UnwireAllRooms()` cleans up everything. No leaked delegates, no orphaned connections, no manual tracking of which lambdas were subscribed where.
 
-## When to Go Programmatic vs. Visual
+And the room-specific events (`OnPlayerEntered`, `OnDamageInRoom`) coexist with the global shared events (`onPlayerDamaged`, `onScreenShake`). Local scope and global scope, wired together dynamically, managed through the same handle-based cleanup pattern.
 
-**Use the visual editor when:**
-- The flow topology is known at design time
-- Designers need to read and modify the flow
+## Keep Your Conditions Lean
+
+One important caveat when building dynamic flows with conditions. The condition predicate runs every time the source event fires, not just at setup time. For high-frequency events, the cost of the predicate matters.
+
+```csharp
+// GOOD: simple field comparison, near-zero cost
+condition: () => isAlive && currentPhase == BossPhase.Rage
+
+// BAD: allocation inside predicate, runs every event firing
+condition: () => GetAllEnemies().Where(e => e.IsAlive).Count() > 5
+
+// BETTER: cache the result, check the cache
+condition: () => aliveEnemyCount > 5
+```
+
+For procedural dungeon wiring, this is rarely a problem — room events don't fire 60 times per second. But if you're building dynamic flows for physics or movement events, keep those predicates to simple field reads.
+
+## When to Go Visual vs. Programmatic
+
+**Visual editor** when:
+- The flow is known at design time
+- Designers need to read and modify it
 - You want quick iteration without recompilation
-- The connections are relatively stable across builds
+- Connections are stable across builds
 
-**Use the programmatic API when:**
-- The flow topology depends on runtime state
-- Procedural generation determines the event graph
-- AI systems need to compose behavior dynamically
+**Programmatic API** when:
+- The flow depends on runtime state
+- Procedural generation determines the graph
+- AI systems compose behavior dynamically
 - You need tight integration with other code systems
-- The flow is temporary (created and destroyed during gameplay)
+- The flow is temporary — created and destroyed during gameplay
 
-**Mix both when:**
-- You have a stable base flow (visual) with dynamic extensions (code)
-- Some connections are designer-facing and others are programmer-facing
-- You want the best of both worlds — visual clarity for the static parts, code flexibility for the dynamic parts
+**Mix both** when:
+- You have a stable base (visual) with dynamic extensions (code)
+- Some connections are designer-facing, others programmer-facing
+- You want visual clarity for static parts, code flexibility for dynamic parts
 
-The programmatic API isn't a replacement for the visual editor. It's the other half of the same system, designed for the cases where visual editing isn't flexible enough. Together, they cover the full spectrum of event flow design.
+The programmatic API isn't a replacement for the visual editor. It's the other half of the same system. Together, they cover the full spectrum from "designer drags a wire in the editor" to "the AI director rewires the entire attack graph at runtime based on player skill analysis."
+
+Same pipeline. Same execution guarantees. Same handle-based lifecycle. Just a different way to build the graph.
 
 ---
 

@@ -5,7 +5,10 @@
       "Bash(wc:*)",
       "Bash(find:*)",
       "Bash(ls -d D:/file/repository/Github/TinyGiants/blog/2025-*/)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(grep -v '```')",
+      "Bash(grep -v '^[0-9]*:.*```')",
+      "Bash(done)"
     ]
   }
 }

@@ -7,34 +7,128 @@ description: "The visual condition tree supports 4 data source types with deep p
 image: /img/home-page/game-event-system-preview.png
 ---
 
-Here's a situation that comes up all the time: you've got a damage event that carries a `DamageInfo` payload, and you want to condition an Event Action on both the damage type from that payload AND the current state of a completely separate object in the scene — say, whether a specific buff is active on the player. In traditional code, that means your event handler needs references to both the event data and the buff system. Two dependencies, more coupling, more fragility.
+Here's a condition that sounds simple: "Only trigger the healing effect if the incoming damage is greater than 50 AND the target's shield is broken AND it's nighttime in the game world."
 
-The visual condition tree in GES solves this by letting each comparison node pull data from different source types independently. One side of your comparison can read from the event's payload while the other side reads from a scene object. No extra wiring. No new dependencies in code.
+Three checks. Three completely different data sources. The damage amount comes from the event payload. The shield state lives on a component attached to the target. The time-of-day is a property on some global manager sitting in the scene. In a traditional setup, your event handler needs references to all three, and suddenly a "simple" condition has dragged three unrelated systems into the same method.
 
-In the previous post, we covered the basics of condition trees — AND/OR groups, comparison node structure, and the general workflow. Today we're going deep on the four data source types that power every comparison node. This is where the condition tree goes from "neat Inspector trick" to "genuinely powerful tool."
+This is the hidden complexity that makes game conditions so much harder than they look on paper. The logic itself is trivial — three comparisons joined by AND. The *data plumbing* is the nightmare.
 
 <!-- truncate -->
 
-## A Quick Refresher
+## Simple Conditions Are Easy. Real Conditions Are Not.
 
-Every comparison node in the condition tree follows the pattern: **Source** → **Operator** → **Target**. Both the Source and Target sides independently select a data source type. The four types are:
+Let's start with what's actually easy. If all your condition data comes from the event itself, life is great:
 
-1. **Event Argument** — data from the event's payload
-2. **Scene Type** — references to objects/components in the scene
-3. **Random** — generated random values
-4. **Constant** — fixed values you type in
+```csharp
+public void OnDamageReceived(DamageInfo info)
+{
+    if (info.damage > 50)
+    {
+        // Do something
+    }
+}
+```
+
+One source of data. One comparison. The event carries the damage amount, you check it, done. This is "intro to programming" territory.
+
+But real game conditions are almost never this clean. Here's what actual conditions look like in production:
+
+**"Apply poison only if damage type is Acid AND the target doesn't have poison immunity AND a random roll under 40% succeeds"**
+
+Three different kinds of data:
+- **Event data** (damage type from the event payload)
+- **Scene state** (whether a specific component on the target has immunity)
+- **Randomness** (a probability roll)
+
+**"Show the dialogue option only if the player is level 10+, has completed the 'Dragon Slayer' quest, AND the NPC's disposition is above 50"**
+
+Again, three sources:
+- **Scene state** (player level, from a PlayerStats component)
+- **Scene state** (quest completion flag, from a QuestManager)
+- **Scene state** (NPC disposition, from an NPCRelationship component)
+
+None of this data comes from the event. It all lives on different objects scattered across the scene.
+
+**"Drop a rare item if the killed enemy is a Boss type AND (the player's luck stat exceeds a random roll between 1-100 OR the difficulty is set to Hard)"**
+
+Now we're mixing:
+- **Event data** (enemy type from the kill event)
+- **Scene state** (player luck stat)
+- **Randomness** (the random roll)
+- **Constants** (the Hard difficulty value for comparison)
+
+Four different data sources in one condition. In code, this means your event handler needs to know about the event payload, the player stats system, Unity's random API, and the difficulty settings. Four dependencies for one boolean expression.
+
+### The Coupling Problem
+
+Every data source you access from an event handler is a dependency. Dependencies create coupling. Coupling makes code fragile. This is Computer Science 101, but it's remarkable how quickly we forget it when we're "just adding a quick condition."
+
+```csharp
+public void OnEnemyKilled(EnemyDeathInfo info)
+{
+    // Dependency 1: Event payload
+    if (info.enemy.enemyType == EnemyType.Boss)
+    {
+        // Dependency 2: Player stats (scene reference)
+        var luck = playerStatsRef.GetComponent<PlayerStats>().luckModifier;
+
+        // Dependency 3: Random API
+        var roll = Random.Range(1, 101);
+
+        // Dependency 4: Game settings (scene reference)
+        var difficulty = GameSettings.Instance.currentDifficulty;
+
+        if (luck > roll || difficulty >= Difficulty.Hard)
+        {
+            DropRareLoot(info.enemy.lootTable);
+        }
+    }
+}
+```
+
+This handler now depends on `EnemyDeathInfo`, `PlayerStats`, `UnityEngine.Random`, and `GameSettings`. If any of those APIs change, this code breaks. If you want to test this condition in isolation, you need to mock all four systems. If the designer wants to add a fifth check — "and it's not a tutorial level" — you add a fifth dependency.
+
+And this is **one condition on one event**. Scale this across a whole game.
+
+### The Deep Property Access Problem
+
+There's another layer of complexity that trips people up: most of the data you need isn't on the surface. You don't just need `enemy.health`. You need `enemy.stats.defense.current`. You don't just need `player.inventory`. You need `player.inventory.equippedWeapon.elementType`.
+
+In code, this is straightforward — chain property accesses and move on. But in a visual tool? Most visual scripting systems can't handle nested property navigation. They give you the top-level fields and call it a day. If you need something three levels deep, you're back to writing code.
+
+### The Enum Problem
+
+Game logic is absolutely stuffed with enums. `DamageType`, `ItemRarity`, `EnemyRank`, `QuestState`, `WeatherType`, `ArmorSlot` — enums are how we represent discrete categories, and conditions are constantly checking against them.
+
+In code, enum comparisons are clean:
+
+```csharp
+if (info.damageType == DamageType.Fire) { ... }
+```
+
+But in visual tools that don't have proper enum support, you end up doing string comparisons:
+
+```
+source: "damageType" equals target: "Fire"
+```
+
+String matching against enums is fragile, typo-prone, and loses all the benefits of type safety. Rename an enum value and your visual conditions silently break. No compiler warning, no red squiggle — just a condition that never evaluates to `true` and a bug that takes an hour to track down.
+
+## GES's Four Data Source Types
+
+The Visual Condition Tree in GES solves the multi-source problem by giving each comparison node four independent data source types. Each side of a comparison — Source and Target — independently selects where its data comes from. You can mix and match freely: event data on one side, scene state on the other. Random value vs. a constant. Two scene objects compared against each other.
 
 ![Condition Tree Overview](/img/game-event-system/visual-workflow/visual-condition-tree/condition-tree-overview.png)
 
-Let's break each one down with real examples.
+Let's dig into each one.
 
-## Source Type 1: Event Argument
+### Source Type 1: Event Argument
 
-This is the source type you'll use most often. When an event fires, it carries data — the argument. For a `GameEvent<DamageInfo>`, the argument is the `DamageInfo` instance. The Event Argument source type lets you reach into that payload and pull out any field or property.
+This is the source type you'll use most. When an event fires, it carries data — the argument. For a `SingleGameEvent`, that's a float. For an `Int32GameEvent`, that's an integer. For custom event types, the argument is whatever struct or class you defined.
 
-### Basic Property Access
+The Event Argument source type lets you reach into that payload and pull out any field or property.
 
-When you select Event Argument as your source type, the Inspector presents a dropdown of available fields and properties on the event's argument type. For a `DamageInfo` with this structure:
+Say you have a `DamageInfo` payload:
 
 ```csharp
 [System.Serializable]
@@ -49,59 +143,44 @@ public class DamageInfo
 }
 ```
 
-You'd see `damage`, `isCritical`, `damageType`, `attacker`, `target`, and `hitPoint` in the dropdown. Select one, and the condition node knows to extract that value at runtime when the event fires.
+Select Event Argument as your source, and a dropdown shows `damage`, `isCritical`, `damageType`, `attacker`, `target`, `hitPoint`. Pick one, and the comparison node knows to extract that value at runtime.
 
-### Deep Property Access (Up to 5 Levels)
+But here's where it gets powerful — you're not limited to top-level fields.
 
-Here's where it gets powerful. You're not limited to top-level fields. The system supports drilling down up to 5 levels into nested structures. So if your `DamageInfo` has an `attacker` field of type `GameObject`, you can navigate through:
+**Deep property access goes up to 5 levels.** If `DamageInfo` has an `attacker` field of type `GameObject`, you can navigate through:
 
 ```
 damageInfo → attacker → transform → position → x
 ```
 
-That's 4 levels deep, and it gives you the attacker's X position as a float — all configured visually in the Inspector. No code. No helper methods. No intermediate variables.
+Four levels deep. That gives you the attacker's X position as a float — configured visually, no code, no helper methods, no intermediate variables.
 
-This deep access works through fields, properties, and even components. When the system encounters a `GameObject`, it automatically exposes `transform`, `name`, `tag`, `layer`, and any component accessible via `GetComponent`. When it encounters a `Component`, it exposes all public fields and properties of that component type.
+When the system encounters a `GameObject`, it automatically exposes `transform`, `name`, `tag`, `layer`, and any accessible component. When it encounters a `Component`, it exposes all public fields and properties. You keep drilling until you hit a primitive (`int`, `float`, `string`, `bool`), at which point that's your comparison value.
 
-In practice, 5 levels is more than enough for nearly any real scenario. I've rarely needed more than 3 in production projects, but it's nice to know the headroom is there.
+Five levels is the maximum, but honestly? I've rarely needed more than 3 in production. The headroom is there for edge cases with deeply nested data structures, but if you're regularly hitting level 5, your data model might benefit from some flattening.
 
-### Single Parameter Events
+For events with simple payloads — `Int32GameEvent`, `SingleGameEvent`, `BoolGameEvent` — there's no property navigation because the argument itself IS the value. A comparison like "is the event's integer argument greater than 100?" is one dropdown selection.
 
-For events that carry a single primitive value — like `GameEvent<int>` or `GameEvent<float>` — the Event Argument source type gives you the value directly. There's no property navigation because the argument itself IS the value. You'd set up a comparison like:
+Events can also include a sender reference. When configured, the Event Argument source shows both payload properties and sender properties in separate sections, so you can compare `sender.tag` against a constant or `argument.damage` against `sender.attackPower`.
 
-- Source: **Event Argument** (the int value)
-- Operator: **>**
-- Target: **Constant** → `100`
+### Source Type 2: Scene Type
 
-This checks "is the event's integer argument greater than 100?"
+Event Argument covers data flowing through the event. Scene Type covers data that already exists in the scene, independent of any event.
 
-### Sender Access
+You drag-and-drop a `GameObject` or `Component` reference directly into the Inspector field. Then navigate its properties using the same deep access system — up to 5 levels.
 
-GES events can optionally include a sender reference — the object that raised the event. The Event Argument source type lets you access the sender as well, not just the payload argument. This is useful for conditions like "only respond if the sender is tagged as Player" or "only respond if the sender's health is above zero."
+Common patterns:
 
-When an Event Action in the Behavior Window is configured to receive the sender, the Event Argument source type shows both the argument properties and the sender properties in separate sections. You can mix and match — compare the sender's tag against a constant, or compare the argument's damage value against the sender's attack power.
+- **Is the door unlocked?** Drag the door's `LockComponent`, access `isLocked`, compare against `false`.
+- **Is the player's HP below half?** Drag the player's `Health` component, access `currentHPPercent`, compare against `0.5`.
+- **Is it nighttime?** Drag the `TimeManager`, access `isNightTime`, compare against `true`.
+- **Cross-source comparison:** Source is Event Argument (`damageInfo.damage`), Target is Scene Type (`enemyDefense.armorValue`). Two completely different data sources, compared in one node.
 
-## Source Type 2: Scene Type
+That last pattern is the real power move. You're comparing dynamic event data against live scene state without writing a single line of coupling code.
 
-Event Argument covers data that flows through the event. But what about data that exists independently in the scene? That's where Scene Type comes in.
+**Bool Method Support**
 
-Scene Type lets you drag-and-drop any `GameObject` or `Component` reference directly into the condition node's Inspector field. Once you've assigned a reference, you can navigate its properties using the same deep access system — up to 5 levels deep.
-
-### Common Use Cases
-
-**Checking a scene object's state:**
-- Is the door's `LockComponent.isLocked` equal to `false`?
-- Is the player's `HealthComponent.currentHPPercent` less than `0.5`?
-- Is the game's `TimeManager.isNightTime` equal to `true`?
-
-**Comparing against another object:**
-- Is the event argument's `damage` greater than the target's `Defense.armorValue`?
-
-That last one is particularly powerful: Source is Event Argument (`damageInfo.damage`), Target is Scene Type (`enemyDefense.armorValue`). Two completely different data sources, compared in one visual node.
-
-### Bool Method Support
-
-Scene Type has a special capability that the other source types don't: it can call zero-parameter methods that return `bool`. This opens up a lot of flexibility. If your component has methods like:
+Scene Type has a trick the other source types don't: it can call zero-parameter methods that return `bool`. If your component has:
 
 ```csharp
 public class EnemyAI : MonoBehaviour
@@ -112,25 +191,23 @@ public class EnemyAI : MonoBehaviour
 }
 ```
 
-You can call any of these directly from a condition node. Select the `EnemyAI` component as your Scene Type reference, and the system will show `IsAggressive()`, `HasLineOfSight()`, and `IsWithinRange()` alongside the regular properties.
+These show up alongside regular properties when you select the `EnemyAI` component. You can call `IsAggressive()` directly from a condition node.
 
-This is intentionally limited to zero-parameter bool methods. The constraint keeps things simple and predictable — you're not building a general-purpose method invocation system, you're checking boolean conditions. If your method needs parameters, that's a sign the logic should probably live in code rather than the visual tree.
+This is intentionally limited to zero-parameter bool methods. The constraint keeps things predictable — you're checking conditions, not building a general-purpose method invocation system. If your method needs parameters, that's a sign the logic should live in code.
 
-### When to Use Scene Type vs Event Argument
-
-A useful mental model: **Event Argument** is for data that varies per event invocation (what happened), while **Scene Type** is for data that represents the current state of the world (what IS). The damage amount varies every time the event fires — that's Event Argument. Whether the player has a shield buff active doesn't depend on the event — that's Scene Type.
+**A useful mental model:** Event Argument is for "what happened" (data that varies per event). Scene Type is for "what IS" (the current state of the world). The damage amount varies per hit — Event Argument. Whether the player has a shield buff — Scene Type.
 
 ![Node Types](/img/game-event-system/visual-workflow/visual-condition-tree/condition-node-types.png)
 
-## Source Type 3: Random
+### Source Type 3: Random
 
-Probability-based conditions are everywhere in games. Critical hit chances, loot drop rates, random encounter triggers, dialogue variation — all of these need some element of randomness in their conditions.
+Probability is everywhere in games. Crit chances, loot drop rates, random encounters, dialogue variation, AI decision-making. All of these need some element of randomness in their conditions.
 
-The Random source type generates a random value each time the condition tree is evaluated. It supports two modes:
+The Random source generates a fresh random value each time the condition tree evaluates. Two modes:
 
-### Range-Based Random
+**Range-Based Random**
 
-You specify a min and max value, and the system generates a random value within that range. The generated type matches what you need — float for float ranges, int for int ranges.
+Specify a min and max. The system generates a value within that range, matching the type you need — float for float ranges, int for int ranges.
 
 ![Random Value](/img/game-event-system/visual-workflow/visual-condition-tree/condition-tree-random-value.png)
 
@@ -140,19 +217,19 @@ The classic use case is a probability check:
 - Operator: **&lt;**
 - Target: **Constant** → `0.3`
 
-This gives you a 30% chance of the condition passing. Your designer can adjust that probability by changing the constant value. No code changes, no recompilation.
+30% chance of passing. Designer changes the constant to tweak the probability. No `Random.value` calls scattered through your codebase.
 
-You can get more creative with ranges too. Say you want damage to only trigger a special effect when a random roll between 1 and 100 exceeds the target's luck stat:
+You can get creative with ranges too. "Only trigger the effect when a random 1-100 roll beats the target's luck stat":
 
 - Source: **Random** → range 1 to 100
 - Operator: **>**
 - Target: **Scene Type** → `enemy.stats.luck`
 
-Randomness meets scene data. Pretty expressive for zero lines of code.
+Randomness meets live scene data, configured visually.
 
-### List-Based Random
+**List-Based Random**
 
-Instead of a range, you provide a list of specific values, and the system picks one at random. This is useful for categorical random selection:
+Instead of a range, provide a list of specific values. The system picks one at random each evaluation.
 
 ![Random List](/img/game-event-system/visual-workflow/visual-condition-tree/condition-tree-random-list.png)
 
@@ -160,85 +237,89 @@ Instead of a range, you provide a list of specific values, and the system picks 
 - Operator: **==**
 - Target: **Event Argument** → `damageInfo.damageType`
 
-This randomly picks one of three damage types and checks if the event's damage type matches. It's a quirky pattern, but I've seen it used for things like "randomly select which element is weak this round."
+Randomly picks an element type and checks if the incoming damage matches. Useful for "randomly determine which element is vulnerable this round" patterns.
 
-## Source Type 4: Constant
+### Source Type 4: Constant
 
-The simplest source type, and probably the second most used after Event Argument. A Constant is just a fixed value you type directly into the Inspector.
+The simplest source type, and the second most used. A Constant is a fixed value you type directly into the Inspector.
 
 ![Constant Value](/img/game-event-system/visual-workflow/visual-condition-tree/condition-tree-constant-value.png)
 
-Constants support all the types you'd expect: `int`, `float`, `double`, `string`, `bool`, and `enum`. The Inspector automatically provides the right input field based on the type context — a text field for strings, a number field for numerics, a toggle for bools, and a dropdown for enums.
+Constants support `int`, `float`, `double`, `string`, `bool`, and `enum`. The Inspector automatically provides the right input field — number field for numerics, text field for strings, toggle for bools, dropdown for enums.
 
-### Constant Lists
+**Constant Lists**
 
-Constants can also be lists, which pairs with the `In List` operator. This is perfect for "is this value one of these options?" checks:
+Constants can also be lists, paired with the `In List` operator:
 
 ![Constant List](/img/game-event-system/visual-workflow/visual-condition-tree/condition-tree-constant-list.png)
 
 - Source: **Event Argument** → `damageInfo.damageType`
 - Operator: **In List**
-- Target: **Constant List** → ["Fire", "Lightning", "Acid"]
+- Target: **Constant List** → [Fire, Lightning, Acid]
 
-This checks whether the damage type is any of the three elemental types. Without the `In List` operator, you'd need three separate comparison nodes in an OR group. The list version is cleaner and more maintainable — especially when the list grows.
+"Is the damage type one of these three?" Without `In List`, you'd need three comparison nodes in an OR group. The list version is cleaner, easier to maintain, and scales better when the list grows.
 
-### Enum Support
+**Enum Dropdown Integration**
 
-When the condition tree detects that a property is an enum type, the Constant source type automatically provides a dropdown with all enum values. No string-based comparisons, no magic numbers — just select the enum value from a dropdown.
+When the condition tree detects an enum type, Constants automatically present a dropdown with all defined values. No string matching, no magic numbers:
 
 ```csharp
 public enum DamageType
 {
-    Physical,
-    Fire,
-    Ice,
-    Lightning,
-    Acid,
-    Holy
+    Physical, Fire, Ice, Lightning, Acid, Holy
 }
 ```
 
-With this enum, your Constant dropdown would show: Physical, Fire, Ice, Lightning, Acid, Holy. Select one, and the comparison uses the actual enum value — type-safe, refactor-friendly, and designer-readable.
+The dropdown shows all six values. Select one. Type-safe, refactor-friendly, designer-readable. The `In List` operator works with enum dropdowns too — build a list by selecting values from dropdowns.
 
-The `In List` operator works with enums too. You can build a constant list of enum values, each selected from the dropdown.
+This is the answer to the enum problem I mentioned earlier. No fragile string comparisons. If someone renames an enum value, the serialized reference updates automatically (or shows as missing, which you can fix in the Inspector instead of hunting through code).
 
-## Deep Property Access in Detail
+## Deep Property Navigation in Practice
 
-I want to spend a moment on deep property access because it's one of those features that seems simple on the surface but has nuances worth understanding.
+I want to spend some time on deep property access because it's one of those features that seems straightforward but has nuances worth understanding when you're actually building condition trees.
 
-When you select a source type (Event Argument or Scene Type) and choose a property, the system checks the property's type and offers to go deeper. If the property is a primitive (`int`, `float`, `string`, `bool`), it stops — that's your value. If the property is a complex type (a class, struct, or Unity type), it offers another level of navigation.
+When you select a source (Event Argument or Scene Type) and choose a property, the system checks the property's return type. Primitive types (`int`, `float`, `string`, `bool`) stop navigation — that's your value. Complex types (classes, structs, Unity types) offer another level.
 
-### How the Navigation Works
+### How Navigation Looks
 
-Let's say you're navigating from a `DamageInfo`:
+Starting from a `DamageInfo`:
 
-**Level 0:** `DamageInfo` — shows fields: `damage`, `isCritical`, `damageType`, `attacker`, `target`, `hitPoint`
+**Level 0:** `DamageInfo` — shows: `damage`, `isCritical`, `damageType`, `attacker`, `target`, `hitPoint`
 
-**Level 1:** Select `attacker` (type: `GameObject`) — shows: `transform`, `name`, `tag`, `layer`, and available components
+**Level 1:** Select `attacker` (GameObject) — shows: `transform`, `name`, `tag`, `layer`, plus accessible components
 
-**Level 2:** Select `transform` (type: `Transform`) — shows: `position`, `rotation`, `localPosition`, `localScale`, `parent`, `childCount`, etc.
+**Level 2:** Select `transform` (Transform) — shows: `position`, `rotation`, `localPosition`, `localScale`, `parent`, `childCount`, etc.
 
-**Level 3:** Select `position` (type: `Vector3`) — shows: `x`, `y`, `z`, `magnitude`, `normalized`, `sqrMagnitude`
+**Level 3:** Select `position` (Vector3) — shows: `x`, `y`, `z`, `magnitude`, `normalized`, `sqrMagnitude`
 
-**Level 4:** Select `x` (type: `float`) — this is a primitive, navigation stops. Your final value is a `float`.
+**Level 4:** Select `x` (float) — primitive, navigation stops. Final value is a `float`.
 
-Each level is a dropdown in the Inspector, so the full path is visible and each step is independently configurable. Want to switch from `position.x` to `position.y`? Just change the last dropdown. Want to switch from `attacker.transform.position` to `target.transform.position`? Change the Level 1 dropdown.
+Each level is a separate dropdown in the Inspector, so the full path is visible. Want to switch from `position.x` to `position.y`? Change the last dropdown. Want `target.transform.position` instead of `attacker.transform.position`? Change the Level 1 dropdown. You don't rebuild the whole path for small changes.
 
-### Practical Depth Limits
-
-Five levels is the maximum, and in practice you'll rarely need all five. Here's a rough guide:
+### Practical Depth Guide
 
 - **1 level** (most common): `damageInfo.damage`, `damageInfo.isCritical`
 - **2 levels** (common): `damageInfo.attacker.tag`, `player.health.currentHP`
 - **3 levels** (occasional): `damageInfo.attacker.transform.position`
 - **4 levels** (rare): `damageInfo.attacker.transform.position.x`
-- **5 levels** (very rare): edge cases with deeply nested data structures
+- **5 levels** (very rare): deeply nested custom data structures
 
-If you find yourself regularly hitting 5 levels, it might be a sign that your data structures could benefit from some flattening, or that the condition logic is complex enough to warrant a custom code solution.
+If you're consistently hitting 5 levels, consider adding convenience properties:
 
-## Combining Source Types: Real-World Patterns
+```csharp
+public class DamageInfo
+{
+    public GameObject attacker;
+    // Flatten deep access for common checks
+    public float AttackerX => attacker.transform.position.x;
+}
+```
 
-The real power of the condition tree shows up when you mix and match source types in a single tree. Here are some patterns I've found useful in production:
+Now the condition node needs 1 level instead of 4.
+
+## Mixing Source Types: Real-World Patterns
+
+The condition tree's real power shows up when you combine source types in a single tree. Here are patterns I've found useful in production:
 
 ### Pattern 1: Event Data vs Scene State
 
@@ -248,9 +329,9 @@ AND
 └── Event Argument: damageInfo.isCritical == Constant: true
 ```
 
-"Trigger phase 2 when a critical hit exceeds the boss's threshold." The threshold is configured on the boss prefab, so different bosses have different thresholds. No code changes per boss.
+"Trigger phase 2 when a critical hit exceeds the boss's threshold." Different bosses have different thresholds configured on their prefabs. Zero code changes per boss variant.
 
-### Pattern 2: Probability Gated by State
+### Pattern 2: Probability Gated by Live Stats
 
 ```
 AND
@@ -258,39 +339,54 @@ AND
 └── Event Argument: attackResult.didHit == Constant: true
 ```
 
-"If the attack hit, roll against the player's crit chance." The crit chance comes from the player's stats component, and the random roll happens per event evaluation. A designer can buff the crit chance by adjusting the stat value on the player object — the condition tree automatically uses the new value.
+"If the attack hit, roll against the player's current crit chance." The designer buffs the crit stat on the player object; the condition tree automatically uses the new value.
 
 ### Pattern 3: Multi-Source Validation
 
 ```
 AND
-├── Event Argument: itemPickup.itemType In List Constant: ["Weapon", "Armor", "Accessory"]
+├── Event Argument: itemPickup.itemType In List Constant: [Weapon, Armor, Accessory]
 ├── Scene Type: player.inventory.slotsFree > Constant: 0
 └── Scene Type: gameManager.isInCombat == Constant: false
 ```
 
-"Only pick up equipment items when the player has inventory space and isn't in combat." Three different sources: event data, player state, and game state. All visual, all designer-configurable.
+"Only pick up equipment items when the player has inventory space and isn't in combat." Three data sources — event payload, player state, game state — all visual, all designer-configurable.
 
-## Performance Considerations
+### Pattern 4: Nested OR with Mixed Sources
 
-A reasonable question: if the condition tree is evaluating all these property accesses and deep navigation at runtime, isn't that slow?
+```
+AND
+├── Event Argument: damage > Constant: 20
+└── OR
+    ├── Scene Type: target.armorComponent.isBroken == Constant: true
+    ├── Event Argument: damageType == Constant: Piercing
+    └── Random: 0.0-1.0 < Constant: 0.15
+```
 
-Short answer: no. The condition tree compiles to an Expression Tree at initialization time. This means the first evaluation has a one-time compilation cost, but subsequent evaluations are essentially the same speed as hand-written C# code. The compiled expression directly accesses fields and properties without reflection — the visual configuration is just the authoring layer, not the runtime execution path.
+"Damage above 20, AND either the armor is broken OR it's piercing damage OR a 15% random chance." Event data, scene state, and randomness all in one tree. A designer can read this. A designer can modify this. No programmer needed.
 
-For detailed performance numbers and optimization strategies, check out the next post in this series on operators and performance.
+## Performance Note
+
+A reasonable concern: if the condition tree is navigating properties 5 levels deep and accessing scene objects at runtime, isn't that slow?
+
+Short answer: no. The visual tree compiles to a .NET Expression Tree at initialization. After compilation, property accesses are direct compiled calls — no reflection, no `PropertyInfo.GetValue`, no boxing. The visual configuration is the authoring layer; the runtime execution is compiled IL running at native C# speed.
+
+We'll cover exact performance numbers and optimization strategies in detail in the next post.
 
 ## Wrapping Up
 
-The four data source types give the condition tree its flexibility:
+The multi-source data problem is real. Real game conditions need data from event payloads, scene objects, random generators, and fixed constants — often in the same boolean expression. Traditional code handles this by accumulating dependencies in event handlers until they become fragile, tightly-coupled messes.
 
-- **Event Argument** for data flowing through the event system
+The four data source types give the condition tree the flexibility to handle all of this visually:
+
+- **Event Argument** for data flowing through the event
 - **Scene Type** for the current state of the world
 - **Random** for probability and variation
-- **Constant** for fixed comparison values
+- **Constant** for fixed thresholds and expected values
 
-Mixed together with AND/OR groups, these cover the vast majority of conditions you'll need in a real game project. The deep property access (up to 5 levels) means you can reach into complex data structures without writing accessor methods, and the bool method support on Scene Types handles the cases where a simple property check isn't enough.
+Combined with deep property navigation (5 levels), bool method support, and proper enum dropdowns, these sources cover the vast majority of real-world game conditions without writing accessor methods, without creating new dependencies in code, and without asking a designer to wait for a recompile.
 
-Next up: we'll cover every comparison operator in detail, plus type validation and performance optimization strategies.
+Next up: every comparison operator explained, plus type validation and performance optimization strategies.
 
 ---
 

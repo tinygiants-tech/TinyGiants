@@ -1,460 +1,323 @@
 ---
 slug: runtime-monitor-complete-guide
-title: "Runtime Monitor: The Complete 8-Panel Guide to Event System Observability"
+title: "Debugging the Invisible: Why Event-Driven Systems Need Their Own Observability Layer"
 authors: [tinygiants]
-tags: [ges, unity, debugging, tools, performance]
-description: "Your event system shouldn't be a black box. The GES Runtime Monitor gives you real-time visibility into every event raise, listener, and performance metric."
+tags: [ges, unity, debugging, tools, performance, observability]
+description: "Event systems are fire-and-forget by nature. When something goes wrong, you need dedicated observability — not Debug.Log spaghetti."
 image: /img/home-page/game-event-system-preview.png
 ---
 
-"Why did the frame rate drop?" You open the Unity Profiler. You see a spike. It's in... some callback. You dig through the call stack. It leads to an event handler. Which event? Which listener? How many listeners does that event have? Is this the first time it spiked or has it been degrading gradually? The Profiler tells you *where* the time was spent, but not *why* your event system behaved that way.
+A QA tester files a bug: "The door doesn't open when the player picks up the key."
 
-This is the observability gap. Your event system is a black box — events fire, listeners react, and you have no visibility into the internal pipeline unless you instrument every single handler manually. That's tedious, error-prone, and the instrumentation code itself becomes maintenance burden.
+Simple, right? Probably a missing reference or a wrong condition. You open the project, pick up the key, and... the door opens fine. Works on your machine. So you ask the tester for reproduction steps, and they say "it happens about 30% of the time, usually after a save/load cycle."
 
-The GES Runtime Monitor fills this gap. It's an editor window that gives you real-time visibility into every aspect of your event system: which events fired, when, how long their listeners took, what conditions were evaluated, which flows propagated, and where the bottlenecks are. Eight specialized panels, each focused on a different dimension of event system health.
+Now you're in debugging hell. Somewhere in the chain between the key pickup event, the inventory update, the quest progress check, and the door's unlock condition, something is failing intermittently. But which link? Was the event not raised? Was it raised but the listener wasn't subscribed? Was the listener subscribed but the condition evaluated to false? Was the condition correct but the door's state was stale after the load?
+
+You don't know. And the event system won't tell you. It's "fire and forget" — emphasis on the forget.
 
 <!-- truncate -->
 
-## Opening the Monitor
+## The Observability Gap in Event-Driven Games
 
-The Runtime Monitor is an editor window. Open it via:
+Event-driven architecture is beautiful in theory. Systems are decoupled. Communication flows through well-defined channels. Adding new behavior means subscribing a new listener, not modifying the sender. It scales, it's clean, it's elegant.
 
-`Tools > TinyGiants > Game Event System > Runtime Monitor`
+Until something goes wrong. Then it's a nightmare.
 
-Or find it in the GES Hub:
+The core problem is that event systems are **invisible by default**. When `PlayerCombat` calls `onDamageDealt.Raise(42)`, the event system iterates through listeners, calls their handlers, and returns. No log. No trace. No record that it happened. The information evaporates the moment the raise completes.
 
-![Hub Core Tools](/img/game-event-system/tools/runtime-monitor/hub-core-tools.png)
+This is fundamentally different from direct method calls. If `PlayerCombat.TakeDamage()` calls `HealthBar.UpdateDisplay()` directly, you can set a breakpoint on the call site, step through the code, and see exactly what happens. With events, the caller doesn't know who's listening. The listeners don't know who's calling. The connection between them exists only at runtime, in the event system's subscription list, invisible to your debugger.
 
-The monitor only collects data during Play Mode. When you're not playing, it shows the last session's data (if any) or a clean state. Data collection has minimal performance impact in the editor and zero impact in builds — the monitor is editor-only code stripped during compilation.
+### Unity's Profiler: Wrong Tool for the Job
 
-Dock it wherever you like. I keep it as a tab next to the Game view so I can see event activity while playing. Some people prefer it next to the Console for quick cross-referencing with debug logs.
+Unity's Profiler is excellent at answering "what method took how long." It is terrible at answering "what event fired, when, with what data, and who responded."
 
-## Tab 1: Dashboard — System Health at a Glance
+You see a spike in the Profiler. It's in some callback method — `HandleDamage`. You dig through the call stack. It was invoked by... the event system's dispatch loop. Which event? The Profiler doesn't know. It just sees a method call from a generic dispatch function. Which listener was slow? You'd need to instrument each one individually. What data was passed? The Profiler doesn't capture arguments.
 
-The Dashboard is your starting point. It gives you a high-level overview of the entire event system's health in a single view.
+The Profiler tells you WHERE time was spent. It doesn't tell you WHY your event system behaved the way it did. Those are fundamentally different questions.
+
+### The Debug.Log Arms Race
+
+Every Unity developer's first debugging tool: sprinkle `Debug.Log` everywhere.
+
+```csharp
+private void HandleDamage(int amount)
+{
+    Debug.Log($"HandleDamage called with amount={amount}");
+    // actual logic...
+}
+```
+
+This works for one event. Now multiply by every listener on every event in your project. You end up with 500 log lines per frame in the Console, scrolling faster than you can read. You try filtering by search term, but you spelled "Damage" differently in three different log statements. You add timestamps, then caller names, then stack traces. Each `Debug.Log` becomes three lines of formatting code wrapped around one line of actual logging.
+
+And when you ship? You need to remove all of them. Or wrap them in `#if UNITY_EDITOR` blocks. Or leave them in and hope nobody notices the performance hit from string formatting 500 log messages per frame.
+
+`Debug.Log` is a debugging strategy the same way a bucket is a plumbing strategy. It works in an emergency, but you wouldn't design a house around it.
+
+### The Questions You Actually Need Answered
+
+When debugging an event-driven system, the questions fall into predictable categories:
+
+**"Was it raised?"** — The most basic question. Did the event fire at all? If the door didn't open, was `OnKeyPickedUp` raised when the player grabbed the key?
+
+**"Who raised it?"** — If it was raised, which script called `Raise()`? Was it the pickup trigger? The inventory system? A debug shortcut you forgot to remove?
+
+**"What data was passed?"** — The event fired, but with what argument? Was the key ID correct? Was it null?
+
+**"Who was listening?"** — The event fired with the right data, but were the right listeners subscribed at that moment? Did the door's listener get removed during the scene transition?
+
+**"How long did it take?"** — One of your listeners is doing something expensive. Which of the 8 listeners on this event is the bottleneck?
+
+**"Is there a loop?"** — Event A raises B, B raises C, C raises A. The game freezes. Where did the cycle start?
+
+### What DevOps Has (And We Don't)
+
+The backend development world solved this problem years ago. Distributed tracing (Jaeger, Zipkin) lets you follow a request through 15 microservices and see exactly where it spent time. Metrics dashboards (Grafana, Datadog) show you request rates, error rates, latency percentiles — in real time. Log aggregation (ELK stack, Splunk) lets you search across millions of log entries with structured queries.
+
+Game events are architecturally similar to microservice messages. An event fires (a request is sent), multiple listeners respond (multiple services process it), and the results propagate downstream (trigger and chain events). The same observability techniques apply.
+
+But Unity's toolbox gives us... the Profiler and Debug.Log. We deserve better.
+
+## GES's Runtime Monitor: Purpose-Built Event Observability
+
+The GES Runtime Monitor is an editor window with 8 specialized tabs, each designed to answer a specific category of debugging question. It understands events, listeners, conditions, timing, and flow graphs natively — because it's built into the event system, not bolted on after the fact.
+
+Open it via `Tools > TinyGiants > Game Event System > Runtime Monitor`, or find it in the GES Hub. Dock it wherever makes sense for your workflow — I keep it tabbed next to the Game view.
+
+The monitor collects data during Play Mode with minimal overhead. It's editor-only code, completely stripped from builds. Zero impact on your shipping game.
+
+Let's walk through all eight tabs.
+
+## Tab 1: Dashboard — The Health Check
+
+The Dashboard is your starting point. Glance at it and know immediately whether your event system is healthy or on fire.
 
 ![Monitor Dashboard](/img/game-event-system/tools/runtime-monitor/monitor-dashboard.png)
 
-### Metric Cards
+**Metric cards** across the top show the big picture: total events in the project, active events this session (raised at least once), total listener subscriptions, and cumulative raise count since Play Mode started.
 
-The top row shows summary cards:
+**The performance bar** is color-coded. Green means all events are processing under 1ms average — you're fine. Yellow means some events average 1-10ms — worth a look. Red means something is over 10ms — stop and investigate. The bar reflects the WORST-performing event, not the average. One bad apple turns the whole bar yellow. Intentional — you want to know about outliers.
 
-- **Total Events:** How many event assets exist in the project
-- **Active Events:** How many have been raised at least once this session
-- **Total Listeners:** Sum of all listener subscriptions across all events
-- **Total Raises:** Cumulative number of event raises since Play Mode started
+**Recent activity** shows the last few event raises scrolling by in real time: event name, timestamp, listener count, execution time. During gameplay, this gives you a live pulse of what your event system is doing.
 
-These numbers tell you the scale of your event system. A project with 200 events and 500 listeners is very different from one with 20 events and 50 listeners — different optimization strategies apply.
+**Quick warnings** summarize detected issues: high execution times, high listener counts, recursive raises, memory allocations. Click a warning badge to jump to the relevant detail tab.
 
-### Performance Bar
+The Dashboard answers: "Is my event system healthy right now?" If the answer is yes, move on with your day. If not, the other tabs tell you why.
 
-A color-coded bar showing overall event system performance:
+## Tab 2: Performance — The Hard Numbers
 
-- **Green:** All events processing under 1ms average. You're in great shape.
-- **Yellow:** Some events averaging 1-10ms. Worth investigating but probably fine.
-- **Red:** Events averaging over 10ms. Something needs attention.
-
-The bar reflects the *worst-performing* event, not the average. One bad event turns the bar yellow or red even if everything else is fast. This is intentional — you want to know about outliers.
-
-### Recent Activity
-
-A scrolling list of the most recent event raises, showing:
-- Event name
-- Timestamp
-- Listener count at time of raise
-- Execution time
-
-This gives you an at-a-glance view of what's happening right now. During gameplay, you'll see events scrolling by in real time — player input events, state changes, UI updates, whatever your game is doing.
-
-### Quick Warnings
-
-If the monitor detects potential issues, they appear here as summary badges:
-- Number of events with high execution time
-- Number of events with high listener counts
-- Any detected recursive raises
-- Memory allocation warnings
-
-Click a warning to jump to the relevant detail tab.
-
-## Tab 2: Performance — Execution Time Analysis
-
-This is where you go when you need hard numbers.
+This is where you go when something feels slow and you need data, not feelings.
 
 ![Monitor Performance](/img/game-event-system/tools/runtime-monitor/monitor-performance.png)
 
-### Per-Event Metrics
+Every event in your project gets a row with:
 
-Each event in your project gets a row showing:
+- **Event Name** — the ScriptableObject asset name
+- **Raise Count** — how many times it's fired this session
+- **Listener Count** — current active subscribers
+- **Avg/Min/Max Time** — execution time per raise, across all listeners
+- **GC Alloc** — garbage collection allocations per raise
 
-- **Event Name:** The ScriptableObject asset name
-- **Raise Count:** How many times it's been raised this session
-- **Listener Count:** Current number of active listeners
-- **Avg Time:** Average execution time per raise (across all listeners)
-- **Min Time:** Fastest raise
-- **Max Time:** Slowest raise (spikes)
-- **GC Alloc:** Garbage collection allocations per raise
+The time cells are color-coded: green (&lt;1ms) is normal, yellow (1-10ms) is elevated, red (>10ms) is critical. Sort by any column — sort by "Max Time" to find spike culprits, sort by "GC Alloc" to find allocation hotspots, sort by "Raise Count" to identify high-frequency events.
 
-### Color Coding
+Here's the insight that makes the Performance tab powerful: **event execution time includes ALL listener work.** If an event shows 5ms average with 50 listeners, that's ~0.1ms per listener — normal. If it shows 5ms with 2 listeners, one of those listeners is doing something expensive. The numbers immediately tell you whether the problem is "too many listeners" or "one listener is slow."
 
-The execution time cells are color-coded:
-- **Green (&lt;1ms):** Normal. Most events should be here.
-- **Yellow (1-10ms):** Elevated. Check if the listener count is high or if individual listeners are doing expensive work.
-- **Red (>10ms):** Critical. This event is a performance bottleneck. Investigate immediately.
+The execution time includes iterating listener layers (basic, priority, conditional, persistent), evaluating condition predicates, executing callbacks, and initiating trigger/chain propagation. It does NOT include the caller's code before/after `Raise()` or the visual editor rendering.
 
-### Sorting and Filtering
+## Tab 3: Recent Events — The Timeline
 
-Click column headers to sort by that metric. Sort by "Max Time" to find spike culprits. Sort by "GC Alloc" to find allocation hotspots. Sort by "Raise Count" to identify high-frequency events that might benefit from conditional listeners.
-
-### What the Numbers Mean
-
-Event execution time includes:
-1. Iterating through all listener layers (basic, priority, conditional, persistent)
-2. Evaluating condition predicates for conditional listeners
-3. Executing each listener's callback
-4. Initiating trigger and chain event propagation
-
-It does NOT include:
-- The caller's code before/after `Raise()`
-- Delayed/repeating event scheduling overhead (negligible)
-- Visual editor rendering
-
-If an event shows 5ms average with 50 listeners, that's ~0.1ms per listener. If it shows 5ms with 2 listeners, one of those listeners is doing something expensive — check the Details tab for per-listener breakdown.
-
-## Tab 3: Recent Events — Chronological Event Log
-
-A timestamped log of every event raise, in chronological order.
+A chronological log of every event raise. This is your event system's flight recorder.
 
 ![Monitor Recent](/img/game-event-system/tools/runtime-monitor/monitor-recent.png)
 
-### What Each Entry Shows
+Each entry shows: timestamp (game time), event name, argument value (displayed as string), the caller script and method that called `Raise()`, listener count at time of raise, and execution time.
 
-- **Timestamp:** When the event fired (game time, not wall clock)
-- **Event Name:** Which event
-- **Argument:** The data passed (for typed events), displayed as a string representation
-- **Caller:** The script and method that called `Raise()` (captured via stack trace)
-- **Listener Count:** How many listeners were active when it fired
-- **Execution Time:** How long the raise took
-
-### Stack Trace Integration
-
-Click any entry to see the full call stack at the moment of the raise. This is invaluable for answering "who raised this event?" — especially when multiple systems can raise the same event.
-
-The stack trace captures where `Raise()` was called, not where the event asset was created. So you'll see something like:
+Click any entry for the full call stack. This is gold for answering "who raised this?" — especially when multiple systems can raise the same event:
 
 ```
 PlayerCombat.TakeDamage() at PlayerCombat.cs:47
-  → GameEventInt.Raise(42)
+  -> Int32GameEvent.Raise(42)
 ```
 
-This tells you the damage event was raised by the player combat system at line 47, with an argument of 42.
+Now you know the damage event came from the player combat system at line 47, with an argument of 42.
 
-### Filtering
+**Filter by event name** to watch a specific event in real time. Set it to "OnKeyPickedUp" and play through the key-pickup sequence. Is it there? When did it fire? What argument? If it's missing, the problem is upstream — the raiser never called `Raise()`. If it's present with the right data, the problem is downstream — check the Listeners tab.
 
-Filter by:
-- Event name (search box)
-- Time range (last N seconds)
-- Minimum execution time (to find spikes)
+**Filter by time range** (last N seconds) or by minimum execution time (to surface spikes only).
 
-The filter persists across frames, so you can set "show only `OnDamageDealt`" and watch it in real time as you play.
+The Recent tab turns "did this event actually fire?" from a guessing game into a lookup.
 
-### Use Cases
+## Tab 4: Statistics — The Patterns
 
-**"Did this event actually fire?"** — Search for it in the log. If it's not there, it didn't fire. Check the raiser.
-
-**"What argument was passed?"** — Click the entry and see the argument value.
-
-**"Why did this fire twice?"** — Look at the timestamps and callers. Two different systems might be raising the same event, or one system is raising it in a loop.
-
-**"What order did things happen?"** — The chronological list shows you the exact sequence of events across your entire system.
-
-## Tab 4: Statistics — Usage Patterns Over Time
-
-While the Recent tab shows individual events, the Statistics tab shows aggregate patterns.
+While Recent shows individual events, Statistics shows aggregate behavior over time.
 
 ![Monitor Statistics](/img/game-event-system/tools/runtime-monitor/monitor-statistics.png)
 
-### Frequency Analysis
+**Frequency analysis:** total events per second (real-time), per-event frequency (raises per second and per minute), and a distribution histogram.
 
-- **Events per second:** How many total event raises happen per second, updated in real time
-- **Per-event frequency:** How often each specific event fires (raises per second, per minute)
-- **Frequency distribution:** Histogram showing how many events fall into each frequency bucket
+**Usage patterns:** most active events (sorted by total raise count), least active events (fired zero times — possible dead code), busiest moments (time periods with peak activity), and listener growth over the session.
 
-### Usage Patterns
+This tab reveals things you'd never find with spot-checking. Like discovering that `OnPositionUpdated` — which you thought was a "sometimes" event — actually fires 60 times per second with 20 listeners. That's 1,200 listener executions per second. Even at 0.01ms each, that's 12ms per second of CPU time for one event. On mobile, that matters.
 
-- **Most active events:** Sorted by total raise count
-- **Least active events:** Events that exist but have never fired (possible dead code)
-- **Busiest moments:** Time periods with the highest event activity
-- **Listener growth:** How listener counts have changed over the session
+Or discovering that `OnBossDied` has zero raises after a full playthrough that includes boss fights. Either the event isn't wired correctly, or it's dead code. Either way, you want to know.
 
-### Why This Matters
+The Statistics tab makes invisible patterns visible without manual instrumentation.
 
-High-frequency events are your optimization targets. If `OnPositionUpdated` fires 60 times per second with 20 listeners, that's 1,200 listener executions per second for one event. Even at 0.01ms per listener, that's 12ms per second — noticeable on mobile.
+## Tab 5: Warnings — The Automatic Health Check
 
-The statistics tab makes these patterns visible without manual instrumentation. You might discover that an event you thought was rare actually fires every frame, or that an event you thought was critical has zero subscribers.
-
-Never-fired events are also worth investigating. If `OnBossDied` has zero raises after a full play-through that includes boss fights, either the event isn't wired correctly or it's dead code.
-
-## Tab 5: Warnings — Automatic Issue Detection
-
-The Warnings tab is your event system's health check. It automatically detects common issues and flags them with severity levels.
+The Warnings tab watches your event system and flags problems automatically. You don't have to know what to look for — it knows.
 
 ![Monitor Warnings](/img/game-event-system/tools/runtime-monitor/monitor-warnings.png)
 
-### Warning Categories
-
-**Performance Warnings:**
+**Performance warnings:**
 - Event with execution time > 10ms (Red)
 - Event with execution time > 5ms (Yellow)
-- Event raising more than 100 times per second without conditional listeners (Yellow)
+- Event raising > 100 times per second without conditional listeners (Yellow)
 
-**Listener Warnings:**
-- Event with more than 50 listeners (Yellow)
-- Event with more than 100 listeners (Red)
+**Listener warnings:**
+- Event with > 50 listeners (Yellow)
+- Event with > 100 listeners (Red)
 - Persistent listener on a non-DontDestroyOnLoad object (Yellow)
 
-**Memory Warnings:**
+**Memory warnings:**
 - Event raise causing GC allocation (Yellow)
 - High-frequency event with GC allocation (Red)
 
-**Recursion Warnings:**
+**Recursion warnings:**
 - Event raised while already being processed (Red)
 - Circular trigger/chain dependency detected (Red)
 
-### Actionable Information
+Each warning includes the event name, the specific metric that triggered it, and a suggested action. Not just "this is bad" but "consider adding conditional listeners to reduce execution count" or "check for missing RemoveListener calls."
 
-Each warning includes:
-- The event name
-- The specific metric that triggered the warning
-- A suggested action (e.g., "Consider adding conditional listeners to reduce execution count" or "Check for missing RemoveListener calls")
+You can suppress individual warnings for the current session if they're expected (during a stress test, for example). Suppression hides the warning but doesn't disable detection — clear suppressions to see everything again.
 
-### Warning Suppression
+The recursion detection alone is worth the price of admission. Event A raises B raises A raises B... is one of the nastiest bugs in event-driven systems. Without automatic detection, you discover it when the game freezes and the stack overflows.
 
-Some warnings are expected in specific scenarios. For example, during a stress test, you intentionally create high listener counts. You can suppress individual warnings for the current session so they don't clutter the view.
+## Tab 6: Listeners — The Subscription Map
 
-Suppression doesn't disable detection — the warning still fires, it's just hidden. Clear suppressions to see everything again.
-
-## Tab 6: Listeners — Active Subscription Breakdown
-
-This tab shows every active listener subscription in the system, organized by event and listener type.
+This tab shows every active listener subscription, organized by event and listener type.
 
 ![Monitor Listeners](/img/game-event-system/tools/runtime-monitor/monitor-listeners.png)
 
-### Per-Event Breakdown
-
-Expand any event to see its listeners grouped by type:
+Expand any event to see its listeners grouped by layer:
 
 ```
 OnPlayerDamaged (12 listeners)
-├── Basic (4)
-│   ├── HealthSystem.HandleDamage
-│   ├── HitFlash.ShowFlash
-│   ├── CameraShake.OnDamage
-│   └── SoundManager.PlayHitSound
-├── Priority (3)
-│   ├── [200] ArmorSystem.ReduceDamage
-│   ├── [100] HealthSystem.ApplyDamage
-│   └── [25]  HealthUI.RefreshBar
-├── Conditional (2)
-│   ├── [cond] BossModifier.ApplyBossMultiplier
-│   └── [cond] CriticalHit.CheckCritical
-├── Persistent (1)
-│   └── AnalyticsManager.TrackDamage
-├── Triggers (1)
-│   └── → OnScreenShake (delay: 0s)
-└── Chains (1)
-    └── → OnDamageNumber (delay: 0.1s, duration: 0.5s)
++-- Basic (4)
+|   +-- HealthSystem.HandleDamage
+|   +-- HitFlash.ShowFlash
+|   +-- CameraShake.OnDamage
+|   +-- SoundManager.PlayHitSound
++-- Priority (3)
+|   +-- [200] ArmorSystem.ReduceDamage
+|   +-- [100] HealthSystem.ApplyDamage
+|   +-- [25]  HealthUI.RefreshBar
++-- Conditional (2)
+|   +-- [cond] BossModifier.ApplyBossMultiplier
+|   +-- [cond] CriticalHit.CheckCritical
++-- Persistent (1)
+|   +-- AnalyticsManager.TrackDamage
++-- Triggers (1)
+|   +-- -> OnScreenShake (delay: 0s)
++-- Chains (1)
+    +-- -> OnDamageNumber (delay: 0.1s, duration: 0.5s)
 ```
 
-### What You Can Learn
+**Subscription audit:** verify that expected listeners are actually subscribed. "Why isn't the hit sound playing?" Check here — is `SoundManager.PlayHitSound` listed? If not, the subscription is missing (probably a lifecycle issue — the object was destroyed and recreated without re-subscribing).
 
-**Subscription audit:** Verify that the listeners you expect are actually subscribed. If your sound system isn't playing hit sounds, check here — is the listener registered?
+**Priority verification:** confirm execution order makes sense. If the UI update (priority 25) is processing before the data mutation (priority 100), your priority values are wrong.
 
-**Priority verification:** Confirm that priority values are correct and the execution order makes sense. If the UI update (priority 25) appears before the data mutation (priority 100), something's wrong with your subscription code.
+**Leak detection:** if a listener appears for an object that should have been destroyed, you've found a subscription leak. The listener's target is stale, and you're missing a `RemoveListener` call in `OnDisable` or `OnDestroy`.
 
-**Leak detection:** If a listener appears here for an object that should have been destroyed, you've found a subscription leak. The listener's target is stale.
+**Flow connections:** see all trigger and chain connections for each event, including delays and conditions.
 
-**Conditional inspection:** See which conditional listeners are active and their associated conditions. Useful for verifying that your conditions are wired correctly.
+Remember the door bug from the intro? The Listeners tab would show you immediately whether the door's unlock listener was subscribed to `OnKeyPickedUp` at the moment of the raise. If it disappeared after save/load, you'd see it in the listener history (available in the Details tab).
 
-**Flow connections:** See all trigger and chain connections for each event, including their delays and conditions.
+## Tab 7: Automation — The Flow Map
 
-## Tab 7: Automation — Trigger and Chain Flow Visualization
-
-This tab visualizes the event-to-event connections — triggers and chains — in two view modes.
+This tab visualizes event-to-event connections — triggers and chains — in two view modes.
 
 ### Tree View
 
 ![Monitor Automation Tree](/img/game-event-system/tools/runtime-monitor/monitor-automation-tree.png)
 
-The tree view shows each event as a root node with its outgoing connections as children:
+The tree view shows each event as a root with outgoing connections as children:
 
 ```
 OnBossDefeated
-├── [trigger] → OnPlayVictoryMusic (delay: 0s)
-├── [trigger] → OnShowVictoryUI (delay: 1s)
-└── [chain] → OnSaveProgress (delay: 2s)
-    └── [chain] → OnLoadNextLevel (delay: 0.5s)
++-- [trigger] -> OnPlayVictoryMusic (delay: 0s)
++-- [trigger] -> OnShowVictoryUI (delay: 1s)
++-- [chain] -> OnSaveProgress (delay: 2s)
+    +-- [chain] -> OnLoadNextLevel (delay: 0.5s)
 ```
 
-This is great for understanding the propagation path of a specific event. "When the boss dies, what else happens?" Follow the tree.
+Great for answering "when the boss dies, what else happens?" Follow the tree and see the full propagation path.
 
 ### Flat View
 
 ![Monitor Automation Flat](/img/game-event-system/tools/runtime-monitor/monitor-automation-flat.png)
 
-The flat view lists all connections as source → target pairs:
+The flat view lists all connections as source-target pairs. Better for searching: "does anything trigger OnLoadNextLevel?" Scan the target column.
 
-```
-OnBossDefeated → OnPlayVictoryMusic [trigger, delay: 0s]
-OnBossDefeated → OnShowVictoryUI [trigger, delay: 1s]
-OnBossDefeated → OnSaveProgress [chain, delay: 2s]
-OnSaveProgress → OnLoadNextLevel [chain, delay: 0.5s]
-```
+Both views show connections configured visually in the Node Editor (marked "visual") and connections created programmatically at runtime (marked "runtime"). If a flow isn't working, check whether the expected connection exists at all. If it shows "visual" but not "runtime," the configuration is correct but something is preventing runtime initialization. If it's absent entirely, the connection was never created.
 
-This is better for searching. "Does anything trigger `OnLoadNextLevel`?" Search for it in the target column.
+## Tab 8: Details — The Deep Dive
 
-### Runtime vs. Visual Connections
-
-The automation tab shows both:
-- Connections configured visually in the Node Editor (marked as "visual")
-- Connections created programmatically at runtime (marked as "runtime")
-
-This distinction helps you understand the full picture. If a flow isn't working, check whether the expected connection exists. If it shows up as "visual" but not as "runtime," the visual editor configuration is correct but something is preventing the runtime initialization. If it's not listed at all, the connection doesn't exist.
-
-## Tab 8: Details — Deep Dive Into Individual Events
-
-Click any event in any other tab, and the Details tab shows you everything about that specific event.
+Click any event in any other tab and the Details tab opens a comprehensive view of that single event.
 
 ### Statistics Section
 
 ![Monitor Details Stats](/img/game-event-system/tools/runtime-monitor/monitor-details-stats.png)
 
-- Total raises this session
-- Average/min/max execution time
-- Current listener count by type
-- GC allocation per raise
-- Frequency (raises per second over last 60 seconds)
-- Last raise timestamp and argument
+Total raises, avg/min/max execution time, current listener count by type, GC allocation per raise, frequency over the last 60 seconds, last raise timestamp and argument. Everything you need to understand one event's behavior at a glance.
 
 ### Log Section
 
 ![Monitor Details Log](/img/game-event-system/tools/runtime-monitor/monitor-details-log.png)
 
-A filtered version of the Recent tab, showing only raises of this specific event:
+A filtered event log showing only this event's raises, with a critical addition: **per-listener breakdown.** While the Performance tab shows aggregate per-event times, the Details tab shows per-listener times within a single event.
 
-- Timestamp
-- Argument value
-- Caller (with stack trace)
-- Execution time
-- Per-listener breakdown (which listener took how long)
+If `OnPlayerDamaged` averages 3ms with 10 listeners, the Details tab tells you that `ArmorSystem.ReduceDamage` takes 2.5ms and the other 9 listeners take 0.05ms each. Now you know exactly where to optimize. No guessing, no adding `Stopwatch` instrumentation to every handler, no Debug.Log timing code.
 
-The per-listener breakdown is the key differentiator from the Performance tab. While Performance shows aggregate per-event times, Details shows per-listener times within a single event. If `OnPlayerDamaged` averages 3ms and has 10 listeners, the Details tab tells you that `ArmorSystem.ReduceDamage` takes 2.5ms and the other 9 listeners take 0.05ms each. Now you know exactly where to optimize.
-
-### Listener History
-
-Shows listener additions and removals over time:
+The listener history section shows additions and removals over time:
 
 ```
-[0.0s] + AddListener: HealthSystem.HandleDamage
-[0.0s] + AddPriorityListener: ArmorSystem.ReduceDamage (200)
-[0.0s] + AddPriorityListener: HealthUI.RefreshBar (25)
+[0.0s]  + AddListener: HealthSystem.HandleDamage
+[0.0s]  + AddPriorityListener: ArmorSystem.ReduceDamage (200)
 [15.3s] - RemoveListener: HealthSystem.HandleDamage
 [15.3s] + AddListener: HealthSystem.HandleDamage
 [45.0s] + AddConditionalListener: BossModifier.Apply (100)
 ```
 
-This history helps debug "phantom listener" issues — listeners that appear and disappear unexpectedly due to object lifecycle events (scene loads, object pooling, etc.).
+This helps debug "phantom listener" issues — listeners that appear and disappear due to object lifecycle events (scene loads, object pooling, enable/disable cycles).
 
-## Using the Monitor Effectively
+## The Debugging Workflow This Enables
 
-### Workflow 1: Performance Profiling
+Let me revisit that door bug from the intro. With the Runtime Monitor, here's how the investigation goes:
 
-1. Open the Performance tab
-2. Play your game through a representative session
-3. Sort by "Max Time" to find spikes
-4. Click the worst offender to open Details
-5. Check the per-listener breakdown
-6. Optimize the slow listener(s)
-7. Repeat
+**Step 1:** Reproduce the bug (pick up key after save/load, door doesn't open).
 
-### Workflow 2: Bug Investigation
+**Step 2:** Open the Recent tab, search for "OnKeyPickedUp." Is it there? **Yes** — it fired at timestamp 23.4s with the correct key ID. So the raise is fine.
 
-1. Reproduce the bug in Play Mode
-2. Open the Recent tab
-3. Search for the event you suspect is involved
-4. Check: Did it fire? When? With what argument? Who raised it?
-5. If it fired correctly, check the Listeners tab — are the right listeners subscribed?
-6. If listeners are correct, the bug is in the listener logic, not the event system
+**Step 3:** Open the Listeners tab, find "OnKeyPickedUp." Is the door's listener subscribed? **No** — it's missing. It was there before the save/load, but it's gone now.
 
-### Workflow 3: Architecture Review
+**Step 4:** The door's listener registers in `OnEnable`. After loading, the door object was destroyed and recreated, but `OnEnable` ran before the event database finished loading. The listener tried to subscribe to a null event reference.
 
-1. Open the Statistics tab
-2. Identify never-fired events (dead code candidates)
-3. Identify extremely high-frequency events (optimization candidates)
-4. Open the Listeners tab
-5. Check for events with very high listener counts (coupling indicator)
-6. Check for events with zero listeners (possibly misconfigured)
-7. Open the Automation tab
-8. Verify that flow connections match your intended architecture
+**Total investigation time:** about 90 seconds. No Debug.Log. No guessing. No "works on my machine."
 
-### Workflow 4: Regression Testing
-
-1. Play through your test scenario
-2. Open the Warnings tab
-3. Any new warnings since last session?
-4. Open the Performance tab
-5. Any events that got slower since last session?
-6. Compare with previous benchmarks (take screenshots for comparison)
-
-## Performance Testing with the Stress Test Facility
-
-GES includes a stress test example (Example 14) specifically designed for performance validation with the Runtime Monitor.
-
-The stress test creates:
-- Configurable number of events (10, 50, 100, 500+)
-- Configurable listeners per event (1, 10, 50, 100+)
-- Configurable raise frequency (per frame, per second, burst)
-- Both simple and complex listener workloads
-
-Run the stress test with the monitor open. Watch the Performance tab for execution time scaling. Watch the Warnings tab for threshold violations. Watch the Dashboard for overall system health under load.
-
-This is how you answer the question "can my game handle 200 events with 50 listeners each?" — not with guesswork, but with measured data in your actual project.
-
-### Interpreting Stress Test Results
-
-**Linear scaling is good.** If 10 listeners take 0.1ms and 100 listeners take 1ms, the system scales linearly. This means you can predict performance at any listener count.
-
-**Non-linear scaling is a red flag.** If 10 listeners take 0.1ms but 100 listeners take 5ms, there's a bottleneck — possibly cache misses, lock contention, or a listener doing O(n) work relative to listener count.
-
-**GC allocation should stay at zero.** GES is designed for zero-allocation event raises. If the stress test shows GC allocation, something is off — likely a listener (not the event system itself) is allocating.
-
-## Monitor Limitations
-
-The Runtime Monitor is an editor tool. A few things to keep in mind:
-
-**Editor-only:** The monitor code is stripped from builds. It cannot run in standalone players, mobile, or consoles. It's a development tool, not a runtime diagnostic.
-
-**Observer effect:** The monitor adds a small amount of overhead when collecting data (timestamp capture, call stack recording). This overhead is negligible for normal development but could affect measurements in extreme stress tests. For accurate micro-benchmarking, use the Unity Profiler alongside the monitor.
-
-**Session-scoped:** Data resets when you exit Play Mode. If you need persistent metrics, take screenshots or export the data manually.
-
-**Per-event granularity:** The monitor tracks per-event metrics, not per-listener metrics (except in the Details tab). If you need per-listener profiling across all events simultaneously, use the Unity Profiler's instrumentation.
-
-## Summary
-
-The Runtime Monitor transforms your event system from a black box into an observable, debuggable, measurable infrastructure component. Eight panels, each serving a specific purpose:
+That's the power of dedicated observability. The monitor doesn't just show you data — it shows you the right data, organized by the questions you're actually asking. Each tab is a lens focused on a different dimension of event system behavior:
 
 | Tab | Question It Answers |
 |-----|---------------------|
 | Dashboard | "Is my event system healthy right now?" |
-| Performance | "Which events are slow?" |
-| Recent | "What just happened?" |
-| Statistics | "What are the usage patterns?" |
+| Performance | "Which events are slow and why?" |
+| Recent | "What just happened, in what order?" |
+| Statistics | "What are the long-term usage patterns?" |
 | Warnings | "What should I worry about?" |
-| Listeners | "Who is listening to what?" |
-| Automation | "How are events connected?" |
+| Listeners | "Who is listening to what, right now?" |
+| Automation | "How are events connected to each other?" |
 | Details | "Tell me everything about this one event." |
 
-Keep it open during development. Glance at the Dashboard regularly. When something feels off, you'll know exactly which tab to check and what to look for. Event-driven debugging shouldn't require printf-debugging every handler — the monitor gives you the visibility that event systems traditionally lack.
+Event-driven architecture is powerful. But power without visibility is just a fancier way to create bugs you can't find. The Runtime Monitor gives you the visibility. Keep it open during development. Glance at the Dashboard between play sessions. When something feels off, you'll know exactly which tab to check — and the answer will be waiting for you, not buried in 500 lines of Debug.Log output.
 
 ---
 

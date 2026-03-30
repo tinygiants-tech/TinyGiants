@@ -7,227 +7,249 @@ description: "Stop creating events one by one. The GES Batch Creator lets you qu
 image: /img/home-page/game-event-system-preview.png
 ---
 
-You just got the design doc for the new combat system. You scan through it and start counting: OnPlayerAttack, OnEnemyHit, OnDamageDealt, OnCriticalHit, OnDodge, OnBlock, OnParry, OnStaggered, OnKnockback, OnDeathBlow... and that's just the first page. Fifty events across six categories, three different parameter types. You're looking at an afternoon of right-click > Create > configure > rename > repeat.
+The design doc just landed in your inbox. New combat system. You start scanning through the requirements and mentally tallying the events you'll need: player attacks, enemy hits, damage dealt, critical hits, dodges, blocks, parries, staggers, knockbacks, death blows, combo chains, weapon switches, buff applications, debuff expirations... you're on page two and you've already counted forty events across six categories and at least four different parameter types.
 
-Or you could queue them all up and create them in one click. That's what the Game Event Creator's batch wizard is for.
+You know what comes next. Open Unity. Right-click in the Project window. Create > ScriptableObject. Rename it. Select it. Configure the type. Assign a category. Repeat. Forty times. For the typed events, you'll also need to make sure the concrete event classes exist first -- and if they don't, you'll need to write them or generate them before you can even create the asset.
 
 <!-- truncate -->
 
-I've been on projects where setting up the event layer for a new feature took longer than implementing the feature itself. Not because the events were complex — they were mostly straightforward — but because the manual process of creating, naming, categorizing, and configuring each one individually is death by a thousand paper cuts. The Game Event Creator eliminates that entire workflow.
+You're looking at an afternoon. Not building the combat system. Not implementing game logic. Just... setting up the plumbing. Creating event assets one at a time, copy-pasting names from the design doc, manually organizing them into folders, and praying you don't introduce a typo that causes a silent failure three weeks from now.
 
-Let's walk through every feature of the Creator, from the three event modes to the batch queue system, and I'll show you how to go from a design doc to a fully configured event set in minutes.
+I've been on projects where the event setup phase for a new feature took longer than the feature implementation itself. Not because the events were complex -- most were straightforward signals or single-parameter carriers -- but because the sheer manual overhead of doing anything forty times in Unity is brutal. And that's before we talk about the problems that manual creation introduces.
 
-## The Three Event Modes
+## The Real Problem: Death by a Thousand Right-Clicks
 
-The Game Event Creator supports three distinct event modes, each designed for a different communication pattern. Understanding which mode to use is the first step.
+Let's be specific about what "creating events manually" actually looks like in a typical Unity project, because the pain isn't obvious until you've lived it.
 
-### Parameterless Events
+### The Basic Loop (Per Event)
+
+For each event, assuming you're using ScriptableObject-based events (which you should be), the minimum process is:
+
+1. Navigate to the right folder in the Project window
+2. Right-click > Create > find the right menu option
+3. Name the asset (carefully -- typos are hard to catch later)
+4. Select the asset
+5. Configure any fields in the Inspector
+6. Repeat
+
+That's maybe 30 seconds per event if you're fast and the folder structure is already set up. For 50 events, that's 25 minutes of mechanical clicking. Your brain goes numb by event number 12, which is exactly when you start making mistakes.
+
+### The Typed Event Tax
+
+But it gets worse for typed events. If you're using a generic event system (which most serious implementations do), you need a concrete class for each parameter type before you can create an event asset. Want a `SingleGameEvent` that carries a float? Fine, `SingleGameEvent` probably already exists as a built-in. Want one that carries your custom `DamageInfo` struct? Now you need to:
+
+1. Create a new C# script
+2. Write the concrete class that inherits from the generic base
+3. Write the corresponding listener class
+4. Write the corresponding editor drawer (if you want Inspector support)
+5. Wait for Unity to compile
+6. Now you can create the ScriptableObject asset
+
+For each new type. Every time.
+
+```csharp
+// This is what you'd have to write manually for EACH custom type:
+[System.Serializable]
+public class DamageInfoGameEvent : GameEventBase<DamageInfo> { }
+
+[System.Serializable]
+public class DamageInfoGameEventListener : GameEventListenerBase<DamageInfo> { }
+
+// And maybe a custom property drawer too...
+// Now multiply this by every custom type in your project.
+```
+
+Some teams automate this with T4 templates or custom editor scripts, but that's its own maintenance burden. And you're still creating the actual event assets one at a time.
+
+### The Naming Consistency Problem
+
+Here's a subtler issue. When three different programmers create events independently over the course of a week, you end up with naming inconsistencies that haunt you forever:
+
+- `OnPlayerDied` (past tense)
+- `PlayerDeath` (noun, no prefix)
+- `player_death_event` (snake_case with suffix)
+- `EnemyHitEvent` (PascalCase with suffix)
+- `OnDamageDealt` (consistent with the first one, but only by coincidence)
+
+There's no enforcement point. No validation. No "hey, you used a different naming convention than the other 40 events in this category." Each event is created in isolation, so inconsistencies creep in naturally.
+
+You might say "just establish a convention and enforce it in code review." Sure. And code reviewers will catch naming inconsistencies in a list of 50 new events on a Friday afternoon PR. Right.
+
+### The Categorization Afterthought
+
+Nobody organizes events at creation time. You're in a hurry. You create the event, name it, and move on. Organization happens "later." Except later, you have 200 events in a flat folder and reorganizing them means updating every reference across the entire project.
+
+Categories should be a first-class part of event creation, not something you bolt on after the fact. But when you're right-clicking your way through 50 events, adding a categorization step to each one feels like adding insult to injury.
+
+### The Mixed Batch Nightmare
+
+Real design docs don't give you 50 events of the same type. They give you a mix:
+
+- 12 parameterless events (game state transitions, UI triggers)
+- 15 float events (damage values, health changes, speed modifiers)
+- 8 events with a custom `CombatHitInfo` struct (which doesn't have generated support yet)
+- 6 events with `Vector3` parameters (positions, directions)
+- 9 sender events with various types (need to know who caused the event)
+
+Managing this manually means constantly switching between creating assets, writing boilerplate code, waiting for compilation, and then going back to creating more assets. The context switching alone kills your productivity.
+
+And if you mess up the order -- create the assets before the concrete types exist -- you get compilation errors and have to backtrack.
+
+## The Creator Window: Queue It, Review It, Ship It
+
+The GES Creator Window was built specifically to eliminate every problem I just described. It's not an incremental improvement on the manual process. It's a different workflow entirely.
+
+The core idea is simple: instead of creating events one at a time, you build up a queue of everything you need, review it all at once, and then create everything in a single operation.
+
+### Three Modes for Three Patterns
+
+The Creator supports three event modes, matching the three communication patterns you'll use in practice.
+
+**Parameterless Events** -- pure signals that carry no data. "Something happened."
 
 ![Creator Parameterless](/img/game-event-system/visual-workflow/game-event-creator/creator-parameterless.png)
 
-Parameterless events are the simplest — they signal that something happened, without carrying any data. Think of them as notifications: "hey, this thing occurred."
-
 ```csharp
-// These events carry no data — they're pure signals
-// OnGameStarted, OnLevelComplete, OnPauseToggled, OnInventoryOpened
+// Parameterless events are the simplest pattern
+// OnGameStarted, OnLevelComplete, OnPauseToggled
+[GameEventDropdown, SerializeField] private SingleGameEvent gameStartedEvent;
 
-// Raising a parameterless event
 gameStartedEvent.Raise();
-
-// Listening is equally simple
-public void OnGameStarted()
-{
-    InitializeHUD();
-    StartBackgroundMusic();
-}
 ```
 
-Use parameterless events when the fact that something happened is all the information listeners need. Don't fall into the trap of making every event carry data "just in case" — it adds complexity for no benefit.
+You set a name, assign a category, and add it to the queue. That's it. No type selection needed.
 
-Common parameterless events include: game state transitions (start, pause, resume, quit), UI navigation events (menu opened, tab switched), checkpoint reached, save completed, and similar "announcement" events.
-
-### Single Parameter Events
+**Single Parameter Events** -- carry one piece of typed data.
 
 ![Creator Single](/img/game-event-system/visual-workflow/game-event-creator/creator-single.png)
 
-Single parameter events carry one piece of typed data along with the signal. This is the most common event type in practice, because most gameplay events naturally carry context.
-
 ```csharp
-// An event that carries damage information
-// GameEvent<float> — OnDamageDealt carries the damage amount
-// GameEvent<int> — OnScoreChanged carries the new score
-// GameEvent<Vector3> — OnExplosion carries the explosion position
-// GameEvent<EnemyData> — OnEnemySpawned carries full enemy info
+// Single parameter events carry typed data
+// Float32GameEvent for damage, Int32GameEvent for scores
+[GameEventDropdown, SerializeField] private Float32GameEvent damageEvent;
 
-// Raising with data
 damageEvent.Raise(35.5f);
-scoreEvent.Raise(currentScore);
-explosionEvent.Raise(transform.position);
-
-// Listening with typed parameter
-public void OnDamageDealt(float amount)
-{
-    healthBar.Reduce(amount);
-    ShowDamageNumber(amount);
-}
 ```
 
-The type system is fully open — you can use any serializable type as the parameter. Primitives like `int`, `float`, `string`, and `bool` work out of the box. Unity types like `Vector3`, `Color`, `GameObject`, and `Transform` are supported. And your own custom structs and classes work too, as long as they're serializable.
+Here you also select the parameter type -- and this is where the Creator's fuzzy type search system really shines.
 
-### Sender Events
+**Sender Events** -- carry data plus a reference to the GameObject that raised the event.
 
 ![Creator Sender](/img/game-event-system/visual-workflow/game-event-creator/creator-sender.png)
 
-Sender events carry both a data payload and a reference to the GameObject that raised the event. This pattern is essential when listeners need to know not just what happened, but who caused it.
-
 ```csharp
 // Sender events include the source GameObject
-// Raising a sender event — note the gameObject parameter
+[GameEventDropdown, SerializeField] private Float32GameEvent damageSenderEvent;
+
 damageSenderEvent.Raise(35.5f, gameObject);
-
-// Listening with both value and sender
-public void OnDamageDealt(float amount, GameObject source)
-{
-    healthBar.Reduce(amount);
-
-    // Now we know WHO dealt the damage
-    ShowDamageDirection(source.transform.position);
-    TrackDamageSource(source);
-
-    // Maybe apply thorns damage back to the attacker
-    if (hasThornsEffect)
-    {
-        var attackerHealth = source.GetComponent<Health>();
-        attackerHealth?.TakeDamage(amount * thornsMultiplier);
-    }
-}
 ```
 
-Sender events are invaluable for combat systems, interaction systems, and any scenario where the relationship between the source and the target matters. They eliminate the need for FindObjectOfType calls or complex reference chains.
+Essential for combat systems, interaction systems, and any scenario where the relationship between source and target matters.
 
-## The Fuzzy Type Search System
+### Fuzzy Type Search: Find Any Type Instantly
 
-One of the most useful features in the Creator is the fuzzy type search. When you're creating a single-parameter or sender event, you need to specify the parameter type. Instead of typing the exact full type name, you can just start typing and the Creator searches for matching types.
+When you're creating a single-parameter or sender event, you need to specify the parameter type. The Creator provides a fuzzy search that automatically discovers every serializable type in your project and all loaded assemblies.
 
-The search system automatically discovers all serializable types in your project and all loaded assemblies. Type "dam" and it'll show you `DamageInfo`, `DamageType`, `DamageResult`, and anything else that matches. Type "vec" and you'll see `Vector2`, `Vector3`, `Vector4`, and your custom `VelocityVector` if you have one.
+Type "dam" and it shows `DamageInfo`, `DamageType`, `DamageResult`. Type "vec" and you see `Vector2`, `Vector3`, `Vector4`, plus any custom types matching the pattern. The search is project-aware -- it scans your actual assemblies, so custom types appear immediately after compilation with no registration needed.
 
-This discovery is project-aware — it scans your actual assemblies, not a pre-built list. So your custom types show up immediately after compilation, no extra registration needed.
+The fuzzy matching is forgiving. "EnemDat" finds `EnemyData`. "PlyrInf" finds `PlayerInfo`. When you're queuing up 30 events and don't want to stop and look up exact type names, this matters more than you'd think.
 
-The search uses fuzzy matching, so you don't need to remember exact names. "EnemDat" will find `EnemyData`. "PlyrInf" will find `PlayerInfo`. It's forgiving of typos and abbreviations, which matters a lot when you're creating events in bulk and don't want to stop and look up exact type names.
+### The Batch Queue: The Whole Point
 
-## The Batch Queue System
+This is the heart of the Creator. Here's the flow:
 
-This is where the Creator really shines. Instead of creating events one at a time, you build up a queue of events and then create them all in a single operation.
+**Step 1: Configure.** Pick a mode (parameterless, single, sender), set the name, choose a category, and for typed events, select the parameter type.
 
-Here's how the flow works:
+**Step 2: Add to queue.** Click "Add to Queue." The event gets added to a list at the bottom of the window. The form resets so you can immediately configure the next one.
 
-**Step 1: Configure an event.** Select the mode (parameterless, single, or sender), set the name, choose a category, and for typed events, select the parameter type.
+**Step 3: Repeat.** Keep adding. Mix types freely -- parameterless, float, custom struct senders, all in the same queue. No limit on queue size.
 
-**Step 2: Add to queue.** Click the "Add to Queue" button. The event gets added to a list at the bottom of the Creator window. The form resets so you can immediately configure the next one.
+**Step 4: Review.** Before creating anything, scroll through the queue. Each entry shows its name, category, mode, and parameter type. Remove anything that looks wrong. This is your last chance to catch typos and miscategorizations -- and unlike reviewing 50 individual assets scattered across folders, reviewing a single queue takes thirty seconds.
 
-**Step 3: Repeat.** Keep adding events. Mix and match types freely — you can have parameterless events, float events, and custom-type sender events all in the same queue. There's no limit to the queue size.
+**Step 5: Create All.** Hit "Create All." GES creates every event asset, sets up the ScriptableObjects, assigns categories, and coordinates code generation for any new types.
 
-**Step 4: Review.** Before creating anything, scroll through the queue and verify everything looks right. Each queued event shows its name, category, mode, and parameter type. You can remove individual items if you made a mistake.
+### Smart Code Generation: The Magic Behind the Scenes
 
-**Step 5: Create All.** Hit the "Create All" button and watch them appear. GES creates every event asset, sets up the scriptable objects, assigns categories, and triggers code generation for any new types that need it.
+Here's where the Creator really earns its keep. Remember the "typed event tax" I described earlier -- the boilerplate code you need for each custom parameter type? The Creator handles that automatically.
 
-The batch nature of this isn't just a convenience — it's actually more reliable than creating events individually. The system can resolve type dependencies across the batch, ensure no naming conflicts exist before creating anything, and run code generation once for all new types instead of once per event.
+When you queue events with custom parameter types, the Creator coordinates with the code generation pipeline intelligently:
 
-## Smart Code Generation Integration
+- If a type already has generated support (like built-in `float`, `int`, `string`), the Creator creates the event immediately. No code generation needed.
+- If a type needs new support (your custom `DamageInfo` struct), the Creator generates all necessary code automatically.
+- If multiple events in the queue use the same new type, code generation happens once, not once per event.
 
-Here's a detail that might not be obvious: when you batch-create events with custom parameter types, the Creator coordinates with the Code Generator intelligently.
-
-If you create 10 events and 3 of them use `DamageInfo` as the parameter type, the Code Generator only generates the `DamageInfo` support code once. If you already had a `GameEvent<float>` in your project and you create 5 more float events, no new code generation happens for that type — it already exists.
-
-The system tracks which types already have generated support and only generates what's missing. This means:
-
-- No duplicate generated files
-- No unnecessary compilation cycles
-- Faster batch creation for projects that already have many event types
-- Clean code generation output even when creating dozens of events at once
+The smart batching works like this: the Creator splits your queue into two groups. Events using existing types get created immediately. Events needing new type support get their code generated first, and after Unity finishes compiling, the Creator automatically creates the pending events. You queue everything up front, and the Creator figures out the dependency order.
 
 ```csharp
-// If your project already has these generated:
-// - GameEvent<float> support
-// - GameEvent<int> support
-// - GameEvent<string> support
+// You create a custom type:
+[System.Serializable]
+public struct DamageInfo
+{
+    public float amount;
+    public DamageType type;
+    public Vector3 hitPoint;
+}
 
-// And you batch-create events using float, int, string,
-// DamageInfo, and EnemyData...
-
-// Only DamageInfo and EnemyData support gets generated.
-// The existing types are recognized and skipped.
+// You queue up 5 events that use DamageInfo in the Creator.
+// The Creator auto-generates all necessary support code ONCE,
+// waits for compilation, then creates all 5 events.
+// You wrote zero boilerplate.
 ```
 
-## Step-by-Step: Creating 10 Events in Under a Minute
+No duplicate generated files. No unnecessary compilation cycles. No manual "create the type support, wait for compile, then create the assets" dance.
 
-Let's walk through a concrete example. Say we're building an inventory system and we need these events:
+### Category Assignment at Creation Time
 
-1. `OnInventoryOpened` — parameterless
-2. `OnInventoryClosed` — parameterless
-3. `OnItemPickedUp` — carries `ItemData`
-4. `OnItemDropped` — carries `ItemData`
-5. `OnItemUsed` — carries `ItemData` with sender
-6. `OnItemEquipped` — carries `ItemData` with sender
-7. `OnItemUnequipped` — carries `ItemData` with sender
-8. `OnInventoryFull` — parameterless
-9. `OnGoldChanged` — carries `int`
-10. `OnWeightChanged` — carries `float`
+Remember the categorization problem? The Creator makes category assignment a required step during event creation, not an afterthought. Every event in the queue has a category before it gets created. You're forced to think about organization while you're thinking about the event itself -- which is exactly when it's cheapest to make that decision.
 
-Here's the process:
+And because you can see the entire queue with categories before creating anything, you can spot organizational issues immediately. "Wait, why did I put OnWeaponSwitch in the UI category? That should be Combat."
 
-**0:00 — Open the Creator** from the System Dashboard or menu.
+## A Real Scenario: From Design Doc to Event Set
 
-**0:05 — Event 1: OnInventoryOpened.** Mode: Parameterless. Name: "OnInventoryOpened". Category: "Inventory". Add to queue.
+Let's walk through a concrete example. New inventory system, ten events needed:
 
-**0:10 — Event 2: OnInventoryClosed.** Same mode and category. Just change the name. Add to queue.
+1. `OnInventoryOpened` -- parameterless, category: Inventory
+2. `OnInventoryClosed` -- parameterless, category: Inventory
+3. `OnItemPickedUp` -- carries `ItemData`, category: Inventory
+4. `OnItemDropped` -- carries `ItemData`, category: Inventory
+5. `OnItemUsed` -- sender with `ItemData`, category: Inventory
+6. `OnItemEquipped` -- sender with `ItemData`, category: Equipment
+7. `OnItemUnequipped` -- sender with `ItemData`, category: Equipment
+8. `OnInventoryFull` -- parameterless, category: Inventory
+9. `OnGoldChanged` -- carries `int`, category: Economy
+10. `OnWeightChanged` -- carries `float`, category: Inventory
 
-**0:15 — Event 3: OnItemPickedUp.** Mode: Single Parameter. Name: "OnItemPickedUp". Category: "Inventory". Type: search "ItemDat" → select `ItemData`. Add to queue.
+Open the Creator. Parameterless mode. Name: "OnInventoryOpened". Category: "Inventory". Add to queue. Change name to "OnInventoryClosed". Add to queue. Switch to Single Parameter mode. Name: "OnItemPickedUp". Type search: "ItemDat" -- select `ItemData`. Add to queue. Keep going. For sender events (5, 6, 7), toggle the mode. For events 9 and 10, the types are built-in -- just type "int" or "float".
 
-**0:20 — Events 4-7.** Same pattern. The type search remembers your recent selections, so `ItemData` is already at the top. For sender events (5, 6, 7), just switch the mode toggle. Name, queue, repeat.
+Under a minute for all ten. Review the queue. Everything looks right. Hit "Create All."
 
-**0:35 — Event 8: OnInventoryFull.** Switch back to Parameterless. Name it, queue it.
+If `ItemData` didn't have generated support yet, the Creator generates it automatically, waits for compilation, and creates the pending events. You don't manage that pipeline -- you just queue and go.
 
-**0:40 — Event 9: OnGoldChanged.** Single Parameter, type "int". Queue.
+Compare that to the manual approach: navigate folders, right-click, create, rename, configure, repeat -- ten times. Plus potentially writing boilerplate for `ItemData` support. Plus organizing into categories after the fact. Plus catching the typo in "OnItemUnequiped" during code review three days later.
 
-**0:45 — Event 10: OnWeightChanged.** Single Parameter, type "float". Queue.
+## What the Creator Doesn't Do
 
-**0:50 — Review the queue.** Scroll through all 10. Verify names, categories, types.
+The Creator is purely additive. It creates new events. For everything else:
 
-**0:55 — Click "Create All."** Done. Ten events, properly categorized, with all necessary code generation triggered.
+- **Modifying existing events** -- use the Event Editor
+- **Configuring behaviors/responses** -- use the Behavior Window
+- **Renaming or recategorizing** -- use the Event Editor
+- **Deleting events** -- use the Event Editor's batch delete mode
+- **Regenerating code for existing types** -- use the Code Generator (maintenance tool)
 
-That's under a minute for what would have been 15-20 minutes of manual asset creation, and with fewer mistakes because you reviewed everything in one place before committing.
+This separation is intentional. The Creator does one thing well: getting new events into your project as fast and accurately as possible. The other tools in the GES toolchain handle everything after creation.
 
-## Event Naming and Category Configuration
+## Why This Matters More Than You Think
 
-A few tips on naming and categorizing your events in the queue:
+Event creation seems like a small thing. It's "just" setup work. But setup work has a way of expanding to fill available time, and more importantly, the friction of manual creation actively discourages good event architecture.
 
-**Naming conventions matter.** Settle on a convention and stick to it. I prefer the `On[Subject][Action]` pattern: `OnPlayerDamaged`, `OnEnemySpawned`, `OnInventoryOpened`. Some teams prefer `[Subject]_[Action]`: `Player_Damaged`, `Enemy_Spawned`. The Creator doesn't enforce a pattern, so this is a team decision.
+When creating an event takes 30 seconds of mechanical clicking, developers start taking shortcuts. They reuse events that don't quite fit instead of creating the right one. They skip categories because it's one more step. They use `string` parameters instead of proper custom types because creating the type support is too much overhead for a "simple" event.
 
-**Categories are your folders.** Use them to group related events. Good categories map to game systems: "Combat", "Inventory", "UI", "Audio", "Physics", "AI". Bad categories are too granular ("PlayerCombatMelee") or too broad ("Gameplay").
+When creating an event takes 3 seconds of typing a name and clicking "Add to Queue," developers create the right events with the right types in the right categories. Lower friction leads to better architecture. It's that simple.
 
-**You can change categories later.** Don't stress about getting it perfect in the Creator. The Event Editor lets you reorganize events between categories at any time. The Creator just sets the initial assignment.
+The batch queue pattern also fundamentally changes when you think about events. Instead of creating them piecemeal as you implement features, you can sit down with the design doc, queue up everything at once, review the full set for consistency, and then move on to implementation with all your plumbing in place. Planning and execution become separate steps, which is almost always better.
 
-**Batch by category.** When using the queue, I find it most efficient to create all events for one category, then switch to the next category. This minimizes context switching and reduces the chance of mis-categorizing an event.
-
-## When Batch Creation Isn't the Right Tool
-
-The Creator is optimized for creating new events. If you need to:
-
-- **Modify existing events** — use the Event Editor
-- **Configure behaviors** — use the Behavior Window
-- **Rename or recategorize** — use the Event Editor
-- **Delete events** — use the Event Editor's batch delete mode
-
-The Creator is purely additive. It creates new things. For everything else, the other tools in the GES toolchain are better suited.
-
-## Wrapping Up
-
-The Game Event Creator's batch wizard transforms event setup from a tedious manual process into a fast, reliable, reviewable operation. Queue up your events, review them, create them all at once, and move on to the actual game logic.
-
-The combination of three event modes, fuzzy type search, and the batch queue system means you can go from a design document to a fully configured event architecture in minutes instead of hours. And because you review the entire batch before creation, you catch naming mistakes and type mismatches before they become problems.
-
-Next up, we'll look at the Behavior Window — where you configure event responses, conditions, delays, and loops entirely in the Inspector, without writing a single line of code.
+Next up, we'll look at the Behavior Window -- where designers configure event responses, conditions, delays, and loops entirely in the Inspector, without touching a single line of code.
 
 ---
 

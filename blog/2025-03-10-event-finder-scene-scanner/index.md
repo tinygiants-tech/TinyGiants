@@ -7,203 +7,147 @@ description: "Before deleting or refactoring an event, you need to know who's re
 image: /img/home-page/game-event-system-preview.png
 ---
 
-"Is anyone still using `OnPlayerDeath`?" You ask the team in Slack. Silence. Someone replies "I think the HUD uses it?" Another person says "maybe the achievement system?" Nobody actually knows. And nobody is brave enough to delete it, because if something references it and you remove it, you've just created a null reference that might not surface until a playtester dies in level 7.
+Last week I tried to delete an event called `OnEnemyStaggered`. The combat system had been reworked two sprints ago, and I was pretty sure stagger was gone. Pretty sure. Not certain. So I did what every Unity developer does in that situation: I asked the team. One person said "I think it was removed." Another said "check the HUD, maybe the stagger indicator still uses it." A third person just shrugged.
 
-So the event stays. Along with the other 30 events that nobody is sure about. Your event system slowly fills with ghosts — events that might be used, might not be, and nobody can tell which is which.
+Nobody knew. And I wasn't about to delete it and find out the hard way during QA.
 
 <!-- truncate -->
 
-This is a real problem, and it's one that Unity's built-in tools can't solve. Ctrl+Shift+F searches your code files, but it doesn't search Inspector references. An event might have zero mentions in code but be referenced by 15 MonoBehaviours through serialized fields. The text search finds nothing, but the event is very much in use.
+This is the "who's using this?" problem, and if you've worked on any Unity project with more than a dozen events, you've hit it. It's not a theoretical concern. It's the reason your event library has 40 events but only 25 of them are actually doing anything. The other 15? Ghosts. Nobody deletes them because nobody can prove they're safe to delete. And so they accumulate, cluttering your project, confusing new team members, and making every refactoring session feel like defusing a bomb.
 
-The Game Event Finder solves this by doing what Unity's search can't: scanning every MonoBehaviour in the scene using reflection, finding every field that references any game event, and presenting the results in a clear, actionable window.
+Let's talk about why this problem is so hard to solve with Unity's existing tools, and then look at what a real solution looks like.
 
-## How It Works Under the Hood
+## The Dependency Visibility Problem
 
-The Event Finder uses C# reflection to scan all MonoBehaviours in the currently loaded scene(s). For each component, it inspects every serialized field — public fields and `[SerializeField]` private fields — and checks whether the field's value references the event you're searching for.
+Every programming environment has some concept of "find all references." Your IDE does it for code. Databases have dependency graphs. Even spreadsheet software can trace cell references. But Unity event systems? They exist in a weird blind spot where no single tool can give you the full picture.
 
-This is a deep scan. It doesn't just check direct GameEvent fields. It inspects:
+### C# Events and Delegates: Grep Works, Sort Of
 
-- Direct `GameEvent` references
-- `GameEvent<T>` typed references
-- Sender event references
-- Fields nested inside serializable classes and structs
-- Arrays and lists containing event references
-- ScriptableObject references that happen to be GameEvents
+If you're using plain C# events or delegates, your best bet is a text search. Ctrl+Shift+F in your IDE, search for `OnEnemyStaggered`, and you'll find every `.cs` file that subscribes to it or invokes it.
 
-The scan is thorough but fast. For a typical scene with a few hundred MonoBehaviours, it completes in under a second. For very large scenes (thousands of objects), it might take a couple of seconds. Either way, it's a one-click operation — you don't need to configure anything or set up search parameters.
+This works. For code. But here's what it misses: anything configured through the Inspector. If a MonoBehaviour has a serialized field that holds an event reference, and that reference was set by dragging an asset into the Inspector, there's no mention of it in any `.cs` file. The text search returns zero results, and you conclude the event is unused. Except it's not — three GameObjects in Scene 4 reference it through Inspector bindings. You delete it, ship a build, and the bug report comes in two days later from a playtester who reached the boss fight.
 
-## Two View Modes
+### UnityEvent: The Serialized Mystery Box
 
-The Finder presents results in two modes, and you can switch between them freely.
+UnityEvent is even worse for dependency tracking. UnityEvent bindings are serialized inside scene files and prefabs as YAML. They don't appear in your C# code at all. There is no programmatic way to enumerate "all UnityEvent bindings that target this method" across your project. You'd have to parse raw `.unity` and `.prefab` files, which is technically possible but practically insane.
 
-### List View
+Some developers try to work around this by searching the serialized YAML directly:
+
+```
+// Sure, you could grep scene files for GUID references...
+// but can you imagine maintaining that workflow?
+// "Before deleting any event, parse all .unity files for this asset's GUID"
+```
+
+Nobody does this. And so UnityEvent bindings become invisible dependencies that silently break when you change things.
+
+### ScriptableObject Events: Better, But Not There
+
+ScriptableObject-based event systems (the pattern popularized by Ryan Hipple's 2017 GDC talk) improve things somewhat. Since events are actual assets, Unity's "Find References in Scene" can locate GameObjects that reference a specific ScriptableObject.
+
+But "Find References in Scene" has a critical limitation: it only searches the **currently active scene**. If your project uses multiple scenes — and most non-trivial projects do — you'd have to manually open every scene, run the search, note the results, open the next scene, repeat. For a project with 15 scenes, that's 15 manual searches per event. Nobody does this either.
+
+There's also the problem of nested references. If a MonoBehaviour stores your event inside a serializable struct or a list, Unity's built-in search might not find it. The reference exists, but it's buried one level deeper than the search inspects.
+
+### The Fear Factor
+
+The end result of all these limitations is fear. Developers stop deleting events. They stop renaming them. They stop refactoring the event architecture because they can't verify the impact of changes.
+
+I've seen projects where the event folder has 300 assets and the team estimates that maybe 180 are actually in use. The other 120? "We'll clean those up eventually." Eventually never comes, because the cleanup requires dependency information that nobody has.
+
+This is the refactoring tax. Every unused event is noise. Every "maybe it's used?" event is a decision you defer. And the longer you defer, the more entangled things become, until the event system is a liability instead of an asset.
+
+### What Other Tools Get Right
+
+Think about how other tools handle this:
+
+- Your IDE shows "3 references" next to a method signature. You can click through to each one.
+- A database schema viewer shows which tables reference a foreign key before you drop it.
+- Even CSS tools can tell you which selectors are unused.
+
+Event systems in Unity have historically had nothing comparable. You create events, you use events, and when you want to know the relationship between the two, you're on your own.
+
+### Multi-Scene Makes Everything Worse
+
+Modern Unity projects commonly use additive scene loading. Your main game scene, your UI scene, your audio scene, your level-specific scenes — all loaded at runtime. An event might have zero references in the scene you're currently editing but fifteen references across three other scenes that load additively.
+
+Without a tool that can scan across all loaded scenes simultaneously, you're always working with partial information. And partial information is worse than no information, because it gives you false confidence. "I checked the main scene, no references, safe to delete." Except the UI scene has five references and you didn't check it.
+
+## How GES's Event Finder Solves This
+
+The Game Event System includes a tool called the Event Finder, and it does exactly one thing: it answers "who's using this event?" with complete, accurate data.
+
+You access it from the Event Editor — every event row has a magnifying glass icon. Click it, and the Finder scans every MonoBehaviour in all currently loaded scenes using C# reflection. Not just public fields. Not just direct references. It inspects every serialized field, including `[SerializeField]` private fields, nested serializable classes, arrays, and lists.
+
+The scan is fast. For a typical scene with a few hundred MonoBehaviours, it completes in under a second. For large multi-scene setups, maybe two or three seconds. One click, full results.
+
+### List View: Every Reference, Flat and Sortable
 
 ![Finder List View](/img/game-event-system/visual-workflow/game-event-finder/game-event-finder-list.png)
 
-List View shows every reference as a flat, scrollable list. Each row represents one reference — one field on one component on one GameObject that points to the searched event.
+List View shows every reference as a flat, scrollable list. Each row is one field on one component on one GameObject that references the searched event. You get the GameObject name, its full hierarchy path (so you know `Canvas/HUD/HealthBar` vs. just "HealthBar"), the component name, and the specific field name.
 
-Each row displays:
-- **GameObject Name** — the object that has the reference
-- **Hierarchy Path** — the full path in the scene hierarchy (e.g., `Canvas/HUD/HealthBar`)
-- **Component Name** — which script holds the reference (e.g., `DamageHandler`)
-- **Field Name** — the specific field (e.g., `onDamageReceived`)
-- **Status Indicator** — green for active GameObjects, red for inactive ones
+This is the "give me everything" mode. When you want to count total references, or you're looking for a specific object, or you just want to see the full picture without any grouping, List View is it.
 
-List View is best when you want to see every single reference without any grouping. It's the "give me everything" mode. You can scan through it quickly to count references, spot patterns, or find a specific object.
-
-### Grouped View
+### Grouped View: The Architectural Perspective
 
 ![Finder Grouped View](/img/game-event-system/visual-workflow/game-event-finder/game-event-finder-grouped.png)
 
 Grouped View organizes results by component type. Instead of a flat list, you see collapsible groups:
 
 ```
-▼ DamageHandler (3 references)
-  ├── Player/PlayerCharacter — onDamageReceived
-  ├── Enemies/Goblin — onDamageDealt
-  └── Enemies/Dragon — onDamageDealt
+DamageHandler (3 references)
+  Player/PlayerCharacter — onDamageReceived
+  Enemies/Goblin — onDamageDealt
+  Enemies/Dragon — onDamageDealt
 
-▼ HealthBarUI (2 references)
-  ├── Canvas/HUD/PlayerHealthBar — damageEvent
-  └── Canvas/HUD/BossHealthBar — damageEvent
+HealthBarUI (2 references)
+  Canvas/HUD/PlayerHealthBar — damageEvent
+  Canvas/HUD/BossHealthBar — damageEvent
 
-▼ AchievementTracker (1 reference)
-  └── Managers/AchievementManager — combatEvents[2]
+AchievementTracker (1 reference)
+  Managers/AchievementManager — combatEvents[2]
 ```
 
-Grouped View is best when you're trying to understand the architectural picture. "Which systems use this event?" is answered at a glance by looking at the group headers. You can see that `OnDamageDealt` is used by the combat system, the UI system, and the achievement system — three separate concerns, all connected through one event.
+This answers the higher-level question: "which systems use this event?" At a glance, you can see that `OnDamageDealt` connects the combat system, the UI system, and the achievement system. Three separate concerns, one event. That's the architectural picture, and it's invaluable when you're deciding whether an event is too broadly coupled or appropriately shared.
 
-## Status Indicators: Active vs. Inactive
+### Status Indicators: Active vs. Inactive
 
-Every reference in the Finder is tagged with a status indicator:
+Every reference is tagged with a color indicator:
 
-- **Green** — the GameObject is active in the hierarchy. This reference is live and will respond to events at runtime.
-- **Red** — the GameObject is inactive. The reference exists, but it won't respond to events unless the object is activated.
+- **Green** means the GameObject is active in the hierarchy. This reference is live and will receive events at runtime.
+- **Red** means the GameObject is inactive. The reference exists in the scene, but the object won't respond to events unless something activates it.
 
-This distinction matters more than you might think. Inactive references are easy to forget about. You deactivate a UI panel during development, forget about it, and then wonder why the Finder shows references that don't seem to do anything at runtime. The red indicator immediately flags these dormant references.
+This distinction catches a class of bugs that are otherwise invisible. You deactivate a UI panel during development, forget about it, and three months later you're staring at the Finder wondering why there's a "dead" reference on an object you don't recognize. The red indicator immediately tells you: this object exists but is dormant.
 
-It also helps with optimization. If you see that an event has 20 references but 15 of them are on inactive objects, that's useful information. Maybe those inactive objects are pooled enemies that get activated during gameplay — in which case, the references are fine. Or maybe they're leftover debug objects that should be cleaned up.
+It also helps with cleanup decisions. If an event has 20 references but 15 are on inactive objects, that's worth investigating. Are those pooled enemies that activate during gameplay? Then the references are fine. Are they leftover debug objects from a prototype phase? Then they should be cleaned up.
 
-## Reference Details
+### Quick Actions: Ping, Focus, Frame
 
-Each reference row in the Finder provides enough context to identify exactly what's going on without having to navigate to the object:
+The Finder isn't read-only. Every reference row has three action buttons:
 
-**GameObject Name** — the name of the object. Combined with the hierarchy path, this uniquely identifies the object in the scene.
+**Ping** flashes the GameObject in the Hierarchy window — a quick visual confirmation of where the object sits in the hierarchy. It doesn't change your selection or move the camera. It's the lightest-weight way to locate something.
 
-**Hierarchy Path** — the full path from the scene root. This is critical in large scenes where multiple objects might share the same name. "Enemy" could be anywhere, but "BattleArena/Waves/Wave3/EnemyGroup/Enemy" tells you exactly where it is.
+**Focus** selects the GameObject and opens it in the Inspector. This is the "I want to look at this" action. After clicking, the Inspector shows the component that holds the event reference, ready for inspection or editing.
 
-**Script Name** — the MonoBehaviour class that contains the reference. Knowing the script tells you which system is involved. A reference in `AudioManager` is very different from a reference in `AchievementTracker`, even if both point to the same event.
+**Frame** moves the Scene camera to center on the referenced GameObject. This gives you spatial context — where is this object in the 3D world? If you're scanning references for `OnExplosion` and one of them is way outside the play area, that's probably a misplaced object that needs attention.
 
-**Field Name** — the specific field on the component. This is the serialized field name from the code. If a component has multiple event references, the field name tells you which one points to your event.
+### The Safe Refactoring Workflow
 
-For array and list references, the field name includes the index: `damageEvents[0]`, `damageEvents[1]`, etc. This is useful when a component stores multiple event references in a collection.
+Here's what the Event Finder actually enables — and why it matters more than any individual feature:
 
-## Quick Actions: Ping, Focus, and Frame
+1. **Before touching any event**, open the Finder and scan. Five seconds.
+2. **Zero references?** Safe to delete. No guessing needed.
+3. **All references inactive?** Probably safe, but check if those objects are pooled or dynamically loaded.
+4. **Active references?** Use Focus to navigate to each one. Update or remove as needed.
+5. **Re-scan.** Confirm the count is now zero or as expected.
+6. **Delete with confidence.**
 
-The Finder isn't just for reading — it's for acting. Each reference row includes quick action buttons that let you navigate to the referenced object instantly.
+Compare this to the old workflow of "ask the team, grep the codebase, pray, and delete." The Finder replaces guessing with data. It turns event cleanup from a high-anxiety gamble into a routine, verified operation.
 
-### Ping
+The broader impact is that teams actually start maintaining their event libraries. When you can prove an event is unused in five seconds, you delete it. When you can trace every reference before renaming, you rename without fear. The event system stays clean because keeping it clean is no longer a heroic effort — it's just a button click.
 
-The Ping action flashes the referenced GameObject in the Hierarchy window. This is Unity's built-in ping behavior — the object's row briefly highlights yellow, making it easy to spot even in a deep hierarchy.
-
-Ping is non-disruptive. It doesn't change your selection, doesn't move the Scene camera, doesn't alter the Inspector. You just get a visual flash to confirm "that's the object." It's the lightest-weight way to locate something.
-
-Use Ping when you want to quickly verify where an object is in the hierarchy without changing your current context.
-
-### Focus
-
-The Focus action selects the referenced GameObject and opens it in the Inspector. This is the "I want to inspect this reference" action. After clicking Focus:
-
-1. The Hierarchy selection changes to the target object
-2. The Inspector shows the target object's components
-3. You can immediately see and edit the component that holds the event reference
-
-Focus is the most common action I use. When I'm auditing event references, I typically scan the Finder list, then Focus on anything that looks unexpected or needs attention.
-
-### Frame
-
-The Frame action moves the Scene camera to center on the referenced GameObject. This is the visual equivalent of Focus — instead of seeing the object in the Inspector, you see it in the 3D Scene view.
-
-Frame is invaluable for spatial understanding. If you're wondering "which objects in the scene reference OnExplosion," you can Frame each one and see their positions. Maybe they're all clustered in one area — that tells you something about the level design. Or maybe one of them is way out of bounds — that's probably a bug.
-
-## The Safe Deletion/Refactoring Workflow
-
-The Event Finder's primary use case isn't casual browsing — it's safe maintenance. Here's the workflow I use whenever I need to delete, rename, or refactor an event:
-
-### Step 1: Scan Before You Touch
-
-Before deleting or modifying any event, open the Event Finder and scan for it. This takes five seconds and gives you complete information about every reference in the scene.
-
-### Step 2: Assess the Impact
-
-Look at the scan results:
-- **Zero references** — safe to delete. Nobody is using it.
-- **All references are on inactive objects** — probably safe to delete, but check if those objects are pooled or loaded dynamically.
-- **Active references** — you need to update or replace these before removing the event.
-
-### Step 3: Update References
-
-If the event has active references, use the Focus action to navigate to each one. Update the reference to point to the replacement event, or remove the component/behavior if it's no longer needed.
-
-### Step 4: Re-Scan
-
-After updating, scan again. Make sure the reference count is zero (or only inactive/expected references remain).
-
-### Step 5: Delete
-
-Now you can safely delete the event, knowing you won't create any null references.
-
-```
-// Without Event Finder:
-// "I think nobody uses this event... let me delete it..."
-// *deletes*
-// *builds game*
-// *playtester reaches level 7*
-// "NullReferenceException in DamageHandler.OnDamageReceived"
-// *spends 30 minutes tracking it down*
-
-// With Event Finder:
-// *scans* — 3 active references found
-// *updates all 3*
-// *re-scans* — 0 references
-// *deletes safely*
-```
-
-### Handling Cross-Scene References
-
-One important caveat: the Finder scans currently loaded scenes. If your project uses additive scene loading, make sure all relevant scenes are loaded before scanning. An event might have zero references in your main scene but five references in a UI scene that's loaded additively.
-
-For thorough auditing, I load all game scenes additively, run the scan, and then document the results. This is especially important before major refactoring passes.
-
-## Using the Finder for Architecture Audits
-
-Beyond deletion safety, the Event Finder is a powerful audit tool. Here are some patterns I look for:
-
-**Over-connected events.** If one event has 30+ references, it might be doing too much. Consider splitting it into more specific events. An `OnGameStateChanged` that everything listens to is an anti-pattern — it's essentially a global callback that undermines the decoupling benefits of an event system.
-
-**Under-connected events.** Events with zero or one reference might be over-engineered. If only one component listens to an event, consider whether a direct method call would be simpler. Events add value when they decouple multiple systems. For one-to-one communication, they're overhead.
-
-**Unexpected references.** When you scan an event and find a reference in a system you didn't expect — say, the audio system is listening to a physics event — that's a signal to investigate. It might be intentional (play a sound when something collides) or it might be a leftover from debugging.
-
-**Inactive reference patterns.** A high ratio of inactive-to-active references suggests objects that should probably be cleaned up or that your pooling system is holding onto too many dormant objects.
-
-## Performance Considerations
-
-The Event Finder uses reflection, which is inherently slower than direct field access. However, it's an editor-only tool — it doesn't affect runtime performance at all. The scan happens on-demand when you click the scan button, not continuously.
-
-For scenes with under 1000 MonoBehaviours, the scan is essentially instant. For very large scenes (5000+ components), it might take 2-3 seconds. The Finder shows a progress indicator during the scan so you know it's working.
-
-The reflection results are not cached between scans. This is intentional — you want fresh data every time, especially if you've been making changes between scans. The slight cost of re-scanning is worth the guarantee of accuracy.
-
-## Wrapping Up
-
-The Game Event Finder answers the question that nobody on your team can: "who's using this event?" It replaces guessing with data, and it turns the terrifying act of deleting an event into a safe, verified operation.
-
-The two view modes (List and Grouped) give you both the detailed and architectural perspectives. The status indicators separate active from inactive references. And the quick actions (Ping, Focus, Frame) let you navigate to any reference instantly.
-
-Build the habit of scanning before modifying. It takes five seconds and prevents hours of debugging. Your future self — the one who would have been tracking down a null reference in level 7 at 11 PM — will thank you.
-
-Next up, we'll look at the Game Event Editor — the main dashboard for managing all your events with search, filters, batch operations, and that satisfying color-coded status system.
+That's the difference a proper dependency scanner makes. Not a new feature to learn, but a removal of the fear that prevents you from doing the maintenance your project needs.
 
 ---
 

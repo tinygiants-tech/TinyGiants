@@ -1,207 +1,262 @@
 ---
 slug: raising-and-scheduling-api
-title: "Raise, RaiseDelayed, RaiseRepeating: The Complete Event Scheduling API Guide"
+title: "Time-Based Events in Unity: Why Coroutines Are the Wrong Tool for Delays, Repeats, and Cancellation"
 authors: [tinygiants]
 tags: [ges, unity, scripting, tutorial, advanced]
-description: "Stop writing coroutines for delayed events. GES gives you one-liner scheduling with delays, repeats, lifecycle callbacks, and cancellation — all handle-managed."
+description: "Coroutines make simple delays easy and everything else painful. Cancellation, lifecycle callbacks, repeat management — there's a better way to handle time-based events in Unity."
 image: /img/home-page/game-event-system-preview.png
 ---
 
-You want to delay an explosion by 2 seconds after a grenade lands. In vanilla Unity, that's a coroutine — `IEnumerator DelayedExplosion()`, yield return `new WaitForSeconds(2f)`, the actual explosion logic, plus you need to store the `Coroutine` reference so you can cancel it if the grenade gets shot mid-air, plus null-check the game object because maybe it got destroyed during the wait. Twenty-ish lines of code for what is conceptually a single operation: "raise this event in 2 seconds."
+You need to delay an explosion by 2 seconds after a grenade lands. Simple enough. You write a coroutine. `IEnumerator DelayedExplosion()`, yield return `new WaitForSeconds(2f)`, call the explosion logic. Maybe 10 lines if you're tidy. You feel good about it.
 
-Or you write one line: `explosionEvent.RaiseDelayed(2f)`. You get back a handle. You can cancel it, attach lifecycle callbacks, and forget about coroutine management entirely. That's what GES scheduling is about — collapsing the ceremony around timed event execution into a clean, handle-managed API.
+Then your designer says "the player should be able to defuse the bomb." Okay, now you need to store the `Coroutine` reference so you can call `StopCoroutine()`. But wait — what if the player defuses it before the coroutine starts? You need a null check. What if the game object gets destroyed mid-wait? Another null check. What if the player defuses it at the exact frame the coroutine completes? Race condition. Your 10 lines are now 25, and you haven't even handled the "show defused message vs. show explosion" branching yet.
 
-This post walks through every scheduling method GES offers, from immediate raises to repeating loops, with the lifecycle callbacks and cancellation patterns that make them production-ready.
+This is the story of every time-based event in Unity. The first implementation is clean. The second requirement doubles the code. The third makes you question your career choices.
 
 <!-- truncate -->
 
-## Immediate Execution: The Three Raise() Overloads
+## The Coroutine Tax on Simple Delays
 
-Before we get to the fancy scheduling stuff, let's nail down the basics. GES supports three event type signatures, and each one has a corresponding `Raise()` call.
-
-### Void Events (No Arguments)
-
-The simplest case. Something happened, no data attached.
+Let's be honest about what a "simple delay" actually looks like in production Unity code. Not the tutorial version — the version that ships.
 
 ```csharp
-// Create or reference the event
-[GameEventDropdown, SerializeField] private GameEvent onPlayerDied;
+public class BombController : MonoBehaviour
+{
+    [SerializeField] private float fuseTime = 2f;
 
-// Raise it
-onPlayerDied.Raise();
+    private Coroutine _explosionCoroutine;
+    private bool _isArmed;
+    private bool _isExploded;
+
+    public void ArmBomb()
+    {
+        if (_isArmed) return;
+        _isArmed = true;
+        _explosionCoroutine = StartCoroutine(DelayedExplosion());
+    }
+
+    public void Defuse()
+    {
+        if (!_isArmed || _isExploded) return;
+
+        if (_explosionCoroutine != null)
+        {
+            StopCoroutine(_explosionCoroutine);
+            _explosionCoroutine = null;
+        }
+
+        _isArmed = false;
+        ShowDefuseMessage(); // how do you know to call this?
+    }
+
+    private IEnumerator DelayedExplosion()
+    {
+        yield return new WaitForSeconds(fuseTime);
+        _isExploded = true;
+        _explosionCoroutine = null;
+        DoExplosion();
+        // What about "on completed" logic?
+        // Just... put it here? Hope nothing else needs to know?
+    }
+
+    private void OnDestroy()
+    {
+        if (_explosionCoroutine != null)
+            StopCoroutine(_explosionCoroutine);
+    }
+}
 ```
 
-Every listener subscribed to `onPlayerDied` fires immediately, in the same frame. No allocation, no delay, no coroutine. This is your bread and butter for notifications — "something happened, react to it."
+That's around 40 lines for "wait 2 seconds, then explode, with cancellation." And we haven't even started on the interesting part.
 
-### Typed Events (Single Argument)
+## Now Add Repeating: The Poison Damage Problem
 
-When you need to pass data with the event.
+Your game has a poison effect. 10 damage per tick, once per second, for 5 ticks. Another coroutine.
 
 ```csharp
-// A typed event carrying damage info
-[GameEventDropdown, SerializeField] private GameEventInt onDamageDealt;
+private Coroutine _poisonCoroutine;
+private int _poisonTicksRemaining;
 
-// Raise with data
+public void ApplyPoison(int damage, float interval, int ticks)
+{
+    if (_poisonCoroutine != null)
+        StopCoroutine(_poisonCoroutine);
+
+    _poisonCoroutine = StartCoroutine(PoisonRoutine(damage, interval, ticks));
+}
+
+private IEnumerator PoisonRoutine(int damage, float interval, int ticks)
+{
+    _poisonTicksRemaining = ticks;
+
+    for (int i = 0; i < ticks; i++)
+    {
+        yield return new WaitForSeconds(interval);
+        ApplyDamage(damage);
+        _poisonTicksRemaining--;
+        // How do you notify the UI about remaining ticks?
+        // Pass a callback? Store a reference? Fire an event?
+    }
+
+    _poisonCoroutine = null;
+    // Poison expired naturally. How do you distinguish this
+    // from "poison was cured" in the cleanup logic?
+}
+
+public void CurePoison()
+{
+    if (_poisonCoroutine != null)
+    {
+        StopCoroutine(_poisonCoroutine);
+        _poisonCoroutine = null;
+        _poisonTicksRemaining = 0;
+        // Play cure effect? How does the UI know to update?
+    }
+}
+```
+
+Notice the pattern. Every time-based behavior needs:
+- A `Coroutine` field to track the handle
+- A `StopCoroutine()` call with null checking
+- Manual state tracking (`_poisonTicksRemaining`)
+- No built-in way to distinguish "completed naturally" from "was cancelled"
+- No built-in way to notify other systems about progress
+
+And this is just ONE poison effect. What if multiple poisons can stack? Now you need a `List<Coroutine>`. What if each poison has different tick rates? Different durations? Different cancellation conditions?
+
+## The Lifecycle Callback Gap
+
+Here's what JavaScript developers take for granted:
+
+```javascript
+const timer = setTimeout(() => explode(), 2000);
+clearTimeout(timer); // clean cancellation
+```
+
+And what C# async developers take for granted:
+
+```csharp
+var cts = new CancellationTokenSource();
+await Task.Delay(2000, cts.Token);
+cts.Cancel(); // clean cancellation with proper exception handling
+```
+
+Both of these paradigms have clear lifecycle semantics. You know when something starts, when it completes, and when it's cancelled. You can attach callbacks to each state transition.
+
+Unity coroutines have none of this. A coroutine is a black box. It's running or it's not. There's no `OnCompleted` callback. There's no `OnCancelled` callback. There's no `OnStep` callback for repeating operations. You have to build all of that yourself, every single time, with manual state tracking and cross-referenced boolean flags.
+
+The result? Your MonoBehaviour starts looking like this:
+
+```csharp
+private Coroutine _explosionCoroutine;
+private Coroutine _poisonCoroutine;
+private Coroutine _shieldRegenCoroutine;
+private Coroutine _buffTimerCoroutine;
+private Coroutine _respawnCoroutine;
+private bool _isExploding;
+private bool _isPoisoned;
+private bool _isRegenerating;
+private bool _isBuffed;
+private bool _isRespawning;
+private int _poisonTicksLeft;
+private float _buffTimeLeft;
+```
+
+Ten time-based behaviors equals ten coroutine fields, ten boolean flags, and probably ten methods that look almost identical: start the coroutine, store the reference, null-check before stopping, reset the flag. Your component is 60% timer management boilerplate.
+
+## The Fragility Problem
+
+Coroutines are tied to the MonoBehaviour that started them. If that game object is destroyed — pooling, scene transitions, manual Destroy calls — every coroutine on it silently dies. No notification. No cleanup callback. No warning.
+
+This means:
+- An explosion coroutine on a pooled grenade object? Silently cancelled when the object returns to the pool.
+- A buff timer on a player object? Gone when you load a new scene.
+- A repeating radar ping? Dead the moment the radar station prefab is recycled.
+
+You can use `DontDestroyOnLoad` for the object, but that introduces its own problems. You can start coroutines on a persistent singleton, but then you lose the natural lifecycle binding. Every solution has tradeoffs that require more code to manage.
+
+## What If Scheduling Was Just... an API?
+
+This is where GES takes a fundamentally different approach. Instead of wrapping timer logic in coroutines that you manage manually, GES treats scheduling as a first-class API on events themselves.
+
+### Immediate: Raise()
+
+The simplest case — fire an event right now, no delay.
+
+```csharp
+[GameEventDropdown, SerializeField] private SingleGameEvent onBombExplode;
+
+// Fire immediately
+onBombExplode.Raise();
+```
+
+Every listener fires synchronously in the same frame. No coroutines involved.
+
+For typed events:
+
+```csharp
+[GameEventDropdown, SerializeField] private Int32GameEvent onDamageDealt;
+
 onDamageDealt.Raise(42);
 ```
 
-The argument gets passed to every listener. The type safety here is enforced at compile time — you can't accidentally raise an `int` event with a `string`. This matters when you have dozens of events and a refactor changes a data type.
-
-### Sender Events (Sender + Arguments)
-
-When listeners need to know both *who* sent the event and *what* the data is.
+For sender events:
 
 ```csharp
-// Sender event: who dealt how much damage
-[GameEventDropdown, SerializeField] private GameEventSenderInt onDamageFromSource;
+[GameEventDropdown, SerializeField] private Int32SenderGameEvent onDamageFromSource;
 
-// Raise with sender context
 onDamageFromSource.Raise(this, 42);
 ```
 
-The sender reference lets listeners do things like "ignore damage from friendlies" or "track damage per source for kill attribution." It's the same pattern as C#'s `EventHandler<T>` but without the boilerplate class hierarchies.
+### Delayed: RaiseDelayed()
 
-All three overloads execute synchronously. The event fires, all listeners execute in order, and control returns to your code. No frames skipped, no async weirdness.
-
-## Delayed Execution: RaiseDelayed()
-
-Now things get interesting. `RaiseDelayed()` schedules an event to fire after a specified delay in seconds. It uses Unity's coroutine system under the hood, but you never touch coroutines directly.
-
-### Void Delayed
+Schedule an event to fire after a delay. One line. You get back a handle.
 
 ```csharp
-ScheduleHandle handle = onExplosion.RaiseDelayed(2f);
+ScheduleHandle handle = onBombExplode.RaiseDelayed(2f);
 ```
 
-That's it. Two seconds from now, `onExplosion` fires. The returned `ScheduleHandle` is your ticket to managing this scheduled execution — more on that in a moment.
+That's it. Two seconds from now, `onBombExplode` fires. The handle is your ticket to managing everything about this scheduled execution — cancellation, lifecycle callbacks, status checking.
 
-### Typed Delayed
+For typed events, the argument is captured at call time:
 
 ```csharp
 ScheduleHandle handle = onDamageDealt.RaiseDelayed(50, 1.5f);
 ```
 
-Deal 50 damage after 1.5 seconds. The argument is captured at call time, not at execution time. This is important — if you're passing a variable, its value at the moment you call `RaiseDelayed()` is what gets used, not whatever the variable holds 1.5 seconds later.
-
-### Sender Delayed
-
-```csharp
-ScheduleHandle handle = onDamageFromSource.RaiseDelayed(this, 50, 1.5f);
-```
-
-Same pattern. Sender and args are both captured immediately.
+The value `50` is locked in when you call `RaiseDelayed()`. If the variable you passed changes before the delay expires, the original value is still used. No surprises.
 
 ![Delayed Event Behavior](/img/game-event-system/examples/07-delayed-event/demo-07-behavior.png)
 
-### What Happens Under the Hood
+### Repeating: RaiseRepeating()
 
-GES spins up a managed coroutine on a persistent runner object. You don't need to worry about the coroutine's lifecycle — it's handled internally. If you cancel the handle, the coroutine stops. If the application quits, outstanding scheduled events are cleaned up automatically.
-
-The delay uses `WaitForSeconds`, which respects `Time.timeScale`. If you pause your game by setting `timeScale` to 0, delayed events pause too. This is usually what you want — a grenade's fuse shouldn't tick during a pause menu.
-
-![Delayed Event Inspector](/img/game-event-system/examples/07-delayed-event/demo-07-inspector.png)
-
-## Repeating Execution: RaiseRepeating()
-
-`RaiseRepeating()` fires an event on a regular interval, either a fixed number of times or indefinitely.
-
-### Finite Repetition
+Fire an event on a regular interval, either a fixed number of times or forever.
 
 ```csharp
-// Poison damage: 10 damage every 1 second, 5 times total
+// Poison: 10 damage every 1 second, 5 ticks total
 ScheduleHandle handle = onPoisonTick.RaiseRepeating(10, interval: 1f, count: 5);
 ```
 
-This fires the event 5 times, once per second. After the 5th execution, the schedule completes naturally and the handle becomes inactive.
-
-The `count` parameter is the total number of executions, not the number of *repeats*. So `count: 5` means the event fires 5 times, not "once initially plus 5 repeats."
+The `count` is total executions, not repeats. `count: 5` means the event fires 5 times.
 
 ![Repeating Event Finite](/img/game-event-system/examples/08-repeating-event/demo-08-behavior-finite.png)
 
-### Infinite Repetition
+For infinite repetition — heartbeats, radar pings, ambient effects:
 
 ```csharp
-// Radar scan: ping every 2 seconds, forever
+// Radar scan: every 2 seconds, forever
 ScheduleHandle handle = onRadarPing.RaiseRepeating(interval: 2f, count: -1);
 ```
 
-Pass `count: -1` for infinite repetition. The event keeps firing every 2 seconds until you explicitly cancel the handle. This is your pattern for heartbeat systems, polling loops, ambient effects, and anything that runs indefinitely during gameplay.
+Pass `count: -1` and it runs until you cancel it.
 
 ![Repeating Event Infinite](/img/game-event-system/examples/08-repeating-event/demo-08-behavior-infinite.png)
 
-### Practical Examples
+## The ScheduleHandle: What Coroutines Should Have Been
 
-**Poison damage over time:**
+The `ScheduleHandle` returned by `RaiseDelayed()` and `RaiseRepeating()` is where the real power lives. It has three lifecycle callbacks that solve the exact problems coroutines leave you to handle manually.
 
-```csharp
-public class PoisonEffect : MonoBehaviour
-{
-    [GameEventDropdown, SerializeField] private GameEventInt onPoisonDamage;
-
-    private ScheduleHandle _poisonHandle;
-
-    public void ApplyPoison(int damagePerTick, float interval, int ticks)
-    {
-        // Cancel any existing poison first
-        if (_poisonHandle.IsActive)
-            onPoisonDamage.CancelRepeating(_poisonHandle);
-
-        _poisonHandle = onPoisonDamage.RaiseRepeating(
-            damagePerTick,
-            interval: interval,
-            count: ticks
-        );
-
-        _poisonHandle.OnCompleted(() =>
-        {
-            Debug.Log("Poison effect expired naturally");
-        });
-    }
-
-    public void CurePoison()
-    {
-        if (_poisonHandle.IsActive)
-        {
-            onPoisonDamage.CancelRepeating(_poisonHandle);
-            Debug.Log("Poison cured!");
-        }
-    }
-}
-```
-
-**Radar/sonar scanning:**
-
-```csharp
-public class RadarSystem : MonoBehaviour
-{
-    [GameEventDropdown, SerializeField] private GameEvent onRadarPing;
-
-    private ScheduleHandle _scanHandle;
-
-    private void OnEnable()
-    {
-        _scanHandle = onRadarPing.RaiseRepeating(interval: 2f, count: -1);
-
-        _scanHandle.OnStep((remaining) =>
-        {
-            // remaining is -1 for infinite loops
-            Debug.Log("Radar ping sent");
-        });
-    }
-
-    private void OnDisable()
-    {
-        if (_scanHandle.IsActive)
-            onRadarPing.CancelRepeating(_scanHandle);
-    }
-}
-```
-
-## ScheduleHandle Lifecycle Callbacks
-
-The `ScheduleHandle` returned by `RaiseDelayed()` and `RaiseRepeating()` isn't just for cancellation. It supports three lifecycle callbacks that let you react to what happens during and after the scheduled execution.
-
-### OnStep: After Each Execution
+### OnStep: After Each Tick
 
 ```csharp
 ScheduleHandle handle = onPoisonTick.RaiseRepeating(10, interval: 1f, count: 5);
@@ -209,17 +264,13 @@ ScheduleHandle handle = onPoisonTick.RaiseRepeating(10, interval: 1f, count: 5);
 handle.OnStep((remainingCount) =>
 {
     Debug.Log($"Poison tick! {remainingCount} ticks remaining");
-    // Output: "Poison tick! 4 ticks remaining"
-    // Output: "Poison tick! 3 ticks remaining"
-    // ... etc
+    UpdatePoisonStackUI(remainingCount);
 });
 ```
 
-`OnStep` fires after each individual execution of the event. The `remainingCount` parameter tells you how many executions are left. For infinite loops (`count: -1`), this value is always `-1`.
+`OnStep` fires after each individual execution. The `remainingCount` tells you how many are left. For infinite loops, it's always `-1`. For delayed events (single execution), it fires once with `remainingCount` of `0`.
 
-This is great for updating UI — think a countdown timer display, a progress bar for a channeled ability, or a visual indicator for remaining poison stacks.
-
-For delayed events (single execution), `OnStep` fires once, right after the event raises, with `remainingCount` of `0`.
+No manual counter tracking. No `_poisonTicksRemaining` field. The handle knows.
 
 ### OnCompleted: Natural Completion
 
@@ -228,12 +279,13 @@ handle.OnCompleted(() =>
 {
     Debug.Log("All poison ticks finished");
     RemovePoisonVisualEffect();
+    ShowPoisonExpiredMessage();
 });
 ```
 
-`OnCompleted` fires when the schedule finishes all its planned executions. This only fires for finite schedules — infinite loops never complete naturally (they must be cancelled).
+Fires when all planned executions finish. Only fires for finite schedules — infinite loops never complete naturally. For `RaiseDelayed()`, this fires after the single delayed execution.
 
-For `RaiseDelayed()`, `OnCompleted` fires after the single delayed execution. This is the clean way to chain actions after a delay without nesting coroutines.
+This is the clean way to chain behavior after a delay. No nested coroutines. No callback spaghetti.
 
 ### OnCancelled: Manual Cancellation
 
@@ -242,16 +294,17 @@ handle.OnCancelled(() =>
 {
     Debug.Log("Poison was cured early!");
     PlayCureParticleEffect();
+    ShowPoisonCuredMessage();
 });
 ```
 
-`OnCancelled` fires when you manually cancel the schedule via `Cancel()`, `CancelDelayed()`, or `CancelRepeating()`. It does NOT fire on natural completion — the two callbacks are mutually exclusive.
+Fires when you manually cancel the schedule. Does NOT fire on natural completion. The two callbacks are mutually exclusive.
 
-This distinction matters. If poison runs out naturally, you might show a "poison expired" message. If it's cured, you might play a cure animation. `OnCompleted` vs `OnCancelled` lets you differentiate without tracking state yourself.
+This distinction is exactly what was impossible with coroutines. If poison runs out naturally, show an "expired" message. If it's cured, play a cure animation. With coroutines, you'd need a boolean flag to track which case you're in. With handles, the API tells you.
 
-### Chaining Callbacks
+### Chaining: The Fluent Pattern
 
-All three callbacks return the handle, so you can chain them fluently:
+All three callbacks return the handle, so you can chain them:
 
 ```csharp
 ScheduleHandle handle = onCountdown.RaiseRepeating(interval: 1f, count: 10)
@@ -260,39 +313,37 @@ ScheduleHandle handle = onCountdown.RaiseRepeating(interval: 1f, count: 10)
     .OnCancelled(() => AbortLaunch());
 ```
 
-Ten lines of coroutine code with state tracking, compressed into a readable chain. This is one of those API patterns that feels obvious in hindsight but saves real cognitive load on every usage.
+Compare that to a coroutine with a loop, a counter, a boolean flag for "was cancelled vs. completed," and separate methods for each cleanup path. This is a fundamentally different level of expressiveness.
 
-## Cancellation Patterns
+## Cancellation: Three Ways, All Clean
 
-Every scheduled event can be cancelled. The API provides three cancellation methods corresponding to the three scheduling types.
-
-### Cancel() — General Purpose
+### Direct Handle Cancellation
 
 ```csharp
 handle.Cancel();
 ```
 
-Works on any active handle, regardless of whether it was created by `RaiseDelayed()` or `RaiseRepeating()`.
+Works on any active handle.
 
-### CancelDelayed(handle) — Via the Event
+### Through the Event: CancelDelayed()
 
 ```csharp
-onExplosion.CancelDelayed(handle);
+onBombExplode.CancelDelayed(handle);
 ```
 
-Cancels a specific delayed schedule through the event that owns it. Functionally equivalent to `handle.Cancel()`, but reads more clearly when you're managing multiple handles and want to emphasize which event you're operating on.
+Functionally equivalent to `handle.Cancel()`, but reads more clearly when managing multiple handles — you're emphasizing which event you're operating on.
 
-### CancelRepeating(handle) — Via the Event
+### Through the Event: CancelRepeating()
 
 ```csharp
 onRadarPing.CancelRepeating(handle);
 ```
 
-Same pattern for repeating schedules. Cancel through the event reference.
+Same pattern for repeating schedules.
 
-### Safe Cancellation Pattern
+### Safe Cancellation
 
-Always check `IsActive` before cancelling if there's any possibility the handle already completed or was already cancelled:
+Always check `IsActive` before cancelling if there's any possibility the handle already completed:
 
 ```csharp
 private void StopAllSchedules()
@@ -308,35 +359,119 @@ private void StopAllSchedules()
 }
 ```
 
-Cancelling an already-inactive handle is a no-op (it won't throw), but checking `IsActive` makes your intent clearer and avoids unnecessary work.
+Cancelling an inactive handle is a no-op (no exceptions), but checking `IsActive` makes intent clear.
 
-## Inspector Auto-Scheduling Integration
+## Inspector Integration: Visual Scheduling
 
-Here's something that trips people up initially: the scheduling API and the Inspector's Behavior window work together. When you configure delay and repeat settings in the Inspector on a GameEventBehavior component, those settings are respected when the behavior raises the event.
+Here's something designers love: the scheduling API and the Inspector's Behavior Window work together. You can configure delay and repeat settings visually without touching code.
 
 ![Behavior Schedule](/img/game-event-system/visual-workflow/game-event-behavior/behavior-schedule.png)
 
-The Behavior component has fields for:
-- **Delay**: how long to wait before the first raise
-- **Repeat Count**: how many times to repeat (0 = once, -1 = infinite)
-- **Repeat Interval**: time between repeats
+The Behavior component exposes:
+- **Delay**: seconds before the first raise
+- **Repeat Count**: number of repetitions (0 = once, -1 = infinite)
+- **Repeat Interval**: seconds between repeats
 
-These map directly to `RaiseDelayed()` and `RaiseRepeating()` under the hood. When a designer configures a behavior to fire with a 2-second delay and 3 repeats at 1-second intervals, that's equivalent to calling `RaiseDelayed(2f)` followed by `RaiseRepeating(interval: 1f, count: 3)`.
+These map directly to `RaiseDelayed()` and `RaiseRepeating()` under the hood. A designer configures a 2-second delay with 3 repeats at 1-second intervals — that's equivalent to `RaiseDelayed(2f)` followed by `RaiseRepeating(interval: 1f, count: 3)` in code.
 
-The beauty here is that designers can tune timing in the Inspector without touching code, and programmers can override or extend the same timing in scripts. Both paths produce the same `ScheduleHandle` management.
+Designers tune timing without code. Programmers override or extend the same timing in scripts. Both paths produce the same ScheduleHandle management. No fighting over who owns the timing logic.
 
-## Complete Scenario: Bomb Defusal
+![Delayed Event Inspector](/img/game-event-system/examples/07-delayed-event/demo-07-inspector.png)
 
-Let's put everything together with a realistic game scenario. A bomb is planted. It has a 30-second fuse with a visible countdown. Players can attempt to defuse it. If they succeed, the bomb is disarmed. If they fail, it explodes.
+## The Full Comparison: Bomb Defusal
+
+Let's put it all together. The bomb scenario from the intro — but this time with GES scheduling.
+
+### The Coroutine Version (What You'd Write Today)
+
+```csharp
+public class BombCoroutine : MonoBehaviour
+{
+    [SerializeField] private float fuseTime = 30f;
+    [SerializeField] private float tickInterval = 1f;
+
+    private Coroutine _explosionCoroutine;
+    private Coroutine _countdownCoroutine;
+    private bool _isArmed;
+    private bool _hasExploded;
+    private int _ticksRemaining;
+
+    public void ArmBomb()
+    {
+        if (_isArmed) return;
+        _isArmed = true;
+        _hasExploded = false;
+        _ticksRemaining = Mathf.FloorToInt(fuseTime / tickInterval);
+
+        _explosionCoroutine = StartCoroutine(ExplosionRoutine());
+        _countdownCoroutine = StartCoroutine(CountdownRoutine());
+    }
+
+    private IEnumerator ExplosionRoutine()
+    {
+        yield return new WaitForSeconds(fuseTime);
+        _hasExploded = true;
+        _explosionCoroutine = null;
+        // Notify explosion... but how? Direct reference? UnityEvent?
+        Debug.Log("BOOM!");
+    }
+
+    private IEnumerator CountdownRoutine()
+    {
+        while (_ticksRemaining > 0)
+        {
+            yield return new WaitForSeconds(tickInterval);
+            _ticksRemaining--;
+            // Notify UI... but how?
+            Debug.Log($"Tick... {_ticksRemaining}");
+        }
+        _countdownCoroutine = null;
+    }
+
+    public void AttemptDefusal()
+    {
+        if (!_isArmed || _hasExploded) return;
+
+        _isArmed = false;
+
+        if (_explosionCoroutine != null)
+        {
+            StopCoroutine(_explosionCoroutine);
+            _explosionCoroutine = null;
+        }
+        if (_countdownCoroutine != null)
+        {
+            StopCoroutine(_countdownCoroutine);
+            _countdownCoroutine = null;
+        }
+
+        // Was it defused or did it explode? Check _hasExploded.
+        // What about notifying other systems? Manual calls.
+        Debug.Log("Defused!");
+    }
+
+    private void OnDestroy()
+    {
+        if (_explosionCoroutine != null)
+            StopCoroutine(_explosionCoroutine);
+        if (_countdownCoroutine != null)
+            StopCoroutine(_countdownCoroutine);
+    }
+}
+```
+
+That's ~50 lines. Two coroutine fields, two boolean flags, manual notification (the `// but how?` comments), no lifecycle callbacks, and the UI has to either poll `_ticksRemaining` or get a direct reference to this component.
+
+### The GES Version
 
 ```csharp
 public class BombController : MonoBehaviour
 {
     [Header("Events")]
-    [GameEventDropdown, SerializeField] private GameEvent onBombExplode;
-    [GameEventDropdown, SerializeField] private GameEventInt onCountdownTick;
-    [GameEventDropdown, SerializeField] private GameEvent onBombDefused;
-    [GameEventDropdown, SerializeField] private GameEvent onBombArmed;
+    [GameEventDropdown, SerializeField] private SingleGameEvent onBombExplode;
+    [GameEventDropdown, SerializeField] private Int32GameEvent onCountdownTick;
+    [GameEventDropdown, SerializeField] private SingleGameEvent onBombDefused;
+    [GameEventDropdown, SerializeField] private SingleGameEvent onBombArmed;
 
     [Header("Settings")]
     [SerializeField] private float fuseTime = 30f;
@@ -351,80 +486,49 @@ public class BombController : MonoBehaviour
         if (_isArmed) return;
         _isArmed = true;
 
-        // Notify everyone the bomb is live
         onBombArmed.Raise();
 
-        // Schedule the explosion
-        _explosionHandle = onBombExplode.RaiseDelayed(fuseTime);
-        _explosionHandle.OnCompleted(() =>
-        {
-            Debug.Log("BOOM! Bomb exploded.");
-            // Explosion effects, damage, etc. handled by listeners
-        });
-
-        // Schedule countdown ticks for UI
         int totalTicks = Mathf.FloorToInt(fuseTime / tickInterval);
-        _countdownHandle = onCountdownTick.RaiseRepeating(
-            totalTicks,
-            interval: tickInterval,
-            count: totalTicks
-        );
 
-        _countdownHandle.OnStep((remaining) =>
-        {
-            // The argument (totalTicks) was captured at start,
-            // but remaining tells us the real countdown
-            Debug.Log($"Tick... {remaining} seconds left");
-        });
+        _explosionHandle = onBombExplode.RaiseDelayed(fuseTime)
+            .OnCompleted(() => Debug.Log("BOOM! Bomb exploded."));
+
+        _countdownHandle = onCountdownTick.RaiseRepeating(
+            totalTicks, interval: tickInterval, count: totalTicks)
+            .OnStep((remaining) => Debug.Log($"Tick... {remaining} seconds left"));
     }
 
-    public void AttemptDefusal(float defuseProgress)
+    public void AttemptDefusal(float progress)
     {
         if (!_isArmed) return;
+        if (progress < 1f) return;
 
-        if (defuseProgress >= 1f)
-        {
-            // Successfully defused!
-            _isArmed = false;
+        _isArmed = false;
 
-            // Cancel the explosion
-            if (_explosionHandle.IsActive)
-                _explosionHandle.Cancel();
+        if (_explosionHandle.IsActive) _explosionHandle.Cancel();
+        if (_countdownHandle.IsActive) _countdownHandle.Cancel();
 
-            // Cancel the countdown
-            if (_countdownHandle.IsActive)
-                _countdownHandle.Cancel();
+        _explosionHandle.OnCancelled(() => Debug.Log("Explosion cancelled!"));
 
-            // The OnCancelled callbacks fire here
-            _explosionHandle.OnCancelled(() =>
-            {
-                Debug.Log("Explosion cancelled — bomb defused!");
-            });
-
-            // Notify systems
-            onBombDefused.Raise();
-        }
+        onBombDefused.Raise();
     }
 
     private void OnDisable()
     {
-        // Clean up if object is destroyed mid-countdown
-        if (_explosionHandle.IsActive)
-            _explosionHandle.Cancel();
-        if (_countdownHandle.IsActive)
-            _countdownHandle.Cancel();
+        if (_explosionHandle.IsActive) _explosionHandle.Cancel();
+        if (_countdownHandle.IsActive) _countdownHandle.Cancel();
     }
 }
 ```
 
-And the UI side, completely decoupled:
+And the UI side, completely decoupled — no reference to `BombController` at all:
 
 ```csharp
 public class BombUI : MonoBehaviour
 {
-    [GameEventDropdown, SerializeField] private GameEventInt onCountdownTick;
-    [GameEventDropdown, SerializeField] private GameEvent onBombDefused;
-    [GameEventDropdown, SerializeField] private GameEvent onBombExplode;
+    [GameEventDropdown, SerializeField] private Int32GameEvent onCountdownTick;
+    [GameEventDropdown, SerializeField] private SingleGameEvent onBombDefused;
+    [GameEventDropdown, SerializeField] private SingleGameEvent onBombExplode;
     [SerializeField] private TextMeshProUGUI countdownText;
     [SerializeField] private GameObject bombPanel;
 
@@ -446,8 +550,6 @@ public class BombUI : MonoBehaviour
     {
         bombPanel.SetActive(true);
         countdownText.text = $"{secondsRemaining}";
-
-        // Flash red in the last 5 seconds
         if (secondsRemaining <= 5)
             countdownText.color = Color.red;
     }
@@ -461,14 +563,87 @@ public class BombUI : MonoBehaviour
     private void ShowExplosionScreen()
     {
         bombPanel.SetActive(false);
-        // Trigger screen shake, flash, etc.
     }
 }
 ```
 
-Notice what's happening here. The `BombController` knows nothing about the UI. The `BombUI` knows nothing about the bomb's internal state. They communicate entirely through events with scheduling. The bomb schedules its own explosion and countdown. The UI listens and reacts. Defusal cancels the schedules, and the lifecycle callbacks handle the state transitions cleanly.
+The `BombController` doesn't know the UI exists. The `BombUI` doesn't know the bomb's internal state. They communicate through events with scheduling. The bomb schedules its own explosion and countdown. The UI listens and reacts. Defusal cancels the schedules, and the lifecycle callbacks handle the branching. No coroutines. No `Update()` loops. No cross-references.
 
-No coroutines written by hand. No `Update()` loops tracking elapsed time. No cross-references between game objects. Just events, schedules, and handles.
+## Practical Patterns
+
+### Poison Damage Over Time
+
+```csharp
+public class PoisonEffect : MonoBehaviour
+{
+    [GameEventDropdown, SerializeField] private Int32GameEvent onPoisonDamage;
+
+    private ScheduleHandle _poisonHandle;
+
+    public void ApplyPoison(int damagePerTick, float interval, int ticks)
+    {
+        if (_poisonHandle.IsActive)
+            onPoisonDamage.CancelRepeating(_poisonHandle);
+
+        _poisonHandle = onPoisonDamage.RaiseRepeating(
+            damagePerTick, interval: interval, count: ticks)
+            .OnStep((remaining) => UpdatePoisonUI(remaining))
+            .OnCompleted(() => ShowPoisonExpired())
+            .OnCancelled(() => ShowPoisonCured());
+    }
+
+    public void CurePoison()
+    {
+        if (_poisonHandle.IsActive)
+            onPoisonDamage.CancelRepeating(_poisonHandle);
+    }
+
+    private void OnDisable()
+    {
+        if (_poisonHandle.IsActive)
+            onPoisonDamage.CancelRepeating(_poisonHandle);
+    }
+}
+```
+
+### Radar / Heartbeat System
+
+```csharp
+public class RadarSystem : MonoBehaviour
+{
+    [GameEventDropdown, SerializeField] private SingleGameEvent onRadarPing;
+
+    private ScheduleHandle _scanHandle;
+
+    private void OnEnable()
+    {
+        _scanHandle = onRadarPing.RaiseRepeating(interval: 2f, count: -1)
+            .OnStep((_) => Debug.Log("Radar ping sent"));
+    }
+
+    private void OnDisable()
+    {
+        if (_scanHandle.IsActive)
+            onRadarPing.CancelRepeating(_scanHandle);
+    }
+}
+```
+
+That's the entire radar system. Seven lines of actual logic. No coroutines, no Update loops, no manual timer tracking. Start on enable, stop on disable.
+
+## When to Use What
+
+**Use `Raise()`** for immediate notifications: player died, button clicked, item collected. No timing involved.
+
+**Use `RaiseDelayed()`** for one-shot timed events: explosion after fuse, dialogue after cutscene, respawn after death timer. Anything that happens once after a wait.
+
+**Use `RaiseRepeating()` with finite count** for damage-over-time, channeled abilities, countdowns, multi-step sequences. Anything that pulses a fixed number of times.
+
+**Use `RaiseRepeating()` with count: -1** for heartbeat systems, polling loops, ambient effects, radar pings. Anything that runs until explicitly stopped.
+
+**Always store the handle** if there's any chance you'll need to cancel. In practice, you almost always want it.
+
+**Always clean up in `OnDisable()`**. If your MonoBehaviour is destroyed while a schedule is active, cancel it. GES won't crash if you don't, but orphaned schedules are a code smell.
 
 ## Quick Reference
 
@@ -488,27 +663,7 @@ No coroutines written by hand. No `Update()` loops tracking elapsed time. No cro
 | `handle.Cancel()` | void | Cancel the schedule |
 | `handle.IsActive` | bool | Check if still running |
 
-## When to Use What
-
-**Use `Raise()`** for immediate notifications: player died, button clicked, item picked up. No timing involved.
-
-**Use `RaiseDelayed()`** for one-shot timed events: explosion after fuse, dialogue after cutscene, respawn after death timer. Anything that happens once after a wait.
-
-**Use `RaiseRepeating()` with finite count** for damage-over-time, channeled abilities, multi-step animations, countdown sequences. Anything that pulses a fixed number of times.
-
-**Use `RaiseRepeating()` with count: -1** for heartbeat systems, polling loops, ambient effects, radar pings. Anything that runs until explicitly stopped.
-
-**Always store the handle** if there's any chance you'll need to cancel. If you know for certain the schedule will always complete naturally and you don't need lifecycle callbacks, you can discard the handle — but in practice, you almost always want it.
-
-**Always clean up in `OnDisable()`**. If your MonoBehaviour gets destroyed while a schedule is active, cancel it. GES won't crash if you don't, but orphaned schedules are a code smell and can cause unexpected behavior when the listener objects no longer exist.
-
-The scheduling API turns what used to be coroutine management boilerplate into declarative, handle-managed event timing. Once you internalize the pattern — raise, capture handle, attach callbacks, cancel when done — you'll wonder why you ever wrote `IEnumerator` for simple delays.
-
----
-
-## Next Up
-
-In the next post, we'll explore the four listener strategies in GES — priority, conditional, persistent, and handle-based — and how they form a deterministic 6-layer execution pipeline. When multiple systems listen to the same event, execution order matters, and GES gives you explicit control over it.
+The scheduling API collapses what used to be coroutine management boilerplate into declarative, handle-managed event timing. The pattern is always the same: raise, capture handle, attach callbacks, cancel when done. Once you internalize it, you'll genuinely wonder why you ever wrote `IEnumerator` for a simple delay.
 
 ---
 

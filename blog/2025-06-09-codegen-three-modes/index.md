@@ -1,76 +1,99 @@
 ---
 slug: codegen-three-modes
-title: "Code Generation Three Ways: Basic, Custom, and Sender — Eliminate All Boilerplate"
+title: "The Boilerplate Tax: Why Unity's Serialization System Forces You to Write Duplicate Code (And How to Stop)"
 authors: [tinygiants]
-tags: [ges, unity, codegen, tools, tutorial]
-description: "Every time you add a new data type, you need concrete event classes for Inspector serialization. GES generates them automatically in three modes."
+tags: [ges, unity, codegen, tools, serialization]
+description: "Unity can't serialize open generics. That means a concrete class for every event type. That means boilerplate hell. Here's what GES does about it."
 image: /img/home-page/game-event-system-preview.png
 ---
 
-You just created a `WeaponInfo` struct. It holds damage, fire rate, ammo type, and a reference to the weapon prefab. Now you need a `GameEvent<WeaponInfo>` so the inventory system can broadcast weapon changes. But Unity's serialization system can't serialize an open generic — you need a concrete class like `GameEventWeaponInfo : GameEvent<WeaponInfo>`. And you might also need the sender variant.
+Let me tell you about the most boring afternoon of my Unity career.
 
-That's boilerplate for every data type. Multiply by every custom type in your project. Now multiply by the maintenance burden when you rename a field or change a namespace. It adds up fast, and it's exactly the kind of tedious, error-prone work that should be automated.
+I had 15 custom data types in my RPG project. Structs for damage info, inventory slots, quest progress, weapon stats, dialogue choices — you know, the stuff every game needs. And I needed events for all of them. ScriptableObject-based events, the kind you wire up in the Inspector and drag-drop between systems.
 
-GES automates it completely. The normal workflow is through the **Creator Window**: open the Editor Window, click "+ New Event," and the Creator opens where you configure and create your event. The Creator auto-generates the necessary code for custom types during batch creation. For maintenance — regenerating code after modifying a type's structure, manually adding a type, or cleaning up — there's also a dedicated Code Generation tool in the System Dashboard with three modes, a batch queue, and a cleanup tool.
+So I sat down and wrote 45 nearly identical C# files. Fifteen event classes. Fifteen UnityEvent wrappers. Fifteen binding fields. Each one was three lines of actual code wrapped in the same boilerplate: namespace declaration, using statements, `[CreateAssetMenu]` attribute, class definition inheriting from a generic base. Copy, paste, change the type name, repeat. For three hours.
+
+Then I made a typo in one of them. `GameEventWeponInfo` instead of `GameEventWeaponInfo`. It took me 20 minutes to find because the compiler error pointed to a completely different file that referenced the misspelled class. Good times.
 
 <!-- truncate -->
 
-## Why Unity Needs Concrete Classes
+## The Root Cause: Unity Can't Serialize Open Generics
 
-Before we dive into the tool, let's understand the problem it solves. This context matters because it explains design decisions that might otherwise seem arbitrary.
+Here's the fundamental problem. Unity's serialization system — the engine that powers the Inspector, ScriptableObjects, prefabs, and every asset reference in your project — cannot handle open generic types. Period.
 
-Unity's serialization system — the one that powers the Inspector, ScriptableObjects, prefabs, and asset references — cannot serialize open generic types. `GameEvent<T>` is an open generic. Unity can't create an Inspector field for it, can't save it as an asset, and can't reference it in a prefab.
-
-The workaround is to create a concrete (closed) generic class:
+You can't do this:
 
 ```csharp
-[CreateAssetMenu]
-public class GameEventWeaponInfo : GameEvent<WeaponInfo> { }
+// This DOES NOT work in Unity's Inspector
+[SerializeField] private GameEvent<float> onHealthChanged;
 ```
 
-That's the entire class. No methods, no overrides, no logic. It exists solely to give Unity's serializer a concrete type to work with. The actual event functionality lives in the `GameEvent<T>` base class.
+Unity sees `GameEvent&lt;T&gt;` and goes "I don't know what T is, I can't serialize this, I'm not drawing an Inspector field for it." It doesn't matter that you specified `float` right there. The serializer needs a concrete, closed type at compile time.
 
-This is a Unity limitation, not a GES design choice. Every ScriptableObject-based event system in Unity has this constraint. GES just automates the boring part.
+The workaround is to create a concrete class:
 
-## Generated Code Architecture
-
-Understanding where generated files live is important so you don't accidentally modify generated code or lose your custom types during updates.
-
-### Core Package (Do Not Touch)
-
-```
-Assets/TinyGiants/GameEventSystem/
+```csharp
+// This works. Unity can serialize this.
+public class SingleGameEvent : GameEvent<float> { }
 ```
 
-This is the GES core package. It contains the base classes, editor tools, and runtime code. **Never modify files here.** Package updates will overwrite them.
+That's the entire class. No methods, no overrides, no logic. It exists solely to satisfy Unity's serializer. The real functionality lives in the `GameEvent&lt;T&gt;` base class. Your concrete class is just a type tag.
 
-### User Data Directory (Your Territory)
+And you need one of these for EVERY type you want to use as an event argument.
 
-```
-Assets/TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/
-├── Basic/      (32 pre-generated primitive types)
-└── Custom/     (your generated classes)
-```
+## The Math Gets Ugly Fast
 
-The `Basic/` directory ships with 32 pre-generated types covering Unity's most common data types. The `Custom/` directory is where your project-specific generated classes go.
+Let's count the boilerplate for a typical mid-sized project.
 
-### What Gets Generated
+For each custom type, you need:
+1. **The event class** — `GameEventDamageInfo : GameEvent&lt;DamageInfo&gt;`
+2. **The behavior binding** — so the visual wiring system can serialize it in the Inspector
 
-For each type, GES generates a set of classes that enable full Inspector support:
+That's 2 files per type. For a project with 15 custom types, that's 30 boilerplate files. Files where the only difference is the type name.
 
-**For a single-parameter type like `WeaponInfo`:**
-- `GameEventWeaponInfo` — the ScriptableObject event asset
-- `GameEventBehaviorWeaponInfo` — the behavior component for visual receiver wiring in the Behavior Window
+But wait, it gets worse. Some events need a sender — you want to know WHO raised the event, not just what data it carries. `GameEvent&lt;TSender, TArgs&gt;` needs its own concrete class. If even 5 of your 15 types need sender variants, you're up to 40 files.
 
-**For a sender type like `GameEvent<Player, DamageInfo>`:**
-- `GameEventPlayerDamageInfo` — the ScriptableObject event asset
-- `GameEventBehaviorPlayerDamageInfo` — the behavior component for visual receiver wiring in the Behavior Window
+Now multiply by the maintenance burden. You rename `DamageInfo` to `CombatDamageInfo` because your naming convention evolved. You need to update every generated class, every reference, every `CreateAssetMenu` attribute. Miss one and you get a cryptic serialization error that takes 20 minutes to debug.
 
-Each generated file follows a consistent naming convention and includes the correct `using` statements, namespace declarations, and `CreateAssetMenu` attributes.
+## The Community's Workarounds (And Why They're Fragile)
 
-## Mode 1: Basic Types — 32 Pre-Generated Primitives
+Unity developers are resourceful. We've been dealing with this for years, and we've cobbled together various solutions:
 
-Out of the box, GES ships with generated classes for 32 common Unity types:
+**T4 Templates:** Text Template Transformation Toolkit. You write a template with placeholder tokens, and a pre-processor generates the C# files. It works, but T4 support in Unity is spotty. Some IDEs handle it, others don't. The templates themselves are hard to debug — when something goes wrong, the error messages point to generated code, not the template.
+
+**Code Snippets:** Your IDE can expand `gevt` + Tab into a full event class scaffold. Faster than typing manually, but you still have one file per type, and snippets can't enforce naming conventions or validate that the target type actually exists and is serializable.
+
+**Custom Editor Scripts:** You write an Editor window that takes a type name and generates the file. This is actually pretty close to the right answer — but now you're maintaining a code generator alongside your actual code. When the base class signature changes, you update the generator, then regenerate everything, then hope nothing broke.
+
+**Copy-Paste:** The most common approach. We all know it. We all hate it. We all do it anyway because it's "just three files" and we'll "clean it up later."
+
+## What Other Languages Do
+
+This problem isn't unique to Unity, but most modern languages have solved it:
+
+**Rust** has derive macros. `#[derive(Serialize)]` and the compiler generates the serialization code at compile time. No boilerplate files, no manual maintenance.
+
+**Go** has code generation as a first-class concept. `go generate` runs custom generators that produce type-safe code. The generated files are checked into version control and regenerated when needed.
+
+**C# itself** has source generators — Roslyn analyzers that emit code at compile time. They're powerful and elegant. But Unity's support for source generators is still limited and quirky, especially with Assembly Definitions and the various compilation passes Unity uses.
+
+The fundamental question is this: **if the boilerplate is 100% predictable — if you can describe exactly what needs to be generated from just the type name — why is a human writing it?**
+
+## What Code Generation Should Look Like
+
+A good code generator for this problem should:
+
+1. **Handle the common cases automatically** — primitives, Unity types, stuff every project uses
+2. **Handle custom types on demand** — you define a struct, you get event support for it
+3. **Handle sender variants** — dual-generic types without doubling the manual work
+4. **Integrate with the creation workflow** — don't make me go to a separate tool just to generate boilerplate
+5. **Stay out of the way** — generated code lives in its own directory, doesn't conflict with updates, doesn't require manual maintenance
+
+GES's code generation does all of this through three modes.
+
+## Mode 1: Basic Types — 32 Pre-Generated, Ready to Go
+
+Out of the box, GES ships with 32 pre-generated event types covering the types you'll use in almost every project:
 
 | Category | Types |
 |----------|-------|
@@ -79,19 +102,16 @@ Out of the box, GES ships with generated classes for 32 common Unity types:
 | Unity Structs | `Rect`, `Bounds`, `Vector2Int`, `Vector3Int`, `RectInt`, `BoundsInt` |
 | Unity Objects | `GameObject`, `Transform`, `Object`, `Component`, `Sprite`, `Texture2D` |
 | Unity Objects | `AudioClip`, `Material`, `AnimationClip`, `ScriptableObject` |
-| Collections | `List<int>`, `List<string>`, `int[]`, `string[]` |
+| Collections | `List&lt;int&gt;`, `List&lt;string&gt;`, `int[]`, `string[]` |
 
-These live in the `Basic/` directory and are ready to use immediately after importing GES. You don't need to generate them — they're already there.
-
-**Important:** Don't modify the Basic types. They're regenerated during package updates. If you need a variant of a basic type (like a custom int event with additional metadata), create it in the Custom directory using Mode 2.
-
-### Using a Basic Type
+These live in `Assets/TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/Basic/` and they cover 70-80% of what a typical project needs. You never touch them. You never think about them. They just work.
 
 ```csharp
-// In your script
-[GameEventDropdown, SerializeField] private GameEventInt onScoreChanged;
-[GameEventDropdown, SerializeField] private GameEventVector3 onPositionUpdated;
-[GameEventDropdown, SerializeField] private GameEventBool onPauseToggled;
+// All of these work immediately after importing GES
+[GameEventDropdown, SerializeField] private Int32GameEvent onScoreChanged;
+[GameEventDropdown, SerializeField] private Vector3GameEvent onPositionUpdated;
+[GameEventDropdown, SerializeField] private BooleanGameEvent onPauseToggled;
+[GameEventDropdown, SerializeField] private StringGameEvent onPlayerNameChanged;
 
 private void UpdateScore(int newScore)
 {
@@ -99,45 +119,15 @@ private void UpdateScore(int newScore)
 }
 ```
 
-In the Inspector, fields marked with `[GameEventDropdown]` show up as **searchable dropdowns** that list all compatible events from your active databases. You create event assets through the Creator Window (Game Event Editor → "+ New Event"), not manually.
+The `[GameEventDropdown]` attribute is GES-specific — it turns the Inspector field into a searchable dropdown that lists all compatible events from your active databases. No manual asset dragging, no "which event was it again?" Just type a few letters and pick from the filtered list.
 
-## Mode 2: Custom Single Parameter — GameEvent\<T\>
+The Basic types are immutable — GES regenerates them during package updates. Don't modify them. If you need a custom variant of a basic type, use Mode 2.
 
-When you need an event for your own data types — structs, classes, enums, or any type not in the basic set.
+## Mode 2: Custom Single Parameter — Your Types, Auto-Generated
 
-### Normal Workflow: Creator Window
+This is where the magic happens for your project-specific types.
 
-The easiest way to create a custom event type is through the Creator:
-
-1. Open the **Editor Window** (`Tools > TinyGiants > Game Event System > Editor Window`)
-2. Click the **"+ New Event"** button
-3. The **Creator Window** opens — configure your event's type, name, and settings
-4. Click Create — the Creator auto-generates the necessary concrete class code
-5. Wait for Unity to compile the new scripts
-
-That's it. Your `GameEventWeaponInfo` is now available as a ScriptableObject asset and an Inspector-serializable field.
-
-### Maintenance Workflow: Code Generation Tool
-
-If you need to regenerate code after modifying a custom type's structure, or manually add a type that wasn't created through the Creator, use the Code Generation tool in the System Dashboard:
-
-1. Open the Code Generation tool: `Tools > TinyGiants > Game Event System > Code Generation`
-
-![CodeGen Single](/img/game-event-system/tools/codegen-and-cleanup/tool_codegen_single.png)
-
-2. Select "Single Parameter" mode
-
-3. Enter your type information:
-   - **Type Name:** The fully qualified type name (e.g., `WeaponInfo` or `MyNamespace.WeaponInfo`)
-   - **Using Statements:** Any additional `using` directives needed (GES adds the common Unity ones automatically)
-
-4. Click "Generate"
-
-5. Wait for Unity to compile the new scripts
-
-### Example: Custom Struct
-
-Let's say you have this in your project:
+Let's say you have this struct in your RPG:
 
 ```csharp
 namespace RPG.Combat
@@ -150,40 +140,26 @@ namespace RPG.Combat
         public float knockbackForce;
         public Vector3 hitPoint;
     }
-
-    public enum DamageType
-    {
-        Physical,
-        Magical,
-        Fire,
-        Ice,
-        Lightning
-    }
 }
 ```
 
-In the Code Generation tool:
-- **Type Name:** `RPG.Combat.DamageInfo`
-- **Using Statements:** `RPG.Combat` (so the generated file can find `DamageInfo`)
+You need a `DamageInfoGameEvent` so your combat system can broadcast damage. In the old world, you'd create the file manually. In GES, the **Creator Window** handles it.
 
-The generated file looks something like:
+### The Primary Path: Creator Window
 
-```csharp
-using UnityEngine;
-using RPG.Combat;
-using TinyGiants.GameEventSystem;
+The normal workflow is dead simple:
 
-[CreateAssetMenu(
-    fileName = "New DamageInfo Event",
-    menuName = "TinyGiants/Game Event System/Custom/DamageInfo Event"
-)]
-public class GameEventDamageInfo : GameEvent<DamageInfo> { }
-```
+1. Open the **Editor Window** (`Tools > TinyGiants > Game Event System > Editor Window`)
+2. Click **"+ New Event"**
+3. The **Creator Window** opens — pick your type, name the event, configure settings
+4. Click Create
 
-Now you can use it:
+That's it. The Creator auto-generates the concrete class code as part of the event creation process. You didn't open a separate tool. You didn't think about code generation. You just created an event and the boilerplate handled itself.
+
+After Unity compiles the new scripts (2-5 seconds), your type is ready:
 
 ```csharp
-[GameEventDropdown, SerializeField] private GameEventDamageInfo onDamageDealt;
+[GameEventDropdown, SerializeField] private DamageInfoGameEvent onDamageDealt;
 
 public void DealDamage(DamageInfo info)
 {
@@ -191,68 +167,55 @@ public void DealDamage(DamageInfo info)
 }
 ```
 
+### The Maintenance Path: CodeGen Tool
+
+Sometimes you need to regenerate code outside of the Creator workflow. Maybe you modified a custom type's struct layout, or you need to manually add a type that wasn't created through the Creator, or you're resolving merge conflicts after a VCS merge.
+
+For these cases, there's a dedicated Code Generation tool in the System Dashboard:
+
+![CodeGen Single](/img/game-event-system/tools/codegen-and-cleanup/tool_codegen_single.png)
+
+Enter the type name, add any necessary `using` statements, and hit Generate. It's a maintenance tool — you won't use it often, but when you need it, it's there.
+
+The generated file lands in `Assets/TinyGiants/TinyGiantsData/GameEventSystem/CodeGen/Custom/`, separate from the immutable Basic types. Your custom types survive package updates.
+
 ### The Serializable Requirement
 
-Your custom type must be serializable by Unity for the Inspector to display it correctly. This means:
+One thing to remember: your custom type must be serializable by Unity for the Inspector to display it. That means:
 
-- **Structs:** Add `[System.Serializable]` attribute
-- **Classes:** Add `[System.Serializable]` attribute, must have a parameterless constructor
-- **Enums:** Serializable by default
-- **Interfaces:** Not serializable — use a concrete type or wrapper
-- **MonoBehaviours/Components:** Use the component reference directly (already serializable)
-- **ScriptableObjects:** Use the SO reference directly (already serializable)
+- **Structs:** Need `[System.Serializable]`
+- **Classes:** Need `[System.Serializable]` and a parameterless constructor
+- **Enums:** Serializable by default — just generate and go
+- **MonoBehaviours/ScriptableObjects:** Already serializable, use the reference directly
 
-If your type isn't serializable, the event will still work in code (you can `Raise()` and listen), but the Inspector won't be able to display the argument field on behavior components.
+If your type isn't serializable, the event still works in code (`Raise()` and listeners function fine), but the Inspector won't display the argument field on behavior components.
 
-## Mode 3: Sender Events — GameEvent\<TSender, TArgs\>
+## Mode 3: Sender Events — When "What" Isn't Enough
 
-Sender events carry two generic parameters: who sent the event and what data it carries. This is essential when listeners need context about the event source.
+Sometimes you need to know WHO raised an event, not just what data it carries.
 
-### Normal Workflow
-
-Sender events can also be created through the Creator Window (Editor Window -> "+ New Event"). Select the sender mode in the Creator, configure both type parameters, and the code is auto-generated.
-
-### Maintenance Workflow: Code Generation Tool
-
-For regenerating or manually adding sender types, use the Code Generation tool:
-
-1. Open the Code Generation tool
+Player takes damage. You need to know the damage amount (the data) AND which enemy dealt it (the sender). That's `GameEvent&lt;Enemy, DamageInfo&gt;` — a dual-generic type that needs its own concrete class.
 
 ![CodeGen Sender](/img/game-event-system/tools/codegen-and-cleanup/tool_codegen_sender.png)
 
-2. Select "Sender" mode
+Sender events can be created through the Creator Window (select sender mode, configure both type parameters) or through the CodeGen tool for maintenance scenarios.
 
-3. Enter both type parameters:
-   - **Sender Type:** The type of the sender (e.g., `GameObject`, `Enemy`, `Player`)
-   - **Args Type:** The type of the event data (e.g., `int`, `DamageInfo`, `string`)
-   - **Using Statements:** Additional directives for both types
-
-4. Click "Generate"
-
-### Example: Player Damage Source Tracking
+After generation, the usage is natural:
 
 ```csharp
-// After generating GameEvent<Enemy, DamageInfo>:
+[GameEventDropdown, SerializeField] private EnemyDamageInfoGameEvent onEnemyDealtDamage;
 
-[GameEventDropdown, SerializeField] private GameEventEnemyDamageInfo onEnemyDealtDamage;
-
-// Raising:
+// Raising (the enemy passes itself as sender):
 public void AttackPlayer(DamageInfo info)
 {
     onEnemyDealtDamage.Raise(this, info);
 }
 
-// Listening:
-private void OnEnable()
-{
-    onEnemyDealtDamage.AddListener(HandleEnemyDamage);
-}
-
+// Listening (you get both sender and data):
 private void HandleEnemyDamage(Enemy sender, DamageInfo args)
 {
     Debug.Log($"{sender.name} dealt {args.amount} {args.type} damage");
 
-    // React based on sender
     if (sender.IsBoss)
         ApplyScreenShake(args.knockbackForce * 2f);
     else
@@ -260,118 +223,63 @@ private void HandleEnemyDamage(Enemy sender, DamageInfo args)
 }
 ```
 
+Without code generation, sender events DOUBLE the boilerplate problem. Two generic parameters means more permutations, more files, more opportunities for copy-paste errors. With code generation, it's the same one-click process.
+
 ### When to Use Sender vs. Single Parameter
 
-**Use single parameter (`GameEvent<T>`)** when:
-- The source doesn't matter (UI events, system notifications)
-- There's only one possible source (singleton managers)
-- You're broadcasting data, not a contextual message
+**Single parameter** when the source doesn't matter: UI events, system notifications, singleton manager broadcasts, state changes.
 
-**Use sender (`GameEvent<TSender, TArgs>`)** when:
-- Multiple sources can raise the same event (enemies, pickups, traps)
-- Listeners need to differentiate behavior by source
-- You're implementing an observer pattern where the observable's identity matters
-- Kill attribution, damage tracking, interaction source identification
+**Sender** when listeners need context about who raised it: damage attribution (which enemy?), interaction source (which NPC?), kill tracking (who killed whom?), any pattern where multiple objects can raise the same event and listeners differentiate by source.
 
-## The Batch Queue
+## What Actually Gets Generated
 
-When regenerating types after a major refactor or manually adding types that weren't created through the Creator, you may need multiple types generated at once. The batch queue in the Code Generation tool lets you queue up multiple generation requests and execute them all in one compilation cycle.
+For transparency, here's what the code generator produces. For a single-parameter type like `WeaponInfo`:
 
-1. Add types to the queue one by one using the "Add to Queue" button
-2. Review the queue in the tool window
-3. Click "Generate All"
-4. Unity compiles once with all new types
+- `WeaponInfoGameEvent` — the ScriptableObject event asset class
+- `WeaponInfoGameEventBehavior` — the behavior component partial class for visual receiver wiring
 
-This is significantly faster than generating types one at a time, because each individual generation triggers a Unity recompilation. Batching 10 types into one queue means one recompile instead of ten.
+For a sender type like `GameEvent&lt;Player, DamageInfo&gt;`:
+
+- `PlayerDamageInfoGameEvent` — the ScriptableObject event asset class
+- `PlayerDamageInfoGameEventBehavior` — the behavior component partial class
+
+Each file follows consistent naming conventions, includes the correct `using` statements, namespace declarations, and `CreateAssetMenu` attributes. It's exactly the code you'd write by hand — just without the hand-writing.
+
+## Batch Operations and the Queue
+
+When you're regenerating types after a major refactor or manually adding multiple types through the CodeGen tool, the batch queue lets you queue everything up and generate in one pass.
 
 ![Hub Code Tools](/img/game-event-system/tools/codegen-and-cleanup/hub-code-tools.png)
 
-## Auto-Compilation Pipeline Integration
+Why batch? Because each individual generation triggers a Unity recompilation. If you generate 10 types one at a time, that's 10 recompiles — each taking 3-10 seconds depending on your project size. Batch them into one queue and you get one recompile. On a large project, that's the difference between 90 seconds and 10 seconds.
 
-When GES generates a file, it writes the `.cs` file to the `Custom/` directory and then triggers Unity's asset refresh. Unity's compilation pipeline picks up the new file, compiles it, and the type becomes available in the Inspector.
+Add types to the queue, review them, click "Generate All." One compilation cycle, all types ready.
 
-The typical flow:
-1. You click "Generate" in the tool
-2. GES writes the `.cs` file
-3. Unity detects the file change and starts compilation
-4. Compilation completes (usually 2-5 seconds)
-5. The new type appears in Create menus and Inspector dropdowns
+## Code Cleanup: Killing Dead Types
 
-If compilation fails (usually because of a missing `using` statement or a typo in the type name), check the Console for compiler errors. Fix the issue in the generated file or delete it and regenerate with the correct settings.
+Projects evolve. Types get renamed, removed, or replaced. The generated classes for those old types stick around in the `Custom/` directory like digital barnacles, cluttering your project.
 
-### Namespace Considerations
-
-If your type lives in a namespace (and it should, in any serious project), make sure to include that namespace in the "Using Statements" field. The generated code needs to resolve your type name.
-
-Common mistake:
-
-```
-Type Name: DamageInfo
-Using Statements: (empty)
-// Generated code can't find DamageInfo because it's in RPG.Combat
-```
-
-Correct:
-
-```
-Type Name: DamageInfo
-Using Statements: RPG.Combat
-// Generated code includes "using RPG.Combat;" and finds the type
-```
-
-Or use the fully qualified name without an extra using:
-
-```
-Type Name: RPG.Combat.DamageInfo
-Using Statements: (empty)
-// Works because the full namespace is in the type name
-```
-
-## Code Cleanup: Removing Unused Generated Types
-
-Over the course of development, types get renamed, removed, or replaced. The generated classes for those old types stick around in the `Custom/` directory, cluttering your project and potentially causing confusion.
-
-The Code Cleanup tool scans your generated types and identifies which ones are no longer referenced anywhere in your project.
+The Code Cleanup tool scans your generated types and identifies which ones are no longer referenced anywhere.
 
 ### Single Type Cleanup
 
 ![Cleaner Single](/img/game-event-system/tools/codegen-and-cleanup/tool_cleaner_single.png)
 
-1. Open `Tools > TinyGiants > Game Event System > Code Cleanup`
-2. Select "Single Parameter" or "Sender" mode
-3. The tool lists all generated types with usage indicators
-4. Types with zero references are highlighted as candidates for removal
-5. Select the types you want to remove
-6. Click "Clean"
-
-The tool deletes the generated `.cs` files and triggers recompilation. Any event assets of the deleted type become "missing script" references, so make sure you've already removed or replaced them before cleaning.
+Open the cleanup tool, and it lists all generated types with usage indicators. Types with zero references are highlighted as removal candidates. Select the dead ones, click Clean, and they're gone.
 
 ### Sender Type Cleanup
 
 ![Cleaner Sender](/img/game-event-system/tools/codegen-and-cleanup/tool_cleaner_sender.png)
 
-Same workflow, but for sender event types. The tool identifies `GameEvent<TSender, TArgs>` generated classes separately from single-parameter ones, because they have different file structures.
+Same workflow for sender types. The tool handles single-parameter and sender types separately because they have different file structures.
 
-## Clean All: The Nuclear Option
+**A warning:** cleaning a type deletes its `.cs` files. Any event assets of that type become "missing script" references. Make sure you've already removed or replaced those assets before cleaning.
 
-For major refactoring — switching from one data architecture to another, or cleaning up after a prototype phase — the "Clean All" button removes every generated type in the `Custom/` directory.
+## The Complete Workflow: Two Minutes, Not Two Hours
 
-**Use this when:**
-- You're starting a major refactor and want a clean slate
-- You've changed your project's type architecture significantly
-- Generated types have gotten out of sync with your actual types
+Here's the end-to-end experience for adding a new event type:
 
-**Don't use this when:**
-- You just want to remove one or two unused types (use individual cleanup)
-- You have event assets referencing these types that you haven't migrated yet
-
-After a Clean All, you'll need to regenerate every custom type your project uses. The batch queue makes this manageable — queue up all your types and generate in one pass.
-
-## Workflow: Adding a New Feature Type
-
-Here's the complete workflow from "I need a new event type" to "it's working in the game":
-
-### 1. Define Your Data Type
+**1. Define your data type** (you're doing this anyway):
 
 ```csharp
 namespace MyGame.Inventory
@@ -387,22 +295,16 @@ namespace MyGame.Inventory
 }
 ```
 
-### 2. Create the Event via the Creator Window
+**2. Create the event via the Creator Window:**
 
-1. Open the **Editor Window** (`Tools > TinyGiants > Game Event System > Editor Window`)
-2. Click **"+ New Event"** to open the **Creator Window**
-3. Set the type to `ItemPickupInfo` (add `MyGame.Inventory` as a using statement if needed)
-4. Name it something descriptive: `OnItemPickedUp`
-5. Click Create — the Creator auto-generates the concrete class and creates the event asset
+Open the Editor Window, click "+ New Event," configure the type, click Create. The Creator auto-generates the concrete class.
 
-### 3. Wait for Compilation
+**3. Wait for compilation** (2-5 seconds).
 
-Watch the bottom-right corner of Unity for the compilation spinner. Once it finishes, your type is ready.
-
-### 4. Reference in Scripts
+**4. Use it:**
 
 ```csharp
-[GameEventDropdown, SerializeField] private GameEventItemPickupInfo onItemPickedUp;
+[GameEventDropdown, SerializeField] private ItemPickupInfoGameEvent onItemPickedUp;
 
 public void PickupItem(Item item, int quantity)
 {
@@ -418,74 +320,11 @@ public void PickupItem(Item item, int quantity)
 }
 ```
 
-### 5. Wire Up Listeners
+**5. Wire up listeners** — either in code or visually via the Behavior Window.
 
-Either in code:
+Total time: about two minutes, most of which is waiting for Unity to compile. Compare that to the three hours I spent writing 45 files by hand. Compare it to the 20 minutes debugging a typo in a copy-pasted class name.
 
-```csharp
-private void OnEnable()
-{
-    onItemPickedUp.AddListener(HandleItemPickup);
-}
-
-private void HandleItemPickup(ItemPickupInfo info)
-{
-    inventoryUI.ShowPickupNotification(info.itemId, info.quantity);
-
-    if (info.rarity >= ItemRarity.Legendary)
-        PlayLegendaryPickupEffect(info.pickupPosition);
-}
-```
-
-Or visually via the **Behavior Window** (no code required).
-
-Total time: about 2 minutes, most of which is waiting for compilation. Compare that to hand-writing the boilerplate classes, dealing with typos, making sure the `CreateAssetMenu` attribute is correct, and keeping the naming consistent.
-
-## Tips and Common Issues
-
-### Generated Types After Package Update
-
-When you update the GES package, the Basic types might be regenerated. Your Custom types are untouched — they live in a separate directory that GES never writes to during updates. This is by design.
-
-### Type Name Conflicts
-
-If you have two types with the same name in different namespaces (e.g., `Combat.DamageInfo` and `Magic.DamageInfo`), the generated class names would conflict. Use the fully qualified name in the type field:
-
-```
-Type Name: Combat.DamageInfo → generates GameEventCombatDamageInfo
-Type Name: Magic.DamageInfo → generates GameEventMagicDamageInfo
-```
-
-The generated class name includes the namespace components to avoid conflicts.
-
-### Nested Types
-
-Types nested inside other classes (e.g., `Player.Stats`) may need special handling depending on the nesting depth. Generally, it's cleaner to extract nested types to their own files for event compatibility.
-
-### Enum Events
-
-Enums work as event arguments out of the box after generation:
-
-```csharp
-public enum GameState { Menu, Playing, Paused, GameOver }
-
-// Generate GameEventGameState, then:
-[GameEventDropdown, SerializeField] private GameEventGameState onGameStateChanged;
-
-onGameStateChanged.Raise(GameState.Playing);
-```
-
-This is one of the most common use cases — state machines broadcasting their current state via typed events.
-
-## Summary
-
-The code generation system eliminates the boilerplate tax that Unity's serialization system imposes on generic types. The normal workflow is through the **Creator Window** (Editor Window -> "+ New Event"), which auto-generates code during event creation. The Code Generation tool in the System Dashboard serves as the maintenance path — for regenerating code after type modifications, manually adding types, or cleaning up unused code. Three modes cover the full spectrum of event types:
-
-- **Basic:** 32 pre-generated primitives, ready out of the box
-- **Custom Single:** Your project-specific types with `GameEvent<T>`
-- **Sender:** Dual-generic types with `GameEvent<TSender, TArgs>`
-
-The batch queue handles bulk generation efficiently, the cleanup tools keep your project tidy, and the whole system integrates with Unity's compilation pipeline seamlessly. Two minutes from "I need a new event type" to "it's working in the Inspector."
+The boilerplate tax is real. Every Unity developer who's built a typed event system has paid it. The question is whether you keep paying it manually or let a tool handle the predictable, mechanical, error-prone part so you can focus on the part that actually requires a human brain — designing the events that make your game work.
 
 ---
 

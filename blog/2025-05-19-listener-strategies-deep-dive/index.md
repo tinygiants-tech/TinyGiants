@@ -1,63 +1,171 @@
 ---
 slug: listener-strategies-deep-dive
-title: "Four Listener Strategies: Priority, Conditional, Persistent, and Handle-Based Management"
+title: "Execution Order Bugs: The Hidden Danger of 'Who Responds First' in Event-Driven Systems"
 authors: [tinygiants]
 tags: [ges, unity, scripting, advanced, best-practices]
-description: "When multiple systems listen to the same event, execution order matters. Master GES's four listener types and the deterministic 6-layer execution pipeline."
+description: "When the UI refreshes before the data updates, you have an execution order bug. Here's why C# events make this inevitable and how deterministic listener pipelines fix it."
 image: /img/home-page/game-event-system-preview.png
 ---
 
-The UI refreshed before the data updated. The health bar shows 100 when it should show 75. The save system captured the old state instead of the new one. The sound effect played before the animation started. Sound familiar?
+The player takes 25 damage. The health system subtracts it from the current HP. The UI updates the health bar. Except the health bar shows 100 instead of 75. You stare at your code for 20 minutes before you realize: the UI listener executed BEFORE the health system listener. The UI read the old HP value, rendered it, and then the health system updated. By the time the data was correct, the frame was already drawn.
 
-These are execution order bugs, and they're among the most insidious problems in event-driven architectures. In a naive event system — including Unity's built-in `UnityEvent` and vanilla C# `event` — listeners execute in registration order. Whichever system subscribed first runs first. That order depends on `Awake()` and `OnEnable()` timing, which depends on script execution order, which depends on... well, sometimes nothing deterministic at all.
+You've just discovered execution order bugs, and if you've shipped anything with event-driven architecture, you've probably shipped a few of these without knowing it. They're the kind of bug that works fine in testing because your scripts happened to initialize in the right order, then breaks in production because Unity decided to load things differently.
 
-GES solves this with a deterministic 6-layer execution pipeline and four distinct listener strategies. You explicitly declare not just *what* listens to an event, but *when* it should run relative to other listeners, *under what conditions* it should fire, and *whether it survives scene transitions*.
+This isn't a rare edge case. It's a structural flaw in how most event systems work — including Unity's `UnityEvent` and standard C# `event` delegates. And once you understand why, you can't unsee it.
 
 <!-- truncate -->
 
-## The 6-Layer Execution Pipeline
+## Why Registration Order Is a Terrible Execution Strategy
 
-When you call `Raise()` on a GES event, listeners don't all fire in a random pile. They execute in a strict, deterministic order across six layers:
+In a vanilla C# event system, listeners execute in the order they were registered. Subscribe first, run first. Sounds reasonable until you think about what "registration order" actually depends on.
 
-1. **Basic Listeners** (FIFO — first in, first out)
-2. **Priority Listeners** (High priority number executes first)
-3. **Conditional Listeners** (Filtered by predicate, then prioritized)
-4. **Persistent Listeners** (Cross-scene, with priority)
-5. **Trigger Events** (Parallel fan-out to other events)
-6. **Chain Events** (Sequential blocking execution)
+In Unity, most subscriptions happen in `Awake()` or `OnEnable()`. The order these run depends on:
 
-This order is always the same. Layer 1 always runs before Layer 2. Within each layer, the internal ordering rules apply (FIFO for basic, priority-sorted for priority, etc.). This determinism is what eliminates the "why did the UI update before the data" class of bugs.
+1. **Script Execution Order** — which you can configure in Project Settings, but who actually does this for 30+ scripts?
+2. **GameObject creation order** — which depends on hierarchy position in the scene, which changes whenever someone rearranges the scene view.
+3. **Prefab instantiation timing** — runtime-spawned objects subscribe later than scene objects.
+4. **AddComponent order** — for dynamically constructed objects, component order determines lifecycle timing.
 
-Let's break down each listener type.
+So the execution order of your listeners depends on scene hierarchy, instantiation timing, script execution settings, and component ordering. Move a GameObject in the hierarchy? Behavior might change. Instantiate a prefab one frame later? Different execution order. Refactor a system to use AddComponent instead of a prefab? Everything shifts.
 
-## Layer 1: Basic Listeners — Simple and Fast
+This is why the "UI shows stale data" bug is so common. It's not that your code is wrong — it's that the implicit ordering is fragile and changes for reasons that have nothing to do with your logic.
 
-Basic listeners are the default. Subscribe, receive callbacks, done.
+## The "Data Before View" Problem Everyone Knows But Nobody Enforces
+
+Every game developer knows the principle: update data first, then render. Model before view. State mutation before presentation. It's Computer Science 101.
+
+But how do you enforce this with C# events?
 
 ```csharp
-// Subscribe
-onPlayerDamaged.AddListener(HandleDamage);
+// In HealthSystem.cs
+private void OnEnable()
+{
+    onPlayerDamaged += ApplyDamage; // mutates HP
+}
 
-// Unsubscribe
-onPlayerDamaged.RemoveListener(HandleDamage);
+// In HealthBarUI.cs
+private void OnEnable()
+{
+    onPlayerDamaged += RefreshHealthBar; // reads HP
+}
 ```
 
+Which runs first? Whichever `OnEnable()` fires first. Which `OnEnable()` fires first? Depends on script execution order. Can you guarantee it? Sort of — you can set script execution order in Project Settings. For two scripts. What about when you have 15 systems listening to the same event?
+
+Script Execution Order doesn't scale. You end up with a nightmare matrix of relative orderings that breaks every time you add a new system. And it only affects `Awake`/`OnEnable`/`Start` ordering, not the actual delegate invocation order (which depends on `+=` call sequence).
+
+The real answer with vanilla C# events is: you can't enforce it. You just hope.
+
+## Conditional Execution: The Performance Problem Nobody Talks About
+
+Here's a subtler issue. You have a physics-related event that fires every `FixedUpdate`. Maybe it's `onCollisionDetected` or `onPositionUpdated`. It fires 50 times per second.
+
+You have 8 systems listening to this event. But most of them only care about specific conditions:
+- The damage system only cares if the collision involves an enemy.
+- The sound system only cares if the impact force exceeds a threshold.
+- The particle system only cares if it's a specific material type.
+- The AI system only cares if the player is involved.
+
+With standard C# events, all 8 listeners execute every single time. Each one checks its condition internally and bails out if it doesn't apply. That's 8 method calls, 8 condition checks, 8 potential cache misses, 50 times per second. For a single event.
+
 ```csharp
+private void HandleCollision(CollisionData data)
+{
+    if (!data.InvolvesEnemy()) return; // most calls bail here
+
+    // Actual work that rarely runs
+    ApplyDamage(data);
+}
+```
+
+The check is cheap, sure. But "cheap times 400 per second times 8 listeners" adds up, especially on mobile. And the pattern — enter function, check condition, immediately return — is wasteful by design. You're paying the function call overhead for the privilege of doing nothing.
+
+What you actually want is a way to say "don't even call me unless this condition is true." Pre-filter, not post-filter.
+
+## Cross-Scene Persistence: The AudioManager Problem
+
+Every Unity project has an AudioManager. It lives on a `DontDestroyOnLoad` object. It needs to play sounds in response to events from every scene. Hit sounds, death sounds, pickup sounds — all triggered by gameplay events.
+
+With standard C# events, this creates a problem. When you load a new scene:
+
+1. All scene objects are destroyed, taking their event subscriptions with them.
+2. New scene objects are created with new event instances.
+3. The AudioManager's subscriptions were on the OLD event instances. They're gone.
+
+So the AudioManager has to re-subscribe to events after every scene load. It needs to know about every event in every scene. It becomes a god object with references to everything.
+
+Or you use static events, and now you have a different problem: when does the AudioManager subscribe? If it subscribes in `Awake()`, do all events exist yet? What if an event is defined on a ScriptableObject that hasn't been loaded? What about event instances that are scene-specific — do they get recreated with the same identity?
+
+The common workarounds — static event buses, service locators, singleton managers with registration APIs — all work but add architectural weight. The AudioManager shouldn't need to know about scene management. It should just say "I want to hear this event, forever, regardless of what scene we're in."
+
+## The Lambda Trap: C#'s Silent Memory Leak
+
+This one bites even experienced C# developers.
+
+```csharp
+private void OnEnable()
+{
+    onDamage += (int amount) => currentHealth -= amount;
+}
+
+private void OnDisable()
+{
+    // How do you unsubscribe? You CAN'T.
+    onDamage -= (int amount) => currentHealth -= amount;
+    // This creates a NEW delegate. It doesn't match the original.
+}
+```
+
+Every lambda expression creates a new delegate instance. Even if the code is character-for-character identical, `RemoveListener` can't match it because it's a different object in memory. The original delegate is still subscribed, still holding a reference to your MonoBehaviour, and the GC can't collect either of them.
+
+Do this in 10 systems across 5 scenes, and you have a slow memory leak that only manifests after 20-30 minutes of play. The kind of leak that QA can't reproduce consistently because it depends on how many scenes were loaded and in what order.
+
+The fix is obvious once you know it — cache the delegate or use method references — but the language makes the dangerous version look natural and the safe version look verbose. It's a pit of failure, not a pit of success.
+
+## What You Actually Want From a Listener System
+
+Let's step back and list the requirements:
+
+1. **Deterministic order**: Data logic runs before view logic. Always. Regardless of registration timing.
+2. **Conditional filtering**: Don't call listeners that don't care. Pre-filter, not post-filter.
+3. **Cross-scene survival**: Some listeners need to persist across scene loads without re-subscribing.
+4. **Clean lifecycle**: Subscribe, unsubscribe, no dangling references, no silent leaks.
+5. **Composability**: Mix different listener strategies on the same event without conflicts.
+
+Standard C# events give you #4 if you're careful, and none of the rest. UnityEvent gives you #4 with inspector support, but still none of the others. This is the gap that GES's listener system fills.
+
+## GES's Four Listener Types
+
+GES provides four distinct listener strategies, each designed for a specific architectural need. They execute in a deterministic 6-layer pipeline, so you always know the order.
+
+### Layer 1: Basic Listeners (FIFO)
+
+The default. Subscribe, get callbacks, done.
+
+```csharp
+[GameEventDropdown, SerializeField] private Int32GameEvent onPlayerDamaged;
+
+private void OnEnable()
+{
+    onPlayerDamaged.AddListener(HandleDamage);
+}
+
+private void OnDisable()
+{
+    onPlayerDamaged.RemoveListener(HandleDamage);
+}
+
 private void HandleDamage(int amount)
 {
     currentHealth -= amount;
 }
 ```
 
-Basic listeners execute in FIFO order — the first to subscribe runs first. This is fine when you genuinely don't care about ordering, which is more common than you might think. If the damage handler and the hit flash effect and the pain sound are all independent reactions to the same event, their relative order doesn't matter.
+Basic listeners execute in FIFO order — first subscribed, first called. Use these when you genuinely don't care about ordering. Independent reactions to the same event: hit flash, pain sound, camera shake. Their relative order doesn't matter because they don't read each other's state.
 
-**When to use:** Independent reactions where order is irrelevant. Most listeners in most projects fall into this category.
+### Layer 2: Priority Listeners (Explicit Order)
 
-**When NOT to use:** When one listener's side effects change state that another listener reads. That's where priority listeners come in.
-
-## Layer 2: Priority Listeners — Explicit Execution Order
-
-Priority listeners let you explicitly control which listeners run first.
+This is where the execution order problem gets solved. Priority listeners let you declare exactly which listeners run first.
 
 ```csharp
 // Higher number = runs first
@@ -68,20 +176,24 @@ onPlayerDamaged.AddPriorityListener(PlayHitSound, priority: 10);
 onPlayerDamaged.AddPriorityListener(LogDamageAnalytics, priority: 0);
 ```
 
-In this setup, `ApplyDamageReduction` always runs first (priority 100), then `UpdateHealthData` (50), then `RefreshHealthUI` (25), then the sound (10), then analytics (0). The UI always sees the correct post-reduction health value because the data update ran before it.
+`ApplyDamageReduction` always runs first (priority 100). Always. Regardless of which script loaded first, which GameObject was created first, or what order the scene hierarchy is in. Then `UpdateHealthData` (50). Then `RefreshHealthUI` (25). The UI always sees the post-reduction, post-mutation HP value.
 
 ![Priority Behavior Ordered](/img/game-event-system/examples/05-priority-event/demo-05-behavior-ordered.png)
 
-### Recommended Priority Scale
+Compare this to what happens without explicit ordering — chaotic execution that varies based on initialization timing:
 
-I've found it helpful to define priority constants so the team uses consistent values:
+![Priority Behavior Chaotic](/img/game-event-system/examples/05-priority-event/demo-05-behavior-chaotic.png)
+
+#### The Priority Convention That Scales
+
+I've found it invaluable to define team-wide priority constants:
 
 ```csharp
 public static class EventPriority
 {
-    public const int CRITICAL    = 200;  // Security, validation, sanity checks
-    public const int HIGH        = 100;  // Data mutations, state changes
-    public const int NORMAL      = 50;   // Game logic, behavior changes
+    public const int CRITICAL    = 200;  // Validation, security, sanity checks
+    public const int HIGH        = 100;  // State mutations, data changes
+    public const int NORMAL      = 50;   // Game logic, behavior reactions
     public const int LOW         = 25;   // UI updates, visual effects
     public const int BACKGROUND  = 10;   // Audio, particles, non-critical feedback
     public const int CLEANUP     = 0;    // Logging, analytics, telemetry
@@ -97,27 +209,13 @@ onPlayerDamaged.AddPriorityListener(PlayHitSound, EventPriority.BACKGROUND);
 onPlayerDamaged.AddPriorityListener(TrackDamageMetrics, EventPriority.CLEANUP);
 ```
 
-This pattern scales. When a new system needs to listen to the same event, you pick the appropriate tier and slot it in. No need to audit every other listener's registration order.
+When a new system needs to listen to the same event, you pick the appropriate tier and slot it in. No need to audit every other listener's registration order. No Script Execution Order dance. Just pick your tier.
 
-### What Happens With Equal Priorities?
+Listeners with the same priority execute in FIFO order within that tier — which is the correct fallback, because within a tier, order shouldn't matter. If it does, give them different priorities.
 
-Listeners with the same priority value execute in FIFO order within that priority tier. So if two listeners both have priority 50, the one that subscribed first runs first. This is the correct fallback — within a priority tier, order shouldn't matter (and if it does, you should give them different priorities).
+### Layer 3: Conditional Listeners (Pre-Filtered Execution)
 
-![Priority Behavior Chaotic](/img/game-event-system/examples/05-priority-event/demo-05-behavior-chaotic.png)
-
-The image above shows what happens without priorities — chaotic execution order that changes unpredictably. Compare that to the deterministic ordering when priorities are assigned.
-
-### Removal
-
-```csharp
-onPlayerDamaged.RemovePriorityListener(UpdateHealthData);
-```
-
-Note: you remove by the callback reference, not by priority value. This means you need to keep a reference to the method or delegate — more on that in the lambda trap section below.
-
-## Layer 3: Conditional Listeners — Filter Before Execution
-
-Conditional listeners add a predicate gate. The listener only fires if the condition evaluates to `true` at the moment the event is raised.
+Conditional listeners add a predicate gate. The listener only fires if the condition is true at the moment the event is raised.
 
 ```csharp
 // Only react to damage when the shield is down
@@ -128,9 +226,7 @@ onPlayerDamaged.AddConditionalListener(
 );
 ```
 
-The condition is evaluated every time the event fires. If it returns `false`, the listener is skipped entirely — it doesn't execute, doesn't cost anything beyond the predicate evaluation.
-
-### Typed Conditions
+The condition is evaluated before any listener logic runs. If it returns false, the listener is skipped entirely — no method call, no overhead beyond the predicate evaluation.
 
 For typed events, the condition can inspect the argument:
 
@@ -143,9 +239,7 @@ onPlayerDamaged.AddConditionalListener(
 );
 ```
 
-### Sender Conditions
-
-For sender events, inspect both sender and args:
+For sender events, inspect both:
 
 ```csharp
 // Only react to damage from bosses
@@ -156,68 +250,20 @@ onDamageFromSource.AddConditionalListener(
 );
 ```
 
-### Why Not Just Check Inside the Listener?
+This solves the high-frequency event problem. Instead of 8 listeners executing and bailing early 50 times per second, only the listeners whose conditions are met actually execute. The rest are skipped at the predicate level — much cheaper than a full method call.
 
-You could write this:
+Conditional listeners are also sorted by priority, so you get both filtering AND ordering in a single subscription. Shield check at priority 100, armor reduction at priority 50, both conditional on their respective criteria.
 
-```csharp
-private void HandleDamage(int amount)
-{
-    if (!isShielded)
-    {
-        // actual logic
-    }
-}
-```
+### Layer 4: Persistent Listeners (Cross-Scene Survival)
 
-And that works. But conditional listeners have two advantages:
-
-1. **The predicate is evaluated before any listener logic runs.** If your listener does expensive work — lookups, calculations, allocation — the conditional check prevents that work entirely when the condition is false.
-
-2. **Separation of concerns.** The "should I react?" logic is declared at subscription time, not buried inside the handler. This makes the handler simpler and the subscription code more readable.
-
-For high-frequency events (like per-frame position updates or collision checks), conditional listeners can meaningfully reduce wasted work.
-
-### Priority Within Conditional Listeners
-
-Conditional listeners are sorted by their priority value, just like priority listeners. So you get both filtering AND ordering in a single subscription.
-
-```csharp
-// Shield check runs first (priority 100), only if player is in combat
-onPlayerDamaged.AddConditionalListener(
-    HandleShieldAbsorption,
-    () => isInCombat,
-    priority: 100
-);
-
-// Armor reduction runs second (priority 50), only for physical damage
-onPlayerDamaged.AddConditionalListener(
-    HandleArmorReduction,
-    (int dmg) => currentDamageType == DamageType.Physical,
-    priority: 50
-);
-```
-
-## Layer 4: Persistent Listeners — Surviving Scene Transitions
-
-Persistent listeners are the cross-scene communication tool. They survive `SceneManager.LoadScene()` calls and continue receiving events across scene transitions.
-
-```csharp
-onPlayerDamaged.AddPersistentListener(TrackLifetimeDamage, priority: 0);
-```
-
-![Persistent Behavior](/img/game-event-system/examples/09-persistent-event/demo-09-behavior-persistent.png)
-
-### Use Cases
-
-**AudioManager:** Lives on a `DontDestroyOnLoad` object. Needs to hear events from every scene without re-subscribing.
+Persistent listeners survive `SceneManager.LoadScene()` calls. They keep receiving events across scene transitions without re-subscribing.
 
 ```csharp
 public class AudioManager : MonoBehaviour
 {
-    [GameEventDropdown, SerializeField] private GameEvent onPlayerDamaged;
-    [GameEventDropdown, SerializeField] private GameEvent onEnemyDied;
-    [GameEventDropdown, SerializeField] private GameEvent onItemPickedUp;
+    [GameEventDropdown, SerializeField] private SingleGameEvent onPlayerDamaged;
+    [GameEventDropdown, SerializeField] private SingleGameEvent onEnemyDied;
+    [GameEventDropdown, SerializeField] private SingleGameEvent onItemPickedUp;
 
     private void OnEnable()
     {
@@ -228,7 +274,6 @@ public class AudioManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        // IMPORTANT: persistent listeners must be manually removed
         onPlayerDamaged.RemovePersistentListener(PlayHitSound);
         onEnemyDied.RemovePersistentListener(PlayDeathSound);
         onItemPickedUp.RemovePersistentListener(PlayPickupSound);
@@ -240,143 +285,60 @@ public class AudioManager : MonoBehaviour
 }
 ```
 
-**Analytics/Telemetry:** Tracks events across the entire session.
+![Persistent Behavior](/img/game-event-system/examples/09-persistent-event/demo-09-behavior-persistent.png)
 
-**Save System:** Listens for save-relevant events regardless of current scene.
+The AudioManager subscribes once and is done. No re-subscription after scene loads. No tracking which events exist in which scenes. No god-object pattern.
+
+This works equally well for Analytics, SaveSystem, AchievementTracker — anything that lives for the entire session and needs to hear events from every scene.
 
 ![Persistent Scene Setup](/img/game-event-system/examples/09-persistent-event/demo-09-scenesetup.png)
 
-### Critical Warning: Manual Removal Required
+#### Critical: Manual Removal Required
 
-Persistent listeners are NOT automatically removed when a scene unloads. They stick around. If the object that registered the listener gets destroyed without calling `RemovePersistentListener()`, you'll have a dangling delegate pointing at a destroyed object — and that's a `MissingReferenceException` waiting to happen.
+Persistent listeners are NOT automatically removed when scenes unload. That's the whole point. But it means you MUST manually remove them when the owning object is destroyed, or you'll have dangling delegates.
 
-Always remove persistent listeners in `OnDestroy()`, not `OnDisable()`. `OnDisable()` fires on scene unload for active objects, which might be too early if you're using `DontDestroyOnLoad`.
+Always remove persistent listeners in `OnDestroy()`, not `OnDisable()`. For `DontDestroyOnLoad` objects, `OnDisable()` fires during scene transitions, which is too early.
 
 ```csharp
-// WRONG: OnDisable fires during scene transition
+// WRONG: fires during scene transition for DontDestroyOnLoad objects
 private void OnDisable()
 {
-    onEvent.RemovePersistentListener(MyHandler); // Too early for DontDestroyOnLoad
+    onEvent.RemovePersistentListener(MyHandler);
 }
 
-// RIGHT: OnDestroy fires when the object is actually destroyed
+// RIGHT: fires when the object is actually destroyed
 private void OnDestroy()
 {
     onEvent.RemovePersistentListener(MyHandler);
 }
 ```
 
-### RemoveAllListeners() Does NOT Remove Persistent
+#### RemoveAllListeners() Is Deliberately Limited
 
-This is by design. When you call `RemoveAllListeners()`, it clears:
-- Basic Listeners
-- Priority Listeners
-- Conditional Listeners
+When you call `RemoveAllListeners()`, it clears Basic, Priority, and Conditional listeners. It does NOT touch Persistent listeners.
 
-But it leaves Persistent Listeners intact. The reasoning is that `RemoveAllListeners()` is typically called during scene cleanup or system reset, and persistent listeners are explicitly meant to survive those operations.
+This is by design. `RemoveAllListeners()` is a cleanup operation — scene transitions, system resets, test teardowns. Persistent listeners explicitly opt out of scene-scoped cleanup. If you want to remove them, you call `RemovePersistentListener()` individually for each one. Intentional friction for intentional decisions.
 
-If you need to remove everything including persistent listeners, you must call `RemovePersistentListener()` for each one explicitly. This is intentional friction — removing persistent listeners should be a deliberate action, not a side effect of a broad cleanup.
+## The 6-Layer Execution Pipeline
 
-## Layers 5 & 6: Trigger and Chain Events
+When `Raise()` is called on a GES event, all listeners execute in a strict, deterministic order across six layers:
 
-These aren't "listeners" in the traditional sense — they're event-to-event connections managed by the flow graph. But they execute as part of the same pipeline.
+1. **Basic Listeners** — FIFO order
+2. **Priority Listeners** — Higher priority number first
+3. **Conditional Listeners** — Predicate-filtered, then priority-sorted
+4. **Persistent Listeners** — Cross-scene, with priority
+5. **Trigger Events** — Parallel fan-out to other events
+6. **Chain Events** — Sequential blocking execution
 
-**Layer 5: Trigger Events** — When Event A fires, Events B, C, and D also fire in parallel (fan-out). This is the "also notify these" pattern.
+Layer 1 always runs before Layer 2. Layer 2 before Layer 3. Always. Within each layer, the internal ordering rules apply. This determinism is what eliminates the "why did the UI update before the data" class of bugs.
 
-**Layer 6: Chain Events** — When Event A fires, Event B fires after a delay, then Event C fires after Event B completes (sequential blocking). This is the "do these in order" pattern.
-
-We covered these in detail in the trigger/chain posts. The key point here is that they execute after all listener layers, which means your data is fully updated before flow propagation begins.
-
-## The Lambda Trap: Cache Your Delegates
-
-This is the single most common mistake I see with event systems, and it applies to C# events generally, not just GES.
-
-```csharp
-// BROKEN: Can't remove this
-private void OnEnable()
-{
-    onDamage.AddListener((int amount) =>
-    {
-        currentHealth -= amount;
-    });
-}
-
-private void OnDisable()
-{
-    // How do you remove the lambda? You can't reference it.
-    // This does NOT work:
-    onDamage.RemoveListener((int amount) =>
-    {
-        currentHealth -= amount;
-    });
-    // This creates a NEW lambda, which doesn't match the original.
-}
-```
-
-Each lambda expression creates a new delegate instance. Even if the code is identical, `RemoveListener` can't match it because it's a different object in memory.
-
-**The fix: cache the delegate.**
-
-```csharp
-private System.Action<int> _damageHandler;
-
-private void OnEnable()
-{
-    _damageHandler = (amount) => currentHealth -= amount;
-    onDamage.AddListener(_damageHandler);
-}
-
-private void OnDisable()
-{
-    onDamage.RemoveListener(_damageHandler);
-}
-```
-
-Or better yet, just use a method reference:
-
-```csharp
-private void OnEnable()
-{
-    onDamage.AddListener(HandleDamage);
-}
-
-private void OnDisable()
-{
-    onDamage.RemoveListener(HandleDamage);
-}
-
-private void HandleDamage(int amount)
-{
-    currentHealth -= amount;
-}
-```
-
-Method references are stable — `HandleDamage` always refers to the same delegate for the same instance. This is the safest pattern and the one I recommend for all listener subscriptions.
-
-The only time lambdas are acceptable for listeners is when you genuinely don't need to remove them — like a persistent listener that lives for the entire application lifetime. Even then, caching is cleaner.
-
-## Choosing the Right Listener Strategy
-
-Here's a decision matrix:
-
-| Question | Answer | Use |
-|----------|--------|-----|
-| Do I care about execution order? | No | `AddListener` (Basic) |
-| Do I care about execution order? | Yes | `AddPriorityListener` |
-| Should this listener sometimes skip? | Yes | `AddConditionalListener` |
-| Does this listener survive scene loads? | Yes | `AddPersistentListener` |
-| Do I need filtering AND ordering? | Yes | `AddConditionalListener` with priority |
-| Is this cross-scene AND ordered? | Yes | `AddPersistentListener` with priority |
-
-### Combining Strategies
-
-In practice, a single event often has multiple listener types:
+In practice, a single event often uses multiple listener types simultaneously:
 
 ```csharp
 // Data layer: priority listener, runs first
 onPlayerDamaged.AddPriorityListener(ApplyDamage, EventPriority.HIGH);
 
-// UI layer: basic listener, order doesn't matter among UI elements
+// UI layer: basic listeners, order among them doesn't matter
 onPlayerDamaged.AddListener(UpdateHealthBar);
 onPlayerDamaged.AddListener(FlashDamageIndicator);
 
@@ -391,37 +353,53 @@ onPlayerDamaged.AddConditionalListener(
 );
 ```
 
-The 6-layer pipeline ensures these all execute in the correct order regardless of when they were registered.
+The pipeline ensures these all execute in the correct order regardless of when they were registered: Conditional (CRITICAL) -> Priority (HIGH) -> Basic (FIFO) -> Persistent (CLEANUP) -> Triggers -> Chains.
 
 ![Monitor Listeners](/img/game-event-system/tools/runtime-monitor/monitor-listeners.png)
 
-The Runtime Monitor's Listeners tab shows you all active subscriptions for each event, broken down by type — an invaluable debugging tool when you need to verify that your listener configuration is correct.
+The Runtime Monitor's Listeners tab shows all active subscriptions for each event, broken down by type. Invaluable for debugging when you need to verify that your listener configuration is correct.
 
-## Real-World Pattern: The MVC Event Bus
+## The Lambda Trap: Solved
 
-Here's a pattern I've used successfully in multiple shipped projects. It maps cleanly to MVC (Model-View-Controller) and uses priority tiers to enforce the architecture:
+Remember the lambda problem with C# events? GES has the same constraint — delegates must be referenceable for removal. But the pattern is straightforward:
+
+```csharp
+// BROKEN: can't remove this
+onDamage.AddListener((int amount) => health -= amount);
+
+// CORRECT: method reference, always stable
+onDamage.AddListener(HandleDamage);
+private void HandleDamage(int amount) => health -= amount;
+
+// ALSO CORRECT: cached delegate
+private System.Action<int> _handler;
+private void OnEnable()
+{
+    _handler = (amount) => health -= amount;
+    onDamage.AddListener(_handler);
+}
+private void OnDisable()
+{
+    onDamage.RemoveListener(_handler);
+}
+```
+
+Method references are the safest pattern. `HandleDamage` always refers to the same delegate for the same instance. Use this for all listener subscriptions unless you have a specific reason for lambdas.
+
+## Real-World Pattern: MVC with Priority Tiers
+
+Here's a pattern that maps cleanly to MVC and enforces it through the event system itself:
 
 ```csharp
 public static class EventPriority
 {
-    // Validation layer: reject bad data before it propagates
-    public const int VALIDATION = 200;
-
-    // Model layer: mutate state
-    public const int MODEL = 100;
-
-    // Controller layer: react to state changes
-    public const int CONTROLLER = 50;
-
-    // View layer: update visuals
-    public const int VIEW = 25;
-
-    // Side effects: audio, analytics, non-critical
-    public const int SIDE_EFFECT = 10;
+    public const int VALIDATION  = 200;  // Reject bad data
+    public const int MODEL       = 100;  // Mutate state
+    public const int CONTROLLER  = 50;   // React to state changes
+    public const int VIEW        = 25;   // Update visuals
+    public const int SIDE_EFFECT = 10;   // Audio, analytics
 }
 ```
-
-With this convention, you can wire up any event knowing that data validation happens first, state mutations happen second, game logic reacts third, and the UI always sees the final state. No timing bugs. No stale data in views.
 
 ```csharp
 // Model
@@ -441,18 +419,24 @@ onItemPurchased.AddPriorityListener(PlayCashRegisterSound, EventPriority.SIDE_EF
 onItemPurchased.AddPersistentListener(LogPurchaseAnalytics, EventPriority.SIDE_EFFECT);
 ```
 
-The model listeners have the same priority (100), so they run in FIFO order — which is fine because `DeductCurrency` and `AddToInventory` are independent operations that both need to happen before the controller layer reacts.
+Data validation happens first. State mutations happen second. Game logic reacts third. UI always sees the final state. Side effects run last. This ordering is enforced by the pipeline, not by hoping that scripts initialize in the right order.
 
-## Summary
+The model listeners share priority 100, so they run in FIFO order within that tier. That's fine — `DeductCurrency` and `AddToInventory` are independent operations that both need to complete before the controller layer reacts. No timing dependency between them.
 
-GES gives you four listener types that map to real architectural needs:
+## Choosing the Right Strategy
 
-- **Basic** for simple, order-independent reactions
-- **Priority** for explicit execution ordering
-- **Conditional** for filtered, high-efficiency subscriptions
-- **Persistent** for cross-scene communication
+| Question | Answer | Use |
+|----------|--------|-----|
+| Do I care about execution order? | No | `AddListener` (Basic) |
+| Do I care about execution order? | Yes | `AddPriorityListener` |
+| Should this listener sometimes skip? | Yes | `AddConditionalListener` |
+| Does this listener survive scene loads? | Yes | `AddPersistentListener` |
+| Do I need filtering AND ordering? | Yes | `AddConditionalListener` with priority |
+| Is this cross-scene AND ordered? | Yes | `AddPersistentListener` with priority |
 
-They execute in a deterministic 6-layer pipeline that eliminates the "which listener ran first?" class of bugs. Combined with the delegate caching pattern and the MVC priority convention, you get an event system that scales from prototype to production without the architectural debt that usually accumulates around event handling.
+The decision is usually obvious from context. Independent visual reactions? Basic. Data-before-view ordering? Priority. High-frequency filtering? Conditional. Session-lifetime services? Persistent.
+
+Most events in most projects use a mix. The 6-layer pipeline keeps them all playing nicely together without you having to think about interaction effects. The execution order is structural, not incidental.
 
 Next time you see stale data in your UI, check your listener priorities. The fix is usually one line.
 
