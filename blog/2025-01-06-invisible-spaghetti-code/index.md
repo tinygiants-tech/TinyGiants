@@ -239,11 +239,11 @@ public class BossEnemy : MonoBehaviour
 }
 ```
 
-The audio system, UI system, progression system, achievement system, analytics system, and save system all have `GameEventListener` components that reference the same `BossDefeated` event. You configure the responses in the Behavior Window. No code coupling. No invisible dependencies. No chance of a rename breaking something silently.
+The audio system, UI system, progression system, achievement system, analytics system, and save system — all their responses are configured as **Event Actions** in the `BossDefeated` event's Behavior Window. You configure what happens visually: drag the target object, select the method. No code coupling. No invisible dependencies. No chance of a rename breaking something silently.
 
-Want to add a seventh response — say, spawning a loot drop? Add a `GameEventListener` to the loot spawner object. Reference the `BossDefeated` event. Done. You didn't touch a single line of existing code.
+Want to add a seventh response — say, spawning a loot drop? Open the Behavior Window for `BossDefeated`, add a new Event Action, and point it at the loot spawner's spawn method. Done. You didn't touch a single line of existing code.
 
-Want to remove the analytics logging? Delete the listener component from the analytics object. No other system is affected.
+Want to remove the analytics logging? Delete that Event Action from the Behavior Window. No other system is affected.
 
 This is what genuine decoupling looks like. Not "decoupled through an intermediary that everything depends on," but truly independent systems that communicate through shared, visible, GUID-protected event assets.
 
@@ -251,7 +251,7 @@ This is what genuine decoupling looks like. Not "decoupled through an intermedia
 
 Remember the ghost subscription problem? ScriptableObject events handle this elegantly because ScriptableObjects live outside of scenes. They're project-level assets.
 
-A `GameEventListener` subscribes when it's enabled and unsubscribes when it's disabled. This happens automatically through Unity's `OnEnable`/`OnDisable` lifecycle. When a scene unloads, all its GameObjects are destroyed, `OnDisable` fires on every listener, and they cleanly unsubscribe. No ghost references. No memory leaks. No `MissingReferenceException`.
+Event listeners subscribe when enabled and unsubscribe when disabled. This happens automatically through Unity's `OnEnable`/`OnDisable` lifecycle — the Behavior Window bindings handle this for you. When a scene unloads, all its GameObjects are destroyed, `OnDisable` fires, and they cleanly unsubscribe. No ghost references. No memory leaks. No `MissingReferenceException`.
 
 And because the event asset itself persists across scene loads, you get free cross-scene communication. An event raised in the gameplay scene can trigger a response in the UI scene. An event from the loading screen can initialize systems in the main menu. It just works, because the event asset is the intermediary — not a scene-bound object.
 

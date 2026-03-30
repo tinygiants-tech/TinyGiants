@@ -99,7 +99,7 @@ private void UpdateScore(int newScore)
 }
 ```
 
-In the Inspector, these show up as drag-and-drop fields. Create the event assets via `Assets > Create > TinyGiants > Game Event System > [Type]`.
+In the Inspector, fields marked with `[GameEventDropdown]` show up as **searchable dropdowns** that list all compatible events from your active databases. You create event assets through the Creator Window (Game Event Editor → "+ New Event"), not manually.
 
 ## Mode 2: Custom Single Parameter — GameEvent\<T\>
 

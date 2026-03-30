@@ -122,7 +122,7 @@ public void CompleteLevel()
     onLevelComplete.Raise();
 }
 
-// Listening (via Behavior-bound, or in code GameEventListener)
+// Listening: configure responses in the Behavior Window, or use AddListener() in code
 ```
 
 Use cases: game start, game over, pause, unpause, level complete, checkpoint reached — any signal where the fact that it happened is the entire message.

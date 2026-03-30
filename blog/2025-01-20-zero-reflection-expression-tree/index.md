@@ -60,8 +60,6 @@ Here's a rough benchmark comparison (tested on a mid-range mobile device):
 
 A single reflection-based condition evaluation might chain 3-4 of these operations. That's 0.15-0.5ms per condition. At 50 conditions per frame on a 60 FPS target (16.67ms frame budget), you're spending 7.5-25ms just on condition checks. That's 45-150% of your entire frame budget — gone to reflection overhead.
 
-![Zero Reflection](/img/game-event-system/feature/zero-reflect.png)
-
 ## What Are Expression Trees, Exactly?
 
 Expression Trees are a .NET feature that lets you represent code as data structures — trees of expression nodes — and then compile those data structures into executable delegates (lambda functions). They live in the `System.Linq.Expressions` namespace and are the backbone of LINQ providers, ORM query builders, and high-performance serialization libraries.
@@ -201,8 +199,6 @@ Compare these to the reflection-based numbers from earlier. A 5-node condition t
 | Single flow node | ~0.01ms | 0 bytes |
 | Flow chain (5 nodes) | ~0.05ms | 0 bytes |
 | Flow chain (10 nodes) | ~0.09ms | 0 bytes |
-
-![Runtime Monitor Performance](/img/game-event-system/tools/runtime-monitor/monitor-performance.png)
 
 ### Production Validation
 

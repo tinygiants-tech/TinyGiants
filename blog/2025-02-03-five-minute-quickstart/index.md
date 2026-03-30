@@ -47,6 +47,8 @@ Let's create a simple void event — an event that says "something happened" wit
 
 In the GES Event Editor (accessible from the dashboard or via **Tools > TinyGiants > Event Editor**), click the **"+ New Event"** button. This opens the Creator Window. Select **Parameterless (Void)** as the event type. Name it `OnButtonPressed` and click Create.
 
+![Creator](/img/game-event-system/visual-workflow/game-event-creator/creator-parameterless.png)
+
 The system creates a new ScriptableObject asset — your event now exists as a draggable, referenceable asset in the project. You can see it in the Event Editor window with its GUID, current listener count, and configuration options.
 
 ## Step 4: Raise the Event from Code (90 seconds)
@@ -81,7 +83,7 @@ public class ButtonPresser : MonoBehaviour
 
 Create a new empty GameObject in your scene. Call it "EventSender." Add the `ButtonPresser` component.
 
-Now the important part: in the Inspector, you'll see the `onButtonPressed` field as an empty slot. **Drag your `OnButtonPressed` event asset** from the Project window into that slot. The field should now show the event asset's name.
+Now the important part: in the Inspector, the `onButtonPressed` field shows as a **searchable dropdown** (thanks to `[GameEventDropdown]`). Click it, and you'll see a list of all void events from your active databases. Find `OnButtonPressed` and select it — done. No digging through the Project window, no manual dragging.
 
 That's it for the sender side. When `PressTheButton()` is called, it raises the event. The sender doesn't know or care who's listening.
 
