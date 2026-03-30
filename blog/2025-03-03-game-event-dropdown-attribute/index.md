@@ -7,52 +7,50 @@ description: "Stop dragging event assets manually. The GameEventDropdown attribu
 image: /img/home-page/game-event-system-preview.png
 ---
 
-Have you ever dragged the wrong event asset into a field? I have. I dragged an `OnDamageDealt` (which was a `GameEvent<int>`) into a slot that expected a `GameEvent<float>`, and Unity happily accepted it because the SerializeField type was just `ScriptableObject`. No warning, no error — until runtime, when the cast failed and I spent 20 minutes figuring out why the damage numbers were null.
+If you've ever built a ScriptableObject-based event system in Unity, you know the drill. You define `GameEvent<T>`, create a concrete subclass for every type you need, then wire everything up via `[SerializeField]` and manual drag-and-drop from the Project window. It works, but the assignment experience is painful — no search, no type filtering, no organizational context. Drag the wrong asset and you won't know until runtime.
 
-This is the kind of bug that shouldn't exist. The information to prevent it was right there — the types are known at edit time. The problem was the tooling. A raw `SerializeField` with manual drag-and-drop has zero type awareness, zero search capability, and zero organizational context.
+GES solves the event type problem with automatic code generation (covered in the previous posts). But the `[GameEventDropdown]` attribute solves the *assignment* problem — it replaces the default object picker with a custom, type-safe, searchable, categorized dropdown. One attribute, and the entire workflow improves.
 
 <!-- truncate -->
 
-The `[GameEventDropdown]` attribute fixes all of this in a single line of code. It replaces the default object picker with a custom dropdown that's type-safe, searchable, and categorized. You literally add one attribute to your existing field and the entire workflow improves.
-
-Let me show you what it does and how to use it across different event patterns.
+Let me show you what it does and how to use it.
 
 ## The Problem with Traditional Event References
 
-Let's look at the standard approach to referencing events in a MonoBehaviour:
+Without GES, referencing events in a MonoBehaviour typically looks like this:
 
 ```csharp
 public class DamageHandler : MonoBehaviour
 {
-    [GameEventDropdown, SerializeField] private GameEvent<float> damageEvent;
-    [GameEventDropdown, SerializeField] private GameEvent<float> healEvent;
-    [GameEventDropdown, SerializeField] private GameEvent criticalHitEvent;
-    [GameEventDropdown, SerializeField] private GameEvent deathEvent;
-
-    // ... 10 more event references
+    [SerializeField] private GameEvent<float> damageEvent;   // Unity can't serialize this
+    [SerializeField] private GameEvent<float> healEvent;     // Doesn't show in Inspector
+    [SerializeField] private GameEvent criticalHitEvent;
+    [SerializeField] private GameEvent deathEvent;
 }
 ```
 
-This works. But it has problems:
+The generic fields (`GameEvent<float>`) don't even appear in the Inspector because Unity's serialization system can't handle open generics. You'd have to hand-write concrete subclasses (`FloatGameEvent : GameEvent<float>`) for every type — which we covered in the serialization post.
 
-1. **No search.** To assign `damageEvent`, you have to navigate the Project window, find the right folder, find the right asset, and drag it over. With 200+ events, this is painful.
+Even after solving the serialization issue (manually or otherwise), assigning events via the default Unity object picker still has problems:
 
-2. **No type safety at the drag level.** Unity's object picker shows all ScriptableObjects, or all GameEvents. It won't filter to only `GameEvent<float>`. You can easily assign a `GameEvent<int>` to a `GameEvent<float>` field if the serialization is ambiguous.
+1. **No search.** You have to navigate the Project window, find the right folder, find the right asset, and drag it over. With 200+ events, this is painful.
+
+2. **No type filtering.** Unity's object picker shows all ScriptableObjects of the base type. It won't filter by generic parameter. You can easily assign the wrong event type and not know until runtime.
 
 3. **No organizational context.** The default picker shows a flat, alphabetical list. No categories, no databases, no grouping. Finding "OnPlayerDamaged" in a list of 200 events is a chore.
 
 4. **Easy to assign the wrong event.** Names like `OnDamageDealt` and `OnDamageReceived` look similar in a flat list. One is raised by the attacker, the other by the defender. Mix them up and your game logic is silently wrong.
 
-## The GameEventDropdown Attribute
+## The GES Way: [GameEventDropdown] + Generated Concrete Types
 
-The fix is one attribute:
+GES solves both problems at once. The Creator auto-generates concrete types (like `SingleGameEvent` for `float`, `Int32GameEvent` for `int`), and `[GameEventDropdown]` gives you a smart dropdown for assignment:
 
 ```csharp
 public class DamageHandler : MonoBehaviour
 {
-    [GameEventDropdown, SerializeField] private GameEvent<float> damageEvent;
+    [GameEventDropdown, SerializeField] private SingleGameEvent damageEvent;
 
-    [GameEventDropdown, SerializeField] private GameEvent<float> healEvent;
+    [GameEventDropdown, SerializeField] private SingleGameEvent healEvent;
 
     [GameEventDropdown, SerializeField] private GameEvent criticalHitEvent;
 
@@ -60,7 +58,7 @@ public class DamageHandler : MonoBehaviour
 }
 ```
 
-That's it. Same fields, same types, same serialization. But now the Inspector shows a custom dropdown instead of the default object picker.
+No hand-written boilerplate. No manual dragging. The Inspector shows a custom dropdown instead of the default object picker — type-safe, searchable, and categorized.
 
 ![Raiser Dropdown](/img/game-event-system/visual-workflow/game-event-raiser/raiser-dropdown.png)
 
@@ -86,15 +84,15 @@ The search is also fast. It's not doing a file system scan — it's querying the
 
 Here's where the attribute really earns its keep: it automatically filters the dropdown to only show events that match the field's type.
 
-If your field is `GameEvent<float>`, the dropdown only shows `GameEvent<float>` events. No `GameEvent<int>`, no `GameEvent<string>`, no parameterless `GameEvent`. Just floats.
+If your field is `SingleGameEvent`, the dropdown only shows `SingleGameEvent` events. No `Int32GameEvent`, no `StringGameEvent`, no parameterless `GameEvent`. Just floats.
 
 If your field is `GameEvent` (parameterless), it only shows parameterless events.
 
-If your field is `GameEventSender<DamageInfo>`, it only shows sender events with the `DamageInfo` type.
+If your field is `DamageInfoGameEventSender`, it only shows sender events with the `DamageInfo` type.
 
 ```csharp
-[GameEventDropdown, SerializeField] private GameEvent<float> damageEvent;
-// Dropdown shows ONLY GameEvent<float> events:
+[GameEventDropdown, SerializeField] private SingleGameEvent damageEvent;
+// Dropdown shows ONLY SingleGameEvent events:
 // ✓ OnDamageDealt (float)
 // ✓ OnHealAmount (float)
 // ✓ OnSpeedChanged (float)
@@ -173,11 +171,11 @@ public class GameManager : MonoBehaviour
 ```csharp
 public class CombatSystem : MonoBehaviour
 {
-    [GameEventDropdown, SerializeField] private GameEvent<float> onDamageDealt;
+    [GameEventDropdown, SerializeField] private SingleGameEvent onDamageDealt;
 
-    [GameEventDropdown, SerializeField] private GameEvent<int> onComboCountChanged;
+    [GameEventDropdown, SerializeField] private Int32GameEvent onComboCountChanged;
 
-    [GameEventDropdown, SerializeField] private GameEvent<Vector3> onImpactPosition;
+    [GameEventDropdown, SerializeField] private Vector3GameEvent onImpactPosition;
 
     public void ProcessHit(float damage, Vector3 hitPoint)
     {
@@ -195,7 +193,7 @@ public class CombatSystem : MonoBehaviour
 ```csharp
 public class EnemyAI : MonoBehaviour
 {
-    [GameEventDropdown, SerializeField] private GameEvent<float> onAttackPerformed;
+    [GameEventDropdown, SerializeField] private SingleGameEvent onAttackPerformed;
 
     public void PerformAttack(float damage)
     {
@@ -273,7 +271,7 @@ This is useful for temporary state changes. During a cutscene, you might want to
 ```csharp
 public class CutsceneManager : MonoBehaviour
 {
-    [GameEventDropdown, SerializeField] private GameEvent<float> onDamageDealt;
+    [GameEventDropdown, SerializeField] private SingleGameEvent onDamageDealt;
 
     [GameEventDropdown, SerializeField] private GameEvent onEnemySpawned;
 
@@ -303,14 +301,14 @@ public class CutsceneManager : MonoBehaviour
 
 ```csharp
 [Header("Combat Events")]
-[GameEventDropdown, SerializeField] private GameEvent<float> onDamageDealt;
+[GameEventDropdown, SerializeField] private SingleGameEvent onDamageDealt;
 
-[GameEventDropdown, SerializeField] private GameEvent<float> onDamageReceived;
+[GameEventDropdown, SerializeField] private SingleGameEvent onDamageReceived;
 
 [Header("UI Events")]
 [GameEventDropdown, SerializeField] private GameEvent onInventoryToggled;
 
-[GameEventDropdown, SerializeField] private GameEvent<string> onTooltipRequested;
+[GameEventDropdown, SerializeField] private StringGameEvent onTooltipRequested;
 ```
 
 **Name your events clearly.** The dropdown is only as good as your naming conventions. `OnDmg` is terrible. `OnDamageDealtToPlayerByEnemy` is too long. `OnPlayerDamaged` is right — clear, specific, and scannable.

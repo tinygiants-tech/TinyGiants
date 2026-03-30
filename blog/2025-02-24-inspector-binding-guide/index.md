@@ -311,7 +311,7 @@ The color-coded status system keeps everyone informed about the state of the eve
 
 If your team is struggling with iteration speed — if every small gameplay change requires a code commit and a recompilation cycle — the Behavior window might be the single most impactful tool in the GES ecosystem. Give it a serious try for a week and see how it changes your workflow.
 
-Next post, we'll look at the `[GameEventDropdown]` attribute — a single-line addition to your code that gives you a searchable, type-safe, categorized event picker right in the Inspector.
+Next post, I'll look at the `[GameEventDropdown]` attribute — a single-line addition to your code that gives you a searchable, type-safe, categorized event picker right in the Inspector.
 
 ---
 

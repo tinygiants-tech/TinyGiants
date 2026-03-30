@@ -36,7 +36,7 @@ In practice, argument transformers fall into three categories. Understanding the
 Sometimes you want to connect a typed event to a void event — one that doesn't take any argument. The target event just needs to know "something happened," not the details.
 
 ```csharp
-// Source: GameEvent<DamageInfo> — carries full damage data
+// Source: DamageInfoGameEvent — carries full damage data
 // Target: GameEvent (void) — just a signal, no data needed
 
 onDamageDealt.AddTriggerEvent(onPlayHitSound, passArgument: false);
@@ -58,8 +58,8 @@ In the Node Editor, this is configured on the connection properties. You'll see 
 This is the most common pattern. You have a complex source type and need to extract a single field or compute a simple value from it.
 
 ```csharp
-// Source: GameEvent<DamageInfo> — carries damage, type, attacker, crit flag
-// Target: GameEvent<int> — expects the damage amount
+// Source: DamageInfoGameEvent — carries damage, type, attacker, crit flag
+// Target: Int32GameEvent — expects the damage amount
 
 onDamageDealt.AddTriggerEvent(onApplyDamage,
     argumentTransformer: (DamageInfo info) => info.damage);
@@ -98,8 +98,8 @@ onDamageDealt.AddTriggerEvent(onShowDamageNumber,
 Sometimes you need data from both the event's argument AND its sender to construct the target value. The transformer can receive both:
 
 ```csharp
-// Source: GameEvent<ItemInfo> with sender being the player who picked it up
-// Target: GameEvent<string> — expects a notification message
+// Source: ItemInfoGameEvent with sender being the player who picked it up
+// Target: StringGameEvent — expects a notification message
 
 onItemPickup.AddTriggerEvent(onShowNotification,
     argumentTransformer: (GameObject sender, ItemInfo item) =>
@@ -278,12 +278,18 @@ Let's build a complete flow that uses argument transformers to connect events wi
 
 ```csharp
 // Events with different argument types
-GameEvent<EnemyDeathInfo> onEnemyDeath;       // Full death data
-GameEvent<int> onAwardXP;                      // XP amount
-GameEvent<LootTable> onDropLoot;               // Loot table reference
-GameEvent<string> onShowKillNotification;      // Display text
+[GameEventDropdown, SerializeField]
+EnemyDeathInfoGameEvent onEnemyDeath;          // Full death data
+[GameEventDropdown, SerializeField]
+Int32GameEvent onAwardXP;                      // XP amount
+[GameEventDropdown, SerializeField]
+LootTableGameEvent onDropLoot;                 // Loot table reference
+[GameEventDropdown, SerializeField]
+StringGameEvent onShowKillNotification;        // Display text
+[GameEventDropdown, SerializeField]
 GameEvent onIncrementKillCount;                // Void — just count it
-GameEvent<Vector3> onSpawnDeathEffect;         // Effect position
+[GameEventDropdown, SerializeField]
+Vector3GameEvent onSpawnDeathEffect;           // Effect position
 
 void SetupEnemyDeathFlow()
 {

@@ -17,11 +17,11 @@ That's exactly why the Game Event System ships with a System Dashboard — a sin
 
 In this post, I'm going to walk through every panel and shortcut in the System Dashboard, explain why each piece of information matters, and share how I use it in my daily workflow.
 
-![System Dashboard Full](/img/game-event-system/visual-workflow/game-event-system/system-dashboard-full.png)
-
 ## Opening the Dashboard
 
 You can access the System Dashboard through the Unity menu: `Tools > TinyGiants > Game Event System`, or use the keyboard shortcut if you've configured one. The window is dockable, so you can pin it next to your Scene or Game view — wherever makes sense for your layout.
+
+![System Dashboard Full](/img/game-event-system/visual-workflow/game-event-system/system-dashboard-full.png)
 
 The first time you open it, you'll see everything laid out in a vertical scroll view. The dashboard is read-mostly — it's not where you create or edit events. It's where you get your bearings and jump to the right tool for the job.
 
@@ -36,6 +36,8 @@ The System Info panel auto-detects and displays:
 - **Scripting Backend** — Mono or IL2CPP
 - **Target Platform** — your current build target
 
+![System Environment Dashboard](/img/game-event-system/intro/installation/install-step-2-sysinfo.png)
+
 Why does this matter for an event system? Because GES adapts its code generation and serialization strategies based on these settings. IL2CPP has stricter AOT compilation requirements, which affects how generic event types get generated. The render pipeline detection matters for the built-in integration examples. And knowing your target platform helps when you're debugging platform-specific event timing issues.
 
 I can't tell you how many times someone has filed a bug report and the first question is "what's your scripting backend?" Now you don't even have to check — it's right there on the dashboard.
@@ -44,20 +46,20 @@ I can't tell you how many times someone has filed a bug report and the first que
 
 ![Quick Access](/img/game-event-system/visual-workflow/game-event-system/quick-access.png)
 
-Below the system info, you'll find the Quick Access panel. This is a grid of buttons that jump you directly to the most-used parts of the GES toolchain. Instead of navigating menus or remembering window names, you just click.
+Below the system info, you'll find the Quick Access panel. These are folder shortcuts that jump you directly to key directories in your GES project. One click opens the folder in Unity's Project window — no digging through nested folders to find what you need.
 
-The shortcuts typically include:
+The shortcuts are:
 
-- **Open Event Editor** — jumps to the main event management window
-- **Open Event Creator** — launches the batch event creation wizard (auto-generates code for custom types)
-- **Open Behavior Window** — opens the visual behavior configuration for event responses
-- **Open Flow Graph** — visual node-based event flow visualization
-- **Open Code Generator** — access code maintenance tools (regenerate, clean up generated files)
-- **Open Settings** — GES configuration and preferences
+- **Documentation** — opens the GES documentation folder
+- **API Scripts** — jumps to the core GES API scripts
+- **Databases** — takes you to the folder containing your event database assets
+- **Flow Graph** — opens the flow graph container assets folder
+- **CodeGen** — jumps to the generated code folder (Basic/ and Custom/ subfolders)
+- **Demo Scenes** — opens the example scenes folder
 
-The beauty here is consistency. No matter which project you open, no matter how your editor layout is configured, the Quick Access panel is always the same. It becomes muscle memory after a few days — open dashboard, click the tool you need, get to work.
+These are simple folder shortcuts, but they save real time. GES stores its data across a specific directory structure (`Assets/TinyGiants/TinyGiantsData/GameEventSystem/`), and remembering the exact path gets old fast. The Quick Access panel means you never have to navigate manually.
 
-For new team members, this panel is a lifesaver. Instead of saying "go to Tools > TinyGiants > blah blah > sub-menu > thing," you just say "open the dashboard and click Event Editor." Done.
+For new team members, this panel is a lifesaver. "Where are the event databases?" — just click Databases in the Quick Access panel. "Where's the generated code?" — click CodeGen. No guessing, no folder hunting.
 
 ## Core Tools Section
 

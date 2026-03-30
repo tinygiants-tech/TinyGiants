@@ -123,7 +123,7 @@ In the Behavior Window, configure an **Event Action**:
 
 - Drag the Cube into the target object slot, and select `ButtonResponder > RespondToButton` (or `ButtonResponder > FlashColor` if you want a visual response)
 
-![Hierarchy Setup](/img/game-event-system/examples/00-quick-start/hierarchy.png)
+![Hierarchy Setup](/img/game-event-system/visual-workflow/game-event-behavior/behavior-action-add.png)
 
 Your hierarchy should now have:
 - **EventSender** (with `ButtonPresser` component, referencing the event asset)
@@ -173,7 +173,7 @@ using TinyGiants.GES;
 
 public class ScoreManager : MonoBehaviour
 {
-    [GameEventDropdown, SerializeField] private IntGameEvent onScoreChanged;  // Pre-generated type
+    [GameEventDropdown, SerializeField] private Int32GameEvent onScoreChanged;  // Pre-generated type
 
     private int currentScore;
 
