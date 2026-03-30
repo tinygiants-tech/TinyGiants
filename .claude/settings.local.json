@@ -19,7 +19,13 @@
       "Bash(cp 2025-02-24-inspector-binding-guide/index.md 2025-03-17-designer-programmer-handoff/index.md)",
       "Bash(rm -f 2025-02-24-inspector-binding-guide/index.md)",
       "Bash(rmdir 2025-02-24-inspector-binding-guide)",
-      "Bash(ls -d 2025-*/)"
+      "Bash(ls -d 2025-*/)",
+      "Bash(mv 2025-01-06-invisible-spaghetti-code 2026-01-05-invisible-spaghetti-code)",
+      "Bash(mv 2025-01-20-generic-serialization-and-codegen 2026-01-11-generic-serialization-and-codegen)",
+      "Bash(mv 2025-02-03-zero-reflection-performance 2026-01-17-zero-reflection-performance)",
+      "Bash(mv 2025-02-17-event-organization-at-scale 2026-01-23-event-organization-at-scale)",
+      "Bash(mv 2025-03-03-five-minute-quickstart 2026-01-29-five-minute-quickstart)",
+      "Bash(ls -d D:/file/repository/Github/TinyGiants/blog/20*/)"
     ]
   }
 }

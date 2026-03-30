@@ -45,7 +45,7 @@ const config = {
           editUrl: 'https://github.com/tinygiants-tech/TinyGiants',
         },
         blog: {
-          showReadingTime: true,
+          showReadingTime: false,
           blogSidebarTitle: 'All Posts',
           blogSidebarCount: 'ALL',
           postsPerPage: 10,
