@@ -413,7 +413,7 @@ If your numbers are significantly worse than expected, check:
 
 Hard numbers:
 - Event raise with 10 listeners: ~0.02ms, zero GC
-- Condition evaluation: ~0.005ms per condition
+- Condition evaluation: ~0.003ms per condition
 - 280 events in production: 1.2% of frame budget average
 - GES vs. C# events: ~30% slower dispatch, vastly more features
 - GES vs. UnityEvent: ~2.5x faster, zero GC (vs. UnityEvent's reflection-based allocation)

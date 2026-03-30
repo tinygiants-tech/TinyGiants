@@ -176,7 +176,7 @@ This is the section performance-conscious developers have been waiting for. Let'
 
 ### How It Works Under the Hood
 
-When a condition tree is first evaluated (typically during scene initialization or when the listener is first enabled), the visual tree structure is compiled into a .NET Expression Tree. This is the same technology that LINQ providers and ORMs use — it's a well-established, highly optimized compilation pathway.
+When a condition tree is first evaluated (typically during scene initialization or when the Event Action is first enabled), the visual tree structure is compiled into a .NET Expression Tree. This is the same technology that LINQ providers and ORMs use — it's a well-established, highly optimized compilation pathway.
 
 The compilation process:
 
@@ -258,7 +258,7 @@ One bool method call in a condition node replaces four separate comparison nodes
 
 ### Strategy 4: Condition Trees on High-Frequency Events
 
-For events that fire very frequently (every frame or multiple times per frame), keep condition trees simple. A tree with 2-3 nodes evaluating at 60 FPS adds about 0.06ms per frame — imperceptible. A tree with 30 nodes evaluating at 60 FPS adds about 0.03ms per frame — still fine, honestly. But if you have 100 listeners each with 30-node condition trees on a per-frame event... consider whether some of that logic should be in code.
+For events that fire very frequently (every frame or multiple times per frame), keep condition trees simple. A tree with 2-3 nodes evaluating at 60 FPS adds about 0.06ms per frame — imperceptible. A tree with 30 nodes evaluating at 60 FPS adds about 0.03ms per frame — still fine, honestly. But if you have 100 Event Actions each with 30-node condition trees on a per-frame event... consider whether some of that logic should be in code.
 
 The general guideline: for events that fire less than once per frame (game events, state changes, user actions), condition tree complexity doesn't matter. For per-frame events, keep trees under 10-15 nodes.
 

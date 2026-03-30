@@ -49,10 +49,10 @@ Below the system info, you'll find the Quick Access panel. This is a grid of but
 The shortcuts typically include:
 
 - **Open Event Editor** — jumps to the main event management window
-- **Open Event Creator** — launches the batch event creation wizard
-- **Open Behavior Window** — opens the Inspector-based behavior configuration
+- **Open Event Creator** — launches the batch event creation wizard (auto-generates code for custom types)
+- **Open Behavior Window** — opens the visual behavior configuration for event responses
 - **Open Flow Graph** — visual node-based event flow visualization
-- **Open Code Generator** — access the automatic code generation tools
+- **Open Code Generator** — access code maintenance tools (regenerate, clean up generated files)
 - **Open Settings** — GES configuration and preferences
 
 The beauty here is consistency. No matter which project you open, no matter how your editor layout is configured, the Quick Access panel is always the same. It becomes muscle memory after a few days — open dashboard, click the tool you need, get to work.
@@ -91,14 +91,14 @@ Below the Core Tools, you'll find the Code Tools section. These are the automate
 
 ### Code Generator
 
-The Code Generator creates the C# boilerplate that GES needs for your custom event types. When you create an event that carries an `EnemyData` parameter, the system needs corresponding listener classes, raiser classes, and serialization support. The Code Generator handles all of this automatically.
+The Code Generator is a maintenance tool for managing the C# boilerplate that GES generates for your custom event types. When you create events through the Creator (Event Editor > "+ New Event"), the Creator auto-generates all necessary code for custom types. The Code Generator is for maintenance tasks: regenerating code after version control merges, cleaning up after refactors, or resolving issues with generated files.
 
-From the dashboard, you can launch the generator and see at a glance whether there are any pending types that need generation. This is particularly useful after pulling from version control — if a teammate added new event types, you'll know immediately that code generation needs to run.
+From the dashboard, you can launch the generator and see at a glance whether there are any pending types that need regeneration. This is particularly useful after pulling from version control — if generated files got out of sync, you'll know immediately.
 
-A typical code generation flow looks like this:
+When the Creator generates code for a custom type, it produces:
 
 ```csharp
-// You create an event that uses a custom type
+// You define a custom type:
 [System.Serializable]
 public struct DamageInfo
 {
@@ -107,14 +107,13 @@ public struct DamageInfo
     public Vector3 hitPoint;
 }
 
-// The Code Generator automatically creates:
+// The Creator auto-generates when you create an event with this type:
 // - GameEvent<DamageInfo> support
-// - GameEventListener<DamageInfo> component
-// - GameEventRaiser<DamageInfo> support
+// - Serialization support
 // - Editor drawer and property support
 ```
 
-You don't write any of that boilerplate. The generator does it for you, and the dashboard tells you when it needs to run.
+You don't write any of that boilerplate. The Creator handles it during event creation, and the Code Generator is there for maintenance if you ever need to regenerate or clean up.
 
 ### Code Cleaner
 

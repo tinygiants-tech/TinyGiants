@@ -200,7 +200,7 @@ public class PlayerDataGameEvent : GameEvent<PlayerData> { }
 3. **Compile** - Unity auto-compiles the new code
 4. **Create** - Now you can create events for your custom types
 
-**Time investment**: ~10 seconds. **Benefit**: Lifetime type safety.
+**Time investment**: ~5 seconds. **Benefit**: Lifetime type safety.
 
 </details>
 

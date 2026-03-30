@@ -7,7 +7,7 @@ description: "The visual condition tree supports 4 data source types with deep p
 image: /img/home-page/game-event-system-preview.png
 ---
 
-Here's a situation that comes up all the time: you've got a damage event that carries a `DamageInfo` payload, and you want to condition a listener on both the damage type from that payload AND the current state of a completely separate object in the scene — say, whether a specific buff is active on the player. In traditional code, that means your event handler needs references to both the event data and the buff system. Two dependencies, more coupling, more fragility.
+Here's a situation that comes up all the time: you've got a damage event that carries a `DamageInfo` payload, and you want to condition an Event Action on both the damage type from that payload AND the current state of a completely separate object in the scene — say, whether a specific buff is active on the player. In traditional code, that means your event handler needs references to both the event data and the buff system. Two dependencies, more coupling, more fragility.
 
 The visual condition tree in GES solves this by letting each comparison node pull data from different source types independently. One side of your comparison can read from the event's payload while the other side reads from a scene object. No extra wiring. No new dependencies in code.
 
@@ -79,7 +79,7 @@ This checks "is the event's integer argument greater than 100?"
 
 GES events can optionally include a sender reference — the object that raised the event. The Event Argument source type lets you access the sender as well, not just the payload argument. This is useful for conditions like "only respond if the sender is tagged as Player" or "only respond if the sender's health is above zero."
 
-When a listener is configured to receive the sender (via the appropriate listener type), the Event Argument source type shows both the argument properties and the sender properties in separate sections. You can mix and match — compare the sender's tag against a constant, or compare the argument's damage value against the sender's attack power.
+When an Event Action in the Behavior Window is configured to receive the sender, the Event Argument source type shows both the argument properties and the sender properties in separate sections. You can mix and match — compare the sender's tag against a constant, or compare the argument's damage value against the sender's attack power.
 
 ## Source Type 2: Scene Type
 

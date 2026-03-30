@@ -265,7 +265,7 @@ This applies to all listener types — basic, priority, conditional, persistent.
 
 ## Muting Inspector Listeners During Batch Operations
 
-GES events can have listeners configured in the Inspector (via GameEventBehavior components). These visual listeners fire alongside your code listeners. Sometimes you want to suppress them temporarily — for example, during a batch operation that raises an event many times in quick succession.
+GES events can have listeners configured visually in the Behavior Window. These visual listeners fire alongside your code listeners. Sometimes you want to suppress them temporarily — for example, during a batch operation that raises an event many times in quick succession.
 
 ```csharp
 // Suppress Inspector-configured listeners
@@ -420,13 +420,13 @@ For large projects with multiple subsystems, consider a bridge pattern where eac
 public class CombatEventInterface : MonoBehaviour
 {
     [Header("Outgoing Events (raised by combat system)")]
-    [SerializeField] private GameEventInt onDamageDealt;
-    [SerializeField] private GameEvent onCombatStarted;
-    [SerializeField] private GameEvent onCombatEnded;
+    [GameEventDropdown, SerializeField] private GameEventInt onDamageDealt;
+    [GameEventDropdown, SerializeField] private GameEvent onCombatStarted;
+    [GameEventDropdown, SerializeField] private GameEvent onCombatEnded;
 
     [Header("Incoming Events (listened by combat system)")]
-    [SerializeField] private GameEvent onPlayerDied;
-    [SerializeField] private GameEventInt onHealReceived;
+    [GameEventDropdown, SerializeField] private GameEvent onPlayerDied;
+    [GameEventDropdown, SerializeField] private GameEventInt onHealReceived;
 
     private CombatSystem _combat;
 

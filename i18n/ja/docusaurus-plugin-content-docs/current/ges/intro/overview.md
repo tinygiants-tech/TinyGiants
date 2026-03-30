@@ -195,7 +195,7 @@ public class PlayerDataGameEvent : GameEvent<PlayerData> { }
 3. **コンパイル** - Unityが新しいコードを自動コンパイル
 4. **作成** - これで、カスタム型のイベントを作成可能に
 
-**所要時間**: 約10秒。**効果**: 生涯の型安全性。
+**所要時間**: 約5秒。**効果**: 生涯の型安全性。
 
 </details>
 

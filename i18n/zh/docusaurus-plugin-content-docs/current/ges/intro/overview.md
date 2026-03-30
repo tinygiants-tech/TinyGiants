@@ -197,7 +197,7 @@ public class PlayerDataGameEvent : GameEvent<PlayerData> { }
 3. **编译** - Unity自动编译新代码
 4. **创建** - 现在你可以为自定义类型创建事件了
 
-**时间投入**: ~10秒。**收益**: 终身类型安全。
+**时间投入**: ~5秒。**收益**: 终身类型安全。
 
 </details>
 

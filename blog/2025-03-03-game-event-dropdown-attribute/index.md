@@ -24,10 +24,10 @@ Let's look at the standard approach to referencing events in a MonoBehaviour:
 ```csharp
 public class DamageHandler : MonoBehaviour
 {
-    [SerializeField] private GameEvent<float> damageEvent;
-    [SerializeField] private GameEvent<float> healEvent;
-    [SerializeField] private GameEvent criticalHitEvent;
-    [SerializeField] private GameEvent deathEvent;
+    [GameEventDropdown, SerializeField] private GameEvent<float> damageEvent;
+    [GameEventDropdown, SerializeField] private GameEvent<float> healEvent;
+    [GameEventDropdown, SerializeField] private GameEvent criticalHitEvent;
+    [GameEventDropdown, SerializeField] private GameEvent deathEvent;
 
     // ... 10 more event references
 }
@@ -50,17 +50,13 @@ The fix is one attribute:
 ```csharp
 public class DamageHandler : MonoBehaviour
 {
-    [GameEventDropdown]
-    [SerializeField] private GameEvent<float> damageEvent;
+    [GameEventDropdown, SerializeField] private GameEvent<float> damageEvent;
 
-    [GameEventDropdown]
-    [SerializeField] private GameEvent<float> healEvent;
+    [GameEventDropdown, SerializeField] private GameEvent<float> healEvent;
 
-    [GameEventDropdown]
-    [SerializeField] private GameEvent criticalHitEvent;
+    [GameEventDropdown, SerializeField] private GameEvent criticalHitEvent;
 
-    [GameEventDropdown]
-    [SerializeField] private GameEvent deathEvent;
+    [GameEventDropdown, SerializeField] private GameEvent deathEvent;
 }
 ```
 
@@ -97,8 +93,7 @@ If your field is `GameEvent` (parameterless), it only shows parameterless events
 If your field is `GameEventSender<DamageInfo>`, it only shows sender events with the `DamageInfo` type.
 
 ```csharp
-[GameEventDropdown]
-[SerializeField] private GameEvent<float> damageEvent;
+[GameEventDropdown, SerializeField] private GameEvent<float> damageEvent;
 // Dropdown shows ONLY GameEvent<float> events:
 // ✓ OnDamageDealt (float)
 // ✓ OnHealAmount (float)
@@ -144,14 +139,11 @@ Let's look at how the `[GameEventDropdown]` attribute works with different event
 ```csharp
 public class GameManager : MonoBehaviour
 {
-    [GameEventDropdown]
-    [SerializeField] private GameEvent onGameStarted;
+    [GameEventDropdown, SerializeField] private GameEvent onGameStarted;
 
-    [GameEventDropdown]
-    [SerializeField] private GameEvent onGamePaused;
+    [GameEventDropdown, SerializeField] private GameEvent onGamePaused;
 
-    [GameEventDropdown]
-    [SerializeField] private GameEvent onGameResumed;
+    [GameEventDropdown, SerializeField] private GameEvent onGameResumed;
 
     public void StartGame()
     {
@@ -181,14 +173,11 @@ public class GameManager : MonoBehaviour
 ```csharp
 public class CombatSystem : MonoBehaviour
 {
-    [GameEventDropdown]
-    [SerializeField] private GameEvent<float> onDamageDealt;
+    [GameEventDropdown, SerializeField] private GameEvent<float> onDamageDealt;
 
-    [GameEventDropdown]
-    [SerializeField] private GameEvent<int> onComboCountChanged;
+    [GameEventDropdown, SerializeField] private GameEvent<int> onComboCountChanged;
 
-    [GameEventDropdown]
-    [SerializeField] private GameEvent<Vector3> onImpactPosition;
+    [GameEventDropdown, SerializeField] private GameEvent<Vector3> onImpactPosition;
 
     public void ProcessHit(float damage, Vector3 hitPoint)
     {
@@ -206,8 +195,7 @@ public class CombatSystem : MonoBehaviour
 ```csharp
 public class EnemyAI : MonoBehaviour
 {
-    [GameEventDropdown]
-    [SerializeField] private GameEvent<float> onAttackPerformed;
+    [GameEventDropdown, SerializeField] private GameEvent<float> onAttackPerformed;
 
     public void PerformAttack(float damage)
     {
@@ -285,11 +273,9 @@ This is useful for temporary state changes. During a cutscene, you might want to
 ```csharp
 public class CutsceneManager : MonoBehaviour
 {
-    [GameEventDropdown]
-    [SerializeField] private GameEvent<float> onDamageDealt;
+    [GameEventDropdown, SerializeField] private GameEvent<float> onDamageDealt;
 
-    [GameEventDropdown]
-    [SerializeField] private GameEvent onEnemySpawned;
+    [GameEventDropdown, SerializeField] private GameEvent onEnemySpawned;
 
     public void StartCutscene()
     {
@@ -317,18 +303,14 @@ public class CutsceneManager : MonoBehaviour
 
 ```csharp
 [Header("Combat Events")]
-[GameEventDropdown]
-[SerializeField] private GameEvent<float> onDamageDealt;
+[GameEventDropdown, SerializeField] private GameEvent<float> onDamageDealt;
 
-[GameEventDropdown]
-[SerializeField] private GameEvent<float> onDamageReceived;
+[GameEventDropdown, SerializeField] private GameEvent<float> onDamageReceived;
 
 [Header("UI Events")]
-[GameEventDropdown]
-[SerializeField] private GameEvent onInventoryToggled;
+[GameEventDropdown, SerializeField] private GameEvent onInventoryToggled;
 
-[GameEventDropdown]
-[SerializeField] private GameEvent<string> onTooltipRequested;
+[GameEventDropdown, SerializeField] private GameEvent<string> onTooltipRequested;
 ```
 
 **Name your events clearly.** The dropdown is only as good as your naming conventions. `OnDmg` is terrible. `OnDamageDealtToPlayerByEnemy` is too long. `OnPlayerDamaged` is right — clear, specific, and scannable.

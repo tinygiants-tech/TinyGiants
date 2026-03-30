@@ -49,9 +49,9 @@ The Game Event System's Visual Condition Tree is exactly what it sounds like: a 
 
 ![Condition Tree Overview](/img/game-event-system/visual-workflow/visual-condition-tree/condition-tree-overview.png)
 
-Here's the core idea: every event listener in GES can have an optional condition tree attached to it. When the event fires, the condition tree evaluates first. If it returns `true`, the listener executes. If it returns `false`, the listener is skipped. No code needed for the condition itself — it's all configured in the Inspector.
+Here's the core idea: every Event Action in the Behavior Window can have an optional condition tree attached to it. When the event fires, the condition tree evaluates first. If it returns `true`, the Event Action executes. If it returns `false`, the Event Action is skipped. No code needed for the condition itself — it's all configured visually in the Behavior Window.
 
-This means your designer can open the Inspector, look at the condition tree, understand exactly what conditions gate this event, and modify them directly. No IDE. No pull request. No waiting for a programmer.
+This means your designer can open the Behavior Window for any event, look at the condition tree, understand exactly what conditions gate this event's responses, and modify them directly. No IDE. No pull request. No waiting for a programmer.
 
 ## AND/OR Groups: Boolean Logic Made Visual
 
@@ -121,7 +121,7 @@ The simplest source type — a fixed value that you type directly into the Inspe
 
 Let's walk through setting up that original request — "trigger the fire effect on a critical hit when the player's HP is below 50%" — using the visual condition tree.
 
-**Step 1:** On your event listener component, enable the condition tree. This adds a foldout section in the Inspector.
+**Step 1:** Open the Behavior Window for your event (click the Behavior button in the Event Editor) and enable the condition tree on your Event Action.
 
 **Step 2:** The root is an AND group by default. We need both conditions to be true, so AND is correct.
 
@@ -183,12 +183,12 @@ The condition tree isn't just a static configuration panel — it's a proper edi
 
 ## When to Use Condition Trees vs Code
 
-I want to be clear: condition trees don't replace all conditional logic in your game. They're designed specifically for event-level gating — "should this listener respond to this event?" For complex game logic that involves state machines, multi-step calculations, or algorithmic decisions, code is still the right tool.
+I want to be clear: condition trees don't replace all conditional logic in your game. They're designed specifically for event-level gating — "should this Event Action respond to this event?" For complex game logic that involves state machines, multi-step calculations, or algorithmic decisions, code is still the right tool.
 
 Here's my rule of thumb:
 
 **Use the visual condition tree when:**
-- The condition gates an event listener's execution
+- The condition gates an Event Action's execution
 - Designers need to see or tweak the conditions
 - The condition combines simple comparisons (field checks, threshold comparisons, type checks)
 - You want to iterate quickly without recompilation
@@ -284,16 +284,16 @@ public void OnScoreChanged(int newScore)
 }
 ```
 
-**After (two condition trees on two listeners):**
+**After (two condition trees on two Event Actions in the Behavior Window):**
 
-Score Master listener:
+Score Master Event Action:
 ```
 AND
 ├── Event Argument: newScore >= Constant: 10000
 └── Scene Type: achievementManager.HasAchievement("score_master") == Constant: false
 ```
 
-Speed Scorer listener:
+Speed Scorer Event Action:
 ```
 AND
 ├── Event Argument: newScore >= Constant: 10000
@@ -301,7 +301,7 @@ AND
 └── Scene Type: gameTimer.elapsedTime < Constant: 300
 ```
 
-Two separate listeners, each with its own clear condition tree. The achievements are independently configurable, and a game designer can adjust thresholds (10000 points, 300 seconds) directly.
+Two separate Event Actions, each with its own clear condition tree. The achievements are independently configurable, and a game designer can adjust thresholds (10000 points, 300 seconds) directly.
 
 ## Performance Under the Hood
 
@@ -324,7 +324,7 @@ If you've been drowning in if-else conditions scattered across your event handle
 
 ## Ready to Try It?
 
-The Visual Condition Tree is included in the Game Event System plugin. Install it, add a condition tree to any event listener, and start building conditions visually. The demo scene `06-Conditional-Event` walks through a complete working example.
+The Visual Condition Tree is included in the Game Event System plugin. Install it, open the Behavior Window for any event, add a condition tree to any Event Action, and start building conditions visually. The demo scene `06-Conditional-Event` walks through a complete working example.
 
 ---
 

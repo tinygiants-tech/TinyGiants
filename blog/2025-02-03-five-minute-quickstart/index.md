@@ -45,11 +45,9 @@ Now add the `GameEventManager` to your scene. You can do this by dragging the ma
 
 Let's create a simple void event — an event that says "something happened" without carrying any data. We'll call it "OnButtonPressed."
 
-In the GES Event Editor (accessible from the dashboard or via **Tools > TinyGiants > Event Editor**), click **Create New Event**. Select **Parameterless (Void)** as the event type. Name it `OnButtonPressed`.
+In the GES Event Editor (accessible from the dashboard or via **Tools > TinyGiants > Event Editor**), click the **"+ New Event"** button. This opens the Creator Window. Select **Parameterless (Void)** as the event type. Name it `OnButtonPressed` and click Create.
 
 The system creates a new ScriptableObject asset — your event now exists as a draggable, referenceable asset in the project. You can see it in the Event Editor window with its GUID, current listener count, and configuration options.
-
-You can also create events by right-clicking in the Project window: **Create > TinyGiants > GES > Void Event**. Both methods produce the same result.
 
 ## Step 4: Raise the Event from Code (90 seconds)
 
@@ -61,7 +59,7 @@ using TinyGiants.GES;
 
 public class ButtonPresser : MonoBehaviour
 {
-    [SerializeField] private GameEvent onButtonPressed;
+    [GameEventDropdown, SerializeField] private GameEvent onButtonPressed;
 
     // Call this from a UI Button's OnClick, or from Update, or from anywhere
     public void PressTheButton()
@@ -113,22 +111,21 @@ public class ButtonResponder : MonoBehaviour
 }
 ```
 
-Now set up the scene:
+Now set up the receiver:
 
 1. Create a **3D Cube** in your scene (GameObject > 3D Object > Cube). Name it "Responder."
 2. Add the `ButtonResponder` component to the Cube.
-3. Add a **`GameEventListener`** component to the same Cube.
+3. Open the **Behavior Window** for the `OnButtonPressed` event. You can do this from the Event Editor by clicking the Behavior button on the event.
 
-The `GameEventListener` is the key component. In its Inspector, you'll see:
+In the Behavior Window, configure an **Event Action**:
 
-- **Event** field: drag your `OnButtonPressed` event asset here
-- **Response** section: this is a UnityEvent. Click the `+` button, drag the Cube (itself) into the object slot, and select `ButtonResponder > RespondToButton` (or `ButtonResponder > FlashColor` if you want a visual response)
+- Drag the Cube into the target object slot, and select `ButtonResponder > RespondToButton` (or `ButtonResponder > FlashColor` if you want a visual response)
 
 ![Hierarchy Setup](/img/game-event-system/examples/00-quick-start/hierarchy.png)
 
 Your hierarchy should now have:
 - **EventSender** (with `ButtonPresser` component, referencing the event asset)
-- **Responder** (with `ButtonResponder` and `GameEventListener` components, both referencing the same event asset)
+- **Responder** (with `ButtonResponder` component)
 
 Neither object has a direct reference to the other. They communicate entirely through the shared event asset.
 
@@ -155,13 +152,12 @@ Here's where the power of this pattern becomes obvious. Want to add a sound effe
 
 1. Create a new empty GameObject called "AudioResponder"
 2. Add an `AudioSource` component
-3. Add a `GameEventListener` component
-4. Drag the same `OnButtonPressed` event asset into the Event field
-5. In the Response, wire up `AudioSource.Play()`
+3. Open the **Behavior Window** for the `OnButtonPressed` event
+4. Add a new Event Action: drag the AudioResponder GameObject in and select `AudioSource.Play()`
 
-Done. You didn't touch `ButtonPresser.cs`. You didn't modify the Responder cube. You just added a new listener to the same event. The system is fully decoupled — adding new responses requires zero changes to existing code.
+Done. You didn't touch `ButtonPresser.cs`. You didn't modify the Responder cube. You just added a new action to the same event's behavior. The system is fully decoupled — adding new responses requires zero changes to existing code.
 
-Want to add a particle effect? Same process. Camera shake? Same process. Analytics logging? Same process. Each new response is an independent listener that references the same event asset.
+Want to add a particle effect? Same process. Camera shake? Same process. Analytics logging? Same process. Each new response is an independent Event Action configured through the same event's Behavior Window.
 
 ## Passing Data with Events
 
@@ -175,7 +171,7 @@ using TinyGiants.GES;
 
 public class ScoreManager : MonoBehaviour
 {
-    [SerializeField] private IntGameEvent onScoreChanged;  // Pre-generated type
+    [GameEventDropdown, SerializeField] private IntGameEvent onScoreChanged;  // Pre-generated type
 
     private int currentScore;
 
@@ -194,7 +190,7 @@ public class ScoreDisplay : MonoBehaviour
 {
     [SerializeField] private TMP_Text scoreText;
 
-    // This method is wired up via the GameEventListener's Response
+    // This method is wired up via the Behavior Window's Event Action
     public void UpdateDisplay(int newScore)
     {
         scoreText.text = $"Score: {newScore}";
@@ -202,7 +198,7 @@ public class ScoreDisplay : MonoBehaviour
 }
 ```
 
-The listener component for typed events is `IntGameEventListener` (or `FloatGameEventListener`, `StringGameEventListener`, etc.). It works exactly like the void listener, but the response method receives the typed parameter.
+For typed events, you configure responses the same way through the Behavior Window. The response method receives the typed parameter automatically.
 
 ## Common First-Time Questions
 
@@ -212,24 +208,29 @@ A: You need one in your first loaded scene. If you use a persistent "Bootstrap" 
 **Q: What happens if I raise an event with no listeners?**
 A: Nothing. No error, no warning, no performance cost. The event fires and nobody responds. This is by design — it means you can safely add events to systems before their listeners exist.
 
-**Q: Can I listen to events in code instead of the Inspector?**
-A: Absolutely. You can register listeners programmatically:
+**Q: Can I listen to events in code instead of the Behavior Window?**
+A: Absolutely. You can register listeners programmatically using `AddListener`/`RemoveListener`:
 
 ```csharp
-[SerializeField] private GameEvent onButtonPressed;
+[GameEventDropdown, SerializeField] private GameEvent onButtonPressed;
 
 private void OnEnable()
 {
-    onButtonPressed.RegisterListener(this);
+    onButtonPressed.AddListener(OnButtonPressed);
 }
 
 private void OnDisable()
 {
-    onButtonPressed.UnregisterListener(this);
+    onButtonPressed.RemoveListener(OnButtonPressed);
+}
+
+private void OnButtonPressed()
+{
+    Debug.Log("Button pressed!");
 }
 ```
 
-The Inspector-based approach is recommended for most cases because it's more visible and easier to debug, but code-based listeners are fully supported for dynamic scenarios.
+The Behavior Window approach is recommended for most cases because it's more visible and easier to debug, but code-based listeners are fully supported for dynamic scenarios.
 
 **Q: Can I raise events from the Inspector without code?**
 A: Yes. The event asset has a "Raise" button in its Inspector. This is great for testing — you can trigger any event manually while the game is running to see how listeners respond without needing to reproduce the actual game condition.
@@ -251,9 +252,9 @@ Now that you have the basics working, here's the recommended order for diving de
 - Build a health system: `FloatGameEvent` for health changes, `GameEvent` for death
 - Build a score system: `IntGameEvent` for score updates
 
-### Week 3: Custom Types and Code Generation
+### Week 3: Custom Types
 - Define a custom data struct for a game-specific event
-- Use the code generation tool to create the event type
+- Open the Event Editor, click "+ New Event", and select your custom type in the Creator — it auto-generates the necessary code
 - Implement a complete feature using custom typed events
 
 ### Week 4: Condition Trees and Visual Flow
@@ -280,7 +281,7 @@ Here's everything we did, in order:
 2. **Initialized** the system via the Dashboard
 3. **Created** a void event asset (`OnButtonPressed`)
 4. **Built a sender** script that raises the event
-5. **Built a receiver** with a `GameEventListener` bound to the same event
+5. **Built a receiver** using the Behavior Window to configure Event Actions for the same event
 6. **Hit Play** and verified it works
 
 Total time: about 5 minutes. Total lines of code: about 15 (in the sender script). Total direct references between sender and receiver: zero.

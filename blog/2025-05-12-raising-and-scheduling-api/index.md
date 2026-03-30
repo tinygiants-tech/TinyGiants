@@ -25,7 +25,7 @@ The simplest case. Something happened, no data attached.
 
 ```csharp
 // Create or reference the event
-[SerializeField] private GameEvent onPlayerDied;
+[GameEventDropdown, SerializeField] private GameEvent onPlayerDied;
 
 // Raise it
 onPlayerDied.Raise();
@@ -39,7 +39,7 @@ When you need to pass data with the event.
 
 ```csharp
 // A typed event carrying damage info
-[SerializeField] private GameEventInt onDamageDealt;
+[GameEventDropdown, SerializeField] private GameEventInt onDamageDealt;
 
 // Raise with data
 onDamageDealt.Raise(42);
@@ -53,7 +53,7 @@ When listeners need to know both *who* sent the event and *what* the data is.
 
 ```csharp
 // Sender event: who dealt how much damage
-[SerializeField] private GameEventSenderInt onDamageFromSource;
+[GameEventDropdown, SerializeField] private GameEventSenderInt onDamageFromSource;
 
 // Raise with sender context
 onDamageFromSource.Raise(this, 42);
@@ -136,7 +136,7 @@ Pass `count: -1` for infinite repetition. The event keeps firing every 2 seconds
 ```csharp
 public class PoisonEffect : MonoBehaviour
 {
-    [SerializeField] private GameEventInt onPoisonDamage;
+    [GameEventDropdown, SerializeField] private GameEventInt onPoisonDamage;
 
     private ScheduleHandle _poisonHandle;
 
@@ -174,7 +174,7 @@ public class PoisonEffect : MonoBehaviour
 ```csharp
 public class RadarSystem : MonoBehaviour
 {
-    [SerializeField] private GameEvent onRadarPing;
+    [GameEventDropdown, SerializeField] private GameEvent onRadarPing;
 
     private ScheduleHandle _scanHandle;
 
@@ -333,10 +333,10 @@ Let's put everything together with a realistic game scenario. A bomb is planted.
 public class BombController : MonoBehaviour
 {
     [Header("Events")]
-    [SerializeField] private GameEvent onBombExplode;
-    [SerializeField] private GameEventInt onCountdownTick;
-    [SerializeField] private GameEvent onBombDefused;
-    [SerializeField] private GameEvent onBombArmed;
+    [GameEventDropdown, SerializeField] private GameEvent onBombExplode;
+    [GameEventDropdown, SerializeField] private GameEventInt onCountdownTick;
+    [GameEventDropdown, SerializeField] private GameEvent onBombDefused;
+    [GameEventDropdown, SerializeField] private GameEvent onBombArmed;
 
     [Header("Settings")]
     [SerializeField] private float fuseTime = 30f;
@@ -422,9 +422,9 @@ And the UI side, completely decoupled:
 ```csharp
 public class BombUI : MonoBehaviour
 {
-    [SerializeField] private GameEventInt onCountdownTick;
-    [SerializeField] private GameEvent onBombDefused;
-    [SerializeField] private GameEvent onBombExplode;
+    [GameEventDropdown, SerializeField] private GameEventInt onCountdownTick;
+    [GameEventDropdown, SerializeField] private GameEvent onBombDefused;
+    [GameEventDropdown, SerializeField] private GameEvent onBombExplode;
     [SerializeField] private TextMeshProUGUI countdownText;
     [SerializeField] private GameObject bombPanel;
 

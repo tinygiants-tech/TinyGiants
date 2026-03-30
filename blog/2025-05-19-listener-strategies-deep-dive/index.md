@@ -215,9 +215,9 @@ onPlayerDamaged.AddPersistentListener(TrackLifetimeDamage, priority: 0);
 ```csharp
 public class AudioManager : MonoBehaviour
 {
-    [SerializeField] private GameEvent onPlayerDamaged;
-    [SerializeField] private GameEvent onEnemyDied;
-    [SerializeField] private GameEvent onItemPickedUp;
+    [GameEventDropdown, SerializeField] private GameEvent onPlayerDamaged;
+    [GameEventDropdown, SerializeField] private GameEvent onEnemyDied;
+    [GameEventDropdown, SerializeField] private GameEvent onItemPickedUp;
 
     private void OnEnable()
     {

@@ -67,7 +67,7 @@ When a connection has a condition, the execution flow checks the condition befor
 
 **For trigger connections:** If the condition is `false`, the target doesn't fire, but other trigger connections from the same source are unaffected. It's like a per-branch gate.
 
-**For chain connections:** If the condition is `false`, the step is skipped and the chain continues to the next step. The chain doesn't halt — it just bypasses that one step. (This is different from a chain step that fails/throws, which DOES halt the chain.)
+**For chain connections:** There are two layers of conditions. **Node conditions** (configured in the NodeBehavior Window) stop the ENTIRE flow branch if `false` — subsequent steps don't execute. **Event conditions** (configured in the Behavior Window) only gate the side effects (Event Actions) for that step; the flow itself CONTINUES to the next step regardless. This distinction is critical: node conditions control flow, event conditions control side effects.
 
 ### Boss Phase Example
 

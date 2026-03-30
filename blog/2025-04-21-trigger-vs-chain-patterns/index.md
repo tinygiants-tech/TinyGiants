@@ -89,7 +89,7 @@ Chain mode is for when order matters and each step must complete before the next
 
 **Delay and duration:** Each chain step can have an optional delay before it starts and a duration that determines when it's "complete." This is how you create timed sequences — wait 0.5 seconds, then fade, then wait for the fade to finish, then load.
 
-**Chain halts on failure:** If a step in a chain fails (throws an exception or its condition evaluates to false), the chain stops. Subsequent steps don't execute. This is intentional — in a sequential flow, later steps often depend on earlier steps succeeding. If the screen fade fails, you don't want to teleport the player to a half-loaded scene.
+**Chain halts on node condition failure:** If a chain node's **node condition** (configured in the NodeBehavior Window) evaluates to `false`, the ENTIRE branch stops — subsequent steps don't execute. This is distinct from **event conditions** (configured in the Behavior Window), which only gate the side effects (Event Actions) for that step while the flow itself continues. If a step throws an exception, the chain also halts. This is intentional — in a sequential flow, later steps often depend on earlier steps succeeding. If the screen fade fails, you don't want to teleport the player to a half-loaded scene.
 
 ### When to Use Chain Mode
 
@@ -128,7 +128,7 @@ sourceEvent.AddChainEvent(targetEvent, duration: 1.0f);
 // With both
 sourceEvent.AddChainEvent(targetEvent, delay: 0.3f, duration: 2.0f);
 
-// With a condition (skip this step if condition is false, but continue the chain)
+// With a condition (if condition is false, the chain STOPS — subsequent steps don't execute)
 sourceEvent.AddChainEvent(targetEvent, condition: () => showCutscenes);
 
 // Wait for the target event's handler to complete (for coroutine-based handlers)

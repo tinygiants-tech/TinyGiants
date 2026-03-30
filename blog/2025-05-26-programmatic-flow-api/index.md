@@ -43,9 +43,9 @@ Let's break down each parameter:
 The event to trigger when the source fires. Can be any GES event type — void, typed, or sender.
 
 ```csharp
-[SerializeField] private GameEvent onDoorOpened;
-[SerializeField] private GameEvent onLightsOn;
-[SerializeField] private GameEvent onAlarmDisabled;
+[GameEventDropdown, SerializeField] private GameEvent onDoorOpened;
+[GameEventDropdown, SerializeField] private GameEvent onLightsOn;
+[GameEventDropdown, SerializeField] private GameEvent onAlarmDisabled;
 
 private void SetupRoom()
 {
@@ -193,13 +193,13 @@ This is where things get really powerful. You can design your base flow graph vi
 public class DifficultyFlowManager : MonoBehaviour
 {
     [Header("Base Events (connected visually in editor)")]
-    [SerializeField] private GameEvent onEnemySpawned;
-    [SerializeField] private GameEvent onEnemyAttackWindup;
-    [SerializeField] private GameEvent onEnemyAttackStrike;
+    [GameEventDropdown, SerializeField] private GameEvent onEnemySpawned;
+    [GameEventDropdown, SerializeField] private GameEvent onEnemyAttackWindup;
+    [GameEventDropdown, SerializeField] private GameEvent onEnemyAttackStrike;
 
     [Header("Hard Mode Events")]
-    [SerializeField] private GameEvent onComboFollowUp;
-    [SerializeField] private GameEvent onEnvironmentHazard;
+    [GameEventDropdown, SerializeField] private GameEvent onComboFollowUp;
+    [GameEventDropdown, SerializeField] private GameEvent onEnvironmentHazard;
 
     private List<TriggerHandle> _hardModeHandles = new List<TriggerHandle>();
 
@@ -397,17 +397,17 @@ public class DungeonRoom
 public class DungeonEventWiring : MonoBehaviour
 {
     [Header("Shared Events")]
-    [SerializeField] private GameEvent onDungeonStarted;
-    [SerializeField] private GameEvent onPlayerDied;
-    [SerializeField] private GameEventInt onPlayerDamaged;
-    [SerializeField] private GameEvent onBossDefeated;
+    [GameEventDropdown, SerializeField] private GameEvent onDungeonStarted;
+    [GameEventDropdown, SerializeField] private GameEvent onPlayerDied;
+    [GameEventDropdown, SerializeField] private GameEventInt onPlayerDamaged;
+    [GameEventDropdown, SerializeField] private GameEvent onBossDefeated;
 
     [Header("Effect Events")]
-    [SerializeField] private GameEvent onPlayTrapSound;
-    [SerializeField] private GameEvent onSpawnTreasureParticles;
-    [SerializeField] private GameEvent onStartBossMusic;
-    [SerializeField] private GameEvent onStopBossMusic;
-    [SerializeField] private GameEvent onScreenShake;
+    [GameEventDropdown, SerializeField] private GameEvent onPlayTrapSound;
+    [GameEventDropdown, SerializeField] private GameEvent onSpawnTreasureParticles;
+    [GameEventDropdown, SerializeField] private GameEvent onStartBossMusic;
+    [GameEventDropdown, SerializeField] private GameEvent onStopBossMusic;
+    [GameEventDropdown, SerializeField] private GameEvent onScreenShake;
 
     private Dictionary<DungeonRoom, EventFlowContext> _roomFlows
         = new Dictionary<DungeonRoom, EventFlowContext>();

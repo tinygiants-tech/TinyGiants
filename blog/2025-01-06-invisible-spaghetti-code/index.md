@@ -46,7 +46,7 @@ GameManager.OnPlayerLevelUp += CheckLevelMilestones;
 GameManager.OnPlayerLevelUp += LogLevelUpEvent;
 ```
 
-Four different files. Four different subscription points. Zero visibility from any single location. Now multiply this by 50 events across a real project. Good luck maintaining that.
+Four different files. Four different subscription points. Zero visibility from any single location. Now multiply this by 50 events across a real project.
 
 ### Problem 2: Runtime Breakage on Rename
 
@@ -160,7 +160,7 @@ The sender doesn't know about the receiver. The receiver doesn't know about the 
 // Sender: raises the event. Doesn't know or care who's listening.
 public class PlayerHealth : MonoBehaviour
 {
-    [SerializeField] private GameEvent onPlayerDefeated; // Drag the asset in
+    [GameEventDropdown, SerializeField] private GameEvent onPlayerDefeated; // Drag the asset in
 
     public void TakeDamage(float damage)
     {
@@ -173,19 +173,19 @@ public class PlayerHealth : MonoBehaviour
 }
 ```
 
-On the receiver side, you don't even need to write code. You add a `GameEventListener` component, drag in the same event asset, and wire up the response in the Inspector.
+On the receiver side, you don't need to write any code. You only need to configure the Action in the Behavior Window.
 
-![Visual Event System](/img/game-event-system/feature/visual.png)
+![Action Behavior](/img/game-event-system/visual-workflow/game-event-behavior/behavior-window-full.png)
 
 ### The Power of Visual Binding
 
 With GES, you can see everything. Click on an event asset, and the Inspector shows you every object that references it — both senders and receivers. Open the Event Editor window, and you get a bird's-eye view of your entire event architecture.
 
-![Event Editor](/img/game-event-system/examples/01-void-event/demo-01-editor.png)
+![Event Editor](/img/game-event-system/visual-workflow/game-event-editor/editor-window-full.png)
 
 This isn't just convenience. It's a fundamental change in how you debug and maintain event-driven code. When something goes wrong, you don't grep through files. You click on the event asset and see exactly who's involved.
 
-![Inspector Binding](/img/game-event-system/examples/01-void-event/demo-01-inspector.png)
+![Inspector Binding](/img/game-event-system/visual-workflow/game-event-finder/game-event-finder-grouped.png)
 
 ## How GUID Protection Actually Works
 
@@ -229,7 +229,7 @@ GES approach: the `BossEnemy` script has one reference — to a `BossDefeated` e
 // BossEnemy.cs — knows about NOTHING except its own event
 public class BossEnemy : MonoBehaviour
 {
-    [SerializeField] private GameEvent onBossDefeated;
+    [GameEventDropdown, SerializeField] private GameEvent onBossDefeated;
 
     private void Die()
     {
@@ -239,7 +239,7 @@ public class BossEnemy : MonoBehaviour
 }
 ```
 
-The audio system, UI system, progression system, achievement system, analytics system, and save system all have `GameEventListener` components that reference the same `BossDefeated` event. You configure the responses in the Inspector. No code coupling. No invisible dependencies. No chance of a rename breaking something silently.
+The audio system, UI system, progression system, achievement system, analytics system, and save system all have `GameEventListener` components that reference the same `BossDefeated` event. You configure the responses in the Behavior Window. No code coupling. No invisible dependencies. No chance of a rename breaking something silently.
 
 Want to add a seventh response — say, spawning a loot drop? Add a `GameEventListener` to the loot spawner object. Reference the `BossDefeated` event. Done. You didn't touch a single line of existing code.
 
